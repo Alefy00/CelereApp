@@ -89,6 +89,14 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            if(project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+                storeFile file('../celereapp.keystore')
+                storePassword '02053017@14'
+                keyAlias 'celereapp'
+                keyPassword '02053017@14'
+            }
+        }
     }
     buildTypes {
         debug {
@@ -97,9 +105,10 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
-            minifyEnabled enableProguardInReleaseBuilds
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            // signingConfig signingConfigs.debug
+            // minifyEnabled enableProguardInReleaseBuilds
+            // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+			signingConfig signingConfigs.release
         }
     }
 }
@@ -109,6 +118,12 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation("com.facebook.react:flipper-integration")
 
+	implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "com.facebook.react:react-native:+"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"  // Exemplo de dependência
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.0'  // Inclua a stdlib do Kotlin
+    // Adicione outras dependências conforme necessário
+
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {
@@ -117,3 +132,5 @@ dependencies {
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+
+apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle");
