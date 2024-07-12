@@ -15,6 +15,10 @@ import StockTab from './StockTab';
 import NStockTab from './NStockTab';
 import Start from '../screens/controls/Start';
 
+import InitialRegistration from '../screens/Start/InitialRegistration';
+import InitialCode from '../screens/Start/InitialCode';
+import InitialBranch from '../screens/Start/InitialBranch';
+
 const Stack = createStackNavigator();
 
 export default () => (
@@ -37,5 +41,9 @@ export default () => (
     <Stack.Screen name="NStockTab" component={NStockTab} />
 
     <Stack.Screen name="Start" component={Start} />
+
+    <Stack.Screen name="InitialRegistration" component={InitialRegistration} />
+    <Stack.Screen name="InitialCode" component={InitialCode} />
+    <Stack.Screen name="InitialBranch" component={InitialBranch} />
   </Stack.Navigator>
 );

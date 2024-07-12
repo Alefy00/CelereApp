@@ -93,6 +93,12 @@ const Start = props => {
                 buttontitle={t('start')}
                 pageScreen="MainMenu"
               />
+              <Card
+                number="6"
+                title={t('Previsão de Compras')}
+                buttontitle={t('start')}
+                pageScreen="MainMenu"
+              />
             </Scroller>
           </>
         </KeyboardAvoidingView>

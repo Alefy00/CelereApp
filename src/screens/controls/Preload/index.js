@@ -8,8 +8,10 @@ const Preload = props => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    navigation.navigate('MainTab');
-  }, []);
+    setTimeout(() => {
+      navigation.navigate('InitialRegistration');
+    }, 1000);
+  }, [navigation]);
 
   return (
     <Container fundo={'#FADC00'}>
