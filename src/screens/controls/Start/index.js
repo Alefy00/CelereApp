@@ -63,21 +63,21 @@ const Start = props => {
                 number="1"
                 title={t('item1')}
                 buttontitle={t('start')}
-                pageScreen="StockTab"
+                pageScreen="OpeningBalance"
               />
 
               <Card
                 number="2"
                 title={t('item2')}
                 buttontitle={t('start')}
-                pageScreen="MainMenu"
+                pageScreen="InitialSupplier"
               />
 
               <Card
                 number="3"
                 title={t('item3')}
                 buttontitle={t('start')}
-                pageScreen="MainMenu"
+                pageScreen="ExpensePage"
               />
 
               <Card

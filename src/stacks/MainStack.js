@@ -19,6 +19,10 @@ import InitialRegistration from '../screens/Start/InitialRegistration';
 import InitialCode from '../screens/Start/InitialCode';
 import InitialBranch from '../screens/Start/InitialBranch';
 
+import OpeningBalance from '../screens/InitialData/OpeningBalance';
+import InitialSupplier from '../screens/InitialData/InitialSupplier';
+import ExpensePage from '../screens/InitialData/ExpensePage';
+
 const Stack = createStackNavigator();
 
 export default () => (
@@ -45,5 +49,9 @@ export default () => (
     <Stack.Screen name="InitialRegistration" component={InitialRegistration} />
     <Stack.Screen name="InitialCode" component={InitialCode} />
     <Stack.Screen name="InitialBranch" component={InitialBranch} />
+
+    <Stack.Screen name="OpeningBalance" component={OpeningBalance} />
+    <Stack.Screen name="InitialSupplier" component={InitialSupplier} />
+    <Stack.Screen name="ExpensePage" component={ExpensePage} />
   </Stack.Navigator>
 );

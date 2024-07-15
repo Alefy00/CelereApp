@@ -23,7 +23,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import '../../../../../../../translation';
 import IconCamera from '../../../../../../../assets/images/svg/iconCamera3.svg';
-import StockMenu from '../index';
+//import StockMenu from '../index'; removido por (Require cycle)
 
 const ItemList = ({pageScreen, title, qtd, value}) => {
   const {t} = useTranslation();
