@@ -22,6 +22,10 @@ import InitialBranch from '../screens/Start/InitialBranch';
 import OpeningBalance from '../screens/InitialData/OpeningBalance';
 import InitialSupplier from '../screens/InitialData/InitialSupplier';
 import ExpensePage from '../screens/InitialData/ExpensePage';
+import SalesReceive from '../screens/InitialData/SalesReceive';
+import MonthlySalesForecast from '../screens/InitialData/SalesForecast/MonthlySalesForecast';
+import HowBusiness from '../screens/InitialData/SalesForecast/HowBusiness';
+import DistributionSales from '../screens/InitialData/SalesForecast/DistributionSales';
 
 const Stack = createStackNavigator();
 
@@ -53,5 +57,10 @@ export default () => (
     <Stack.Screen name="OpeningBalance" component={OpeningBalance} />
     <Stack.Screen name="InitialSupplier" component={InitialSupplier} />
     <Stack.Screen name="ExpensePage" component={ExpensePage} />
+    <Stack.Screen name="SalesReceive" component={SalesReceive} />
+    <Stack.Screen name="MonthlySalesForecast" component={MonthlySalesForecast} />
+    <Stack.Screen name="HowBusiness" component={HowBusiness} />
+    <Stack.Screen name="DistributionSales" component={DistributionSales} />
+
   </Stack.Navigator>
 );

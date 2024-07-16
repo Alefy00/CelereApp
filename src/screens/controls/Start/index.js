@@ -84,14 +84,14 @@ const Start = props => {
                 number="4"
                 title={t('item4')}
                 buttontitle={t('start')}
-                pageScreen="MainMenu"
+                pageScreen="SalesReceive"
               />
 
               <Card
                 number="5"
                 title={t('item5')}
                 buttontitle={t('start')}
-                pageScreen="MainMenu"
+                pageScreen="MonthlySalesForecast"
               />
               <Card
                 number="6"
