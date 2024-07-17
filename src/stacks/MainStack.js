@@ -14,6 +14,7 @@ import MainTab from './MainTab';
 import StockTab from './StockTab';
 import NStockTab from './NStockTab';
 import Start from '../screens/controls/Start';
+import Entries from '../screens/controls/MainMenu/YourCash/Entries';
 
 import InitialRegistration from '../screens/Start/InitialRegistration';
 import InitialCode from '../screens/Start/InitialCode';
@@ -26,6 +27,8 @@ import SalesReceive from '../screens/InitialData/SalesReceive';
 import MonthlySalesForecast from '../screens/InitialData/SalesForecast/MonthlySalesForecast';
 import HowBusiness from '../screens/InitialData/SalesForecast/HowBusiness';
 import DistributionSales from '../screens/InitialData/SalesForecast/DistributionSales';
+import BuyPrevision from '../screens/InitialData/BuyPrevision/AveragePurchase';
+import PurchaseFrequency from '../screens/InitialData/BuyPrevision/PurchaseFrequency';
 
 const Stack = createStackNavigator();
 
@@ -49,6 +52,7 @@ export default () => (
     <Stack.Screen name="NStockTab" component={NStockTab} />
 
     <Stack.Screen name="Start" component={Start} />
+    <Stack.Screen name="Entries" component={Entries} />
 
     <Stack.Screen name="InitialRegistration" component={InitialRegistration} />
     <Stack.Screen name="InitialCode" component={InitialCode} />
@@ -61,6 +65,8 @@ export default () => (
     <Stack.Screen name="MonthlySalesForecast" component={MonthlySalesForecast} />
     <Stack.Screen name="HowBusiness" component={HowBusiness} />
     <Stack.Screen name="DistributionSales" component={DistributionSales} />
+    <Stack.Screen name="BuyPrevision" component={BuyPrevision} />
+    <Stack.Screen name="PurchaseFrequency" component={PurchaseFrequency} />
 
   </Stack.Navigator>
 );

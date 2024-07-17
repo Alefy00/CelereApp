@@ -60,8 +60,13 @@ export const TxtItemMenu = styled.Text`
 export default () => {
   const {t} = useTranslation();
   const navigation = useNavigation();
+
   const handlePageStart = () => {
     navigation.navigate('Start');
+  };
+
+  const handlePageEntrie = () => {
+    navigation.navigate('Entries');
   };
 
   return (
@@ -77,8 +82,8 @@ export default () => {
           <TxtItemMenu>{t('start')}</TxtItemMenu>
         </BtnItemMenu>
 
-        <BtnItemMenu backColor={'#F0E6E6'} disabled>
-          <IconEntries0
+        <BtnItemMenu backColor={COLORS.lightYellow2} onPress={handlePageEntrie}>
+          <IconEntries
             width="38"
             height="38"
             fill={COLORS.green}

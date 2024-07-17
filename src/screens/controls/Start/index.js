@@ -1,9 +1,13 @@
+/* eslint-disable prettier/prettier */
 import React, {useEffect, useState} from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Text,
+  TouchableOpacity,
+  View,
+  Platform
 } from 'react-native';
 import {Container, Scroller} from './styles';
 import {useNavigation} from '@react-navigation/native';
@@ -37,8 +41,12 @@ export const SubTitle = styled.Text`
   text-align: justify;
 `;
 
-const Start = props => {
+const Start = ({navigation}) => {
   const {t} = useTranslation();
+
+  const handleSave = ()=>{
+    navigation.navigate('MainTab');
+  };
   return (
     <Container
       backColor={COLORS.background}
@@ -97,8 +105,14 @@ const Start = props => {
                 number="6"
                 title={t('Previsão de Compras')}
                 buttontitle={t('start')}
-                pageScreen="MainMenu"
+                pageScreen="BuyPrevision"
               />
+              <View style={{justifyContent: 'center',alignItems: 'center', padding: 25}}>
+                <TouchableOpacity style={{ height: 70, backgroundColor: COLORS.primary, justifyContent: 'center',alignItems: 'center', borderRadius: 4, paddingHorizontal: 46, marginTop: 16}} onPress={handleSave}>
+
+                      <Text style={{fontSize: 16,color: COLORS.white,fontWeight: 'bold'}}>Salvar</Text>
+                </TouchableOpacity>
+              </View>
             </Scroller>
           </>
         </KeyboardAvoidingView>
