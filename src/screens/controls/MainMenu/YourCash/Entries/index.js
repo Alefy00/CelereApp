@@ -46,6 +46,9 @@ const Entries = ({navigation}) => {
       });
     };
   
+    const NewRegisteredSale = ()=>{
+      navigation.navigate("NewRegisteredSale");
+    }
     const options = [
       { id: 1, label: 'Nova Venda', action: handleNewSalePress },
       { id: 2, label: 'Cancelar venda', screen: 'CancelSaleScreen' },
@@ -99,9 +102,11 @@ const Entries = ({navigation}) => {
                 </View>
                 <Text style={styles.modalTitle}>Nova Venda</Text>
                 <Text style={styles.modalSubtitle}>Selecione o tipo de venda:</Text>
-                <TouchableOpacity style={styles.modalOption}>
+
+                <TouchableOpacity style={styles.modalOption} onPress={NewRegisteredSale}>
                   <Text style={styles.modalOptionText}>📦 Produto ou Serviço Registrado</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity style={styles.modalOption2}>
                   <Text style={styles.modalOptionText}>⚠️ Produto ou Serviço Avulso</Text>
                 </TouchableOpacity>

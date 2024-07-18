@@ -15,6 +15,7 @@ import StockTab from './StockTab';
 import NStockTab from './NStockTab';
 import Start from '../screens/controls/Start';
 import Entries from '../screens/controls/MainMenu/YourCash/Entries';
+import NewRegisteredSale from '../screens/controls/MainMenu/YourCash/Entries/NewRegisteredSale';
 
 import InitialRegistration from '../screens/Start/InitialRegistration';
 import InitialCode from '../screens/Start/InitialCode';
@@ -53,6 +54,8 @@ export default () => (
 
     <Stack.Screen name="Start" component={Start} />
     <Stack.Screen name="Entries" component={Entries} />
+
+    <Stack.Screen name="NewRegisteredSale" component={NewRegisteredSale} />
 
     <Stack.Screen name="InitialRegistration" component={InitialRegistration} />
     <Stack.Screen name="InitialCode" component={InitialCode} />
