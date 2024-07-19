@@ -8,41 +8,45 @@ import DatePicker from './components/DatePicker';
 import BarTop2 from '../../../components/BarTop2';
 import { COLORS } from '../../../constants';
 
+
 const ExpensePage = ({ navigation }) => {
   const [category, setCategory] = useState('');
   const [value, setValue] = useState('');
-  const [item, setItem] = useState('');
-  const [supplier, setSupplier] = useState('');
-  const [isRepeated, setIsRepeated] = useState(false);
-  const [months, setMonths] = useState('');
-  const [monthsOptions, setMonthsOptions] = useState([]);
+  const [item, setItem] = useState(''); 
+  const [supplier, setSupplier] = useState(''); 
+  const [isRepeated, setIsRepeated] = useState(false); 
+  const [months, setMonths] = useState(''); 
+  const [monthsOptions, setMonthsOptions] = useState([]); 
 
+  // useEffect para buscar as opções de meses quando o componente é montado
   useEffect(() => {
     const fetchMonthsOptions = async () => {
       try {
-        //TODO: substituir pelo endpoint real
+        // TODO: substituir pelo endpoint real
         const response = await fetch('https://api.example.com/months');
         const data = await response.json();
         setMonthsOptions(data);
       } catch (error) {
-       // console.error("Erro ao buscar opções de meses:", error);
+        // console.error("Erro ao buscar opções de meses:", error);
       }
     };
 
     fetchMonthsOptions();
   }, []);
 
+  // Função para salvar os dados
   const handleSave = () => {
-    //TODO: Lógica para salvar os dados no banco
+    // TODO: Lógica para salvar os dados no banco
     console.log('Categoria:', category);
     console.log('Valor:', value);
     console.log('Item:', item);
     console.log('Fornecedor:', supplier);
     console.log('Despesas se repete:', isRepeated);
     console.log('Meses:', months);
-    navigation.navigate('Start')
+    navigation.navigate('Start'); // Navega para a tela inicial
   };
 
+  // Retorna o layout principal do componente
   return (
     <View style={{ flex: 1 }}>
       <BarTop2
@@ -53,8 +57,8 @@ const ExpensePage = ({ navigation }) => {
         routeCalculator={''}
       />
       <ScrollView contentContainerStyle={[styles.container, { paddingTop: 50 }]}>
-        <View style={{alignItems: 'center'}}>
-        <Text style={styles.title}>Contas a pagar</Text>
+        <View style={{ alignItems: 'center' }}>
+          <Text style={styles.title}>Contas a pagar</Text>
         </View>
         <DatePicker label="Data de pagamento" onConfirm={(date) => console.log(date)} />
 

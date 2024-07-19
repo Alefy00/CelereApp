@@ -4,9 +4,10 @@ import { Button, Text, View, TextInput } from 'react-native';
 import CountryFlag from 'react-native-country-flag';
 import styles from './styles';
 
+
 const InitialRegistration = ({ navigation }) => {
-  const [ddi, setDdi] = useState('');
-  const [isoCode, setIsoCode] = useState('');
+  const [ddi, setDdi] = useState(''); // Estado para armazenar o DDI (código do país)
+  const [isoCode, setIsoCode] = useState(''); // Estado para armazenar o código ISO do país
 
   // Mapeamento de DDI para código ISO
   const ddiToIso = {
@@ -16,6 +17,7 @@ const InitialRegistration = ({ navigation }) => {
     '91': 'IN',
   };
 
+  // Função para lidar com mudanças no campo DDI
   const handleDdiChange = (text) => {
     setDdi(text);
     const trimmedDdi = text.replace(/\D/g, ''); // Remove caracteres não numéricos
@@ -25,6 +27,7 @@ const InitialRegistration = ({ navigation }) => {
       setIsoCode('');
     }
   };
+
 
   return (
     <View style={styles.container}>

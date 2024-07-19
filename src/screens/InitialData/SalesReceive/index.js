@@ -7,32 +7,36 @@ import styles from './styles';
 import BarTop2 from '../../../components/BarTop2';
 import { COLORS } from '../../../constants';
 
-const SalesReceive = ({ navigation }) => {
-  const [client, setClient] = useState('');
-  const [dueDate, setDueDate] = useState('');
-  const [value, setValue] = useState('');
-  const [recurrence, setRecurrence] = useState('');
 
+const SalesReceive = ({ navigation }) => {
+  const [client, setClient] = useState(''); 
+  const [dueDate, setDueDate] = useState(''); 
+  const [value, setValue] = useState(''); 
+  const [recurrence, setRecurrence] = useState(''); 
+
+  // Função para confirmar a data selecionada
   const handleDateConfirm = (date) => {
-    setDueDate(date.toLocaleDateString('pt-BR'));
+    setDueDate(date.toLocaleDateString('pt-BR')); 
   };
 
+  // Função para salvar os dados e navegar para a tela inicial
   const handleSave = () => {
-    //TODO: Lógica para salvar os dados no banco
+    // TODO: Lógica para salvar os dados no banco
     console.log('Cliente:', client);
     console.log('Data de vencimento:', dueDate);
     console.log('Valor:', value);
     console.log('Recorrência:', recurrence);
-    navigation.navigate('Start');
+    navigation.navigate('Start'); // Navega para a tela inicial
   };
 
+  // Retorna o layout principal do componente
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <View style={{ height: 50 }}>
             <BarTop2
               titulo={'Retorno'}

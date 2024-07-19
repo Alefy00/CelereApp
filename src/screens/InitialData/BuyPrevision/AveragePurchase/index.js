@@ -5,40 +5,43 @@ import BarTop2 from "../../../../components/BarTop2";
 import { COLORS } from "../../../../constants";
 import { Keyboard, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 
-const BuyPrevision = ({navigation}) => {
+
+const BuyPrevision = ({ navigation }) => {
     const [averagePurchase, setAveragePurchase] = useState('');
-    
-    const handleNext = ()=>{
-        //TODO: lógica para salvar dados no banco
+
+    // Função para navegar para a próxima tela e logar a média de compra
+    const handleNext = () => {
+        // TODO: lógica para salvar dados no banco
         console.log('Média de compra do fornecedor: ', averagePurchase);
-        navigation.navigate("PurchaseFrequency");
+        navigation.navigate("PurchaseFrequency"); // Navega para a tela de Frequência de Compra
     };
 
+    // Retorna o layout principal do componente
     return (
         <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? 'padding' : 'height'}
-        style={styles.container}
+            behavior={Platform.OS === "ios" ? 'padding' : 'height'}
+            style={styles.container}
         >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <View style={{flex: 1}}>
-                    <View style={{height: 50}}>
+                <View style={{ flex: 1 }}>
+                    <View style={{ height: 50 }}>
                         <BarTop2
-                        titulo={'Retorno'}
-                        backColor={COLORS.primary}
-                        foreColor={COLORS.black}
-                        routeMailer={''}
-                        routeCalculator={''}
+                            titulo={'Retorno'}
+                            backColor={COLORS.primary}
+                            foreColor={COLORS.black}
+                            routeMailer={''}
+                            routeCalculator={''}
                         />
                     </View>
                     <View style={styles.content}>
                         <Text style={styles.label}>Quanto em média você compra do seu fornecedor?</Text>
                         <View style={styles.inputContainer}>
                             <TextInput
-                            style={styles.input}
-                            placeholder="R$ 0,00"
-                            keyboardType='numeric'
-                            value={averagePurchase}
-                            onChangeText={setAveragePurchase}
+                                style={styles.input}
+                                placeholder="R$ 0,00"
+                                keyboardType='numeric'
+                                value={averagePurchase}
+                                onChangeText={setAveragePurchase}
                             />
                         </View>
                         <TouchableOpacity style={styles.button} onPress={handleNext}>

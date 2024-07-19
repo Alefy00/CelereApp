@@ -5,17 +5,20 @@ import styles from './styles';
 import BarTop2 from '../../../components/BarTop2';
 import { COLORS } from '../../../constants';
 
-const OpeningBalance = ({navigation}) => {
+// Componente principal da página de Saldo Inicial
+const OpeningBalance = ({ navigation }) => {
   const [cash, setCash] = useState('');
   const [bank, setBank] = useState('');
 
+  // Função para salvar os dados e navegar para a tela inicial
   const handleSave = () => {
-    //TODO: Lógica para salvar os dados no banco
-    console.log('Dinheiro em éspecie: ', cash);
+    // TODO: Lógica para salvar os dados no banco
+    console.log('Dinheiro em espécie: ', cash);
     console.log('Dinheiro no banco: ', bank);
-    navigation.navigate("Start");
+    navigation.navigate("Start"); // Navega para a tela inicial
   };
 
+  // Retorna o layout principal do componente
   return (
     <View style={{ flex: 1 }}>
       <View style={{ height: Platform.OS === 'android' ? 55 : 105 }}>

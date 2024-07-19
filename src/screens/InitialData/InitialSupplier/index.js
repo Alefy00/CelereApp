@@ -6,17 +6,20 @@ import styles from './styles';
 import BarTop2 from "../../../components/BarTop2";
 import { COLORS } from "../../../constants";
 
+
 const InitialSupplier = ({ navigation }) => {
-    const [name, setName] = useState('');
-    const [category, setCategory] = useState('');
+    const [name, setName] = useState(''); 
+    const [category, setCategory] = useState(''); 
+
 
     const handleSave = () => {
-        //TODO: lógica para salvar os dados no banco
+        // TODO: lógica para salvar os dados no banco
         console.log("Nome: ", name);
         console.log("Categoria: ", category);
-        navigation.navigate("Start");
+        navigation.navigate("Start"); // Navega para a tela inicial
     };
 
+    // Retorna o layout principal do componente
     return (
         <View style={{ flex: 1 }}>
             <View style={{ height: Platform.OS === 'android' ? 55 : 105 }}>

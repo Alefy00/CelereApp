@@ -50,7 +50,7 @@ const InitialBranch = ({ navigation }) => {
       <Text style={styles.label}>Qual seu ramo de atuação?</Text>
       <Text style={styles.description}>Se desejar, adicione uma descrição:</Text>
 
-      {/* Renderiza as opções predefinidas */}
+
       {predefinedOptions.map((option, index) => (
         <TouchableOpacity
           key={index}
@@ -64,7 +64,7 @@ const InitialBranch = ({ navigation }) => {
         </TouchableOpacity>
       ))}
 
-      {/* Campo de entrada para a opção customizada e botão de adicionar */}
+
       <View style={styles.customInputContainer}>
         <TextInput
           style={styles.customInput}
@@ -77,7 +77,6 @@ const InitialBranch = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Botão para avançar para a próxima tela */}
       <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
         <Text style={styles.nextButtonText}>Avançar</Text>
       </TouchableOpacity>

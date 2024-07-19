@@ -5,22 +5,25 @@ import styles from './styles';
 import BarTop2 from '../../../../components/BarTop2';
 import { COLORS } from '../../../../constants';
 
-const MonthlySalesForecast = ({ navigation }) => {
-  const [salesForecast, setSalesForecast] = useState('');
 
+const MonthlySalesForecast = ({ navigation }) => {
+  const [salesForecast, setSalesForecast] = useState(''); 
+
+  // Função para salvar os dados e navegar para a próxima tela
   const handleNext = () => {
-    //TODO: Lógica pra salvar os dados no banco
+    // TODO: Lógica para salvar os dados no banco
     console.log('Previsão de venda mensal:', salesForecast);
-    navigation.navigate('HowBusiness');
+    navigation.navigate('HowBusiness'); // Navega para a tela de Como Funciona Seu Negócio
   };
 
+  // Retorna o layout principal do componente
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <View style={{ height: 50 }}>
             <BarTop2
               titulo={'Retorno'}
