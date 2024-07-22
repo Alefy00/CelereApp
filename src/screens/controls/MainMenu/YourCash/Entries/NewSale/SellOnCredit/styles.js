@@ -2,46 +2,56 @@
 import { StyleSheet } from "react-native";
 import { COLORS } from "../../../../../../../constants";
 
-const styles = StyleSheet.create({
+export default styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
   },
   content: {
-    padding: 15,
+    padding: 20,
   },
   label: {
     fontSize: 16,
     fontWeight: 'bold',
     marginVertical: 10,
-    color: '#000'
-  },
-  labelData:{
-    color: '#000',
-    fontWeight: 'bold',
+    color:'#000',
   },
   dateContainer: {
-    marginBottom: 5,
+    marginBottom: 1,
+  },
+  labelData: {
+    fontSize: 16,
+
+  },
+  dateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    borderColor: COLORS.grey,
+    borderRadius: 5,
+    borderBottomWidth: 1,
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginVertical: 10,
-    borderWidth: 1,
+    borderWidth:1,
   },
   button: {
-    padding: 10,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-  },
-  buttonSell: {
     padding: 10,
     backgroundColor: COLORS.white,
     alignItems: 'center',
   },
-  buttonText:{
+  buttonSell: {
+    padding: 10,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: COLORS.black,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#000'
   },
   searchContainer: {
     flexDirection: 'row',
@@ -58,23 +68,23 @@ const styles = StyleSheet.create({
     right: 10,
   },
   productContainer: {
-    padding: 10,
+    padding: 20,
     marginVertical: 10,
   },
   productDetail: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom:10,
+    marginBottom: 10,
   },
   productInfo: {
     flex: 1,
     marginLeft: 10,
   },
   productText: {
-    fontWeight: 'bold',
     fontSize: 16,
-    color: '#000',
+    color:'#000',
+    fontWeight: 'bold'
   },
   productAmount: {
     fontSize: 14,
@@ -88,31 +98,24 @@ const styles = StyleSheet.create({
   productTotal: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: COLORS.black,
+    color: COLORS.green,
   },
-  paymentButton: {
+  discount: {
+    borderColor: COLORS.grey,
     padding: 10,
-    backgroundColor: COLORS.lightGray2,
-    borderRadius: 5,
-    marginHorizontal: 5,
-  },
-  selectedPaymentButton: {
-    backgroundColor: COLORS.primary,
-  },
-  paymentButtonText: {
-    fontSize: 16,
-    fontWeight:'bold',
+    marginVertical: 10,
+    borderBottomWidth:1,
   },
   totalContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-    justifyContent:'space-between',
-    flexDirection:'row',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+    alignItems:'center',
   },
   totalLabel: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#000'
   },
   totalValue: {
     fontSize: 20,
@@ -126,63 +129,57 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
     flexDirection: 'row',
-    justifyContent:'center'
+    justifyContent: 'center',
   },
   confirmButtonText: {
     color: COLORS.black,
     fontSize: 16,
     fontWeight: 'bold',
-    marginLeft: 12,
-  },
-  discount:{
-    borderBottomWidth:1,
-    borderColor: COLORS.gray
+    marginLeft: 10,
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
     width: '80%',
+    padding: 20,
     backgroundColor: COLORS.white,
     borderRadius: 10,
-    padding: 20,
     alignItems: 'center',
   },
   modalText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     marginVertical: 20,
-    color: '#000',
   },
   modalButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.primary,
-    padding: 10,
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: COLORS.success,
     borderRadius: 5,
-    marginTop: 10,
-    width:'100%',
-    justifyContent:'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   modalButtonText: {
-   
-    marginLeft: 10,
+    color: COLORS.white,
     fontSize: 16,
-    color: COLORS.black,
+    fontWeight: 'bold',
+    marginLeft: 10,
   },
   modalBackButton: {
-    flexDirection:'row',
     marginTop: 20,
-   
+    padding: 15,
+    backgroundColor: COLORS.primary,
+    borderRadius: 5,
+    alignItems: 'center',
   },
   modalBackButtonText: {
+    color: COLORS.white,
     fontSize: 16,
-    color: COLORS.black,
-    marginLeft:10,
+    fontWeight: 'bold',
   },
-  });
-  
-  export default styles;
+})

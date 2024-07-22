@@ -6,7 +6,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import styles from "./styles";
 import { Image, Text, View, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, TextInput, FlatList, TouchableOpacity } from "react-native";
 
-
 const NewRegisteredSale = ({ navigation }) => {
   const [search, setSearch] = useState('');
   const [products, setProducts] = useState([
@@ -18,6 +17,7 @@ const NewRegisteredSale = ({ navigation }) => {
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [quantities, setQuantities] = useState({});
   const [totalPrice, setTotalPrice] = useState(0);
+  const [nextScreen, setNextScreen] = useState("SaleDetails"); // Estado para controlar a próxima tela
 
   useEffect(() => {
     if (search) {
@@ -48,9 +48,10 @@ const NewRegisteredSale = ({ navigation }) => {
       return {
         ...product,
         amount: quantities[key],
+        total: quantities[key] * product.price,
       };
     });
-    navigation.navigate("SaleDetails", { products: selectedProducts, totalPrice });
+    navigation.navigate(nextScreen, { products: selectedProducts, totalPrice });
   };
 
   const handleQuantityChange = (id, delta) => {
@@ -139,6 +140,14 @@ const NewRegisteredSale = ({ navigation }) => {
             numColumns={2}
             ListFooterComponent={renderFooter}
           />
+          <View style={styles.buttonRow}>
+              <TouchableOpacity style={[styles.button, { flex: 1 }]} onPress={() => setNextScreen("SaleDetails")}>
+                <Text style={styles.buttonText}>Immediately</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.buttonSell, { flex: 1 }]} onPress={() => setNextScreen("SellOnCredit")}>
+                <Text style={styles.buttonText}>Sell on Credit</Text>
+              </TouchableOpacity>
+            </View>
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
