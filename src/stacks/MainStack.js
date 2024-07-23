@@ -32,6 +32,7 @@ import BuyPrevision from '../screens/InitialData/BuyPrevision/AveragePurchase';
 import PurchaseFrequency from '../screens/InitialData/BuyPrevision/PurchaseFrequency';
 import SaleDetails from '../screens/controls/MainMenu/YourCash/Entries/NewSale/SalesDetails';
 import SellOnCredit from '../screens/controls/MainMenu/YourCash/Entries/NewSale/SellOnCredit';
+import LooseProduct from '../screens/controls/MainMenu/YourCash/Entries/NewSale/LooseProduct';
 
 const Stack = createStackNavigator();
 
@@ -60,6 +61,7 @@ export default () => (
     <Stack.Screen name="NewRegisteredSale" component={NewRegisteredSale} />
     <Stack.Screen name="SaleDetails" component={SaleDetails} />
     <Stack.Screen name="SellOnCredit" component={SellOnCredit} />
+    <Stack.Screen name="LooseProduct" component={LooseProduct} />
 
     <Stack.Screen name="InitialRegistration" component={InitialRegistration} />
     <Stack.Screen name="InitialCode" component={InitialCode} />

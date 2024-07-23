@@ -63,6 +63,8 @@ const NewRegisteredSale = ({ navigation }) => {
     });
   };
 
+
+
   const renderProduct = ({ item }) => (
     <View style={styles.productCard}>
       <Image source={{ uri: item.image }} style={styles.productImage} />
