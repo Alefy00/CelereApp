@@ -10,28 +10,33 @@ import 'moment/locale/pt-br';
 import { FlatList, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 
 const LooseProduct = ({ navigation }) => {
-  const [currentDate, setCurrentDate] = useState('');
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [quantity, setQuantity] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState('PIX');
-  const paymentMethods = ['PIX', 'Dinheiro', 'Cartão de Crédito', 'Cartão de Débito'];
+  // Estados para armazenar dados da tela
+  const [currentDate, setCurrentDate] = useState(''); // Data de pagamento
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false); // Visibilidade do DatePicker
+  const [name, setName] = useState(''); // Nome do produto
+  const [price, setPrice] = useState(''); // Preço do produto
+  const [quantity, setQuantity] = useState(0); // Quantidade do produto
+  const [total, setTotal] = useState(0); // Total do produto
+  const [paymentMethod, setPaymentMethod] = useState('PIX'); // Método de pagamento selecionado
+  const paymentMethods = ['PIX', 'Dinheiro', 'Cartão de Crédito', 'Cartão de Débito']; // Métodos de pagamento disponíveis
 
+  // Função para exibir o DatePicker
   const showDatePicker = () => {
     setDatePickerVisibility(true);
   };
 
+  // Função para esconder o DatePicker
   const hideDatePicker = () => {
     setDatePickerVisibility(false);
   };
 
+  // Função para confirmar a data selecionada no DatePicker
   const handleConfirmDate = (date) => {
     setCurrentDate(moment(date).locale('pt-br').format('LL'));
     hideDatePicker();
   };
 
+  // Função para alterar a quantidade do produto
   const handleQuantityChange = (delta) => {
     const newQuantity = quantity + delta;
     if (newQuantity >= 0) {
@@ -40,13 +45,13 @@ const LooseProduct = ({ navigation }) => {
     }
   };
 
+  // Função para adicionar um item (lógica futura)
   const handleAddItem = () => {
-    //TODO: lógica para adicionar o item
     console.log({ name, price, quantity, total });
   };
 
+  // Função para confirmar a venda (lógica futura)
   const handleConfirmSale = () => {
-    //TODO: lógica para confirmar a venda
     console.log('Venda confirmada');
   };
 
@@ -119,7 +124,6 @@ const LooseProduct = ({ navigation }) => {
             <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
               <Text style={styles.addButtonText}>+ Adicionar Item</Text>
             </TouchableOpacity>
-
             <Text style={styles.label}>Método de pagamento</Text>
             <FlatList
               horizontal

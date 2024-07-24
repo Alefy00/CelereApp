@@ -11,46 +11,54 @@ import 'moment/locale/pt-br';
 
 const SellOnCredit = ({ navigation, route }) => {
   const { products, totalPrice } = route.params; // Recebe os produtos selecionados e o preço total
-  const [currentDate, setCurrentDate] = useState('');
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [currentDate, setCurrentDate] = useState(''); // Estado para armazenar a data de pagamento
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false); // Estado para controlar a visibilidade do seletor de data
   const [filteredProducts, setFilteredProducts] = useState(products); // Estado para os produtos filtrados
   const [search, setSearch] = useState(''); // Estado para a busca
   const [isModalVisible, setIsModalVisible] = useState(false); // Estado para controlar a visibilidade do modal
 
+  // Função para mostrar o seletor de data
   const showDatePicker = () => {
     setDatePickerVisibility(true);
   };
 
+  // Função para esconder o seletor de data
   const hideDatePicker = () => {
     setDatePickerVisibility(false);
   };
 
+  // Função para confirmar a data selecionada
   const handleConfirm = (date) => {
     setCurrentDate(moment(date).locale('pt-br').format('LL'));
     hideDatePicker();
   };
 
+  // Função para atualizar o estado de busca
   const handleSearch = (text) => {
     setSearch(text);
   };
 
+  // Função para confirmar a venda e exibir o modal
   const handleConfirmSale = () => {
-    // Exibe o modal
     setIsModalVisible(true);
   };
 
+  // Função para fechar o modal e navegar para a tela de Nova Venda Registrada
   const handleCloseModal = () => {
     setIsModalVisible(false);
     navigation.navigate('NewRegisteredSale'); // Altere para a tela apropriada após fechar o modal
   };
-  const handleNewEntreis = ()=>{
-    setIsModalVisible(false);
-    navigation.navigate('Entries')
-  }
 
+  // Função para navegar para a tela de Entradas
+  const handleNewEntries = () => {
+    setIsModalVisible(false);
+    navigation.navigate('Entries');
+  };
+
+  // Função para navegar para a tela de Detalhes da Venda
   const handleImmediately = () => {
     navigation.navigate('SaleDetails', { products, totalPrice });
-  }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -59,6 +67,7 @@ const SellOnCredit = ({ navigation, route }) => {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
+
           <View style={{ height: 50 }}>
             <BarTop2
               titulo={'Retorno'}
@@ -70,12 +79,14 @@ const SellOnCredit = ({ navigation, route }) => {
           </View>
           <ScrollView contentContainerStyle={styles.content}>
             <Text style={styles.label}>Detalhes da venda</Text>
+
             <View style={styles.dateContainer}>
               <TouchableOpacity onPress={showDatePicker} style={styles.dateButton}>
                 <Text style={styles.labelData}>{currentDate || "Selecione a data de pagamento"}</Text>
                 <Icon name="calendar" size={20} color={COLORS.black} />
               </TouchableOpacity>
             </View>
+            {/* Botões para alternar entre venda imediata e venda a crédito */}
             <View style={styles.buttonRow}>
               <TouchableOpacity style={[styles.button, { flex: 1 }]} onPress={handleImmediately}>
                 <Text style={styles.buttonText}>Immediately</Text>
@@ -84,6 +95,7 @@ const SellOnCredit = ({ navigation, route }) => {
                 <Text style={styles.buttonText}>Sell on Credit</Text>
               </TouchableOpacity>
             </View>
+
             <View style={styles.searchContainer}>
               <TextInput
                 style={styles.searchInput}
@@ -93,6 +105,7 @@ const SellOnCredit = ({ navigation, route }) => {
               />
               <Icon name="search" size={20} color={COLORS.grey} style={styles.searchIcon} />
             </View>
+            {/* Lista de produtos filtrados */}
             <View style={styles.productContainer}>
               {filteredProducts.map((product, index) => (
                 <View key={index} style={styles.productDetail}>
@@ -111,6 +124,7 @@ const SellOnCredit = ({ navigation, route }) => {
                 style={styles.discount}
               />
             </View>
+
             <View style={styles.totalContainer}>
               <Text style={styles.totalLabel}>Total a Receber</Text>
               <Text style={styles.totalValue}>R$ {totalPrice.toFixed(2)}</Text>
@@ -121,6 +135,7 @@ const SellOnCredit = ({ navigation, route }) => {
               <Text style={styles.confirmButtonText}>Finalizar a venda</Text>
             </TouchableOpacity>
           </ScrollView>
+
           <Modal
             transparent={true}
             animationType="slide"
@@ -135,12 +150,13 @@ const SellOnCredit = ({ navigation, route }) => {
                   <Icon name="cart" size={20} color={COLORS.black} />
                   <Text style={styles.modalButtonText}>Registre outra venda</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.modalBackButton} onPress={handleNewEntreis}>
+                <TouchableOpacity style={styles.modalBackButton} onPress={handleNewEntries}>
                   <Text style={styles.modalBackButtonText}>Menu Entradas</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </Modal>
+
           <DateTimePickerModal
             isVisible={isDatePickerVisible}
             mode="date"

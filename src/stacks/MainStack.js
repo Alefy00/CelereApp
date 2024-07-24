@@ -76,6 +76,5 @@ export default () => (
     <Stack.Screen name="DistributionSales" component={DistributionSales} />
     <Stack.Screen name="BuyPrevision" component={BuyPrevision} />
     <Stack.Screen name="PurchaseFrequency" component={PurchaseFrequency} />
-
   </Stack.Navigator>
 );

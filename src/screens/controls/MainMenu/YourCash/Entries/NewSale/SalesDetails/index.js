@@ -8,12 +8,12 @@ import styles from "./styles";
 
 const SaleDetails = ({ navigation, route }) => {
   const { products, totalPrice } = route.params; // Recebe os produtos selecionados e o preço total
-  const [currentDate, setCurrentDate] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('PIX');
+  const [currentDate, setCurrentDate] = useState(''); // Estado para armazenar a data atual
+  const [paymentMethod, setPaymentMethod] = useState('PIX'); // Estado para armazenar o método de pagamento
   const [filteredProducts, setFilteredProducts] = useState(products); // Estado para os produtos filtrados
   const [search, setSearch] = useState(''); // Estado para a busca
   const [isModalVisible, setIsModalVisible] = useState(false); // Estado para controlar a visibilidade do modal
-  const paymentMethods = ['PIX', 'Dinheiro', 'Cartão de Crédito', 'Cartão de Débito'];
+  const paymentMethods = ['PIX', 'Dinheiro', 'Cartão de Crédito', 'Cartão de Débito']; // Métodos de pagamento disponíveis
 
   useEffect(() => {
     // Define a data atual do dispositivo
@@ -22,6 +22,7 @@ const SaleDetails = ({ navigation, route }) => {
     setCurrentDate(formattedDate);
   }, []);
 
+  // Filtra os produtos com base na busca do usuário
   useEffect(() => {
     if (search) {
       const filtered = products.filter(product => 
@@ -33,25 +34,29 @@ const SaleDetails = ({ navigation, route }) => {
     }
   }, [search, products]);
 
+  // Função para mudar o método de pagamento
   const handlePaymentMethodChange = (method) => {
     setPaymentMethod(method);
   };
 
+  // Função para confirmar a venda e exibir o modal
   const handleConfirm = () => {
-    // Exibe o modal
     setIsModalVisible(true);
   };
 
+  // Função para fechar o modal e navegar para a tela de Entries
   const handleCloseModal = () => {
     setIsModalVisible(false);
     navigation.navigate('Entries'); 
   };
 
-  const handleNewRegistered = () =>{
+  // Função para registrar uma nova venda
+  const handleNewRegistered = () => {
     setIsModalVisible(false);
     navigation.navigate('NewRegisteredSale')
   }
 
+  // Função para navegar para a tela SellOnCredit
   const handleSellOnCredit = () => {
     navigation.navigate('SellOnCredit', { products, totalPrice });
   };
@@ -63,6 +68,7 @@ const SaleDetails = ({ navigation, route }) => {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
+
           <View style={{ height: 50 }}>
             <BarTop2
               titulo={'Retorno'}
@@ -77,6 +83,7 @@ const SaleDetails = ({ navigation, route }) => {
             <View style={styles.dateContainer}>
               <Text style={styles.labelData}>Hoje, {currentDate}</Text>
             </View>
+
             <View style={styles.buttonRow}>
               <TouchableOpacity style={[styles.button, { flex: 1 }]}>
                 <Text style={styles.buttonText}>Immediately</Text>
@@ -85,6 +92,7 @@ const SaleDetails = ({ navigation, route }) => {
                 <Text style={styles.buttonText}>Sell on Credit</Text>
               </TouchableOpacity>
             </View>
+
             <View style={styles.searchContainer}>
               <TextInput
                 style={styles.searchInput}
@@ -94,6 +102,7 @@ const SaleDetails = ({ navigation, route }) => {
               />
               <Icon name="search" size={20} color={COLORS.grey} style={styles.searchIcon} />
             </View>
+            {/* Lista de produtos filtrados */}
             <View style={styles.productContainer}>
               {filteredProducts.map((product, index) => (
                 <View key={index} style={styles.productDetail}>
@@ -107,6 +116,7 @@ const SaleDetails = ({ navigation, route }) => {
               ))}
             </View>
             <Text style={styles.label}>Método de pagamento</Text>
+
             <FlatList
               horizontal
               data={paymentMethods}
@@ -132,11 +142,13 @@ const SaleDetails = ({ navigation, route }) => {
               <Text style={styles.totalValue}>R$ {totalPrice.toFixed(2)}</Text>
             </View>
 
+
             <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
               <Icon name="checkmark-circle" size={25} color={COLORS.black} />
               <Text style={styles.confirmButtonText}>Finalizar venda</Text>
             </TouchableOpacity>
           </ScrollView>
+
           <Modal
             transparent={true}
             animationType="slide"
