@@ -1,13 +1,25 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
-import { Button, Text, View, TextInput } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Button, Text, View, TextInput, Alert, Modal } from 'react-native';
 import CountryFlag from 'react-native-country-flag';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
 
+// Definindo constantes
+const API_URL = 'https://api.celereapp.com.br/config/empreendedor/';
+const SUCCESS_MESSAGE = 'Número registrado com sucesso!';
+const ERROR_MESSAGE = 'Erro ao registrar o número. Tente novamente.';
+const DUPLICATE_NUMBER_MESSAGE = 'Este número já foi registrado. Tente com um número diferente.';
+const CONNECTION_ERROR_MESSAGE = 'Não foi possível conectar à API. Verifique sua conexão e tente novamente.';
 
 const InitialRegistration = ({ navigation }) => {
-  const [ddi, setDdi] = useState(''); // Estado para armazenar o DDI (código do país)
-  const [isoCode, setIsoCode] = useState(''); // Estado para armazenar o código ISO do país
+  const [ddi, setDdi] = useState('');
+  const [isoCode, setIsoCode] = useState('');
+  const [ddd, setDdd] = useState('');
+  const [number, setNumber] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
   // Mapeamento de DDI para código ISO
   const ddiToIso = {
@@ -28,6 +40,87 @@ const InitialRegistration = ({ navigation }) => {
     }
   };
 
+  // Função para validar os campos
+  const validateFields = () => {
+    if (!ddi || !ddd || !number) {
+      setModalMessage('Todos os campos devem ser preenchidos.');
+      setModalVisible(true);
+      return false;
+    }
+    if (!/^\d+$/.test(ddi) || !/^\d+$/.test(ddd) || !/^\d+$/.test(number)) {
+      setModalMessage('DDI, DDD e Número de Celular devem conter apenas números.');
+      setModalVisible(true);
+      return false;
+    }
+    return true;
+  };
+
+  // Função para lidar com a resposta da API
+  const handleApiResponse = async (response) => {
+    if (response.status === 200) {
+      await AsyncStorage.setItem('userPhone', JSON.stringify({ ddi, ddd, number }));
+      Alert.alert('Sucesso', SUCCESS_MESSAGE, [
+        { text: 'OK', onPress: () => navigation.navigate('InitialCode') }
+      ]);
+    } else {
+      Alert.alert('Erro', ERROR_MESSAGE, [
+      ]);
+    }
+  };
+
+  // Função para enviar os dados para a API
+  const handleSend = async () => {
+    if (!validateFields()) return;
+
+    try {
+      console.log('Enviando dados para a API:', { ddi, ddd, celular: number });
+
+      const response = await axios.post(API_URL, {
+        ddi,
+        ddd,
+        celular: number,
+      });
+
+      console.log('Resposta da API:', response);
+      await handleApiResponse(response);
+
+    } catch (error) {
+      console.log('Erro ao conectar à API:', error);
+
+      if (error.response) {
+        console.log('Dados da resposta de erro:', error.response.data);
+
+        if (error.response.data.non_field_errors) {
+          Alert.alert('Erro', DUPLICATE_NUMBER_MESSAGE, [
+          ]);
+        } else {
+          Alert.alert('Erro', `Erro na requisição: ${error.response.data.message || 'Erro desconhecido'}`, [
+
+          ]);
+        }
+      } else {
+        Alert.alert('Erro', CONNECTION_ERROR_MESSAGE, [
+
+        ]);
+      }
+    }
+  };
+
+  // Verifica se o número de telefone já está armazenado
+  useEffect(() => {
+    const checkStoredPhoneNumber = async () => {
+      try {
+        const storedPhone = await AsyncStorage.getItem('userPhone');
+        if (storedPhone) {
+          navigation.navigate('MainMenu'); // Direciona para o menu principal se o número já estiver registrado
+        }
+      } catch (error) {
+        console.log('Erro ao verificar o número de telefone armazenado:', error);
+      }
+    };
+
+    checkStoredPhoneNumber();
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
@@ -44,15 +137,40 @@ const InitialRegistration = ({ navigation }) => {
         <TextInput
           style={styles.input}
           placeholder='DDD'
+          value={ddd}
+          onChangeText={setDdd}
         />
         <TextInput
           style={styles.inputNumber}
           placeholder='0 0000-0000'
+          value={number}
+          onChangeText={setNumber}
         />
       </View>
-      <Button title="Enviar" onPress={() => navigation.navigate('InitialCode')} />
+      <Button title="Enviar" onPress={handleSend} />
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>{modalMessage}</Text>
+            <Button
+              title="OK"
+              onPress={() => setModalVisible(!modalVisible)}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
 
 export default InitialRegistration;
+
+
