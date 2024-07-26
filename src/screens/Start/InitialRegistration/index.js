@@ -6,11 +6,12 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
 
-// Definindo constantes
+// Definindo constantes para strings usadas repetidamente
 const API_URL = 'https://api.celereapp.com.br/config/empreendedor/';
+const VERIFY_API_URL = 'https://api.celereapp.com.br/config/empreendedor/';
 const SUCCESS_MESSAGE = 'Número registrado com sucesso!';
 const ERROR_MESSAGE = 'Erro ao registrar o número. Tente novamente.';
-const DUPLICATE_NUMBER_MESSAGE = 'Este número já foi registrado. Tente com um número diferente.';
+const DUPLICATE_NUMBER_MESSAGE = 'Este número já foi registrado. Redirecionando para o menu...';
 const CONNECTION_ERROR_MESSAGE = 'Não foi possível conectar à API. Verifique sua conexão e tente novamente.';
 
 const InitialRegistration = ({ navigation }) => {
@@ -57,6 +58,7 @@ const InitialRegistration = ({ navigation }) => {
 
   // Função para lidar com a resposta da API
   const handleApiResponse = async (response) => {
+    console.log('Resposta da API no handleApiResponse:', response);
     if (response.status === 200) {
       await AsyncStorage.setItem('userPhone', JSON.stringify({ ddi, ddd, number }));
       Alert.alert('Sucesso', SUCCESS_MESSAGE, [
@@ -64,13 +66,43 @@ const InitialRegistration = ({ navigation }) => {
       ]);
     } else {
       Alert.alert('Erro', ERROR_MESSAGE, [
+        { text: 'OK', onPress: () => navigation.navigate('InitialCode') }
       ]);
     }
+  };
+
+  // Função para verificar se o número de telefone já está cadastrado no banco de dados
+  const checkPhoneNumberExists = async () => {
+    try {
+      const response = await axios.get(`${VERIFY_API_URL}?ddi=${ddi}&ddd=${ddd}&celular=${number}`);
+      console.log('Resposta da verificação:', response);
+
+      if (response.status === 200 && response.data.count > 0) {
+        await AsyncStorage.setItem('userPhone', JSON.stringify({ ddi, ddd, number }));
+        Alert.alert('Aviso', DUPLICATE_NUMBER_MESSAGE, [
+          { text: 'OK', onPress: () => navigation.navigate('MainMenu') }
+        ]);
+        return true;
+      }
+    } catch (error) {
+      if (error.response) {
+        console.log('Erro na resposta da verificação:', error.response.data);
+        setModalMessage(`Erro na verificação: ${error.response.data.message || error.response.data}`);
+      } else {
+        console.log('Erro ao verificar o número de telefone:', error.message);
+        setModalMessage('Erro ao verificar o número de telefone.');
+      }
+      setModalVisible(true);
+    }
+    return false;
   };
 
   // Função para enviar os dados para a API
   const handleSend = async () => {
     if (!validateFields()) return;
+
+    const exists = await checkPhoneNumberExists();
+    if (exists) return;
 
     try {
       console.log('Enviando dados para a API:', { ddi, ddd, celular: number });
@@ -81,46 +113,24 @@ const InitialRegistration = ({ navigation }) => {
         celular: number,
       });
 
-      console.log('Resposta da API:', response);
+      console.log('Resposta da API no handleSend:', response);
       await handleApiResponse(response);
 
     } catch (error) {
-      console.log('Erro ao conectar à API:', error);
-
       if (error.response) {
-        console.log('Dados da resposta de erro:', error.response.data);
-
-        if (error.response.data.non_field_errors) {
-          Alert.alert('Erro', DUPLICATE_NUMBER_MESSAGE, [
-          ]);
-        } else {
-          Alert.alert('Erro', `Erro na requisição: ${error.response.data.message || 'Erro desconhecido'}`, [
-
-          ]);
-        }
+        console.log('Erro na resposta da API:', error.response.data);
+        setModalMessage(`Erro na API: ${error.response.data.message || error.response.data}`);
       } else {
-        Alert.alert('Erro', CONNECTION_ERROR_MESSAGE, [
-
-        ]);
+        console.log('Erro ao conectar à API no handleSend:', error.message);
+        setModalMessage('Erro ao conectar à API. Verifique sua conexão e tente novamente.');
       }
+      setModalVisible(true);
     }
   };
 
-  // Verifica se o número de telefone já está armazenado
   useEffect(() => {
-    const checkStoredPhoneNumber = async () => {
-      try {
-        const storedPhone = await AsyncStorage.getItem('userPhone');
-        if (storedPhone) {
-          navigation.navigate('MainMenu'); // Direciona para o menu principal se o número já estiver registrado
-        }
-      } catch (error) {
-        console.log('Erro ao verificar o número de telefone armazenado:', error);
-      }
-    };
-
-    checkStoredPhoneNumber();
-  }, [navigation]);
+    // Função vazia no useEffect porque não precisamos de verificação no início
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -172,5 +182,3 @@ const InitialRegistration = ({ navigation }) => {
 };
 
 export default InitialRegistration;
-
-
