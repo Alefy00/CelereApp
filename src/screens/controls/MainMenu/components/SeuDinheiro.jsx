@@ -69,6 +69,13 @@ export default () => {
     navigation.navigate('Entries');
   };
 
+  const handleCashBalance = () => {
+    navigation.navigate('CashBalance');
+  };
+  const handleSalesForecast = () => {
+    navigation.navigate("MonthlySalesForecast");
+  };
+
   return (
     <ContainerGroupButtons style={{flex: 1, width: '92%'}}>
       <GroupButton>
@@ -102,8 +109,8 @@ export default () => {
           <TxtItemMenu>{t('expenses')}</TxtItemMenu>
         </BtnItemMenu>
 
-        <BtnItemMenu backColor={COLORS.lightYellow2} disabled>
-          <IconCashBalance0
+        <BtnItemMenu backColor={COLORS.lightYellow2} onPress={handleCashBalance}>
+          <IconCashBalance
             width="38"
             height="38"
             fill={COLORS.green}
@@ -114,8 +121,8 @@ export default () => {
 
         {/* Linha 2 */}
 
-        <BtnItemMenu backColor={'#F0E6E6'} disabled>
-          <IconSalesForecast0
+        <BtnItemMenu backColor={COLORS.lightYellow2} onPress={handleSalesForecast}>
+          <IconSalesForecast
             width="38"
             height="38"
             fill={COLORS.green}

@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Button, Text, View, TextInput, Alert, Modal } from 'react-native';
 import CountryFlag from 'react-native-country-flag';
 import axios from 'axios';
@@ -15,8 +15,8 @@ const DUPLICATE_NUMBER_MESSAGE = 'Este número já foi registrado. Redirecionand
 const CONNECTION_ERROR_MESSAGE = 'Não foi possível conectar à API. Verifique sua conexão e tente novamente.';
 
 const InitialRegistration = ({ navigation }) => {
-  const [ddi, setDdi] = useState('');
-  const [isoCode, setIsoCode] = useState('');
+  const [ddi, setDdi] = useState('55');
+  const [isoCode, setIsoCode] = useState('BR');
   const [ddd, setDdd] = useState('');
   const [number, setNumber] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -59,14 +59,14 @@ const InitialRegistration = ({ navigation }) => {
   // Função para lidar com a resposta da API
   const handleApiResponse = async (response) => {
     console.log('Resposta da API no handleApiResponse:', response);
-    if (response.status === 200) {
+    if (response.status === 201) {
       await AsyncStorage.setItem('userPhone', JSON.stringify({ ddi, ddd, number }));
       Alert.alert('Sucesso', SUCCESS_MESSAGE, [
         { text: 'OK', onPress: () => navigation.navigate('InitialCode') }
       ]);
     } else {
       Alert.alert('Erro', ERROR_MESSAGE, [
-        { text: 'OK', onPress: () => navigation.navigate('InitialCode') }
+        { text: 'OK', onPress: () => navigation.navigate('InitialRegistration') }
       ]);
     }
   };
@@ -80,7 +80,7 @@ const InitialRegistration = ({ navigation }) => {
       if (response.status === 200 && response.data.count > 0) {
         await AsyncStorage.setItem('userPhone', JSON.stringify({ ddi, ddd, number }));
         Alert.alert('Aviso', DUPLICATE_NUMBER_MESSAGE, [
-          { text: 'OK', onPress: () => navigation.navigate('MainMenu') }
+          { text: 'OK', onPress: () => navigation.navigate('MainTab') }
         ]);
         return true;
       }
@@ -127,10 +127,6 @@ const InitialRegistration = ({ navigation }) => {
       setModalVisible(true);
     }
   };
-
-  useEffect(() => {
-    // Função vazia no useEffect porque não precisamos de verificação no início
-  }, []);
 
   return (
     <View style={styles.container}>
@@ -182,3 +178,6 @@ const InitialRegistration = ({ navigation }) => {
 };
 
 export default InitialRegistration;
+
+
+

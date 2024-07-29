@@ -34,6 +34,8 @@ import SaleDetails from '../screens/controls/MainMenu/YourCash/Entries/NewSale/S
 import SellOnCredit from '../screens/controls/MainMenu/YourCash/Entries/NewSale/SellOnCredit';
 import LooseProduct from '../screens/controls/MainMenu/YourCash/Entries/NewSale/LooseProduct';
 
+import CashBalance from '../screens/controls/MainMenu/YourCash/CashBalance';
+
 const Stack = createStackNavigator();
 
 export default () => (
@@ -76,5 +78,6 @@ export default () => (
     <Stack.Screen name="DistributionSales" component={DistributionSales} />
     <Stack.Screen name="BuyPrevision" component={BuyPrevision} />
     <Stack.Screen name="PurchaseFrequency" component={PurchaseFrequency} />
+    <Stack.Screen name="CashBalance" component={CashBalance} />
   </Stack.Navigator>
 );
