@@ -71,11 +71,10 @@ const Entries = ({ navigation }) => {
   // Opções do menu com suas respectivas ações
   const options = [
     { id: 1, label: 'Nova Venda', action: handleNewSalePress },
-    { id: 2, label: 'Cancelar venda', screen: 'CancelSaleScreen' },
-    { id: 3, label: 'Liquidar Fiado', screen: 'SettleCreditScreen' },
+    { id: 2, label: 'Cancelar venda', screen: 'CancelSale' },
+    { id: 3, label: 'Liquidar Fiado', screen: 'SettleCredit' },
     { id: 4, label: 'Aporte', screen: 'ContributionScreen' },
     { id: 5, label: 'Empréstimo', screen: 'LoanScreen' },
-    { id: 6, label: 'Aplicações', screen: 'ApplicationsScreen' },
     { id: 7, label: 'Outros', screen: 'OthersScreen' },
     { id: 8, label: 'Relatórios', screen: 'ReportsScreen' },
   ];

@@ -36,6 +36,9 @@ import LooseProduct from '../screens/controls/MainMenu/YourCash/Entries/NewSale/
 
 import CashBalance from '../screens/controls/MainMenu/YourCash/CashBalance';
 
+import CancelSale from '../screens/controls/MainMenu/YourCash/Entries/CancelSale';
+import SettleCredit from '../screens/controls/MainMenu/YourCash/Entries/SettleCredit';
+
 const Stack = createStackNavigator();
 
 export default () => (
@@ -64,6 +67,9 @@ export default () => (
     <Stack.Screen name="SaleDetails" component={SaleDetails} />
     <Stack.Screen name="SellOnCredit" component={SellOnCredit} />
     <Stack.Screen name="LooseProduct" component={LooseProduct} />
+
+    <Stack.Screen name="CancelSale" component={CancelSale} />
+    <Stack.Screen name="SettleCredit" component={SettleCredit} />
 
     <Stack.Screen name="InitialRegistration" component={InitialRegistration} />
     <Stack.Screen name="InitialCode" component={InitialCode} />
