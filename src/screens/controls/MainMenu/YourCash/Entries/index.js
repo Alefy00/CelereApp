@@ -73,8 +73,8 @@ const Entries = ({ navigation }) => {
     { id: 1, label: 'Nova Venda', action: handleNewSalePress },
     { id: 2, label: 'Cancelar venda', screen: 'CancelSale' },
     { id: 3, label: 'Liquidar Fiado', screen: 'SettleCredit' },
-    { id: 4, label: 'Aporte', screen: 'ContributionScreen' },
-    { id: 5, label: 'Empréstimo', screen: 'LoanScreen' },
+    { id: 4, label: 'Aporte', screen: 'Contribution' },
+    { id: 5, label: 'Empréstimo', screen: 'Loan' },
     { id: 7, label: 'Outros', screen: 'OthersScreen' },
     { id: 8, label: 'Relatórios', screen: 'ReportsScreen' },
   ];

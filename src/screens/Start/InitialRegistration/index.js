@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Button, Text, View, TextInput, Alert, Modal } from 'react-native';
 import CountryFlag from 'react-native-country-flag';
 import axios from 'axios';
@@ -8,7 +8,6 @@ import styles from './styles';
 
 // Definindo constantes para strings usadas repetidamente
 const API_URL = 'https://api.celereapp.com.br/config/empreendedor/';
-const VERIFY_API_URL = 'https://api.celereapp.com.br/config/empreendedor/';
 const SUCCESS_MESSAGE = 'Número registrado com sucesso!';
 const ERROR_MESSAGE = 'Erro ao registrar o número. Tente novamente.';
 const DUPLICATE_NUMBER_MESSAGE = 'Este número já foi registrado. Redirecionando para o menu...';
@@ -23,15 +22,15 @@ const InitialRegistration = ({ navigation }) => {
   const [modalMessage, setModalMessage] = useState('');
 
   // Mapeamento de DDI para código ISO
-  const ddiToIso = {
+  const ddiToIso = useMemo(() => ({
     '1': 'US',
     '55': 'BR',
     '44': 'GB',
     '91': 'IN',
-  };
+  }), []);
 
   // Função para lidar com mudanças no campo DDI
-  const handleDdiChange = (text) => {
+  const handleDdiChange = useCallback((text) => {
     setDdi(text);
     const trimmedDdi = text.replace(/\D/g, ''); // Remove caracteres não numéricos
     if (ddiToIso[trimmedDdi]) {
@@ -39,10 +38,10 @@ const InitialRegistration = ({ navigation }) => {
     } else {
       setIsoCode('');
     }
-  };
+  }, [ddiToIso]);
 
   // Função para validar os campos
-  const validateFields = () => {
+  const validateFields = useCallback(() => {
     if (!ddi || !ddd || !number) {
       setModalMessage('Todos os campos devem ser preenchidos.');
       setModalVisible(true);
@@ -54,30 +53,30 @@ const InitialRegistration = ({ navigation }) => {
       return false;
     }
     return true;
-  };
+  }, [ddi, ddd, number]);
 
   // Função para lidar com a resposta da API
-  const handleApiResponse = async (response) => {
+  const handleApiResponse = useCallback(async (response) => {
     console.log('Resposta da API no handleApiResponse:', response);
-    if (response.status === 201) {
+    const { message, code_message } = response.data;
+    if (response.status === 201 && code_message === 'success') {
       await AsyncStorage.setItem('userPhone', JSON.stringify({ ddi, ddd, number }));
       Alert.alert('Sucesso', SUCCESS_MESSAGE, [
         { text: 'OK', onPress: () => navigation.navigate('InitialCode') }
       ]);
     } else {
-      Alert.alert('Erro', ERROR_MESSAGE, [
-        { text: 'OK', onPress: () => navigation.navigate('InitialRegistration') }
-      ]);
+      setModalMessage(message || ERROR_MESSAGE);
+      setModalVisible(true);
     }
-  };
+  }, [ddi, ddd, number, navigation]);
 
   // Função para verificar se o número de telefone já está cadastrado no banco de dados
-  const checkPhoneNumberExists = async () => {
+  const checkPhoneNumberExists = useCallback(async () => {
     try {
-      const response = await axios.get(`${VERIFY_API_URL}?ddi=${ddi}&ddd=${ddd}&celular=${number}`);
+      const response = await axios.get(`${API_URL}?ddi=${ddi}&ddd=${ddd}&celular=${number}`);
       console.log('Resposta da verificação:', response);
 
-      if (response.status === 200 && response.data.count > 0) {
+      if (response.status === 200 && response.data.code_message === 200 && response.data.message === 'success' && response.data.data.length > 0) {
         await AsyncStorage.setItem('userPhone', JSON.stringify({ ddi, ddd, number }));
         Alert.alert('Aviso', DUPLICATE_NUMBER_MESSAGE, [
           { text: 'OK', onPress: () => navigation.navigate('MainTab') }
@@ -95,10 +94,10 @@ const InitialRegistration = ({ navigation }) => {
       setModalVisible(true);
     }
     return false;
-  };
+  }, [ddi, ddd, number, navigation]);
 
   // Função para enviar os dados para a API
-  const handleSend = async () => {
+  const handleSend = useCallback(async () => {
     if (!validateFields()) return;
 
     const exists = await checkPhoneNumberExists();
@@ -114,7 +113,12 @@ const InitialRegistration = ({ navigation }) => {
       });
 
       console.log('Resposta da API no handleSend:', response);
-      await handleApiResponse(response);
+      if (response.status === 201) {
+        await AsyncStorage.setItem('userPhone', JSON.stringify({ ddi, ddd, number }));
+        navigation.navigate('InitialCode');
+      } else {
+        await handleApiResponse(response);
+      }
 
     } catch (error) {
       if (error.response) {
@@ -122,11 +126,11 @@ const InitialRegistration = ({ navigation }) => {
         setModalMessage(`Erro na API: ${error.response.data.message || error.response.data}`);
       } else {
         console.log('Erro ao conectar à API no handleSend:', error.message);
-        setModalMessage('Erro ao conectar à API. Verifique sua conexão e tente novamente.');
+        setModalMessage(CONNECTION_ERROR_MESSAGE);
       }
       setModalVisible(true);
     }
-  };
+  }, [validateFields, checkPhoneNumberExists, handleApiResponse, ddi, ddd, number]);
 
   return (
     <View style={styles.container}>
@@ -178,6 +182,3 @@ const InitialRegistration = ({ navigation }) => {
 };
 
 export default InitialRegistration;
-
-
-
