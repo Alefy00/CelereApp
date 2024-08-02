@@ -40,6 +40,8 @@ import CancelSale from '../screens/controls/MainMenu/YourCash/Entries/CancelSale
 import SettleCredit from '../screens/controls/MainMenu/YourCash/Entries/SettleCredit';
 import Contribution from '../screens/controls/MainMenu/YourCash/Entries/Contribution';
 import Loan from '../screens/controls/MainMenu/YourCash/Entries/Loan';
+import Others from '../screens/controls/MainMenu/YourCash/Entries/Others';
+import Report from '../screens/controls/MainMenu/YourCash/Entries/Reports';
 
 const Stack = createStackNavigator();
 
@@ -74,6 +76,8 @@ export default () => (
     <Stack.Screen name="SettleCredit" component={SettleCredit} />
     <Stack.Screen name="Contribution" component={Contribution} />
     <Stack.Screen name="Loan" component={Loan} />
+    <Stack.Screen name="Others" component={Others} />
+    <Stack.Screen name="Report" component={Report} />
 
     <Stack.Screen name="InitialRegistration" component={InitialRegistration} />
     <Stack.Screen name="InitialCode" component={InitialCode} />

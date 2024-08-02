@@ -75,8 +75,8 @@ const Entries = ({ navigation }) => {
     { id: 3, label: 'Liquidar Fiado', screen: 'SettleCredit' },
     { id: 4, label: 'Aporte', screen: 'Contribution' },
     { id: 5, label: 'Empréstimo', screen: 'Loan' },
-    { id: 7, label: 'Outros', screen: 'OthersScreen' },
-    { id: 8, label: 'Relatórios', screen: 'ReportsScreen' },
+    { id: 7, label: 'Outros', screen: 'Others' },
+    { id: 8, label: 'Relatórios', screen: 'Report' },
   ];
 
   useEffect(() => {
