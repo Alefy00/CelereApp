@@ -1,77 +1,69 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from "react";
+import { ScrollView, TouchableOpacity, View, Text } from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import Icon from 'react-native-vector-icons/Ionicons';
 import BarTop2 from "../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../constants";
-import { Picker } from "@react-native-picker/picker";
-import { BarChart, PieChart } from "react-native-chart-kit";
+import RoundedBarsChart from './components/RoundedBarsChart';
+import DonutChartWithLegend from './components/DonutChartWithLegend';
+import BottomRoundedBarsChart from './components/BottomRoundedBarsCharts';
 import styles from './styles';
-import { ScrollView, TouchableOpacity, View, Text } from "react-native";
-import Icon from 'react-native-vector-icons/Ionicons';
 
 const Report = ({ navigation }) => {
   const [selectedMonth, setSelectedMonth] = useState('Fevereiro');
   const [selectedTimeframe, setSelectedTimeframe] = useState('Mensal');
 
-  const dataPieChart = [
-    { name: "Fiados a receber", amount: 3140, color: "rgba(131, 167, 234, 1)", legendFontColor: "#7F7F7F", legendFontSize: 15 },
-    { name: "Saldo de Caixa", amount: 4560, color: "rgba(255, 230, 0, 1)", legendFontColor: "#7F7F7F", legendFontSize: 15 },
-    { name: "Estoque", amount: 14550, color: "rgba(255, 0, 0, 1)", legendFontColor: "#7F7F7F", legendFontSize: 15 },
+  const dataBarChart = [
+    { value: 21110, label: "Vendas", svg: { fill: COLORS.green } },
+    { value: 11100, label: "Custos de Vendas", svg: { fill: COLORS.red } },
+    { value: 5500, label: "Custos Fixos", svg: { fill: COLORS.orange } },
   ];
 
-  const dataBarChart = {
-    labels: ["Vendas", "Custos de Vendas", "Custos Fixos"],
-    datasets: [
-      {
-        data: [21110, 11100, 5500],
-      },
-    ],
-  };
+  const dataPieChart = [
+    { name: "Fiados a receber", amount: 3140, color: "rgb(94, 208, 112)", legendFontColor: "#7F7F7F" },
+    { name: "Saldo de Caixa", amount: 4560, color: "rgb(141, 228, 255)", legendFontColor: "#7F7F7F" },
+    { name: "Estoque", amount: 14550, color: "rgb(250, 220, 0)", legendFontColor: "#7F7F7F" },
+  ];
+
+  const dataBottomBarChart = [
+    { value: 100, amount: 22740, label: "Capital de Giro" },
+    { value: 80, amount: 21900, label: "Capital de Giro mínimo recomendado" },
+  ];
 
   return (
     <ScrollView style={styles.container}>
       <BarTop2
-        titulo={'Relatório Mensal'}
+        titulo="Relatório Mensal"
         backColor={COLORS.primary}
         foreColor={COLORS.black}
-        routeMailer={''}
-        routeCalculator={''}
+        routeMailer=""
+        routeCalculator=""
         style={{ height: 50 }}
       />
       <Text style={styles.textEspaco}>Espaço de tempo:</Text>
       <View style={styles.filterContainer}>
-        <TouchableOpacity style={[styles.filterButton, selectedTimeframe === 'Diário' && styles.selectedFilterButton]} onPress={() => setSelectedTimeframe('Diário')}>
-          <Text style={styles.filterButtonText}>Diário</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.filterButton, selectedTimeframe === 'Semanal' && styles.selectedFilterButton]} onPress={() => setSelectedTimeframe('Semanal')}>
-          <Text style={styles.filterButtonText}>Semanal</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.filterButton, selectedTimeframe === 'Mensal' && styles.selectedFilterButton]} onPress={() => setSelectedTimeframe('Mensal')}>
-          <Text style={styles.filterButtonText}>Mensal</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.filterButton, selectedTimeframe === 'Anual' && styles.selectedFilterButton]} onPress={() => setSelectedTimeframe('Anual')}>
-          <Text style={styles.filterButtonText}>Anual</Text>
-        </TouchableOpacity>
+        {["Diário", "Semanal", "Mensal", "Anual"].map((timeframe) => (
+          <TouchableOpacity
+            key={timeframe}
+            style={[styles.filterButton, selectedTimeframe === timeframe && styles.selectedFilterButton]}
+            onPress={() => setSelectedTimeframe(timeframe)}
+          >
+            <Text style={styles.filterButtonText}>{timeframe}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
       <View style={styles.pickeralign}>
         <View style={styles.pickerContainer}>
-            <Picker
+          <Picker
             selectedValue={selectedMonth}
             style={styles.picker}
             onValueChange={(itemValue) => setSelectedMonth(itemValue)}
-            >
-            <Picker.Item label="Janeiro" value="Janeiro" />
-            <Picker.Item label="Fevereiro" value="Fevereiro" />
-            <Picker.Item label="Março" value="Março" />
-            <Picker.Item label="Abril" value="Abril" />
-            <Picker.Item label="Maio" value="Maio" />
-            <Picker.Item label="Junho" value="Junho" />
-            <Picker.Item label="Julho" value="Julho" />
-            <Picker.Item label="Agosto" value="Agosto" />
-            <Picker.Item label="Setembro" value="Setembro" />
-            <Picker.Item label="Outubro" value="Outubro" />
-            <Picker.Item label="Novembro" value="Novembro" />
-            <Picker.Item label="Dezembro" value="Dezembro" />
-            </Picker>
+          >
+            {["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"].map((month) => (
+              <Picker.Item key={month} label={month} value={month} />
+            ))}
+          </Picker>
         </View>
       </View>
       <View style={styles.balanceContainer}>
@@ -92,8 +84,8 @@ const Report = ({ navigation }) => {
           </View>
         </View>
         <View style={styles.balanceBarContainer}>
-          <View style={styles.balanceBarGreen}></View>
-          <View style={styles.balanceBarRed}></View>
+          <View style={styles.balanceBarGreen} />
+          <View style={styles.balanceBarRed} />
         </View>
         <View style={styles.balanceRow2}>
           <View style={styles.balanceBox2}>
@@ -105,52 +97,37 @@ const Report = ({ navigation }) => {
             <Text style={[styles.balanceAmount, styles.balenceValue2]}>R$4.560</Text>
           </View>
         </View>
-      </View>
-      <Text style={styles.balanceRecommended}>Saldo mínimo recomendado R$4.200</Text>
-      <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>Vendas, Custos de Vendas e Custos Fixos</Text>
-        <BarChart
-          data={dataBarChart}
-          width={350}
-          height={220}
-          chartConfig={chartConfig}
-        />
+        <Text style={styles.balanceRecommended}>Saldo mínimo recomendado</Text>
+        <Text style={styles.balanceRecommendedValue}>R$4.200</Text>
       </View>
       <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>Fiados a Receber, Saldo de Caixa e Estoque</Text>
-        <PieChart
-          data={dataPieChart}
-          width={350}
-          height={220}
-          chartConfig={chartConfig}
-          accessor={"amount"}
-          backgroundColor={"transparent"}
-          paddingLeft={"15"}
-        />
+        <RoundedBarsChart data={dataBarChart} />
       </View>
-      <View style={styles.capitalContainer}>
-        <Text style={styles.capitalTitle}>Capital de Giro</Text>
-        <Text style={styles.capitalValue}>R$22.740</Text>
-        <Text style={styles.capitalTitle}>Capital de Giro mínimo recomendado</Text>
-        <Text style={styles.capitalValue}>R$21.900</Text>
+      <View style={styles.informationContainer}>
+        <View style={styles.containerTextInfo}>
+          <Text style={styles.informationText}>Resultado</Text>
+          <Text style={styles.informationText}>Margem de lucro</Text>
+          <Text style={styles.informationText}>Ponto de equilíbrio</Text>
+        </View>
+        <View style={styles.containerTextValue}>
+          <Text style={styles.informationValue}>R$4.400</Text>
+          <Text style={styles.informationValue}>47.41% (R$10.010)</Text>
+          <Text style={styles.informationValue}>R$11.704,41</Text>
+        </View>
+      </View>
+      <View style={styles.chartContainer}>
+        <DonutChartWithLegend data={dataPieChart} />
+      </View>
+      <View style={styles.chartContainer}>
+        <BottomRoundedBarsChart 
+          data={dataBottomBarChart} 
+          barColor="#8A2BE2" 
+          labelStyle={{ color: "#000", fontSize: "14", fontWeight: "bold"  }} 
+          valueStyle={{ color: "#000", fontSize: "14", }}
+        />
       </View>
     </ScrollView>
   );
-};
-
-const chartConfig = {
-  backgroundGradientFrom: "#fff",
-  backgroundGradientTo: "#fff",
-  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-  style: {
-    borderRadius: 16,
-  },
-  propsForDots: {
-    r: "6",
-    strokeWidth: "2",
-    stroke: "#ffa726",
-  },
 };
 
 export default Report;
