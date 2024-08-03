@@ -12,23 +12,26 @@ const Loan = ({ navigation }) => {
   const [dataVencimento, setDataVencimento] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  // Função para lidar com o salvamento dos dados do empréstimo
   const handleSave = () => {
     if (!valorPrestacao || !prazoMeses || !dataVencimento) {
       Alert.alert('Erro', 'Todos os campos devem ser preenchidos.');
       return;
     }
 
-    // Lógica para salvar o empréstimo
+    //TODO: Lógica para salvar o empréstimo
     console.log('Empréstimo salvo:', { valorPrestacao, prazoMeses, dataVencimento });
     Alert.alert('Sucesso', 'Empréstimo salvo com sucesso.');
   };
 
+  // Função para lidar com a mudança da data no DateTimePicker
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || dataVencimento;
     setShowDatePicker(false);
     setDataVencimento(currentDate);
   };
 
+  // Função para formatar a data para o formato 'pt-BR'
   const formatDate = (date) => {
     return date.toLocaleDateString('pt-BR');
   };
@@ -63,9 +66,11 @@ const Loan = ({ navigation }) => {
               onChangeText={setPrazoMeses}
               keyboardType="numeric"
             />
+            {/* Botão para abrir o DateTimePicker */}
             <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
               <Text>{formatDate(dataVencimento)}</Text>
             </TouchableOpacity>
+            {/* Exibe o DateTimePicker se showDatePicker for verdadeiro */}
             {showDatePicker && (
               <DateTimePicker
                 testID="dateTimePicker"
@@ -77,6 +82,7 @@ const Loan = ({ navigation }) => {
               />
             )}
           </View>
+          {/* Botão para salvar os dados do empréstimo */}
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveButtonText}>Salvar</Text>
           </TouchableOpacity>

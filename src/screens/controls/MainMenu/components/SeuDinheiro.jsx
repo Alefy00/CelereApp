@@ -76,6 +76,9 @@ export default () => {
     navigation.navigate("MonthlySalesForecast");
   };
 
+  const handleExits = () => {
+    navigation.navigate("Exits")
+  };
   return (
     <ContainerGroupButtons style={{flex: 1, width: '92%'}}>
       <GroupButton>
@@ -99,14 +102,14 @@ export default () => {
           <TxtItemMenu>{t('entries')}</TxtItemMenu>
         </BtnItemMenu>
 
-        <BtnItemMenu backColor={'#F0E6E6'} disabled>
-          <IconExpenses0
+        <BtnItemMenu backColor={COLORS.lightYellow2} onPress={handleExits}>
+          <IconExpenses
             width="38"
             height="38"
             fill={COLORS.green}
             style={{paddingLeft: 0, marginTop: -5}}
           />
-          <TxtItemMenu>{t('expenses')}</TxtItemMenu>
+          <TxtItemMenu>{t('Saídas')}</TxtItemMenu>
         </BtnItemMenu>
 
         <BtnItemMenu backColor={COLORS.lightYellow2} onPress={handleCashBalance}>

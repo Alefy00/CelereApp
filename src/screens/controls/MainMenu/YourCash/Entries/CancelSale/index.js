@@ -13,8 +13,9 @@ const CancelSale = ({ navigation }) => {
       { id: '2', data: '2024-07-28', valor: '200.00' },
       { id: '3', data: '2024-07-27', valor: '150.00' }
     ]);
-    const [filteredVendas, setFilteredVendas] = useState(vendas);
+    const [filteredVendas, setFilteredVendas] = useState(vendas); // Estado para armazenar as vendas filtradas
   
+    // Efeito que filtra as vendas com base na data e valor fornecidos pelo usuário
     useEffect(() => {
       if (dataVenda || valorVenda) {
         const filtered = vendas.filter(venda => 
@@ -26,13 +27,15 @@ const CancelSale = ({ navigation }) => {
       }
     }, [dataVenda, valorVenda]);
   
+    // Função para lidar com o cancelamento de uma venda
     const handleCancel = (id) => {
-      //TODO: adicionar a lógica de cancelamento da venda
+      // TODO: adicionar a lógica de cancelamento da venda
       setVendas(prevVendas => prevVendas.filter(venda => venda.id !== id));
       setFilteredVendas(prevFilteredVendas => prevFilteredVendas.filter(venda => venda.id !== id));
       Alert.alert("Cancelamento", "Venda cancelada com sucesso!");
     };
   
+    // Função para renderizar cada item da lista de vendas
     const renderItem = ({ item }) => (
       <View style={styles.vendaItem}>
         <Text>Data: {item.data}</Text>
@@ -51,6 +54,7 @@ const CancelSale = ({ navigation }) => {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={{ flex: 1 }}>
             <View style={{ height: 50 }}>
+              {/* Componente de barra superior personalizado */}
               <BarTop2
                 titulo={'Entradas'}
                 backColor={COLORS.primary}
@@ -87,6 +91,6 @@ const CancelSale = ({ navigation }) => {
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     );
-  };
+};
 
 export default CancelSale;

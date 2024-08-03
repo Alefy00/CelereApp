@@ -3,16 +3,18 @@ import React, { useState } from "react";
 import BarTop2 from "../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../constants";
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
-import styles from './styles'
+import styles from './styles';
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const Contribution = ({ navigation }) => {
+    // Estados para armazenar os valores de entrada do usuário
     const [dataAporte, setDataAporte] = useState(new Date());
     const [valorAporte, setValorAporte] = useState('');
     const [origemAporte, setOrigemAporte] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
-  
+
+    // Lista de possíveis origens de aporte
     const origens = [
       'Investidor Anjo',
       'Venture Capital',
@@ -20,25 +22,27 @@ const Contribution = ({ navigation }) => {
       'Fundos de Investimento',
       'Outros'
     ];
-  
+
+    // Função para lidar com o salvamento dos dados de aporte
     const handleSave = () => {
       if (!dataAporte || !valorAporte || !origemAporte) {
         Alert.alert('Erro', 'Todos os campos devem ser preenchidos.');
         return;
       }
-  
-      // Lógica para salvar o aporte
+
+      //TODO: Lógica para salvar o aporte
       console.log('Aporte salvo:', { dataAporte, valorAporte, origemAporte });
       Alert.alert('Sucesso', 'Aporte salvo com sucesso.');
-      navigation.navigate('Entries')
+      navigation.navigate('Entries');
     };
-  
+
+    // Função para lidar com a mudança da data no DateTimePicker
     const handleDateChange = (event, selectedDate) => {
       const currentDate = selectedDate || dataAporte;
       setShowDatePicker(false);
       setDataAporte(currentDate);
     };
-  
+
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -55,9 +59,11 @@ const Contribution = ({ navigation }) => {
             />
             <View style={styles.inputContainer}>
               <Text style={styles.textAporte}>Aporte</Text>
+              {/* Botão para abrir o DateTimePicker */}
               <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
                 <Text>{dataAporte.toLocaleDateString()}</Text>
               </TouchableOpacity>
+              {/* Exibe o DateTimePicker se showDatePicker for verdadeiro */}
               {showDatePicker && (
                 <DateTimePicker
                   testID="dateTimePicker"
@@ -74,6 +80,7 @@ const Contribution = ({ navigation }) => {
                 onChangeText={setValorAporte}
                 keyboardType="numeric"
               />
+              {/* Picker para selecionar a origem do aporte */}
               <View style={styles.pickerContainer}>
                 <Picker
                   selectedValue={origemAporte}
@@ -87,6 +94,7 @@ const Contribution = ({ navigation }) => {
                 </Picker>
               </View>
             </View>
+            {/* Botão para salvar os dados de aporte */}
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
               <Text style={styles.saveButtonText}>Salvar</Text>
             </TouchableOpacity>
@@ -94,6 +102,6 @@ const Contribution = ({ navigation }) => {
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     );
-  };
+};
 
 export default Contribution;

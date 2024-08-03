@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from "react";
-import { Alert, FlatList, Keyboard, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View, Modal, Button } from "react-native";
+import { Alert, FlatList, Keyboard, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View, Modal } from "react-native";
 import BarTop2 from "../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../constants";
 import styles from './styles';
@@ -13,11 +13,12 @@ const SettleCredit = ({ navigation }) => {
       { id: '2', data: '2024-07-28', valor: '200.00' },
       { id: '3', data: '2024-07-27', valor: '150.00' }
     ]);
-    const [filteredVendas, setFilteredVendas] = useState(vendas);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [selectedVenda, setSelectedVenda] = useState(null);
-    const [abatimento, setAbatimento] = useState('');
-  
+    const [filteredVendas, setFilteredVendas] = useState(vendas); // Estado para armazenar as vendas filtradas
+    const [modalVisible, setModalVisible] = useState(false); // Estado para controlar a visibilidade do modal
+    const [selectedVenda, setSelectedVenda] = useState(null); // Estado para armazenar a venda selecionada
+    const [abatimento, setAbatimento] = useState(''); // Estado para armazenar o valor do abatimento
+
+    // Efeito que filtra as vendas com base na data e valor fornecidos pelo usuário
     useEffect(() => {
       if (dataVenda || valorVenda) {
         const filtered = vendas.filter(venda => 
@@ -29,17 +30,20 @@ const SettleCredit = ({ navigation }) => {
       }
     }, [dataVenda, valorVenda]);
   
+    // Função para lidar com o abatimento de uma venda
     const handleAbater = (venda) => {
       setSelectedVenda(venda);
       setModalVisible(true);
     };
   
+    // Função para baixar uma venda
     const handleBaixar = (id) => {
       setVendas(vendas.filter(venda => venda.id !== id));
       setFilteredVendas(filteredVendas.filter(venda => venda.id !== id));
       Alert.alert("Baixa", "Venda baixada com sucesso!");
     };
   
+    // Função para confirmar o abatimento do valor de uma venda
     const confirmarAbatimento = () => {
       const valorAbatido = parseFloat(abatimento);
       setVendas(vendas.map(venda => 
@@ -57,6 +61,7 @@ const SettleCredit = ({ navigation }) => {
       Alert.alert("Abatimento", "Valor abatido com sucesso!");
     };
   
+    // Função para renderizar cada item da lista de vendas
     const renderItem = ({ item }) => (
       <View style={styles.vendaItem}>
         <View style={styles.vendaInfo}>
