@@ -43,6 +43,7 @@ import Contribution from '../screens/controls/MainMenu/YourCash/Entries/Contribu
 import Loan from '../screens/controls/MainMenu/YourCash/Entries/Loan';
 import Others from '../screens/controls/MainMenu/YourCash/Entries/Others';
 import Report from '../screens/controls/MainMenu/YourCash/Entries/Reports';
+import NewExpense from '../screens/controls/MainMenu/YourCash/Exits/NewExpense';
 
 const Stack = createStackNavigator();
 
@@ -95,5 +96,7 @@ export default () => (
     <Stack.Screen name="BuyPrevision" component={BuyPrevision} />
     <Stack.Screen name="PurchaseFrequency" component={PurchaseFrequency} />
     <Stack.Screen name="CashBalance" component={CashBalance} />
+
+    <Stack.Screen name="NewExpense" component={NewExpense} />
   </Stack.Navigator>
 );

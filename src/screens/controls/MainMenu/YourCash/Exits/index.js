@@ -6,8 +6,9 @@ import { COLORS } from "../../../../../constants";
 import styles from './styles';
 import { Text, TouchableOpacity, View } from "react-native";
 
+
 const menuItems = [
-    { name: 'Nova Despesa', screen: 'NovaDespesa' },
+    { name: 'Nova Despesa', screen: 'NewExpense' },
     { name: 'Cancelar Despesa', screen: 'CancelarDespesa' },
     { name: 'Categorias', screen: 'Categorias' },
     { name: 'Liquidar despesa', screen: 'LiquidarDespesa' },
