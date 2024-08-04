@@ -12,13 +12,22 @@ const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
-    marginVertical: 5,
-    backgroundColor: COLORS.lightGray2,
-    borderRadius: 10,
+    padding: 16,
+    marginVertical: 8,
+    backgroundColor: COLORS.white,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.gray,
+    justifyContent: 'space-between', // Adiciona espaço entre o texto e a seta
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   menuItemDisabled: {
     backgroundColor: COLORS.lightGray,
+   
   },
   menuIconContainer: {
     width: 40,
