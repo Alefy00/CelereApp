@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import Preload from '../screens/controls/Preload';
@@ -44,6 +45,8 @@ import Loan from '../screens/controls/MainMenu/YourCash/Entries/Loan';
 import Others from '../screens/controls/MainMenu/YourCash/Entries/Others';
 import Report from '../screens/controls/MainMenu/YourCash/Entries/Reports';
 import NewExpense from '../screens/controls/MainMenu/YourCash/Exits/NewExpense';
+import CancelExpense from '../screens/controls/MainMenu/YourCash/Exits/CancelExpense';
+import LiquidateExpense from '../screens/controls/MainMenu/YourCash/Exits/SettleExpense';
 
 const Stack = createStackNavigator();
 
@@ -98,5 +101,7 @@ export default () => (
     <Stack.Screen name="CashBalance" component={CashBalance} />
 
     <Stack.Screen name="NewExpense" component={NewExpense} />
+    <Stack.Screen name="CancelExpense" component={CancelExpense} />
+    <Stack.Screen name="LiquidateExpense" component={LiquidateExpense} />
   </Stack.Navigator>
 );

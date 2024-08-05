@@ -9,9 +9,9 @@ import { Text, TouchableOpacity, View } from "react-native";
 
 const menuItems = [
     { name: 'Nova Despesa', screen: 'NewExpense' },
-    { name: 'Cancelar Despesa', screen: 'CancelarDespesa' },
+    { name: 'Cancelar Despesa', screen: 'CancelExpense' },
     { name: 'Categorias', screen: 'Categorias' },
-    { name: 'Liquidar despesa', screen: 'LiquidarDespesa' },
+    { name: 'Liquidar despesa', screen: 'LiquidateExpense' },
     { name: 'Consultar', screen: 'Consultar' },
     { name: 'Relatório', screen: 'RelatorioDesabilitar', disabled: true },
 ];

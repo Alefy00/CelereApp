@@ -7,17 +7,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  scrollContainer: {
+    paddingBottom: 20,
+  },
   formContainer: {
     padding: 20,
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     marginBottom: 20,
+    borderWidth:0.5,
+    padding:10,
+    marginHorizontal:30,
+    borderRadius:10,
+    borderColor:COLORS.gray,
   },
   button: {
     padding: 10,
-    backgroundColor: COLORS.lightGray2,
     borderRadius: 10,
   },
   buttonActive: {
@@ -27,7 +34,6 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: COLORS.black,
-    fontWeight: 'bold',
   },
   buttonTextActive: {
     color: COLORS.white,
@@ -43,8 +49,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.lightGray2,
-    padding: 10,
     borderRadius: 10,
+    paddingHorizontal:20,
+    padding:10,
+  },
+  textDate:{
+    marginRight:15,
+    color:'black'
   },
   inputContainer: {
     marginBottom: 20,
@@ -68,11 +79,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
+  checkboxLabel: {
+    marginLeft: 8,
+    fontSize: 16,
+    color:'#000',
+  },
   saveButton: {
-    backgroundColor: COLORS.yellow,
+    backgroundColor: COLORS.primary,
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
+    marginHorizontal:80,
   },
   saveButtonText: {
     color: COLORS.black,
