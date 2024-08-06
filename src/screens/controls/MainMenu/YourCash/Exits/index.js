@@ -12,7 +12,7 @@ const menuItems = [
     { name: 'Cancelar Despesa', screen: 'CancelExpense' },
     { name: 'Categorias', screen: 'Categorias' },
     { name: 'Liquidar despesa', screen: 'LiquidateExpense' },
-    { name: 'Consultar', screen: 'Consultar' },
+    { name: 'Consultar', screen: 'ConsultExpense' },
     { name: 'Relatório', screen: 'RelatorioDesabilitar', disabled: true },
 ];
 

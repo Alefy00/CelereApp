@@ -47,6 +47,7 @@ import Report from '../screens/controls/MainMenu/YourCash/Entries/Reports';
 import NewExpense from '../screens/controls/MainMenu/YourCash/Exits/NewExpense';
 import CancelExpense from '../screens/controls/MainMenu/YourCash/Exits/CancelExpense';
 import LiquidateExpense from '../screens/controls/MainMenu/YourCash/Exits/SettleExpense';
+import ConsultExpense from '../screens/controls/MainMenu/YourCash/Exits/ConsultExpense';
 
 const Stack = createStackNavigator();
 
@@ -103,5 +104,6 @@ export default () => (
     <Stack.Screen name="NewExpense" component={NewExpense} />
     <Stack.Screen name="CancelExpense" component={CancelExpense} />
     <Stack.Screen name="LiquidateExpense" component={LiquidateExpense} />
+    <Stack.Screen name="ConsultExpense" component={ConsultExpense} />
   </Stack.Navigator>
 );
