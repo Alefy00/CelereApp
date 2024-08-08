@@ -20,7 +20,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import '../../../translation';
 import styles from './styles';
 
-const Winning = props => {
+const Winning = ({navigation}) => {
   const { t } = useTranslation();
   const [selectedMonth, setSelectedMonth] = useState('JAN');
   const [viewMode, setViewMode] = useState('Por Categoria');
@@ -44,6 +44,10 @@ const Winning = props => {
         }).start();
       });
     }
+  };
+
+  const handleMenu = () => {
+    navigation.navigate("MainTab");
   };
 
   const renderMonth = (month) => (
@@ -73,6 +77,7 @@ const Winning = props => {
               routeMailer={''}
               routeCalculator={''}
             />
+            
             <Scroller style={{ paddingTop: 10 }}>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carouselContainer}>
                 {months.map(renderMonth)}
@@ -166,15 +171,20 @@ const Winning = props => {
                         <Text style={styles.exitItemValue}>R$ 0,00</Text>
                       </View>
                     </View>
+                    <TouchableOpacity onPress={handleMenu}>
+                      <Text>VOltar</Text>
+                    </TouchableOpacity>
                   </View>
                 ) : (
                   <View style={styles.contentContainer}>
                     {/* Conteúdo da visualização "Por dia" */}
                     <Text style={styles.sectionTitle}>Por dia</Text>
                     {/* Adicione o conteúdo específico para a visualização "Por dia" aqui */}
+
                   </View>
                 )}
               </Animated.View>
+
             </Scroller>
           </>
         </KeyboardAvoidingView>

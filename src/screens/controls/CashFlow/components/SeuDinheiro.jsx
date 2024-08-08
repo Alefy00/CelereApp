@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React from 'react';
 import styled from 'styled-components/native';
 import {COLORS, FONTS, SIZES} from '../../../../constants';
@@ -114,7 +115,7 @@ export default () => {
         </BtnItemMenu>
 
         <BtnItemMenu disabled>
-          <IconCashFlow0
+          <IconCashFlow
             width="38"
             height="38"
             fill={COLORS.green}
