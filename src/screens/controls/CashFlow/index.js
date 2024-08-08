@@ -171,9 +171,7 @@ const Winning = ({navigation}) => {
                         <Text style={styles.exitItemValue}>R$ 0,00</Text>
                       </View>
                     </View>
-                    <TouchableOpacity onPress={handleMenu}>
-                      <Text>VOltar</Text>
-                    </TouchableOpacity>
+
                   </View>
                 ) : (
                   <View style={styles.contentContainer}>
