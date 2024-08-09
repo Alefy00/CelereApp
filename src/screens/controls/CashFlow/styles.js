@@ -64,8 +64,10 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   section: {
-    marginVertical: 10,
+    marginVertical: 20,
     marginLeft: 20,
+    borderBottomWidth: 1,
+    
   },
   section2: {
     marginVertical: 20,

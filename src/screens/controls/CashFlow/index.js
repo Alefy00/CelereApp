@@ -19,8 +19,9 @@ import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
 import '../../../translation';
 import styles from './styles';
+import DailyView from './components/DailyView';
 
-const Winning = ({navigation}) => {
+const Winning = ({ navigation }) => {
   const { t } = useTranslation();
   const [selectedMonth, setSelectedMonth] = useState('JAN');
   const [viewMode, setViewMode] = useState('Por Categoria');
@@ -28,6 +29,12 @@ const Winning = ({navigation}) => {
 
   const months = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
   const windowWidth = Dimensions.get('window').width;
+
+  const dailyTransactions = [
+    { date: '2024-08-01', entradas: 500, saidas: 200 },
+    { date: '2024-08-02', entradas: 300, saidas: 100 },
+    // ... outros dias
+  ];
 
   const toggleViewMode = (mode) => {
     if (viewMode !== mode) {
@@ -61,10 +68,7 @@ const Winning = ({navigation}) => {
   );
 
   return (
-    <Container
-      backColor={COLORS.background}
-      behavior={Platform.OS === 'ios' ? 'padding' : ''}
-      enabled>
+    <Container backColor={COLORS.background}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView behavior="position" enabled>
           <>
@@ -74,10 +78,7 @@ const Winning = ({navigation}) => {
               subtitulo={'Planeta Cell'}
               backColor={COLORS.primary}
               foreColor={'#000000'}
-              routeMailer={''}
-              routeCalculator={''}
             />
-            
             <Scroller style={{ paddingTop: 10 }}>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carouselContainer}>
                 {months.map(renderMonth)}
@@ -87,13 +88,17 @@ const Winning = ({navigation}) => {
                   style={[styles.toggleButton, viewMode === 'Por Categoria' && styles.selectedToggleButton]}
                   onPress={() => toggleViewMode('Por Categoria')}
                 >
-                  <Text style={[styles.toggleButtonText, viewMode === 'Por Categoria' && styles.selectedToggleButtonText]}>Por Categoria</Text>
+                  <Text style={[styles.toggleButtonText, viewMode === 'Por Categoria' && styles.selectedToggleButtonText]}>
+                    Por Categoria
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.toggleButton, viewMode === 'Por dia' && styles.selectedToggleButton]}
                   onPress={() => toggleViewMode('Por dia')}
                 >
-                  <Text style={[styles.toggleButtonText, viewMode === 'Por dia' && styles.selectedToggleButtonText]}>Por dia</Text>
+                  <Text style={[styles.toggleButtonText, viewMode === 'Por dia' && styles.selectedToggleButtonText]}>
+                    Por dia
+                  </Text>
                 </TouchableOpacity>
               </View>
               <Animated.View style={{ opacity: fadeAnim }}>
@@ -171,18 +176,12 @@ const Winning = ({navigation}) => {
                         <Text style={styles.exitItemValue}>R$ 0,00</Text>
                       </View>
                     </View>
-
                   </View>
                 ) : (
-                  <View style={styles.contentContainer}>
-                    {/* Conteúdo da visualização "Por dia" */}
-                    <Text style={styles.sectionTitle}>Por dia</Text>
-                    {/* Adicione o conteúdo específico para a visualização "Por dia" aqui */}
+                  <DailyView dailyTransactions={dailyTransactions} selectedMonth={months.indexOf(selectedMonth)} />
 
-                  </View>
                 )}
               </Animated.View>
-
             </Scroller>
           </>
         </KeyboardAvoidingView>
