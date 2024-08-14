@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React from 'react';
 import styled from 'styled-components/native';
 import {COLORS, FONTS, SIZES} from '../../../../constants';
@@ -79,6 +80,10 @@ export default () => {
   const handleExits = () => {
     navigation.navigate("Exits")
   };
+
+  const handleCashFlow = () => {
+    navigation.navigate('Winning')
+  }
   return (
     <ContainerGroupButtons style={{flex: 1, width: '92%'}}>
       <GroupButton>
@@ -134,8 +139,8 @@ export default () => {
           <TxtItemMenu>{t('sales_forecast')}</TxtItemMenu>
         </BtnItemMenu>
 
-        <BtnItemMenu backColor={'#F0E6E6'} disabled>
-          <IconCashFlow0
+        <BtnItemMenu backColor={COLORS.lightYellow2} onPress={handleCashFlow}>
+          <IconCashFlow
             width="38"
             height="38"
             fill={COLORS.green}
