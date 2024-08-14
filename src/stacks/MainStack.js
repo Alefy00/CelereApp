@@ -47,6 +47,8 @@ import Report from '../screens/controls/MainMenu/YourCash/Entries/Reports';
 import NewExpense from '../screens/controls/MainMenu/YourCash/Exits/NewExpense';
 import CancelExpense from '../screens/controls/MainMenu/YourCash/Exits/CancelExpense';
 import LiquidateExpense from '../screens/controls/MainMenu/YourCash/Exits/SettleExpense';
+import ConsultExpense from '../screens/controls/MainMenu/YourCash/Exits/ConsultExpense';
+import BusinessInfoScreen from '../screens/Start/InitialBusiness';
 
 const Stack = createStackNavigator();
 
@@ -88,6 +90,7 @@ export default () => (
     <Stack.Screen name="InitialRegistration" component={InitialRegistration} />
     <Stack.Screen name="InitialCode" component={InitialCode} />
     <Stack.Screen name="InitialBranch" component={InitialBranch} />
+    <Stack.Screen name="BusinessInfoScreen" component={BusinessInfoScreen} />
 
     <Stack.Screen name="OpeningBalance" component={OpeningBalance} />
     <Stack.Screen name="InitialSupplier" component={InitialSupplier} />
@@ -103,5 +106,6 @@ export default () => (
     <Stack.Screen name="NewExpense" component={NewExpense} />
     <Stack.Screen name="CancelExpense" component={CancelExpense} />
     <Stack.Screen name="LiquidateExpense" component={LiquidateExpense} />
+    <Stack.Screen name="ConsultExpense" component={ConsultExpense} />
   </Stack.Navigator>
 );

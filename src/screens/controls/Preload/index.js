@@ -10,7 +10,7 @@ const Preload = props => {
   useEffect(() => {
     setTimeout(() => {
       navigation.navigate('InitialRegistration');
-    }, 1000);
+    }, 0);
   }, [navigation]);
 
   return (

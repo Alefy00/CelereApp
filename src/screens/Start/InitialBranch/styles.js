@@ -1,80 +1,91 @@
 /* eslint-disable prettier/prettier */
+import { StyleSheet } from 'react-native';
 
-import { StyleSheet } from "react-native";
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#FFF',
+  },
+  label: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 20,
+  },
+  option: {
+    padding: 15,
+    backgroundColor: '#F0F0F0',
+    borderRadius: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#DDD',
+    alignItems: 'center',
+  },
+  optionSelected: {
+    backgroundColor: '#FFEB3B',
+    
+  },
+  optionText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  optionSubText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalOption: {
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: '#F0F0F0',
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  modalOptionSelected: {
+    backgroundColor: '#FFEB3B',
+  },
+  modalOptionText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  modalButton: {
+    flex: 1,
+    padding: 10,
+    alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: '#CCC',
+    marginHorizontal: 5,
+  },
+  modalSaveButton: {
+    backgroundColor: '#FFEB3B',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: '#333',
+  },
+});
 
-export default styles = StyleSheet.create({
-    container: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-      },
-      label: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginVertical: 10,
-      },
-      description: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 10,
-      },
-      input: {
-        width: '100%',
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
-        borderRadius: 5,
-        marginBottom: 20,
-        backgroundColor: '#f9f9f9',
-      },
-      option: {
-        width: '100%',
-        padding: 15,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        marginVertical: 5,
-      },
-      optionSelected: {
-        backgroundColor: '#d1e7dd',
-      },
-      optionText: {
-        fontSize: 16,
-      },
-      customInputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 10,
-      },
-      customInput: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
-        borderRadius: 5,
-      },
-      addButton: {
-        backgroundColor: '#007bff',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 5,
-        marginLeft: 10,
-      },
-      addButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-      },
-      nextButton: {
-        backgroundColor: '#fadc00',
-        paddingVertical: 15,
-        paddingHorizontal: 40,
-        borderRadius: 5,
-        marginTop: 20,
-      },
-      nextButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
-      },
-})
+export default styles;

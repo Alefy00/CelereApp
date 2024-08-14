@@ -1,89 +1,137 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from 'react';
-import { Text, View, TextInput, ScrollView, TouchableOpacity } from 'react-native';
-import  styles   from './styles'
+import { Text, View, TouchableOpacity, Modal, Alert, Animated, Easing } from 'react-native';
+import styles from './styles';
 
-
+const subcategories = {
+  varejo: ['Lojista', 'Ambulante', 'Feirante', 'Internet', 'Em casa ou porta a porta'],
+  servicos: ['Beleza - Cabelo, maquiagem, unhas, outros', 'Obras - Alvenaria, serralheria, elétrica, outros', 'Manutenção - Ar condicionado, Celular, Carros, outros', 'Profissionais de app', 'Outros'],
+  fabricacao: ['Artesanato', 'Indústria', 'Pães, bolos, doces ou outros', 'Outros'],
+};
 
 const InitialBranch = ({ navigation }) => {
-  // Lista de opções predefinidas
-  const predefinedOptions = [
-    'Varejo - revenda de produtos',
-    'Preparo e venda de refeições, confeitaria, lanchonete, outros',
-    'Fabricação ou artesanato',
-    'Serviços de Beleza - cabelo, maquiagem, unhas, outros',
-    'Serviços em Obras - alvenaria, serralheria, elétrica, outros',
-  ];
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [currentSubcategories, setCurrentSubcategories] = useState([]);
+  const [fadeAnim] = useState(new Animated.Value(0)); // Inicializa a animação com opacidade 0
 
-  // Estado para armazenar as opções selecionadas e a opção customizada
-  const [selectedOptions, setSelectedOptions] = useState([]);
-  const [customOption, setCustomOption] = useState('');
+  const openModal = (category) => {
+    setSelectedCategory(category);
+    setCurrentSubcategories(subcategories[category]);
+    setModalVisible(true);
 
-  // Função para adicionar ou remover uma opção da lista de selecionadas
-  const toggleOption = (option) => {
-    setSelectedOptions((prevSelected) => 
-      prevSelected.includes(option)
-        ? prevSelected.filter((item) => item !== option) // Remove a opção se já estiver selecionada
-        : [...prevSelected, option] // Adiciona a opção se não estiver selecionada
-    );
+    // Animação de entrada
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
   };
 
-  // Função para adicionar a opção customizada à lista de selecionadas
-  const addCustomOption = () => {
-    if (customOption) {
-      setSelectedOptions((prevSelected) => [...prevSelected, customOption]);
-      setCustomOption(''); // Limpa o campo de entrada
+  const closeModal = () => {
+    // Animação de saída
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setModalVisible(false);
+    });
+  };
+
+  const handleSave = () => {
+    if (!selectedSubcategory) {
+      Alert.alert('Atenção', 'Por favor, selecione uma subcategoria antes de prosseguir.');
+      return;
     }
-  };
-
-  // Função para prosseguir para a próxima tela com as opções selecionadas
-  const handleNext = () => {
-
-     //TODO: Lógica para prosseguir com as opções selecionadas
-    console.log('Opções Selecionadas:', selectedOptions);
-    navigation.navigate('Start'); 
+    closeModal();
+    navigation.navigate('Start', { selectedCategory, selectedSubcategory });
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.label}>Ramo de Atividade:</Text>
+    <View style={styles.container}>
       <Text style={styles.label}>Qual seu ramo de atuação?</Text>
-      <Text style={styles.description}>Se desejar, adicione uma descrição:</Text>
 
-
-      {predefinedOptions.map((option, index) => (
-        <TouchableOpacity
-          key={index}
-          style={[
-            styles.option,
-            selectedOptions.includes(option) && styles.optionSelected,
-          ]}
-          onPress={() => toggleOption(option)}
-        >
-          <Text style={styles.optionText}>{option}</Text>
-        </TouchableOpacity>
-      ))}
-
-
-      <View style={styles.customInputContainer}>
-        <TextInput
-          style={styles.customInput}
-          placeholder="Outro serviço"
-          value={customOption}
-          onChangeText={setCustomOption}
-        />
-        <TouchableOpacity style={styles.addButton} onPress={addCustomOption}>
-          <Text style={styles.addButtonText}>Adicionar</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-        <Text style={styles.nextButtonText}>Avançar</Text>
+      <TouchableOpacity
+        style={[
+          styles.option,
+          selectedCategory === 'varejo' && styles.optionSelected,
+        ]}
+        onPress={() => openModal('varejo')}
+      >
+        <Text style={styles.optionText}>Varejo</Text>
+        <Text style={styles.optionSubText}>Revenda de produtos</Text>
       </TouchableOpacity>
-    </ScrollView>
+
+      <TouchableOpacity
+        style={[
+          styles.option,
+          selectedCategory === 'servicos' && styles.optionSelected,
+        ]}
+        onPress={() => openModal('servicos')}
+      >
+        <Text style={styles.optionText}>Serviços</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[
+          styles.option,
+          selectedCategory === 'fabricacao' && styles.optionSelected,
+        ]}
+        onPress={() => openModal('fabricacao')}
+      >
+        <Text style={styles.optionText}>Fabricação / Produção</Text>
+      </TouchableOpacity>
+
+      <CustomModal
+        visible={modalVisible}
+        fadeAnim={fadeAnim}
+        subcategories={currentSubcategories}
+        selectedSubcategory={selectedSubcategory}
+        setSelectedSubcategory={setSelectedSubcategory}
+        onClose={closeModal}
+        onSave={handleSave}
+      />
+    </View>
   );
 };
 
+const CustomModal = ({ visible, fadeAnim, subcategories, selectedSubcategory, setSelectedSubcategory, onClose, onSave }) => (
+  <Modal
+    animationType="none"
+    transparent={true}
+    visible={visible}
+    onRequestClose={onClose}
+  >
+    <Animated.View style={[styles.modalContainer, { opacity: fadeAnim }]}>
+      <View style={styles.modalContent}>
+        <Text style={styles.modalTitle}>Selecione uma Subcategoria</Text>
+        
+        {subcategories.map((subcategory, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.modalOption,
+              selectedSubcategory === subcategory && styles.modalOptionSelected,
+            ]}
+            onPress={() => setSelectedSubcategory(subcategory)}
+          >
+            <Text style={styles.modalOptionText}>{subcategory}</Text>
+          </TouchableOpacity>
+        ))}
 
+        <View style={styles.modalButtons}>
+          <TouchableOpacity style={styles.modalButton} onPress={onClose}>
+            <Text style={styles.modalButtonText}>Fechar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.modalButton, styles.modalSaveButton]} onPress={onSave}>
+            <Text style={styles.modalButtonText}>Salvar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Animated.View>
+  </Modal>
+);
 
 export default InitialBranch;

@@ -12,7 +12,7 @@ const InitialCode = ({ navigation }) => {
         style={styles.input}
         placeholder='Insira o código'
       />
-      <Button title='Enviar' onPress={() => navigation.navigate('InitialBranch')}/>
+      <Button title='Enviar' onPress={() => navigation.navigate('BusinessInfoScreen')}/>
     </View>
   );
 };
