@@ -19,31 +19,21 @@ const InitialRegistration = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkRegistration = async () => {
+    const checkStoredData = async () => {
       try {
-        // Recupera os dados do AsyncStorage e converte de JSON para objeto
         const storedData = await AsyncStorage.getItem('userPhone');
         if (storedData) {
-          const userData = JSON.parse(storedData);
-          navigation.navigate('MainTab', { userData }); // Passa os dados do usuário para a MainTab
-          return;
-        }
-
-        // Verifica se o número já está no banco de dados
-        const response = await axios.get(`${API_URL}?ddi=${ddi}&ddd=${ddd}&celular=${number}`);
-        if (response.status === 200 && response.data.data.length > 0) {
-          const userData = response.data.data[0];
-          await AsyncStorage.setItem('userPhone', JSON.stringify(userData));
-          navigation.navigate('MainTab', { userData });
+          navigation.navigate('MainTab');
         } else {
-          setLoading(false); // Prosseguir com o registro se o número não está no banco
+          setLoading(false); // Exibir a tela de registro se não há dados armazenados
         }
       } catch (error) {
-        setLoading(false); // Mostrar tela de registro em caso de erro de conexão
+        console.error('Erro ao verificar os dados armazenados:', error);
+        setLoading(false); // Exibir a tela de registro em caso de erro
       }
     };
 
-    checkRegistration();
+    checkStoredData();
   }, [navigation]);
 
   const handleDdiChange = (text) => {
@@ -74,22 +64,33 @@ const InitialRegistration = ({ navigation }) => {
     if (!validateFields()) return;
 
     try {
+      console.log('Fazendo requisição para a API...');
       const response = await axios.post(API_URL, {
         ddi,
         ddd,
         celular: number,
       });
 
-      if (response.status === 201 && response.data.code_message === 'success') {
-        const userData = { ddi, ddd, number };
-        await AsyncStorage.setItem('userPhone', JSON.stringify(userData));
-        Alert.alert('Sucesso', 'Número registrado com sucesso!', [
-          { text: 'OK', onPress: () => navigation.navigate('InitialCode', { userData }) }
-        ]);
+      console.log('Resposta da API:', response.data);
+
+      if (response.status === 201 && response.data.status === 'success') {
+        const { id, codigo_ativacao } = response.data.data;
+        const newUserData = {
+          id,
+          ddi,
+          ddd,
+          number,
+          isValidated: false,
+          codigo_ativacao,
+        };
+        await AsyncStorage.setItem('userPhone', JSON.stringify(newUserData));
+        console.log('Empreendedor registrado com sucesso. Redirecionando para InitialCode.');
+        navigation.navigate('InitialCode', { userData: newUserData });
       } else {
         showModal(response.data.message || 'Erro ao registrar. Tente novamente.');
       }
     } catch (error) {
+      console.error('Erro ao conectar à API:', error.message);
       showModal('Não foi possível conectar à API. Verifique sua conexão e tente novamente.');
     }
   };

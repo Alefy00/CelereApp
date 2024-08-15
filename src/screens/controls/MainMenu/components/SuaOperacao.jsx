@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React from 'react';
 import styled from 'styled-components/native';
 import {COLORS, FONTS, SIZES} from '../../../../constants';
@@ -67,6 +68,10 @@ export default () => {
   const navigateToScreen = screenName => {
     navigation.navigate(screenName);
   };
+
+const handleServices = () => {
+  navigation.navigate("ServicesMenu");
+};
   return (
     <ContainerGroupButtons style={{flex: 1, width: '92%'}}>
       <GroupButton>
@@ -77,8 +82,8 @@ export default () => {
           <TxtItemMenu>{t('stock')}</TxtItemMenu>
         </BtnItemMenu>
 
-        <BtnItemMenu backColor="#F0E6E6" disabled>
-          <IconServices0 width="38" height="38" />
+        <BtnItemMenu backColor={COLORS.lightYellow2} onPress={handleServices}>
+          <IconServices width="38" height="38" />
           <TxtItemMenu>{t('services')}</TxtItemMenu>
         </BtnItemMenu>
 

@@ -49,6 +49,9 @@ import CancelExpense from '../screens/controls/MainMenu/YourCash/Exits/CancelExp
 import LiquidateExpense from '../screens/controls/MainMenu/YourCash/Exits/SettleExpense';
 import Winning from '../screens/controls/CashFlow';
 import BusinessInfoScreen from '../screens/Start/InitialBusiness';
+import ConsultExpense from '../screens/controls/MainMenu/YourCash/Exits/ConsultExpense';
+import ServicesMenu from '../screens/controls/MainMenu/YourOperation/Services';
+import AddService from '../screens/controls/MainMenu/YourOperation/Services/ServiceRegistration';
 
 
 const Stack = createStackNavigator();
@@ -76,6 +79,7 @@ export default () => (
     <Stack.Screen name="Entries" component={Entries} />
     <Stack.Screen name="Exits" component={Exits} />
     <Stack.Screen name="Winning" component={Winning} />
+    <Stack.Screen name="ServicesMenu" component={ServicesMenu} />
 
     <Stack.Screen name="NewRegisteredSale" component={NewRegisteredSale} />
     <Stack.Screen name="SaleDetails" component={SaleDetails} />
@@ -108,6 +112,8 @@ export default () => (
     <Stack.Screen name="NewExpense" component={NewExpense} />
     <Stack.Screen name="CancelExpense" component={CancelExpense} />
     <Stack.Screen name="LiquidateExpense" component={LiquidateExpense} />
+    <Stack.Screen name="ConsultExpense" component={ConsultExpense} />
+    <Stack.Screen name="AddService" component={AddService} />
  
   </Stack.Navigator>
 );
