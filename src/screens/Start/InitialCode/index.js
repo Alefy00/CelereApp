@@ -31,11 +31,10 @@ const InitialCode = ({ navigation, route }) => {
 
     setLoading(true);
     try {
-      const response = await axios.post(API_URL, { // Remova userData.id da URL
-        id: userData.id, // Inclua o ID no corpo da requisição
+      const response = await axios.patch(`${API_URL}${userData.id}/`, {
         codigo_ativacao: codigoAtivacao,
       });
-      
+
       if (response.status === 200 && response.data.status === 'success' && response.data.data.esta_ativo) {
         // Redireciona para BusinessInfoScreen após a ativação bem-sucedida
         Alert.alert('Sucesso', 'Conta ativada com sucesso!', [

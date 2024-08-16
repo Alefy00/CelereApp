@@ -14,7 +14,7 @@ const InitialBranch = ({ navigation }) => {
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [currentSubcategories, setCurrentSubcategories] = useState([]);
-  const [fadeAnim] = useState(new Animated.Value(0)); // Inicializa a animação com opacidade 0
+  const [fadeAnim] = useState(new Animated.Value(0)); 
 
   const openModal = (category) => {
     setSelectedCategory(category);
