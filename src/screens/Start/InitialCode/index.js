@@ -7,7 +7,7 @@ import styles from './styles';
 const API_URL = 'https://api.celereapp.com.br/config/ativar-empreendedor/';
 
 const InitialCode = ({ navigation, route }) => {
-  const { userData } = route.params; // Recebe os dados do usuário passados pela navegação
+  const { userData } = route.params || {}; // Recebe os dados do usuário passados pela navegação
   const [codigoAtivacao, setCodigoAtivacao] = useState('');
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -29,6 +29,11 @@ const InitialCode = ({ navigation, route }) => {
   const handleValidate = async () => {
     if (!validateFields()) return;
 
+    if (!userData || !userData.id) {
+      showModal('Dados do usuário não encontrados.');
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await axios.patch(`${API_URL}${userData.id}/`, {
@@ -38,7 +43,7 @@ const InitialCode = ({ navigation, route }) => {
       if (response.status === 200 && response.data.status === 'success' && response.data.data.esta_ativo) {
         // Redireciona para BusinessInfoScreen após a ativação bem-sucedida
         Alert.alert('Sucesso', 'Conta ativada com sucesso!', [
-          { text: 'OK', onPress: () => navigation.navigate('BusinessInfoScreen') }
+          { text: 'OK', onPress: () => navigation.navigate('BusinessInfoScreen', { userData }) }
         ]);
       } else {
         showModal('Código de ativação incorreto. Tente novamente.');
