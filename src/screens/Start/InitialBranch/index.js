@@ -1,32 +1,50 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
-import { Text, View, TouchableOpacity, Modal, Alert, Animated, Easing } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Text, View, TouchableOpacity, Modal, Alert, Animated, ScrollView, ActivityIndicator } from 'react-native';
+import axios from 'axios';
 import styles from './styles';
 
+const API_URL_RAMO_ATIVIDADE = 'https://api.celereapp.com.br/cad/ramosatividades/';
+const API_URL_ASSOCIAR_RAMO = 'https://api.celereapp.com.br/cad/associar_ramo_atividade/';
+
 const subcategories = {
-  varejo: ['Lojista', 'Ambulante', 'Feirante', 'Internet', 'Em casa ou porta a porta'],
-  servicos: ['Beleza - Cabelo, maquiagem, unhas, outros', 'Obras - Alvenaria, serralheria, elétrica, outros', 'Manutenção - Ar condicionado, Celular, Carros, outros', 'Profissionais de app', 'Outros'],
-  fabricacao: ['Artesanato', 'Indústria', 'Pães, bolos, doces ou outros', 'Outros'],
+  varejo: 'V',
+  servicos: 'S',
+  fabricacao: 'F',
 };
 
-const InitialBranch = ({ navigation }) => {
+const InitialBranch = ({ navigation, route }) => {
+  const userData = route?.params?.userData;
+
+
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [currentSubcategories, setCurrentSubcategories] = useState([]);
-  const [fadeAnim] = useState(new Animated.Value(0)); 
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const [loading, setLoading] = useState(false);
 
-  const openModal = (category) => {
+  const openModal = async (category) => {
     setSelectedCategory(category);
-    setCurrentSubcategories(subcategories[category]);
-    setModalVisible(true);
+    const tipo = subcategories[category];
 
-    // Animação de entrada
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_URL_RAMO_ATIVIDADE}?page_size=100&max_page_size=100&tipo=${tipo}`);
+      setCurrentSubcategories(response.data.data);
+      setModalVisible(true);
+
+      // Animação de entrada
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível carregar os ramos de atividades. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const closeModal = () => {
@@ -40,13 +58,35 @@ const InitialBranch = ({ navigation }) => {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selectedSubcategory) {
-      Alert.alert('Atenção', 'Por favor, selecione uma subcategoria antes de prosseguir.');
+      Alert.alert('Atenção', 'Por favor, selecione um ramo de atividade antes de prosseguir.');
       return;
     }
+
+    try {
+      setLoading(true);
+      const response = await axios.post(API_URL_ASSOCIAR_RAMO, {
+        empreendedor_id: userData.id,
+        ramo_atividade_id: selectedSubcategory,
+      });
+
+      if (response.status === 200 && response.data.status === 'success') {
+        Alert.alert('Sucesso', 'Ramo de atividade associado com sucesso.', [
+          { text: 'OK', onPress: () => navigation.navigate('Start') }
+        ]);
+      } else {
+        Alert.alert("Sucesso", response.data.message || 'Erro ao salvar o ramo de atividade. Tente novamente.', [
+          { text: 'OK', onPress: () => navigation.navigate('Start') }
+        ])
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível conectar à API. Verifique sua conexão e tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+
     closeModal();
-    navigation.navigate('Start', { selectedCategory, selectedSubcategory });
   };
 
   return (
@@ -59,6 +99,7 @@ const InitialBranch = ({ navigation }) => {
           selectedCategory === 'varejo' && styles.optionSelected,
         ]}
         onPress={() => openModal('varejo')}
+        disabled={loading}
       >
         <Text style={styles.optionText}>Varejo</Text>
         <Text style={styles.optionSubText}>Revenda de produtos</Text>
@@ -70,6 +111,7 @@ const InitialBranch = ({ navigation }) => {
           selectedCategory === 'servicos' && styles.optionSelected,
         ]}
         onPress={() => openModal('servicos')}
+        disabled={loading}
       >
         <Text style={styles.optionText}>Serviços</Text>
       </TouchableOpacity>
@@ -80,9 +122,12 @@ const InitialBranch = ({ navigation }) => {
           selectedCategory === 'fabricacao' && styles.optionSelected,
         ]}
         onPress={() => openModal('fabricacao')}
+        disabled={loading}
       >
         <Text style={styles.optionText}>Fabricação / Produção</Text>
       </TouchableOpacity>
+
+      {loading && <ActivityIndicator size="large" color="#000" />}
 
       <CustomModal
         visible={modalVisible}
@@ -106,20 +151,22 @@ const CustomModal = ({ visible, fadeAnim, subcategories, selectedSubcategory, se
   >
     <Animated.View style={[styles.modalContainer, { opacity: fadeAnim }]}>
       <View style={styles.modalContent}>
-        <Text style={styles.modalTitle}>Selecione uma Subcategoria</Text>
+        <Text style={styles.modalTitle}>Selecione um Ramo de Atividade</Text>
         
-        {subcategories.map((subcategory, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.modalOption,
-              selectedSubcategory === subcategory && styles.modalOptionSelected,
-            ]}
-            onPress={() => setSelectedSubcategory(subcategory)}
-          >
-            <Text style={styles.modalOptionText}>{subcategory}</Text>
-          </TouchableOpacity>
-        ))}
+        <ScrollView>
+          {subcategories.map((subcategory, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.modalOption,
+                selectedSubcategory === subcategory.id && styles.modalOptionSelected,
+              ]}
+              onPress={() => setSelectedSubcategory(subcategory.id)}
+            >
+              <Text style={styles.modalOptionText}>{subcategory.nome}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
         <View style={styles.modalButtons}>
           <TouchableOpacity style={styles.modalButton} onPress={onClose}>

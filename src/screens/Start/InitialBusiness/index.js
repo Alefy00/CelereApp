@@ -50,7 +50,7 @@ const BusinessInfoScreen = ({ navigation, route }) => {
       const dataToSend = {
         nome_negocio: businessName,
         cargo: role,
-        cnpj: cnpj || ""
+        cnpj: cnpj || null
       };
 
       console.log('Enviando os dados:', dataToSend);
@@ -61,7 +61,7 @@ const BusinessInfoScreen = ({ navigation, route }) => {
 
       if (response.status === 200 && response.data.status === 'success') {
         Alert.alert('Sucesso', 'Informações salvas com sucesso.', [
-          { text: 'OK', onPress: () => navigation.navigate('InitialBranch') }
+          { text: 'OK', onPress: () => navigation.navigate('InitialBranch', { userData }) }
         ]);
       } else {
         Alert.alert("Erro", response.data.message || 'Erro ao salvar as informações. Tente novamente.');
