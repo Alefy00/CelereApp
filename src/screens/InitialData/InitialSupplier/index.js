@@ -8,8 +8,8 @@ import { COLORS } from "../../../constants";
 
 
 const InitialSupplier = ({ navigation }) => {
-    const [name, setName] = useState(''); 
-    const [category, setCategory] = useState(''); 
+    const [name, setName] = useState('');
+    const [category, setCategory] = useState('');
 
 
     const handleSave = () => {

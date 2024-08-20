@@ -3,18 +3,39 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ProgressBar from '../components/ProgressBar';
 import styles from './styles';
 
 const API_URL_CARGOS = 'https://api.celereapp.com.br/api/cargos_negocio/';
 const API_URL_CLASSIFICAR = 'https://api.celereapp.com.br/config/classificar_empreendedor/';
 
-const BusinessInfoScreen = ({ navigation, route }) => {
-  const { userData } = route.params;
+const BusinessInfoScreen = ({ navigation }) => {
+  const [userData, setUserData] = useState(null);
   const [businessName, setBusinessName] = useState('');
   const [role, setRole] = useState('');
   const [cnpj, setCnpj] = useState('');
   const [rolesList, setRolesList] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const storedUserData = await AsyncStorage.getItem('userPhone');
+        if (storedUserData) {
+          setUserData(JSON.parse(storedUserData));
+        } else {
+          Alert.alert('Erro', 'Dados do usuário não encontrados.');
+          navigation.navigate('InitialRegistration');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+        Alert.alert('Erro ao carregar dados do usuário.');
+      }
+    };
+
+    fetchUserData();
+  }, [navigation]);
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -45,6 +66,11 @@ const BusinessInfoScreen = ({ navigation, route }) => {
   const handleNext = async () => {
     if (!validateFields()) return;
 
+    if (!userData || !userData.id) {
+      Alert.alert('Erro', 'Dados do usuário não carregados. Tente novamente.');
+      return;
+    }
+
     setLoading(true);
     try {
       const dataToSend = {
@@ -61,7 +87,7 @@ const BusinessInfoScreen = ({ navigation, route }) => {
 
       if (response.status === 200 && response.data.status === 'success') {
         Alert.alert('Sucesso', 'Informações salvas com sucesso.', [
-          { text: 'OK', onPress: () => navigation.navigate('InitialBranch', { userData }) }
+          { text: 'OK', onPress: () => navigation.navigate('InitialBranch') }
         ]);
       } else {
         Alert.alert("Erro", response.data.message || 'Erro ao salvar as informações. Tente novamente.');
@@ -82,49 +108,47 @@ const BusinessInfoScreen = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.progressBar}>
-        <View style={styles.progress} />
-        <Text style={styles.stepText}>3 de 4 passos</Text>
+      <ProgressBar currentStep={3} totalSteps={4} />
+      <View style={styles.contentContainer}>
+        {loading ? (
+          <ActivityIndicator size="large" color="#000" />
+        ) : (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="Nome do seu negócio"
+              value={businessName}
+              onChangeText={setBusinessName}
+            />
+
+            <Text style={styles.label}>Você é?</Text> 
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={role}
+                style={styles.picker}
+                onValueChange={(itemValue) => setRole(itemValue)}
+              >
+                <Picker.Item label="Selecione..." value="" />
+                {rolesList && rolesList.length > 0 && rolesList.map((roleItem) => (
+                  <Picker.Item key={roleItem.id} label={roleItem.nome} value={roleItem.id} />
+                ))}
+              </Picker>
+            </View>
+
+            <TextInput
+              style={styles.input}
+              placeholder="CNPJ (se tiver)"
+              value={cnpj}
+              onChangeText={setCnpj}
+              keyboardType="numeric"
+            />
+
+            <TouchableOpacity style={styles.button} onPress={handleNext} disabled={loading}>
+              <Text style={styles.buttonText}>Avançar</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
-
-      {loading ? (
-        <ActivityIndicator size="large" color="#000" />
-      ) : (
-        <>
-          <TextInput
-            style={styles.input}
-            placeholder="Nome do seu negócio"
-            value={businessName}
-            onChangeText={setBusinessName}
-          />
-
-          <Text style={styles.label}>Você é?</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={role}
-              style={styles.picker}
-              onValueChange={(itemValue) => setRole(itemValue)}
-            >
-              <Picker.Item label="Selecione..." value="" />
-              {rolesList && rolesList.length > 0 && rolesList.map((roleItem) => (
-                <Picker.Item key={roleItem.id} label={roleItem.nome} value={roleItem.id} />
-              ))}
-            </Picker>
-          </View>
-
-          <TextInput
-            style={styles.input}
-            placeholder="CNPJ (se tiver)"
-            value={cnpj}
-            onChangeText={setCnpj}
-            keyboardType="numeric"
-          />
-
-          <TouchableOpacity style={styles.button} onPress={handleNext} disabled={loading}>
-            <Text style={styles.buttonText}>Avançar</Text>
-          </TouchableOpacity>
-        </>
-      )}
     </View>
   );
 };

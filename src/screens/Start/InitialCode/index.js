@@ -1,17 +1,38 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Text, TextInput, View, Alert, Modal, ActivityIndicator } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ProgressBar from '../components/ProgressBar';
 import styles from './styles';
 
 const API_URL = 'https://api.celereapp.com.br/config/ativar-empreendedor/';
 
-const InitialCode = ({ navigation, route }) => {
-  const { userData } = route.params || {}; // Recebe os dados do usuário passados pela navegação
+const InitialCode = ({ navigation }) => {
+  const [userData, setUserData] = useState(null);
   const [codigoAtivacao, setCodigoAtivacao] = useState('');
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const storedUserData = await AsyncStorage.getItem('userPhone');
+        if (storedUserData) {
+          setUserData(JSON.parse(storedUserData));
+        } else {
+          showModal('Dados do usuário não encontrados.');
+          navigation.navigate('InitialRegistration');
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados do usuário:", error);
+        showModal('Erro ao carregar dados do usuário.');
+      }
+    };
+
+    fetchUserData();
+  }, [navigation]);
 
   const validateFields = () => {
     if (!codigoAtivacao) {
@@ -41,9 +62,8 @@ const InitialCode = ({ navigation, route }) => {
       });
 
       if (response.status === 200 && response.data.status === 'success' && response.data.data.esta_ativo) {
-        // Redireciona para BusinessInfoScreen após a ativação bem-sucedida
         Alert.alert('Sucesso', 'Conta ativada com sucesso!', [
-          { text: 'OK', onPress: () => navigation.navigate('BusinessInfoScreen', { userData }) }
+          { text: 'OK', onPress: () => navigation.navigate('BusinessInfoScreen') }
         ]);
       } else {
         showModal('Código de ativação incorreto. Tente novamente.');
@@ -57,6 +77,7 @@ const InitialCode = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
+      <ProgressBar currentStep={2} totalSteps={4} />
       <Text style={styles.text}>Insira o código recebido:</Text>
       <TextInput
         style={styles.input}

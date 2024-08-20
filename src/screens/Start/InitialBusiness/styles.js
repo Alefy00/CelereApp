@@ -5,18 +5,7 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       padding: 20,
-      backgroundColor: '#FFF',
-    },
-    progressBar: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 20,
-    },
-    progress: {
-      flex: 1,
-      height: 4,
-      backgroundColor: '#000',
-      borderRadius: 2,
+      backgroundColor: '#fff',
     },
     stepText: {
       marginLeft: 10,

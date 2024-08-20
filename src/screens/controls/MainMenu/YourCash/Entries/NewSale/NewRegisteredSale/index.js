@@ -127,7 +127,7 @@ const NewRegisteredSale = ({ navigation }) => {
           </View>
           <View style={styles.header}>
             <TouchableOpacity style={styles.registerButton}>
-              <Text style={styles.registerButtonText}>+ Register a new product</Text>
+              <Text style={styles.registerButtonText}>+ Registrar novo produto</Text>
             </TouchableOpacity>
             <Text style={styles.title}>Nova Venda</Text>
             <View style={styles.searchContainer}>

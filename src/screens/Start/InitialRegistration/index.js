@@ -5,6 +5,8 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CountryFlag from 'react-native-country-flag';
 import LogoApp from '../../../assets/images/logo.svg';
+import ProgressBar from '../components/ProgressBar';
+
 import styles from './styles';
 
 const API_URL = 'https://api.celereapp.com.br/config/empreendedor/';
@@ -85,7 +87,7 @@ const InitialRegistration = ({ navigation }) => {
         };
         await AsyncStorage.setItem('userPhone', JSON.stringify(newUserData));
         console.log('Empreendedor registrado com sucesso. Redirecionando para InitialCode.');
-        navigation.navigate('InitialCode', { userData: newUserData });
+        navigation.navigate('InitialCode'); // Agora não precisamos passar userData
       } else {
         showModal(response.data.message || 'Erro ao registrar. Tente novamente.');
       }
@@ -106,6 +108,7 @@ const InitialRegistration = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <ProgressBar currentStep={1} totalSteps={4} />
       <Text style={styles.text}>Informe o seu Telefone: </Text>
       <View style={styles.inputContainer}>
         {isoCode ? <CountryFlag isoCode={isoCode} size={25} /> : null}

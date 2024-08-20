@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, TouchableOpacity, Modal, Alert, Animated, ScrollView, ActivityIndicator } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
+import ProgressBar from '../components/ProgressBar';
 
 const API_URL_RAMO_ATIVIDADE = 'https://api.celereapp.com.br/cad/ramosatividades/';
 const API_URL_ASSOCIAR_RAMO = 'https://api.celereapp.com.br/cad/associar_ramo_atividade/';
@@ -13,16 +15,33 @@ const subcategories = {
   fabricacao: 'F',
 };
 
-const InitialBranch = ({ navigation, route }) => {
-  const userData = route?.params?.userData;
-
-
+const InitialBranch = ({ navigation }) => {
+  const [userData, setUserData] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [currentSubcategories, setCurrentSubcategories] = useState([]);
   const [fadeAnim] = useState(new Animated.Value(0));
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const storedUserData = await AsyncStorage.getItem('userPhone');
+        if (storedUserData) {
+          setUserData(JSON.parse(storedUserData));
+        } else {
+          Alert.alert('Erro', 'Dados do usuário não encontrados.');
+          navigation.navigate('InitialRegistration');
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados do usuário:", error);
+        Alert.alert('Erro ao carregar dados do usuário.');
+      }
+    };
+
+    fetchUserData();
+  }, [navigation]);
 
   const openModal = async (category) => {
     setSelectedCategory(category);
@@ -64,6 +83,11 @@ const InitialBranch = ({ navigation, route }) => {
       return;
     }
 
+    if (!userData || !userData.id) {
+      Alert.alert('Erro', 'Dados do usuário não carregados. Tente novamente.');
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await axios.post(API_URL_ASSOCIAR_RAMO, {
@@ -78,7 +102,7 @@ const InitialBranch = ({ navigation, route }) => {
       } else {
         Alert.alert("Sucesso", response.data.message || 'Erro ao salvar o ramo de atividade. Tente novamente.', [
           { text: 'OK', onPress: () => navigation.navigate('Start') }
-        ])
+        ]);
       }
     } catch (error) {
       Alert.alert("Erro", "Não foi possível conectar à API. Verifique sua conexão e tente novamente.");
@@ -91,6 +115,7 @@ const InitialBranch = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
+      <ProgressBar currentStep={4} totalSteps={4} />
       <Text style={styles.label}>Qual seu ramo de atuação?</Text>
 
       <TouchableOpacity
