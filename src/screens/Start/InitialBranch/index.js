@@ -1,10 +1,12 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from 'react';
-import { Text, View, TouchableOpacity, Modal, Alert, Animated, ScrollView, ActivityIndicator } from 'react-native';
+import { Text, View, TouchableOpacity, Alert, Animated, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
 import ProgressBar from '../components/ProgressBar';
+import CustomModal from './components/CustomModal';
+
 
 const API_URL_RAMO_ATIVIDADE = 'https://api.celereapp.com.br/cad/ramosatividades/';
 const API_URL_ASSOCIAR_RAMO = 'https://api.celereapp.com.br/cad/associar_ramo_atividade/';
@@ -15,14 +17,9 @@ const subcategories = {
   fabricacao: 'F',
 };
 
-const InitialBranch = ({ navigation }) => {
+// Hook personalizado para carregar dados do usuário
+const useUserData = (navigation) => {
   const [userData, setUserData] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedSubcategory, setSelectedSubcategory] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [currentSubcategories, setCurrentSubcategories] = useState([]);
-  const [fadeAnim] = useState(new Animated.Value(0));
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -42,6 +39,18 @@ const InitialBranch = ({ navigation }) => {
 
     fetchUserData();
   }, [navigation]);
+
+  return userData;
+};
+
+const InitialBranch = ({ navigation }) => {
+  const userData = useUserData(navigation);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [currentSubcategories, setCurrentSubcategories] = useState([]);
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const [loading, setLoading] = useState(false);
 
   const openModal = async (category) => {
     setSelectedCategory(category);
@@ -91,24 +100,28 @@ const InitialBranch = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await axios.post(API_URL_ASSOCIAR_RAMO, {
-        empreendedor_id: userData.id,
+        empresa_id: userData.id,
         ramo_atividade_id: selectedSubcategory,
       });
-
-      if (response.status === 200 && response.data.status === 'success') {
+    
+      console.log('API Response:', response.data);
+    
+      // Verifica se o status HTTP é 200 e se a resposta contém "success" no campo "status"
+      if (response.status >= 200 && response.status < 300 && response.data.status && response.data.status.toLowerCase() === 'success') {
         Alert.alert('Sucesso', 'Ramo de atividade associado com sucesso.', [
           { text: 'OK', onPress: () => navigation.navigate('Start') }
         ]);
       } else {
-        Alert.alert("Sucesso", response.data.message || 'Erro ao salvar o ramo de atividade. Tente novamente.', [
-          { text: 'OK', onPress: () => navigation.navigate('Start') }
-        ]);
+        console.log('Unexpected response:', response.data);
+        Alert.alert("Erro", response.data.message || 'Erro ao salvar o ramo de atividade. Tente novamente.');
       }
     } catch (error) {
+      console.error("Erro ao conectar à API:", error);
       Alert.alert("Erro", "Não foi possível conectar à API. Verifique sua conexão e tente novamente.");
     } finally {
       setLoading(false);
     }
+    
 
     closeModal();
   };
@@ -152,7 +165,7 @@ const InitialBranch = ({ navigation }) => {
         <Text style={styles.optionText}>Fabricação / Produção</Text>
       </TouchableOpacity>
 
-      {loading && <ActivityIndicator size="large" color="#000" />}
+      {loading && <ActivityIndicator size="large" color="#000" style={styles.activityIndicator} />}
 
       <CustomModal
         visible={modalVisible}
@@ -166,43 +179,5 @@ const InitialBranch = ({ navigation }) => {
     </View>
   );
 };
-
-const CustomModal = ({ visible, fadeAnim, subcategories, selectedSubcategory, setSelectedSubcategory, onClose, onSave }) => (
-  <Modal
-    animationType="none"
-    transparent={true}
-    visible={visible}
-    onRequestClose={onClose}
-  >
-    <Animated.View style={[styles.modalContainer, { opacity: fadeAnim }]}>
-      <View style={styles.modalContent}>
-        <Text style={styles.modalTitle}>Selecione um Ramo de Atividade</Text>
-        <ScrollView>
-          {subcategories.map((subcategory, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.modalOption,
-                selectedSubcategory === subcategory.id && styles.modalOptionSelected,
-              ]}
-              onPress={() => setSelectedSubcategory(subcategory.id)}
-            >
-              <Text style={styles.modalOptionText}>{subcategory.nome}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        <View style={styles.modalButtons}>
-          <TouchableOpacity style={styles.modalButton} onPress={onClose}>
-            <Text style={styles.modalButtonText}>Fechar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.modalButton, styles.modalSaveButton]} onPress={onSave}>
-            <Text style={styles.modalButtonText}>Salvar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Animated.View>
-  </Modal>
-);
 
 export default InitialBranch;

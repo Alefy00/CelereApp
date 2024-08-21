@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,6 +17,8 @@ const BusinessInfoScreen = ({ navigation }) => {
   const [cnpj, setCnpj] = useState('');
   const [rolesList, setRolesList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -25,17 +27,17 @@ const BusinessInfoScreen = ({ navigation }) => {
         if (storedUserData) {
           setUserData(JSON.parse(storedUserData));
         } else {
-          Alert.alert('Erro', 'Dados do usuário não encontrados.');
+          showModal('Erro', 'Dados do usuário não encontrados.');
           navigation.navigate('InitialRegistration');
         }
       } catch (error) {
         console.error('Erro ao carregar dados do usuário:', error);
-        Alert.alert('Erro ao carregar dados do usuário.');
+        showModal('Erro ao carregar dados do usuário.');
       }
     };
 
     fetchUserData();
-  }, [navigation]);
+  }, [navigation, showModal]);
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -43,31 +45,36 @@ const BusinessInfoScreen = ({ navigation }) => {
         const response = await axios.get(`${API_URL_CARGOS}?page_size=100&max_page_size=100`);
         setRolesList(response.data.data);
       } catch (error) {
-        Alert.alert('Erro', 'Não foi possível carregar a lista de cargos. Tente novamente');
+        showModal('Erro', 'Não foi possível carregar a lista de cargos. Tente novamente.');
       } finally {
         setLoading(false);
       }
     };
     fetchRoles();
-  }, []);
+  }, [showModal]);
 
-  const validateFields = () => {
+  const validateFields = useCallback(() => {
     if (!businessName) {
-      Alert.alert('Erro', 'O nome do negócio é obrigatório.');
+      showModal('Erro', 'O nome do negócio é obrigatório.');
       return false;
     }
     if (!role) {
-      Alert.alert("Erro", "Selecione um cargo");
+      showModal('Erro', 'Selecione um cargo.');
       return false;
     }
     return true;
-  };
+  }, [businessName, role, showModal]);
 
-  const handleNext = async () => {
+  const showModal = useCallback((title, message) => {
+    setModalMessage(`${title}\n${message}`);
+    setModalVisible(true);
+  }, []);
+
+  const handleNext = useCallback(async () => {
     if (!validateFields()) return;
 
     if (!userData || !userData.id) {
-      Alert.alert('Erro', 'Dados do usuário não carregados. Tente novamente.');
+      showModal('Erro', 'Dados do usuário não carregados. Tente novamente.');
       return;
     }
 
@@ -79,32 +86,33 @@ const BusinessInfoScreen = ({ navigation }) => {
         cnpj: cnpj || null
       };
 
-      console.log('Enviando os dados:', dataToSend);
-
       const response = await axios.patch(`${API_URL_CLASSIFICAR}${userData.id}/`, dataToSend);
 
-      console.log('Resposta da API:', response.data);
-
       if (response.status === 200 && response.data.status === 'success') {
-        Alert.alert('Sucesso', 'Informações salvas com sucesso.', [
-          { text: 'OK', onPress: () => navigation.navigate('InitialBranch') }
-        ]);
+        showModal('Sucesso', 'Informações salvas com sucesso.');
       } else {
-        Alert.alert("Erro", response.data.message || 'Erro ao salvar as informações. Tente novamente.');
+        showModal('Erro', response.data.message || 'Erro ao salvar as informações. Tente novamente.');
       }
     } catch (error) {
       if (error.response) {
-        console.error("Erro na resposta da API:", error.response.data);
+        console.error('Erro na resposta da API:', error.response.data);
       } else if (error.request) {
-        console.error("Erro na requisição:", error.request);
+        console.error('Erro na requisição:', error.request);
       } else {
-        console.error("Erro desconhecido:", error.message);
+        console.error('Erro desconhecido:', error.message);
       }
-      Alert.alert("Erro", "Não foi possível conectar à API. Verifique sua conexão e tente novamente.");
+      showModal('Erro', 'Não foi possível conectar à API. Verifique sua conexão e tente novamente.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [businessName, role, cnpj, userData, validateFields, showModal]);
+
+  const handleModalClose = useCallback(() => {
+    setModalVisible(false);
+    if (modalMessage.includes('Sucesso')) {
+      navigation.navigate('InitialBranch');
+    }
+  }, [modalMessage, navigation]);
 
   return (
     <View style={styles.container}>
@@ -149,6 +157,22 @@ const BusinessInfoScreen = ({ navigation }) => {
           </>
         )}
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={handleModalClose}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>{modalMessage}</Text>
+            <TouchableOpacity onPress={handleModalClose} style={styles.modalButton}>
+              <Text style={styles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };

@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
-import React, { useState, useEffect } from 'react';
-import { Button, Text, View, TextInput, Alert, Modal, ActivityIndicator, Image } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Button, Text, View, TextInput, Modal, ActivityIndicator, Image } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CountryFlag from 'react-native-country-flag';
@@ -12,13 +12,16 @@ import styles from './styles';
 const API_URL = 'https://api.celereapp.com.br/config/empreendedor/';
 
 const InitialRegistration = ({ navigation }) => {
-  const [ddi, setDdi] = useState('55');
-  const [isoCode, setIsoCode] = useState('BR');
-  const [ddd, setDdd] = useState('');
-  const [number, setNumber] = useState('');
+  const [phoneData, setPhoneData] = useState({
+    ddi: '55',
+    isoCode: 'BR',
+    ddd: '',
+    number: '',
+  });
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   useEffect(() => {
     const checkStoredData = async () => {
@@ -27,30 +30,39 @@ const InitialRegistration = ({ navigation }) => {
         if (storedData) {
           navigation.navigate('MainTab');
         } else {
-          setLoading(false); // Exibir a tela de registro se não há dados armazenados
+          setLoading(false);
         }
       } catch (error) {
         console.error('Erro ao verificar os dados armazenados:', error);
-        setLoading(false); // Exibir a tela de registro em caso de erro
+        setLoading(false);
       }
     };
 
     checkStoredData();
   }, [navigation]);
 
-  const handleDdiChange = (text) => {
-    setDdi(text);
+  const handleDdiChange = useCallback((text) => {
     const trimmedDdi = text.replace(/\D/g, '');
     const isoCodes = { '1': 'US', '55': 'BR', '44': 'GB', '91': 'IN' };
-    setIsoCode(isoCodes[trimmedDdi] || '');
-  };
+    setPhoneData(prevState => ({
+      ...prevState,
+      ddi: trimmedDdi,
+      isoCode: isoCodes[trimmedDdi] || '',
+    }));
+  }, []);
 
-  const showModal = (message) => {
+  const handleInputChange = useCallback((name, value) => {
+    setPhoneData(prevState => ({ ...prevState, [name]: value }));
+  }, []);
+
+  const showModal = useCallback((message, success = false) => {
     setModalMessage(message);
+    setIsSuccess(success);
     setModalVisible(true);
-  };
+  }, []);
 
-  const validateFields = () => {
+  const validateFields = useCallback(() => {
+    const { ddi, ddd, number } = phoneData;
     if (!ddi || !ddd || !number) {
       showModal('Todos os campos devem ser preenchidos.');
       return false;
@@ -60,35 +72,30 @@ const InitialRegistration = ({ navigation }) => {
       return false;
     }
     return true;
-  };
+  }, [phoneData, showModal]);
 
-  const handleSend = async () => {
+  const handleSend = useCallback(async () => {
     if (!validateFields()) return;
 
     try {
-      console.log('Fazendo requisição para a API...');
       const response = await axios.post(API_URL, {
-        ddi,
-        ddd,
-        celular: number,
-        usuario: 1
+        ddi: phoneData.ddi,
+        ddd: phoneData.ddd,
+        celular: phoneData.number,
+        usuario: 1,
       });
-
-      console.log('Resposta da API:', response.data);
 
       if (response.status === 201 && response.data.status === 'success') {
         const { id, codigo_ativacao } = response.data.data;
         const newUserData = {
           id,
-          ddi,
-          ddd,
-          number,
+          ...phoneData,
           isValidated: false,
           codigo_ativacao,
         };
         await AsyncStorage.setItem('userPhone', JSON.stringify(newUserData));
-        console.log('Empreendedor registrado com sucesso. Redirecionando para InitialCode.');
-        navigation.navigate('InitialCode'); // Agora não precisamos passar userData
+        
+        showModal('Registro realizado com sucesso!', true);
       } else {
         showModal(response.data.message || 'Erro ao registrar. Tente novamente.');
       }
@@ -96,12 +103,19 @@ const InitialRegistration = ({ navigation }) => {
       console.error('Erro ao conectar à API:', error.message);
       showModal('Não foi possível conectar à API. Verifique sua conexão e tente novamente.');
     }
+  }, [phoneData, validateFields, showModal]);
+
+  const handleModalClose = () => {
+    setModalVisible(false);
+    if (isSuccess) {
+      navigation.navigate('InitialCode');
+    }
   };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <LogoApp width="100%" height="110" style={{marginTop: 100, marginBottom: 50}} />
+        <LogoApp width="100%" height="110" style={{ marginTop: 100, marginBottom: 50 }} />
         <ActivityIndicator size="large" color="#000" />
       </View>
     );
@@ -112,25 +126,25 @@ const InitialRegistration = ({ navigation }) => {
       <ProgressBar currentStep={1} totalSteps={4} />
       <Text style={styles.text}>Informe o seu Telefone: </Text>
       <View style={styles.inputContainer}>
-        {isoCode ? <CountryFlag isoCode={isoCode} size={25} /> : null}
+        {phoneData.isoCode ? <CountryFlag isoCode={phoneData.isoCode} size={25} /> : null}
         <TextInput
           style={styles.input}
           keyboardType="numeric"
           placeholder="DDI"
-          value={ddi}
-          onChangeText={handleDdiChange}
+          value={phoneData.ddi}
+          onChangeText={(text) => handleDdiChange(text)}
         />
         <TextInput
           style={styles.input}
           placeholder='DDD'
-          value={ddd}
-          onChangeText={setDdd}
+          value={phoneData.ddd}
+          onChangeText={(text) => handleInputChange('ddd', text)}
         />
         <TextInput
           style={styles.inputNumber}
           placeholder='0 0000-0000'
-          value={number}
-          onChangeText={setNumber}
+          value={phoneData.number}
+          onChangeText={(text) => handleInputChange('number', text)}
         />
       </View>
       <Button title="Enviar" onPress={handleSend} />
@@ -139,14 +153,14 @@ const InitialRegistration = ({ navigation }) => {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(!modalVisible)}
+        onRequestClose={handleModalClose}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>{modalMessage}</Text>
             <Button
               title="OK"
-              onPress={() => setModalVisible(!modalVisible)}
+              onPress={handleModalClose}
             />
           </View>
         </View>

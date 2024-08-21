@@ -24,7 +24,14 @@ const styles = StyleSheet.create({
   },
   optionSelected: {
     backgroundColor: '#FFEB3B',
-    
+    shadowColor: '#000', // Adiciona sombra
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5, // Apenas para Android
   },
   optionText: {
     fontSize: 16,
@@ -45,6 +52,14 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#FFF',
     borderRadius: 10,
+    shadowColor: '#000', // Adiciona sombra
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5, // Apenas para Android
   },
   modalTitle: {
     fontSize: 18,
@@ -85,6 +100,9 @@ const styles = StyleSheet.create({
   modalButtonText: {
     fontSize: 16,
     color: '#333',
+  },
+  activityIndicator: {
+    marginTop: 20,
   },
 });
 

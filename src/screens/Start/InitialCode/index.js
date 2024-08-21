@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
-import React, { useState, useEffect } from 'react';
-import { Button, Text, TextInput, View, Alert, Modal, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Button, Text, TextInput, View, Modal, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProgressBar from '../components/ProgressBar';
@@ -12,8 +12,7 @@ const InitialCode = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [codigoAtivacao, setCodigoAtivacao] = useState('');
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
+  const [modalState, setModalState] = useState({ visible: false, message: '', isSuccess: false });
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -22,36 +21,35 @@ const InitialCode = ({ navigation }) => {
         if (storedUserData) {
           setUserData(JSON.parse(storedUserData));
         } else {
-          showModal('Dados do usuário não encontrados.');
+          showModal('Dados do usuário não encontrados.', false);
           navigation.navigate('InitialRegistration');
         }
       } catch (error) {
         console.error("Erro ao carregar dados do usuário:", error);
-        showModal('Erro ao carregar dados do usuário.');
+        showModal('Erro ao carregar dados do usuário.', false);
       }
     };
 
     fetchUserData();
-  }, [navigation]);
+  }, [navigation, showModal]);
 
-  const validateFields = () => {
+  const validateFields = useCallback(() => {
     if (!codigoAtivacao) {
-      showModal('O código de ativação deve ser preenchido.');
+      showModal('O código de ativação deve ser preenchido.', false);
       return false;
     }
     return true;
-  };
+  }, [codigoAtivacao, showModal]);
 
-  const showModal = (message) => {
-    setModalMessage(message);
-    setModalVisible(true);
-  };
+  const showModal = useCallback((message, isSuccess) => {
+    setModalState({ visible: true, message, isSuccess });
+  }, []);
 
-  const handleValidate = async () => {
+  const handleValidate = useCallback(async () => {
     if (!validateFields()) return;
 
     if (!userData || !userData.id) {
-      showModal('Dados do usuário não encontrados.');
+      showModal('Dados do usuário não encontrados.', false);
       return;
     }
 
@@ -62,18 +60,25 @@ const InitialCode = ({ navigation }) => {
       });
 
       if (response.status === 200 && response.data.status === 'success' && response.data.data.esta_ativo) {
-        Alert.alert('Sucesso', 'Conta ativada com sucesso!', [
-          { text: 'OK', onPress: () => navigation.navigate('BusinessInfoScreen') }
-        ]);
+        await AsyncStorage.mergeItem('userPhone', JSON.stringify({ isValidated: true }));
+        showModal('Conta ativada com sucesso!', true);
       } else {
-        showModal('Código de ativação incorreto. Tente novamente.');
+        showModal('Código de ativação incorreto. Tente novamente.', false);
       }
     } catch (error) {
-      showModal('Não foi possível conectar à API. Verifique sua conexão e tente novamente.');
+      console.error('Erro ao conectar à API:', error.message);
+      showModal('Não foi possível conectar à API. Verifique sua conexão e tente novamente.', false);
     } finally {
       setLoading(false);
     }
-  };
+  }, [codigoAtivacao, userData, validateFields, showModal]);
+
+  const handleModalClose = useCallback(() => {
+    setModalState({ ...modalState, visible: false });
+    if (modalState.isSuccess) {
+      navigation.navigate('BusinessInfoScreen');
+    }
+  }, [modalState, navigation]);
 
   return (
     <View style={styles.container}>
@@ -95,15 +100,15 @@ const InitialCode = ({ navigation }) => {
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(!modalVisible)}
+        visible={modalState.visible}
+        onRequestClose={handleModalClose}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>{modalMessage}</Text>
+            <Text style={styles.modalText}>{modalState.message}</Text>
             <Button
               title="OK"
-              onPress={() => setModalVisible(!modalVisible)}
+              onPress={handleModalClose}
             />
           </View>
         </View>
