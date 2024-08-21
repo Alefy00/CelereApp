@@ -177,7 +177,6 @@ const CustomModal = ({ visible, fadeAnim, subcategories, selectedSubcategory, se
     <Animated.View style={[styles.modalContainer, { opacity: fadeAnim }]}>
       <View style={styles.modalContent}>
         <Text style={styles.modalTitle}>Selecione um Ramo de Atividade</Text>
-        
         <ScrollView>
           {subcategories.map((subcategory, index) => (
             <TouchableOpacity

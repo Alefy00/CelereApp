@@ -71,6 +71,7 @@ const InitialRegistration = ({ navigation }) => {
         ddi,
         ddd,
         celular: number,
+        usuario: 1
       });
 
       console.log('Resposta da API:', response.data);

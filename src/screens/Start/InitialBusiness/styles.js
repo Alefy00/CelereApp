@@ -7,6 +7,12 @@ const styles = StyleSheet.create({
       padding: 20,
       backgroundColor: '#fff',
     },
+    contentContainer: {
+      flex: 1,
+      justifyContent: 'center',  // Centralizar conteúdo verticalmente
+      paddingHorizontal: 20,
+      marginTop:20
+  },
     stepText: {
       marginLeft: 10,
       fontSize: 12,
@@ -19,6 +25,7 @@ const styles = StyleSheet.create({
       borderRadius: 10,
       paddingHorizontal: 10,
       marginBottom: 20,
+
     },
     label: {
       fontSize: 14,

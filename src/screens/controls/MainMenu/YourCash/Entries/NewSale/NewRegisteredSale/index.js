@@ -1,65 +1,90 @@
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from "react";
+import { View, Text, TextInput, FlatList, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from "react-native";
+import axios from 'axios';
+import Icon from 'react-native-vector-icons/Ionicons';
 import BarTop2 from "../../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../../constants";
-import Icon from 'react-native-vector-icons/Ionicons';
+import RenderProduct from './components/RenderProduct.jsx'; // Importa o componente RenderProduct
 import styles from "./styles";
-import { Image, Text, View, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, TextInput, FlatList, TouchableOpacity } from "react-native";
+
+const API_URL = 'https://api.celereapp.com.br/cad/produtos/listaprodutovenda/?page_size=100&empresa_id=1&search=';
 
 const NewRegisteredSale = ({ navigation }) => {
-  // Estados para armazenar dados da tela
-  const [search, setSearch] = useState(''); // Estado para armazenar a busca do usuário
-  const [products, setProducts] = useState([
-    { id: 1, name: 'Type-C Cable - Black', stock: 99, price: 10, image: 'https://via.placeholder.com/150' },
-    { id: 2, name: 'OTG Cable P3', stock: 0, price: 15, image: 'https://via.placeholder.com/150' },
-    { id: 3, name: 'Type A Cable - Black', stock: 6, price: 8, image: 'https://via.placeholder.com/150' },
-    { id: 4, name: 'Lightning Cable USB-C', stock: 6, price: 12, image: 'https://via.placeholder.com/150' },
-  ]);
-  const [filteredProducts, setFilteredProducts] = useState(products); // Estado para armazenar os produtos filtrados
-  const [quantities, setQuantities] = useState({}); // Estado para armazenar as quantidades dos produtos
-  const [totalPrice, setTotalPrice] = useState(0); // Estado para armazenar o preço total
-  const [nextScreen, setNextScreen] = useState("SaleDetails"); // Estado para controlar a próxima tela
+  const [search, setSearch] = useState('');
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [quantities, setQuantities] = useState({});
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [nextScreen, setNextScreen] = useState("SaleDetails");
 
-  // useEffect para filtrar os produtos com base na busca
+  const ITEM_HEIGHT = 150;
+
   useEffect(() => {
-    if (search) {
-      const filtered = products.filter(product => 
-        product.name.toLowerCase().includes(search.toLowerCase())
-      );
-      setFilteredProducts(filtered);
-    } else {
-      setFilteredProducts(products);
-    }
+    fetchProducts();
   }, [search]);
 
-  // useEffect para calcular o preço total com base nas quantidades
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}${search.toLowerCase()}`); // Padroniza o termo de busca para minúsculas
+      console.log('Resposta da API:', response.data);
+
+      if (response.status === 200 && response.data.status === 200) {
+        const produtos = response.data.data.map(product => ({
+          ...product,
+
+        }));
+        setProducts(produtos);
+        setFilteredProducts(produtos);
+      } else {
+        Alert.alert("Erro", "Não foi possível carregar os produtos. Tente novamente.");
+      }
+    } catch (error) {
+      console.error('Erro ao conectar à API:', error.message);
+      Alert.alert("Erro", "Erro ao conectar à API. Verifique sua conexão e tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const total = Object.keys(quantities).reduce((sum, key) => {
       const product = products.find(p => p.id.toString() === key);
-      return sum + (product.price * quantities[key]);
+      return sum + (product.preco_venda * quantities[key]);
     }, 0);
     setTotalPrice(total);
   }, [quantities]);
 
-  // Função para lidar com a busca
   const handleSearch = (text) => {
     setSearch(text);
+
+    // Filtra os produtos com base na pesquisa, ignorando maiúsculas/minúsculas
+    const filtered = products.filter(product => 
+      product.nome.includes(text.toLowerCase())
+    );
+    setFilteredProducts(filtered);
   };
 
-  // Função para navegar para a próxima tela com os produtos selecionados
   const handleNext = () => {
     const selectedProducts = Object.keys(quantities).map(key => {
       const product = products.find(p => p.id.toString() === key);
       return {
         ...product,
         amount: quantities[key],
-        total: quantities[key] * product.price,
+        total: quantities[key] * product.preco_venda,
+        imagem: product.imagem ? `https://api.celereapp.com.br${product.imagem}` : null,
       };
     });
+    const filteredProducts = selectedProducts.map(product => ({
+      ...product,
+      imagem: product.imagem || 'https://via.placeholder.com/150', // Define uma imagem padrão caso esteja null
+    }));
+  
     navigation.navigate(nextScreen, { products: selectedProducts, totalPrice });
   };
 
-  // Função para alterar a quantidade dos produtos
   const handleQuantityChange = (id, delta) => {
     setQuantities(prevQuantities => {
       const newQuantities = { ...prevQuantities, [id]: (prevQuantities[id] || 0) + delta };
@@ -69,29 +94,6 @@ const NewRegisteredSale = ({ navigation }) => {
     });
   };
 
-  // Função para renderizar cada produto
-  const renderProduct = ({ item }) => (
-    <View style={styles.productCard}>
-      <Image source={{ uri: item.image }} style={styles.productImage} />
-      <Text style={styles.productName}>{item.name}</Text>
-      <Text style={item.stock > 0 ? styles.inStock : styles.outOfStock}>
-        {item.stock > 0 ? `on stock: ${item.stock}` : 'none on stock'}
-      </Text>
-      {item.stock > 0 && (
-        <View style={styles.productActions}>
-          <TouchableOpacity style={styles.productActionButton} onPress={() => handleQuantityChange(item.id, -1)}>
-            <Text style={styles.productActionButtonText}>-</Text>
-          </TouchableOpacity>
-          <Text style={styles.productQuantity}>{quantities[item.id] || 0}</Text>
-          <TouchableOpacity style={styles.productActionButton} onPress={() => handleQuantityChange(item.id, 1)}>
-            <Text style={styles.productActionButtonText}>+</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-  );
-
-  // Função para renderizar o rodapé com o botão de confirmar a venda
   const renderFooter = () => (
     <>
       {totalPrice > 0 && (
@@ -140,14 +142,27 @@ const NewRegisteredSale = ({ navigation }) => {
               <Icon name="search" size={20} color={COLORS.grey} />
             </View>
           </View>
-          <FlatList
-            data={filteredProducts}
-            renderItem={renderProduct}
-            keyExtractor={(item) => item.id.toString()}
-            contentContainerStyle={styles.productsList}
-            numColumns={2}
-            ListFooterComponent={renderFooter}
-          />
+          {loading ? (
+            <ActivityIndicator size="large" color="#000" />
+          ) : (
+            <FlatList
+              data={filteredProducts}
+              renderItem={({ item }) => (
+                <RenderProduct 
+                  item={item} 
+                  handleQuantityChange={handleQuantityChange} 
+                  quantities={quantities} 
+                />
+              )}
+              keyExtractor={(item) => item.id.toString()}
+              contentContainerStyle={styles.productsList}
+              numColumns={2}
+              ListFooterComponent={renderFooter}
+              getItemLayout={(data, index) => (
+                { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
+              )}
+            />
+          )}
           <View style={styles.buttonRow}>
             <TouchableOpacity style={[styles.button, { flex: 1 }]} onPress={() => setNextScreen("SaleDetails")}>
               <Text style={styles.buttonText}>Immediately</Text>

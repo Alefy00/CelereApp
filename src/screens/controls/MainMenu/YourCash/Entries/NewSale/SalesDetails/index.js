@@ -1,9 +1,11 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { useIsFocused } from '@react-navigation/native';
 import BarTop2 from "../../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../../constants";
 import Icon from 'react-native-vector-icons/Ionicons';
 import { FlatList, Keyboard, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View, Image, ScrollView, Modal } from "react-native";
+import ToggleButton from "./components/ToggleButton";
 import styles from "./styles";
 
 const SaleDetails = ({ navigation, route }) => {
@@ -13,7 +15,23 @@ const SaleDetails = ({ navigation, route }) => {
   const [filteredProducts, setFilteredProducts] = useState(products); // Estado para os produtos filtrados
   const [search, setSearch] = useState(''); // Estado para a busca
   const [isModalVisible, setIsModalVisible] = useState(false); // Estado para controlar a visibilidade do modal
-  const paymentMethods = ['PIX', 'Dinheiro', 'Cartão de Crédito', 'Cartão de Débito']; // Métodos de pagamento disponíveis
+  const paymentMethods = ['PIX', 'Dinheiro', 'Cartão de Crédito', 'Cartão de Débito']; // Métodos de pagamento 
+  const [viewMode, setViewMode] = useState('Immediately'); // Estado para alternância de modos
+  const isFocused = useIsFocused();
+
+  // Memoiza a função toggleViewMode para evitar recriação em cada renderização
+  const toggleViewMode = useCallback((mode) => {
+    setViewMode(mode);
+    if (mode === 'Sell on Credit') {
+      navigation.navigate('SellOnCredit', { products, totalPrice });
+    }
+  }, [navigation, products, totalPrice]);
+
+  useEffect(() => {
+    if (isFocused) {
+      setViewMode('Immediately'); // Sincroniza o estado viewMode ao focar na tela
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     // Define a data atual do dispositivo
@@ -26,7 +44,7 @@ const SaleDetails = ({ navigation, route }) => {
   useEffect(() => {
     if (search) {
       const filtered = products.filter(product => 
-        product.name.toLowerCase().includes(search.toLowerCase())
+        product.nome.toLowerCase().includes(search.toLowerCase())
       );
       setFilteredProducts(filtered);
     } else {
@@ -53,12 +71,7 @@ const SaleDetails = ({ navigation, route }) => {
   // Função para registrar uma nova venda
   const handleNewRegistered = () => {
     setIsModalVisible(false);
-    navigation.navigate('NewRegisteredSale')
-  }
-
-  // Função para navegar para a tela SellOnCredit
-  const handleSellOnCredit = () => {
-    navigation.navigate('SellOnCredit', { products, totalPrice });
+    navigation.navigate('NewRegisteredSale');
   };
 
   return (
@@ -79,24 +92,11 @@ const SaleDetails = ({ navigation, route }) => {
             />
           </View>
           <ScrollView contentContainerStyle={styles.content}>
-            <Text style={styles.label}>Detalhes da venda</Text>
-            <View style={styles.dateContainer}>
-              <Text style={styles.labelData}>Hoje, {currentDate}</Text>
-            </View>
-
-            <View style={styles.buttonRow}>
-              <TouchableOpacity style={[styles.button, { flex: 1 }]}>
-                <Text style={styles.buttonText}>Immediately</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.buttonSell, { flex: 1 }]} onPress={handleSellOnCredit}>
-                <Text style={styles.buttonText}>Sell on Credit</Text>
-              </TouchableOpacity>
-            </View>
-
+            <ToggleButton viewMode={viewMode} toggleViewMode={toggleViewMode} />
             <View style={styles.searchContainer}>
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search in cart..."
+                placeholder="Buscar..."
                 value={search}
                 onChangeText={setSearch}
               />
@@ -106,10 +106,10 @@ const SaleDetails = ({ navigation, route }) => {
             <View style={styles.productContainer}>
               {filteredProducts.map((product, index) => (
                 <View key={index} style={styles.productDetail}>
-                  <Image source={{ uri: product.image }} style={styles.productImage} />
+                  <Image source={{ uri: product.imagem }} style={styles.productImage} />
                   <View style={styles.productInfo}>
-                    <Text style={styles.productText}>{product.name}</Text>
-                    <Text style={styles.productAmount}>Amount: {product.amount}</Text>
+                    <Text style={styles.productText}>{product.nome}</Text>
+                    <Text style={styles.productAmount}>Quantidade: {product.amount}</Text>
                   </View>
                   <Text style={styles.productTotal}>R${product.total.toFixed(2)}</Text>
                 </View>
@@ -133,7 +133,7 @@ const SaleDetails = ({ navigation, route }) => {
             />
             <View>
               <TextInput
-                placeholder="% of Discount"
+                placeholder="% de desconto"
                 style={styles.discount}
               />
             </View>
@@ -141,7 +141,6 @@ const SaleDetails = ({ navigation, route }) => {
               <Text style={styles.totalLabel}>Total a Receber:</Text>
               <Text style={styles.totalValue}>R$ {totalPrice.toFixed(2)}</Text>
             </View>
-
 
             <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
               <Icon name="checkmark-circle" size={25} color={COLORS.black} />

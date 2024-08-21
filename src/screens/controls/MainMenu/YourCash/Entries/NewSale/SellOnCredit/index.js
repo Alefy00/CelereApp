@@ -1,10 +1,12 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useIsFocused } from '@react-navigation/native';
 import BarTop2 from "../../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../../constants";
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Keyboard, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View, Image, ScrollView, Modal } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import ToggleButton from "../SalesDetails/components/ToggleButton";
 import styles from "./styles";
 import moment from 'moment';
 import 'moment/locale/pt-br';
@@ -16,6 +18,22 @@ const SellOnCredit = ({ navigation, route }) => {
   const [filteredProducts, setFilteredProducts] = useState(products); // Estado para os produtos filtrados
   const [search, setSearch] = useState(''); // Estado para a busca
   const [isModalVisible, setIsModalVisible] = useState(false); // Estado para controlar a visibilidade do modal
+  const [viewMode, setViewMode] = useState('Sell on Credit');
+  const isFocused = useIsFocused();
+
+  // Memoiza a função toggleViewMode para evitar recriação em cada renderização
+  const toggleViewMode = useCallback((mode) => {
+    setViewMode(mode);
+    if (mode === 'Immediately') {
+      navigation.navigate('SaleDetails', { products, totalPrice });
+    }
+  }, [navigation, products, totalPrice]);
+
+  useEffect(() => {
+    if (isFocused) {
+      setViewMode('Sell on Credit'); // Sincroniza o estado viewMode ao focar na tela
+    }
+  }, [isFocused]);
 
   // Função para mostrar o seletor de data
   const showDatePicker = () => {
@@ -36,6 +54,10 @@ const SellOnCredit = ({ navigation, route }) => {
   // Função para atualizar o estado de busca
   const handleSearch = (text) => {
     setSearch(text);
+    const filtered = products.filter(product =>
+      product.nome.toLowerCase().includes(text.toLowerCase())
+    );
+    setFilteredProducts(filtered);
   };
 
   // Função para confirmar a venda e exibir o modal
@@ -55,11 +77,6 @@ const SellOnCredit = ({ navigation, route }) => {
     navigation.navigate('Entries');
   };
 
-  // Função para navegar para a tela de Detalhes da Venda
-  const handleImmediately = () => {
-    navigation.navigate('SaleDetails', { products, totalPrice });
-  };
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -67,7 +84,6 @@ const SellOnCredit = ({ navigation, route }) => {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
-
           <View style={{ height: 50 }}>
             <BarTop2
               titulo={'Retorno'}
@@ -78,28 +94,18 @@ const SellOnCredit = ({ navigation, route }) => {
             />
           </View>
           <ScrollView contentContainerStyle={styles.content}>
+            <ToggleButton viewMode={viewMode} toggleViewMode={toggleViewMode} />
             <Text style={styles.label}>Detalhes da venda</Text>
-
             <View style={styles.dateContainer}>
               <TouchableOpacity onPress={showDatePicker} style={styles.dateButton}>
                 <Text style={styles.labelData}>{currentDate || "Selecione a data de pagamento"}</Text>
                 <Icon name="calendar" size={20} color={COLORS.black} />
               </TouchableOpacity>
             </View>
-            {/* Botões para alternar entre venda imediata e venda a crédito */}
-            <View style={styles.buttonRow}>
-              <TouchableOpacity style={[styles.button, { flex: 1 }]} onPress={handleImmediately}>
-                <Text style={styles.buttonText}>Immediately</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.buttonSell, { flex: 1 }]}>
-                <Text style={styles.buttonText}>Sell on Credit</Text>
-              </TouchableOpacity>
-            </View>
-
             <View style={styles.searchContainer}>
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search in cart..."
+                placeholder="Buscar..."
                 value={search}
                 onChangeText={handleSearch}
               />
@@ -109,10 +115,10 @@ const SellOnCredit = ({ navigation, route }) => {
             <View style={styles.productContainer}>
               {filteredProducts.map((product, index) => (
                 <View key={index} style={styles.productDetail}>
-                  <Image source={{ uri: product.image }} style={styles.productImage} />
+                  <Image source={{ uri: product.imagem }} style={styles.productImage} />
                   <View style={styles.productInfo}>
-                    <Text style={styles.productText}>{product.name}</Text>
-                    <Text style={styles.productAmount}>Amount: {product.amount}</Text>
+                    <Text style={styles.productText}>{product.nome}</Text>
+                    <Text style={styles.productAmount}>Quantidade: {product.amount}</Text>
                   </View>
                   <Text style={styles.productTotal}>R${product.total.toFixed(2)}</Text>
                 </View>
@@ -120,22 +126,19 @@ const SellOnCredit = ({ navigation, route }) => {
             </View>
             <View>
               <TextInput
-                placeholder="% of Discount"
+                placeholder="% de desconto"
                 style={styles.discount}
               />
             </View>
-
             <View style={styles.totalContainer}>
               <Text style={styles.totalLabel}>Total a Receber</Text>
               <Text style={styles.totalValue}>R$ {totalPrice.toFixed(2)}</Text>
             </View>
-
             <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmSale}>
               <Icon name="checkmark-circle" size={25} color={COLORS.black} />
               <Text style={styles.confirmButtonText}>Finalizar a venda</Text>
             </TouchableOpacity>
           </ScrollView>
-
           <Modal
             transparent={true}
             animationType="slide"
@@ -156,13 +159,12 @@ const SellOnCredit = ({ navigation, route }) => {
               </View>
             </View>
           </Modal>
-
           <DateTimePickerModal
             isVisible={isDatePickerVisible}
             mode="date"
             onConfirm={handleConfirm}
             onCancel={hideDatePicker}
-            locale="pt_BR" 
+            locale="pt_BR"
           />
         </View>
       </TouchableWithoutFeedback>
