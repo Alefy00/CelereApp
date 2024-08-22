@@ -109,7 +109,6 @@ const Start = ({navigation}) => {
               />
               <View style={{justifyContent: 'center',alignItems: 'center', padding: 25}}>
                 <TouchableOpacity style={{ height: 70, backgroundColor: COLORS.primary, justifyContent: 'center',alignItems: 'center', borderRadius: 4, paddingHorizontal: 46, marginTop: 16}} onPress={handleSave}>
-
                       <Text style={{fontSize: 16,color: COLORS.white,fontWeight: 'bold'}}>Salvar</Text>
                 </TouchableOpacity>
               </View>

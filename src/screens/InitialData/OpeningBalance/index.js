@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Text, TextInput, TouchableOpacity, View, ScrollView, Platform, Alert, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import styles from './styles';
-import BarTop2 from '../../../components/BarTop2';
+import styles from './styles';  // Estilização será ajustada conforme o novo design
+import BarTop3 from '../../../components/BarTop3';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../constants';
 
 const API_URL_SALDO = 'https://api.celereapp.com.br/cad/saldo_caixa_inicial/';
@@ -13,6 +14,7 @@ const OpeningBalance = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [cash, setCash] = useState('');
   const [bank, setBank] = useState('');
+  const [totalBalance, setTotalBalance] = useState(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -33,6 +35,16 @@ const OpeningBalance = ({ navigation }) => {
 
     fetchUserData();
   }, [navigation]);
+
+  useEffect(() => {
+    const calculateTotalBalance = () => {
+      const cashValue = parseFloat(cash) || 0;
+      const bankValue = parseFloat(bank) || 0;
+      setTotalBalance(cashValue + bankValue);
+    };
+
+    calculateTotalBalance();
+  }, [cash, bank]);
 
   const validateFields = () => {
     if (!cash || isNaN(cash) || parseFloat(cash) <= 0) {
@@ -85,44 +97,53 @@ const OpeningBalance = ({ navigation }) => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#FFFCF5' }}>
       <View style={{ height: Platform.OS === 'android' ? 55 : 105 }}>
-        <BarTop2
-          titulo={'Retorno'}
+        <BarTop3
+          titulo={'Voltar'}
           backColor={COLORS.primary}
           foreColor={COLORS.black}
           routeMailer={''}
           routeCalculator={''}
         />
       </View>
-      <ScrollView contentContainerStyle={{ ...styles.container, paddingTop: Platform.OS === 'android' ? 0 : 50 }}>
-        <Text style={styles.label}>
-          Quanto seu negócio tem de dinheiro em espécie (em papel e moedas)
-        </Text>
-        <View style={styles.inputContainer}>
-          <Text style={styles.currency}>R$</Text>
+      <ScrollView contentContainerStyle={styles.containerMain}>
+        <Text style={styles.headerText}>Adicione seu saldo de caixa inicial</Text>
+        
+        <View style={styles.card}>
+          <Text style={styles.label}>Quanto seu negócio tem de dinheiro em espécie?</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
-            placeholder="0,00"
+            placeholder="Digite o valor"
             value={cash}
             onChangeText={setCash}
+            placeholderTextColor="#A6A6A6"
           />
         </View>
-        <Text style={styles.label}>Quanto seu negócio tem de saldo no banco?</Text>
-        <View style={styles.inputContainer}>
-          <Text style={styles.currency}>R$</Text>
+
+        <View style={styles.card}>
+          <Text style={styles.label}>Quanto seu negócio tem de saldo no banco?</Text>
           <TextInput
             style={styles.input}
             keyboardType='numeric'
-            placeholder='0,00'
+            placeholder='Digite o valor'
             value={bank}
             onChangeText={setBank}
+            placeholderTextColor="#A6A6A6"
           />
         </View>
-        <TouchableOpacity style={styles.button} onPress={handleSave} disabled={loading}>
-          <Text style={styles.buttonText}>Salvar</Text>
+
+        <View style={styles.totalBalanceContainer}>
+          <Text style={styles.totalBalanceText}>Saldo inicial total:</Text>
+          <Text style={styles.totalBalanceValue}>{`R$${totalBalance.toFixed(2)}`}</Text>
+        </View>
+
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={loading}>
+        <Icon name="checkmark-circle" size={25} color={COLORS.black} />
+          <Text style={styles.buttonText}>Salvar Tudo</Text>
         </TouchableOpacity>
+
         {loading && <ActivityIndicator size="large" color="#000" style={{ marginTop: 20 }} />}
       </ScrollView>
     </View>

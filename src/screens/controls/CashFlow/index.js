@@ -5,12 +5,10 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Text,
-  Platform,
   Animated,
   View,
   TouchableOpacity,
   ScrollView,
-  Dimensions,
 } from 'react-native';
 import { COLORS } from '../../../constants';
 import { Container, Scroller } from './styles';
@@ -28,7 +26,7 @@ const Winning = ({ navigation }) => {
   const [fadeAnim] = useState(new Animated.Value(1));
 
   const months = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
-  const windowWidth = Dimensions.get('window').width;
+
 
   const dailyTransactions = [
     { date: '2024-08-01', entradas: 500, saidas: 200 },

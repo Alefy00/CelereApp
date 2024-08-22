@@ -21,8 +21,8 @@ import {useTranslation} from 'react-i18next';
 import '../translation';
 
 const TabArea = styled.View`
-  height: 86px;
-  background-color: ${COLORS.secondary};
+  height: 70px;
+  background-color: ${COLORS.black};
   flex-direction: row;
 `;
 const TabItem = styled.TouchableOpacity`
@@ -36,9 +36,8 @@ const TabItemCenter = styled.TouchableOpacity`
   height: 70px;
   justify-content: center;
   align-items: center;
-  background-color: #f4f440;
+  background-color: ${COLORS.primary};
   border-radius: 35px;
-  border: 4px solid ${COLORS.secondary};
   margin-top: -30px;
 `;
 const AvatarIcon = styled.Image`
@@ -94,7 +93,6 @@ export default ({state, navigation}) => {
               style={{marginTop: +15, opacity: state.index !== 0 ? 0.6 : 1}}
             />
             <ItemTitle style={{marginTop: +10}}>{t('summary')}</ItemTitle>
-            <ItemMsg>1</ItemMsg>
           </>
         )}
       </TabItem>
@@ -114,7 +112,6 @@ export default ({state, navigation}) => {
               style={{marginTop: +15, opacity: state.index !== 1 ? 0.6 : 1}}
             />
             <ItemTitle style={{marginTop: +10}}>{t('expiring')}</ItemTitle>
-            <ItemMsg>1</ItemMsg>
           </>
         )}
       </TabItem>
@@ -138,7 +135,6 @@ export default ({state, navigation}) => {
               style={{marginTop: +15, opacity: state.index !== 3 ? 0.6 : 1}}
             />
             <ItemTitle style={{marginTop: +10}}>{t('cash_flow')}</ItemTitle>
-            <ItemMsg>1</ItemMsg>
           </>
         )}
       </TabItem>
@@ -158,7 +154,6 @@ export default ({state, navigation}) => {
               style={{marginTop: +15, opacity: state.index !== 4 ? 0.6 : 1}}
             />
             <ItemTitle style={{marginTop: +10}}>{t('menu')}</ItemTitle>
-            <ItemMsg>1</ItemMsg>
           </>
         )}
       </TabItem>

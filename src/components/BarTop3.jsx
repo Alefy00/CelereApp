@@ -3,10 +3,11 @@ import React from 'react';
 import styled from 'styled-components/native';
 import {useNavigation} from '@react-navigation/native';
 import {Platform} from 'react-native';
+import {COLORS, FONTS, SIZES, icons, images} from '../../../constants';
 
+import IconArrowLeft from '../assets/images/svg/iconArrowLeft.svg';
 import CalculatorIcon from '../assets/images/svg/iconCalculator.svg';
 import MailerIcon from '../assets/images/svg/iconMailer.svg';
-import RobotIcon from '../assets/images/svg/iconRobot.svg';
 
 export const HeaderArea = styled.View`
   flex: 1;
@@ -37,14 +38,19 @@ export const ToggleText = styled.View`
 
 export const HeaderTitle = styled.Text`
   flex: 1;
-  font-size: 10px;
+  flex-direction: column;
+  font-size: 16px;
   font-family: Rubik-Regular;
   color: ${props => `${props.foreColor}`};
   background-color: ${props => `${props.backColor}`};
-  padding-left: 8px;
   padding-right: 8px;
-  margin-left: 13px;
-  margin-top: 8px;
+  margin-left: 10px;
+  max-height: 55px;
+  text-align: left;
+  align-content: center;
+  align-items: center;
+  padding-top: 13px;
+
 `;
 
 export const HeaderSubTitle = styled.Text`
@@ -60,7 +66,7 @@ export const HeaderSubTitle = styled.Text`
   font-weight: bold;
 `;
 
-export const ToggleLeft = styled.View`
+export const ToggleLeft = styled.TouchableOpacity`
   flex-basis: 20px;
   align-items: center;
   justify-content: center;
@@ -101,35 +107,36 @@ export default ({
   foreColor,
   routeMailer,
   routeCalculator,
+  messages,
 }) => {
   const navigation = useNavigation();
 
-  const handleMenu = () => {
-    navigation.navigate("MainTab");
-  }
+  const handleBackButton = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      console.warn('No screen to go back to');
+    }
+  };
   return (
     <HeaderArea backColor={backColor}>
-      <ToggleLeft>
-        <UserAvatar source={{uri: uriAvatar}}  onPress={handleMenu}/>
+      <ToggleLeft onPress={handleBackButton}>
+        <IconArrowLeft width="24" height="24" fill={foreColor} />
       </ToggleLeft>
 
       <ToggleText>
-        <HeaderTitle backColor={backColor} foreColor={foreColor} onPress={handleMenu}>
+        <HeaderTitle backColor={backColor} foreColor={foreColor}  onPress={handleBackButton}>
           {titulo}
         </HeaderTitle>
-        <HeaderSubTitle onPress={handleMenu}>{subtitulo}</HeaderSubTitle>
       </ToggleText>
 
       <ToggleRight>
-        <Btn onPress={handleMenu}>
-          <RobotIcon width="26" height="26" fill={foreColor} />
-        </Btn>
-      </ToggleRight>
-
-      <ToggleRight style={{marginLeft: 10}}>
-        <Btn onPress={handleMenu}>
-          <CalculatorIcon width="26" height="26" fill={foreColor} />
-        </Btn>
+        {messages && (
+          <Btn onPress={null}>
+            <MailerIcon width="26" height="26" fill={foreColor} />
+            <ItemMailer>2</ItemMailer>
+          </Btn>
+        )}
       </ToggleRight>
     </HeaderArea>
   );
