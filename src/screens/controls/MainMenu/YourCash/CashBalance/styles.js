@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   selectedModeButton: {
-    backgroundColor: '#fadc00',
+    backgroundColor: COLORS.primary,
   },
   modeButtonText: {
     color: '#FFF',
@@ -38,16 +38,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     marginVertical: 5,
-    borderRadius: 3,
-    margin:12,
-    borderWidth:0.2,
+    borderRadius: 5,
+    margin: 12,
+    borderWidth: 0.2,
     borderColor: '#ccc',
   },
   todayItem: {
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.primary,
   },
   todayText: {
     color: '#000',
+    fontWeight: 'bold',
   },
   date: {
     color: '#FFF',
@@ -62,10 +63,10 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   positive: {
-    color: 'green',
+    color: COLORS.green,
   },
   negative: {
-    color: 'red',
+    color: COLORS.red,
   },
   value: {
     color: '#FFF',
@@ -74,12 +75,15 @@ const styles = StyleSheet.create({
   starIcon: {
     marginRight: 10,
   },
+  arrowIcon: {
+    marginRight: 4, // Pequeno espaço entre o ícone e a porcentagem
+  },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 15,
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.primary,
     borderRadius: 15,
     marginHorizontal: 15,
     marginBottom: -10,
@@ -88,22 +92,25 @@ const styles = StyleSheet.create({
   footerText: {
     color: '#000',
     fontSize: 16,
+    fontWeight: 'bold'
   },
   footerValue: {
     color: '#000',
     fontSize: 16,
+    marginBottom: 40,
+    fontWeight: 'bold'
   },
   textSaldo:{
     color: 'white',
     marginLeft: 30,
     fontSize: 22,
     margin:5,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    marginTop:15,
   },
   textModo:{
     color:'#ffffff',
     marginLeft: 30,
-    marginTop:10,
   },
 });
 

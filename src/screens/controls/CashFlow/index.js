@@ -1,72 +1,157 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
-  Text,
-  Animated,
   View,
+  Text,
   TouchableOpacity,
   ScrollView,
+  Modal,
+  Dimensions,
 } from 'react-native';
 import { COLORS } from '../../../constants';
-import { Container, Scroller } from './styles';
 import BarTop from '../../../components/BarTop';
-import { useTranslation } from 'react-i18next';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useTranslation } from 'react-i18next';
 import '../../../translation';
 import styles from './styles';
-import DailyView from './components/DailyView';
+import IncomeDetails from './components/IncomeDatails';
+import ExpenseDetails from './components/ExpenseDetails';
 
-const Winning = ({ navigation }) => {
-  const { t } = useTranslation();
-  const [selectedMonth, setSelectedMonth] = useState('JAN');
-  const [viewMode, setViewMode] = useState('Por Categoria');
-  const [fadeAnim] = useState(new Animated.Value(1));
+const { width } = Dimensions.get('window');
+const DAY_WIDTH = width / 6; // 5 dias visíveis por vez
 
-  const months = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+const getDaysInMonth = (month, year) => {
+  const date = new Date(year, month, 1);
+  const days = [];
+  while (date.getMonth() === month) {
+    days.push({
+      day: date.getDate().toString().padStart(2, '0'),
+      month: date.toLocaleString('pt-BR', { month: 'short' }).toUpperCase(),
+      isSelected: false,
+      isToday:
+        date.getDate() === new Date().getDate() &&
+        date.getMonth() === new Date().getMonth() &&
+        date.getFullYear() === new Date().getFullYear(),
+    });
+    date.setDate(date.getDate() + 1);
+  }
+  return days;
+};
 
+const DatePicker = ({ dates, selectedDateIndex, onDateSelect, onFilterPress }) => {
+  const scrollViewRef = useRef(null);
 
-  const dailyTransactions = [
-    { date: '2024-08-01', entradas: 500, saidas: 200 },
-    { date: '2024-08-02', entradas: 300, saidas: 100 },
-    // ... outros dias
-  ];
+  // Rola automaticamente para o dia atual ao carregar a tela
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      scrollToSelectedDate(selectedDateIndex);
+    }
+  }, [selectedDateIndex]);
 
-  const toggleViewMode = (mode) => {
-    if (viewMode !== mode) {
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start(() => {
-        setViewMode(mode);
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }).start();
-      });
+  // Função para rolar até a data selecionada
+  const scrollToSelectedDate = (index) => {
+    if (scrollViewRef.current) {
+      const scrollPosition = index * DAY_WIDTH - (width / 2 - DAY_WIDTH / 2);
+      scrollViewRef.current.scrollTo({ x: scrollPosition, animated: true });
     }
   };
 
-  const handleMenu = () => {
-    navigation.navigate("MainTab");
+  const handleDateSelect = (date, index) => {
+    onDateSelect(date, index);
+    scrollToSelectedDate(index); // Centraliza o dia selecionado
   };
 
-  const renderMonth = (month) => (
-    <TouchableOpacity
-      key={month}
-      style={[styles.monthButton, selectedMonth === month && styles.selectedMonthButton]}
-      onPress={() => setSelectedMonth(month)}
-    >
-      <Text style={[styles.monthButtonText, selectedMonth === month && styles.selectedMonthButtonText]}>{month}</Text>
-    </TouchableOpacity>
+  return (
+    <View style={styles.datePickerContainer}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        ref={scrollViewRef}
+        contentContainerStyle={{ flexGrow: 1 }}
+        bounces={false}
+        scrollEventThrottle={16}
+        overScrollMode="never"
+      >
+        {dates.map((date, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.dateContainer,
+              date.isSelected && styles.selectedDate,
+              date.isToday && styles.todayDate,
+            ]}
+            onPress={() => handleDateSelect(date, index)}
+            activeOpacity={1}
+          >
+            <Text style={[styles.dateText, date.isSelected && styles.selectedDateText]}>
+              {date.day}
+            </Text>
+            <Text style={[styles.monthText, date.isSelected && styles.selectedMonthText]}>
+              {date.month}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+      <TouchableOpacity onPress={onFilterPress} style={styles.filterButton}>
+        <Icon name="filter-outline" size={24} color="#000" />
+      </TouchableOpacity>
+    </View>
   );
+};
+
+const FinanceSummary = () => {
+  return (
+    <View style={styles.financeSummaryContainer}>
+      <View style={styles.row}>
+        <Text style={styles.label}>Entradas</Text>
+        <Text style={[styles.value, styles.income]}>R$ 210</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.label}>Saídas</Text>
+        <Text style={[styles.value, styles.expense]}>R$ 100</Text>
+      </View>
+      <View style={styles.separator} />
+      <View style={styles.row}>
+        <Text style={styles.label}>Resultado</Text>
+        <Text style={[styles.value, styles.result]}>R$ 110</Text>
+      </View>
+    </View>
+  );
+};
+
+const Winning = ({ navigation }) => {
+  const { t } = useTranslation();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [month, setMonth] = useState(new Date().getMonth());
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [dates, setDates] = useState(getDaysInMonth(month, year));
+  const [selectedDateIndex, setSelectedDateIndex] = useState(new Date().getDate() - 1);
+
+  const handleDateSelect = (selectedDate, index) => {
+    const updatedDates = dates.map((date, i) => ({
+      ...date,
+      isSelected: i === index,
+    }));
+    setDates(updatedDates);
+    setSelectedDateIndex(index);
+  };
+
+  const handleFilterPress = () => {
+    setModalVisible(true);
+  };
+
+  const handleMonthSelect = (selectedMonth) => {
+    setMonth(selectedMonth);
+    setDates(getDaysInMonth(selectedMonth, year));
+    setModalVisible(false);
+    setSelectedDateIndex(0); // Reset to the first day of the new month
+  };
 
   return (
-    <Container backColor={COLORS.background}>
+    <ScrollView style={{ backgroundColor: COLORS.background }}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView behavior="position" enabled>
           <>
@@ -77,114 +162,69 @@ const Winning = ({ navigation }) => {
               backColor={COLORS.primary}
               foreColor={'#000000'}
             />
-            <Scroller style={{ paddingTop: 10 }}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carouselContainer}>
-                {months.map(renderMonth)}
-              </ScrollView>
-              <View style={styles.toggleContainer}>
-                <TouchableOpacity
-                  style={[styles.toggleButton, viewMode === 'Por Categoria' && styles.selectedToggleButton]}
-                  onPress={() => toggleViewMode('Por Categoria')}
-                >
-                  <Text style={[styles.toggleButtonText, viewMode === 'Por Categoria' && styles.selectedToggleButtonText]}>
-                    Por Categoria
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.toggleButton, viewMode === 'Por dia' && styles.selectedToggleButton]}
-                  onPress={() => toggleViewMode('Por dia')}
-                >
-                  <Text style={[styles.toggleButtonText, viewMode === 'Por dia' && styles.selectedToggleButtonText]}>
-                    Por dia
-                  </Text>
-                </TouchableOpacity>
+            <DatePicker
+              dates={dates}
+              selectedDateIndex={selectedDateIndex}
+              onDateSelect={handleDateSelect}
+              onFilterPress={handleFilterPress}
+            />
+            <View style={{ backgroundColor: COLORS.background }}>
+              <View style={styles.containerBase}>
+                <View style={styles.containerInfo}>
+                  <Text style={styles.balanceRecommended}>Saldo de caixa inicial</Text>
+                  <Icon name="alert-circle" size={20} color={COLORS.lightGray} style={{ marginTop: 10 }} />
+                </View>
+                <Text style={styles.balanceRecommendedValue}>R$1430</Text>
               </View>
-              <Animated.View style={{ opacity: fadeAnim }}>
-                {viewMode === 'Por Categoria' ? (
-                  <View style={styles.contentContainer}>
-                    <View style={styles.section}>
-                      <Text style={styles.sectionTitle}>Saldo de caixa Inicial</Text>
-                      <Text style={styles.sectionValue}>R$ 1.430,00</Text>
-                    </View>
-                    <View style={styles.summaryBox}>
-                      <View style={styles.summaryItem}>
-                        <Text style={styles.summaryText}>Entradas</Text>
-                        <Text style={styles.summaryText}>Saídas</Text>
-                        <Text style={styles.summaryText}>Saldo</Text>
-                      </View>
-                      <View style={styles.summaryItemValue}>
-                        <Text style={styles.summaryValue}>R$ 10.000</Text>
-                        <Text style={styles.summaryValueRed}>R$ 21.000</Text>
-                        <Text style={styles.summaryValue}>R$ 11.000</Text>
-                      </View>
-                    </View>
-                    <View style={styles.section2}>
-                      <Text style={styles.sectionTitle}>Saldo de caixa Final</Text>
-                      <Text style={styles.sectionValue}>R$ 1.540,00</Text>
-                    </View>
-                    <View style={styles.entrySection}>
-                      <View style={styles.containerIcon}>
-                        <Icon name="arrow-up" size={20} color={COLORS.green} />
-                        <Text style={styles.entryTitle}>Entradas</Text>
-                      </View>
-                      <View style={styles.entryHeader}>
-                        <Text style={styles.entryHeaderText}>Descrição</Text>
-                        <Text style={styles.entryHeaderText}>Previsto</Text>
-                        <Text style={styles.entryHeaderText}>Realizado</Text>
-                      </View>
-                      <View style={styles.entryItem}>
-                        <Text style={styles.entryItemText}>Vendas</Text>
-                        <Text style={styles.entryItemValue}>R$ 200</Text>
-                        <Text style={styles.entryItemValue}>R$ 210</Text>
-                      </View>
-                      <View style={styles.entryItem}>
-                        <Text style={styles.entryItemText}>Fiados Recebidos</Text>
-                        <Text style={styles.entryItemValue}>R$ 0,00</Text>
-                        <Text style={styles.entryItemValue}>R$ 0,00</Text>
-                      </View>
-                      <View style={styles.entryItem}>
-                        <Text style={styles.entryItemText}>Outros</Text>
-                        <Text style={styles.entryItemValue}>R$ 0,00</Text>
-                        <Text style={styles.entryItemValue}>R$ 0,00</Text>
-                      </View>
-                      <View style={styles.entryTotal}>
-                        <Text style={styles.entryTotalText}>Total</Text>
-                        <Text style={styles.entryTotalValue}>R$ 200</Text>
-                        <Text style={styles.entryTotalValue}>R$ 210</Text>
-                      </View>
-                    </View>
-                    <View style={styles.exitSection}>
-                      <View style={styles.containerIcon}>
-                        <Icon name="arrow-down" size={20} color={COLORS.red} />
-                        <Text style={styles.exitTitle}>Saídas</Text>
-                      </View>
-                      <View style={styles.exitHeader}>
-                        <Text style={styles.exitHeaderText}>Descrição</Text>
-                        <Text style={styles.exitHeaderText}>Previsto</Text>
-                        <Text style={styles.exitHeaderText}>Liquidado</Text>
-                      </View>
-                      <View style={styles.exitItem}>
-                        <Text style={styles.exitItemText}>Fornecedores</Text>
-                        <Text style={styles.exitItemValue}>R$ 100</Text>
-                        <Text style={styles.exitItemValue}>R$ 100</Text>
-                      </View>
-                      <View style={styles.exitItem}>
-                        <Text style={styles.exitItemText}>Aluguel</Text>
-                        <Text style={styles.exitItemValue}>R$ 0,00</Text>
-                        <Text style={styles.exitItemValue}>R$ 0,00</Text>
-                      </View>
-                    </View>
-                  </View>
-                ) : (
-                  <DailyView dailyTransactions={dailyTransactions} selectedMonth={months.indexOf(selectedMonth)} />
+              <FinanceSummary />
+              <View style={styles.containerBase}>
+                <View style={styles.containerInfo}>
+                  <Text style={styles.balanceRecommended}>Saldo de caixa final</Text>
+                  <Icon name="alert-circle" size={20} color={COLORS.lightGray} style={{ marginTop: 10 }} />
+                </View>
+                <Text style={styles.balanceRecommendedValue}>R$1540</Text>
+              </View>
+              <View style={styles.divider} />
+              <View style={styles.incomeHeaderContainer}>
+                <Icon name="arrow-up-outline" size={20} color={COLORS.green} />
+                <Text style={styles.incomeHeaderText}>Entradas</Text>
+              </View>
+              <IncomeDetails />
+              <View style={styles.divider} />
+              <View style={styles.incomeHeaderContainer}>
+                <Icon name="arrow-down-outline" size={20} color={COLORS.red} />
+                <Text style={[styles.incomeHeaderText, { color: COLORS.red }]}>Despesas</Text>
+              </View>
+              <View style={{ marginBottom: 60 }}>
+                <ExpenseDetails />
+              </View>
+            </View>
 
-                )}
-              </Animated.View>
-            </Scroller>
+            <Modal
+              visible={modalVisible}
+              transparent={true}
+              animationType="slide"
+              onRequestClose={() => setModalVisible(false)}
+            >
+              <View style={styles.modalContainer}>
+                <Text>Selecione o Mês</Text>
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <TouchableOpacity
+                    key={i}
+                    onPress={() => handleMonthSelect(i)}
+                    style={styles.monthOption}
+                  >
+                    <Text style={styles.monthText}>
+                      {new Date(0, i).toLocaleString('pt-BR', { month: 'long' }).toUpperCase()}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </Modal>
           </>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
-    </Container>
+    </ScrollView>
   );
 };
 

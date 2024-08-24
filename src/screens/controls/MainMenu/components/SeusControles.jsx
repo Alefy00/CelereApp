@@ -4,6 +4,7 @@ import {COLORS, FONTS, SIZES} from '../../../../constants';
 import {useTranslation} from 'react-i18next';
 import '../../../../translation';
 import {StyleSheet} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 import Svg, {Image, Defs, Filter, FeColorMatrix} from 'react-native-svg';
 
@@ -61,6 +62,12 @@ export const TxtItemMenu = styled.Text`
 
 export default () => {
   const {t} = useTranslation();
+  const navigation = useNavigation();
+
+  const NavTeamScreen = () => {
+    navigation.navigate('TeamScreen');
+  };
+
   return (
     <ContainerGroupButtons style={{flex: 1, width: '92%'}}>
       <GroupButton>
@@ -86,9 +93,9 @@ export default () => {
 
         {/* Linha 2 */}
 
-        <BtnItemMenu disabled>
-          <IconUsers0 width="38" height="38" />
-          <TxtItemMenu>{t('users')}</TxtItemMenu>
+        <BtnItemMenu style={{backgroundColor: COLORS.lightYellow2}} onPress={NavTeamScreen}>
+          <IconUsers width="38" height="38" />
+          <TxtItemMenu>{t('Equipe')}</TxtItemMenu>
         </BtnItemMenu>
 
         <BtnItemMenu disabled>

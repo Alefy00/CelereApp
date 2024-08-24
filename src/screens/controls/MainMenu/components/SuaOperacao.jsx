@@ -77,7 +77,7 @@ const handleServices = () => {
       <GroupButton>
         <BtnItemMenu
           backColor={COLORS.lightYellow2}
-          onPress={() => navigateToScreen('NStockTab')}>
+          onPress={() => navigateToScreen('StockInfo')}>
           <IconStock width="38" height="38" />
           <TxtItemMenu>{t('stock')}</TxtItemMenu>
         </BtnItemMenu>

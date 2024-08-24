@@ -7,6 +7,7 @@ import {COLORS, FONTS, SIZES, icons, images} from '../../../constants';
 import IconArrowLeft from '../assets/images/svg/iconArrowLeft.svg';
 import CalculatorIcon from '../assets/images/svg/iconCalculator.svg';
 import MailerIcon from '../assets/images/svg/iconMailer.svg';
+import RobotIcon from '../assets/images/svg/iconRobot.svg';
 
 export const HeaderArea = styled.View`
   flex: 1;
@@ -26,7 +27,7 @@ export const HeaderArea = styled.View`
 export const ToggleRight = styled.View`
   flex-basis: 25px;
   justify-content: center;
-  margin-right: 20px;
+  margin-right: 10px;
 `;
 
 export const ToggleText = styled.View`
@@ -38,7 +39,7 @@ export const ToggleText = styled.View`
 export const HeaderTitle = styled.Text`
   flex: 1;
   flex-direction: column;
-  font-size: 20px;
+  font-size: 18px;
   font-family: Rubik-Regular;
   color: ${props => `${props.foreColor}`};
   background-color: ${props => `${props.backColor}`};
@@ -122,7 +123,7 @@ export default ({
         <IconArrowLeft width="26" height="26" fill={foreColor} />
       </ToggleLeft>
 
-      <ToggleText>
+      <ToggleText onPress={handleBackButton}>
         <HeaderTitle backColor={backColor} foreColor={foreColor}>
           {titulo}
         </HeaderTitle>
@@ -137,6 +138,11 @@ export default ({
         )}
       </ToggleRight>
 
+      <ToggleRight style={{marginLeft: 10}}>
+        <Btn onPress={null}>
+          <RobotIcon width="26" height="26" fill={foreColor} />
+        </Btn>
+      </ToggleRight>
       <ToggleRight style={{marginLeft: 10}}>
         <Btn onPress={null}>
           <CalculatorIcon width="26" height="26" fill={foreColor} />
