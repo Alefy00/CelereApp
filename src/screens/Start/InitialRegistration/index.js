@@ -42,7 +42,7 @@ const InitialRegistration = ({ navigation }) => {
   }, [navigation]);
 
   const handleDdiChange = useCallback((text) => {
-    const trimmedDdi = text.replace(/\D/g, '');
+    const trimmedDdi = text.replace(/\D/g, '').slice(0, 2); // Limita a 2 dígitos
     const isoCodes = { '1': 'US', '55': 'BR', '44': 'GB', '91': 'IN' };
     setPhoneData(prevState => ({
       ...prevState,
@@ -52,7 +52,14 @@ const InitialRegistration = ({ navigation }) => {
   }, []);
 
   const handleInputChange = useCallback((name, value) => {
-    setPhoneData(prevState => ({ ...prevState, [name]: value }));
+    let maxLength = 0;
+    if (name === 'ddd') {
+      maxLength = 2; // Limita o DDD a 2 dígitos
+    } else if (name === 'number') {
+      maxLength = 9; // Limita o número de telefone a 9 dígitos
+    }
+    const trimmedValue = value.replace(/\D/g, '').slice(0, maxLength); // Limita a entrada conforme necessário
+    setPhoneData(prevState => ({ ...prevState, [name]: trimmedValue }));
   }, []);
 
   const showModal = useCallback((message, success = false) => {
@@ -137,12 +144,14 @@ const InitialRegistration = ({ navigation }) => {
         <TextInput
           style={styles.input}
           placeholder='DDD'
+          keyboardType="numeric"
           value={phoneData.ddd}
           onChangeText={(text) => handleInputChange('ddd', text)}
         />
         <TextInput
           style={styles.inputNumber}
           placeholder='0 0000-0000'
+          keyboardType="numeric"
           value={phoneData.number}
           onChangeText={(text) => handleInputChange('number', text)}
         />

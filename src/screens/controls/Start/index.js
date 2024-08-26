@@ -7,11 +7,12 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Platform
+  Platform,
+  ScrollView
 } from 'react-native';
-import {Container, Scroller} from './styles';
+import {Container} from './styles';
 import {useNavigation} from '@react-navigation/native';
-import {COLORS, FONTS, SIZES, icons, images} from '../../../constants';
+import {COLORS, FONTS} from '../../../constants';
 
 import BarTop2 from '../../../components/BarTop2';
 // import SubTitle from '../../../components/SubTitle';
@@ -63,7 +64,7 @@ const Start = ({navigation}) => {
               routeCalculator={''}
             />
 
-            <Scroller>
+            <ScrollView>
               <Title>{t('start')}</Title>
               <SubTitle>{t('desc_start')}</SubTitle>
 
@@ -112,7 +113,7 @@ const Start = ({navigation}) => {
                       <Text style={{fontSize: 16,color: COLORS.white,fontWeight: 'bold'}}>Salvar</Text>
                 </TouchableOpacity>
               </View>
-            </Scroller>
+            </ScrollView>
           </>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
