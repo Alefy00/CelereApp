@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Text, TextInput, TouchableOpacity, View, ScrollView, Platform, Alert, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import styles from './styles';  // Estilização será ajustada conforme o novo design
+import styles from './styles';
 import BarTop3 from '../../../components/BarTop3';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../constants';
@@ -70,7 +70,7 @@ const OpeningBalance = ({ navigation }) => {
 
     try {
       const response = await axios.post(API_URL_SALDO, {
-        empreendedor_id: userData.id,
+        empresa_id: userData.id,
         valor_especie: parseFloat(cash).toFixed(2),
         saldo_banco: parseFloat(bank).toFixed(2),
       });
