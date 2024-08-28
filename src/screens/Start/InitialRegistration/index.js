@@ -1,15 +1,15 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Text, View, TextInput, Modal, ActivityIndicator, Image } from 'react-native';
+import { Button, Text, View, TextInput, Modal, ActivityIndicator, Alert } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CountryFlag from 'react-native-country-flag';
 import LogoApp from '../../../assets/images/logo.svg';
 import ProgressBar from '../components/ProgressBar';
-
 import styles from './styles';
 
 const API_URL = 'https://api.celereapp.com.br/config/empreendedor/';
+const VERIFY_USER_URL = 'https://api.celereapp.com.br/config/empreendedor/';
 
 const InitialRegistration = ({ navigation }) => {
   const [phoneData, setPhoneData] = useState({
@@ -81,8 +81,52 @@ const InitialRegistration = ({ navigation }) => {
     return true;
   }, [phoneData, showModal]);
 
+  const checkUserExists = useCallback(async () => {
+    try {
+      const response = await axios.get(VERIFY_USER_URL, {
+        params: {  // Usando 'params' para adicionar os parâmetros na URL
+          ddi: phoneData.ddi,
+          ddd: phoneData.ddd,
+          celular: phoneData.number,
+        },
+      });
+
+      if (response.data.status === 'success' && response.data.data.length > 0) {
+        // Se o usuário já existe, redirecionar para MainTab
+        const userData = response.data.data[0]; // Assumindo que o primeiro resultado é o usuário desejado
+
+        const newUserData = {
+          id: userData.id,
+          ...phoneData,
+          isValidated: true, // Marcando como validado
+          codigo_ativacao: userData.codigo_ativacao,
+        };
+
+        // Armazena os dados do usuário e da empresa
+        await AsyncStorage.setItem('userPhone', JSON.stringify(newUserData));
+
+        if (userData.empresa) {
+          await AsyncStorage.setItem('empresaData', JSON.stringify(userData.empresa));
+          console.log('Dados da empresa armazenados:', userData.empresa);
+        }
+
+        navigation.navigate('MainTab');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Erro ao verificar usuário:', error.message);
+      showModal('Erro ao verificar o usuário. Tente novamente.');
+      return false;
+    }
+  }, [phoneData, showModal, navigation]);
+
   const handleSend = useCallback(async () => {
     if (!validateFields()) return;
+
+    // Primeiro, verifica se o usuário já existe
+    const userExists = await checkUserExists();
+    if (userExists) return;
 
     try {
       const response = await axios.post(API_URL, {
@@ -93,15 +137,22 @@ const InitialRegistration = ({ navigation }) => {
       });
 
       if (response.status === 201 && response.data.status === 'success') {
-        const { id, codigo_ativacao } = response.data.data;
+        const { id, codigo_ativacao, empresa } = response.data.data;
         const newUserData = {
           id,
           ...phoneData,
           isValidated: false,
           codigo_ativacao,
         };
+
+        // Armazena os dados do usuário e da empresa
         await AsyncStorage.setItem('userPhone', JSON.stringify(newUserData));
-        
+
+        if (empresa) {
+          await AsyncStorage.setItem('empresaData', JSON.stringify(empresa));
+          console.log('Dados da empresa armazenados:', empresa);
+        }
+
         showModal('Registro realizado com sucesso!', true);
       } else {
         showModal(response.data.message || 'Erro ao registrar. Tente novamente.');
@@ -110,7 +161,7 @@ const InitialRegistration = ({ navigation }) => {
       console.error('Erro ao conectar à API:', error.message);
       showModal('Não foi possível conectar à API. Verifique sua conexão e tente novamente.');
     }
-  }, [phoneData, validateFields, showModal]);
+  }, [phoneData, validateFields, checkUserExists, showModal]);
 
   const handleModalClose = () => {
     setModalVisible(false);
