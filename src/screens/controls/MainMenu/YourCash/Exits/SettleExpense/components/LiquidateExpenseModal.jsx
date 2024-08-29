@@ -1,85 +1,67 @@
 /* eslint-disable prettier/prettier */
-import React from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { COLORS } from '../../../../../../../constants';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import Icon from 'react-native-vector-icons/Ionicons';
+import styles from '../styles';
 
-const LiquidateExpenseModal = ({ visible, onClose, onConfirm }) => {
+const LiquidateExpenseModal = ({ visible, onClose, onConfirmLiquidation }) => {
+  const [paymentDate, setPaymentDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [reason, setReason] = useState('');
+
+  const handleConfirm = () => {
+    if (!reason) {
+      Alert.alert('Erro', 'Por favor, informe o motivo da liquidação.');
+      return;
+    }
+
+    onConfirmLiquidation(paymentDate, reason);
+  };
+
   return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalBackground}>
+    <Modal visible={visible} onRequestClose={onClose} transparent={true}>
+      <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
-          <Text style={styles.title}>Confirmar Liquidação</Text>
-          <Text style={styles.message}>Tem certeza que deseja liquidar esta despesa?</Text>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelButtonText}>Não</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.confirmButton} onPress={onConfirm}>
-              <Text style={styles.confirmButtonText}>Sim</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Icon name="close" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.modalTitle}>Informações da Liquidação</Text>
+
+          <Text style={styles.label}>Data de Pagamento</Text>
+          <TouchableOpacity style={styles.dateButton} onPress={() => setShowDatePicker(true)}>
+            <Text style={styles.textDate}>{paymentDate.toLocaleDateString()}</Text>
+            <Icon name="calendar-outline" size={20} color="#000" />
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={paymentDate}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+                if (selectedDate) setPaymentDate(selectedDate);
+              }}
+              maximumDate={new Date()}
+              locale="pt-BR"
+            />
+          )}
+
+          <Text style={styles.label}>Motivo da Liquidação</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Informe o motivo"
+            value={reason}
+            onChangeText={setReason}
+          />
+
+          <TouchableOpacity style={styles.liquidateButton} onPress={handleConfirm}>
+            <Text style={styles.liquidateButtonText}>Confirmar</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContainer: {
-    width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  message: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  cancelButton: {
-    backgroundColor: COLORS.lightGray,
-    padding: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-    width: '45%',
-  },
-  cancelButtonText: {
-    color: COLORS.black,
-    fontWeight: 'bold',
-  },
-  confirmButton: {
-    backgroundColor: COLORS.green,
-    padding: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-    width: '45%',
-  },
-  confirmButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-});
 
 export default LiquidateExpenseModal;

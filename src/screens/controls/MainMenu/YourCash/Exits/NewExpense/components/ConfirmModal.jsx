@@ -3,7 +3,7 @@ import React from "react";
 import { COLORS } from "../../../../../../../constants";
 import { Modal, View, StyleSheet, Text, TouchableOpacity } from "react-native";
 
-const ConfirmModal = ({ visible, onClose, onConfirm, valor, parceiro, dataPagamento, recorrencia }) => {
+const ConfirmModal = ({ visible, onClose, onConfirm, valor, parceiro, dataPagamento, dataVencimento, recorrencia }) => {
   
   // Função para formatar o valor como moeda BRL
   const formatCurrency = (value) => {
@@ -44,6 +44,11 @@ const ConfirmModal = ({ visible, onClose, onConfirm, valor, parceiro, dataPagame
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Data de pagamento</Text>
             <Text style={styles.input}>{dataPagamento}</Text>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Data de vencimento</Text>
+            <Text style={styles.input}>{dataVencimento}</Text>
           </View>
           
           <View style={styles.inputContainer}>

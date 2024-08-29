@@ -32,7 +32,9 @@ const NewExpense = ({ navigation }) => {
   const [quantosMeses, setQuantosMeses] = useState('');
   const [months, setMonths] = useState([]);
   const [date, setDate] = useState(new Date());
+  const [dueDate, setDueDate] = useState(new Date()); // Novo estado para a data de vencimento
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showDueDatePicker, setShowDueDatePicker] = useState(false); // Novo estado para o picker de data de vencimento
   const [modalVisible, setModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -59,6 +61,7 @@ const NewExpense = ({ navigation }) => {
     const supplier = suppliers.find((s) => s.value === id);
     return supplier ? supplier.label : 'Parceiro não encontrado';
   };
+
   const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
@@ -147,14 +150,24 @@ const NewExpense = ({ navigation }) => {
   const onChangeDate = (event, selectedDate) => {
     setShowDatePicker(Platform.OS === 'ios');
     const currentDate = selectedDate || date;
-    
-    // Ajustar para o fuso horário do Brasil
     const localDate = new Date(currentDate.getTime() - (currentDate.getTimezoneOffset() * 60000));
 
     if (localDate <= new Date()) {
       setDate(localDate);
     } else {
       Alert.alert('Erro', 'Por favor, selecione uma data que não seja no futuro.');
+    }
+  };
+
+  const onChangeDueDate = (event, selectedDate) => {
+    setShowDueDatePicker(Platform.OS === 'ios');
+    const currentDueDate = selectedDate || dueDate;
+    const localDueDate = new Date(currentDueDate.getTime() - (currentDueDate.getTimezoneOffset() * 60000));
+
+    if (localDueDate >= new Date()) {
+      setDueDate(localDueDate);
+    } else {
+      Alert.alert('Erro', 'Por favor, selecione uma data de vencimento futura.');
     }
   };
 
@@ -188,7 +201,9 @@ const NewExpense = ({ navigation }) => {
       empresa_id: Number(empresa_id), // Convertendo para número
       item: item || '', // Usando string vazia se `item` estiver indefinido
       valor: formattedValue, // Valor deve ser float
-      dt_pagamento: date.toISOString().split('T')[0], // Data no formato 'YYYY-MM-DD'
+      dt_pagamento: format(date, 'yyyy-MM-dd'), // Data no formato 'YYYY-MM-DD'
+      dt_vencimento: format(dueDate, 'yyyy-MM-dd'), // Novo campo para data de vencimento
+      status: 'pendente', // Novo campo de status padrão
       recorrencia: repeats ? parseInt(quantosMeses, 10) : 1, // Recorrência como número inteiro
       fornecedor_id: Number(parceiro), // Convertendo para número
       categoria_despesa_id: Number(categoria), // Convertendo para número
@@ -214,8 +229,6 @@ const NewExpense = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
-    console.log('Dados da despesa sendo enviados (debug detalhado):', JSON.stringify(expenseData, null, 2));
-
   };
   
   const handleRegisterNew = () => {
@@ -227,35 +240,36 @@ const NewExpense = ({ navigation }) => {
     setRepeats(false);
     setQuantosMeses('');
     setDate(new Date());
+    setDueDate(new Date()); // Resetar a data de vencimento também
   };
 
   return (
     <View style={styles.container}>
-      <BarTop2
-        titulo="Saídas"
-        backColor={COLORS.primary}
-        foreColor={COLORS.black}
-        routeMailer=""
-        routeCalculator=""
-        style={{ height: 50 }}
-      />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {loading ? (
-          <ActivityIndicator size="large" color={COLORS.primary} />
-        ) : (
-          <View style={styles.formContainer}>
-            <View style={styles.row}>
-              <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>Imediato</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.buttonActive}>
-                <Text style={styles.buttonTextActive}>Contas a pagar</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.datePicker}>
+    <BarTop2
+      titulo="Saídas"
+      backColor={COLORS.primary}
+      foreColor={COLORS.black}
+      routeMailer=""
+      routeCalculator=""
+      style={{ height: 50 }}
+    />
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      {loading ? (
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      ) : (
+        <View style={styles.formContainer}>
+          <View style={styles.row}>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttonText}>Imediato</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.buttonActive}>
+              <Text style={styles.buttonTextActive}>Contas a pagar</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.datePicker}>
             <Text style={{ color: '#000' }}>Data de pagamento</Text>
             <TouchableOpacity style={styles.dateButton} onPress={() => setShowDatePicker(true)}>
-              <Text style={styles.textDate}>{format(date, 'P', { locale: ptBR })}</Text>
+              <Text style={styles.textDate}>{format(date, 'dd/MM/yyyy', { locale: ptBR })}</Text>
               <Icon name="calendar-outline" size={20} color={COLORS.black} />
             </TouchableOpacity>
             {showDatePicker && (
@@ -265,6 +279,24 @@ const NewExpense = ({ navigation }) => {
                 display="default"
                 onChange={onChangeDate}
                 maximumDate={new Date()}
+                locale="pt-BR" // Configurando o DateTimePicker para português
+              />
+            )}
+          </View>
+
+          <View style={styles.datePicker}>
+            <Text style={{ color: '#000' }}>Data de vencimento</Text>
+            <TouchableOpacity style={styles.dateButton} onPress={() => setShowDueDatePicker(true)}>
+              <Text style={styles.textDate}>{format(dueDate, 'dd/MM/yyyy', { locale: ptBR })}</Text>
+              <Icon name="calendar-outline" size={20} color={COLORS.black} />
+            </TouchableOpacity>
+            {showDueDatePicker && (
+              <DateTimePicker
+                value={dueDate}
+                mode="date"
+                display="default"
+                onChange={onChangeDueDate}
+                minimumDate={new Date()}
                 locale="pt-BR" // Configurando o DateTimePicker para português
               />
             )}
@@ -345,14 +377,16 @@ const NewExpense = ({ navigation }) => {
         )}
       </ScrollView>
       <ConfirmModal
-      visible={modalVisible}
-      onClose={() => setModalVisible(false)}
-      onConfirm={handleConfirm}
-      valor={valor}
-      parceiro={getSupplierNameById(parceiro)}
-      dataPagamento={date.toLocaleDateString()}
-      recorrencia={repeats ? `Pagamento se repete todo dia ${date.getDate()}` : 'Pagamento único'}
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onConfirm={handleConfirm}
+        valor={valor}
+        parceiro={getSupplierNameById(parceiro)}
+        dataPagamento={date.toLocaleDateString()}
+        dataVencimento={dueDate.toLocaleDateString()} // Passando a data de vencimento
+        recorrencia={repeats ? `Pagamento se repete todo dia ${date.getDate()}` : 'Pagamento único'}
       />
+
       <SucessModal
         visible={successModalVisible}
         onClose={() => navigation.navigate('Exits')}
