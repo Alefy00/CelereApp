@@ -182,15 +182,40 @@ const LiquidateExpense = ({ navigation }) => {
 
     setGroupedExpenses(updatedExpenses);
   };
-
-  const handleSearch = () => {
-    const dataInicial = searchDate ? `${searchDate}-01-01` : '';
-    const dataFinal = searchDate ? `${searchDate}-12-31` : '';
-    const valor = searchValue || '';
-
-    fetchExpenses(dataInicial, dataFinal, empresaId, valor);
+  const handleSearch = (startDate, endDate, valor) => {
+    const params = {
+      page: 1,
+      page_size: 100,
+      empresa_id: empresaId,
+      data_inicial: startDate,
+      data_final: endDate,
+      status: 'pendente',
+    };
+  
+    if (valor) {
+      params.valor = valor; // Adiciona o parâmetro de valor apenas se ele for fornecido
+    }
+  
+    setLoading(true);
+    axios.get(EXPENSES_API, { params })
+      .then(response => {
+        if (response.data.status === 200 && response.data.data) {
+          const expenses = response.data.data;
+          setExpenses(expenses);
+          groupExpensesByParent(expenses);
+        } else {
+          Alert.alert('Erro', response.data.message || 'Erro ao buscar despesas.');
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao buscar despesas:', error);
+        Alert.alert('Erro', 'Ocorreu um erro ao buscar as despesas. Verifique sua conexão com a internet e tente novamente.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
-
+  
   const getCategoryNameById = (id) => {
     const category = categories.find((cat) => cat.id === id);
     return category ? category.descricao : 'Categoria não encontrada';

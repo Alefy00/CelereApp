@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import Bartop2 from '../../../../../../components/BarTop2';
 import { COLORS } from "../../../../../../constants";
 import styles from './styles';
-import { FlatList, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Button, FlatList, Text, TextInput, TouchableOpacity, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const despesasFicticias = [
     { id: '1', data: '10/01/2024', valor: '100,00' },
@@ -17,6 +18,17 @@ const despesasFicticias = [
   
     const handleSearch = () => {
       // Lógica de busca pode ser implementada aqui
+    };
+
+    const clearAsyncStorage = async () => {
+      try {
+        await AsyncStorage.clear();
+        console.log('AsyncStorage limpo com sucesso!');
+        Alert.alert('Sucesso', 'O armazenamento foi limpo. Você pode testar um novo número.');
+      } catch (error) {
+        console.error('Erro ao limpar AsyncStorage:', error);
+        Alert.alert('Erro', 'Não foi possível limpar o armazenamento.');
+      }
     };
   
     const renderHeader = () => (
@@ -39,6 +51,7 @@ const despesasFicticias = [
           <Text style={styles.searchButtonText}>Pesquisar</Text>
         </TouchableOpacity>
         <Text style={styles.label}>Lista</Text>
+        <Button title="Limpar Armazenamento" onPress={clearAsyncStorage} color="#FF0000" />
       </View>
     );
   
