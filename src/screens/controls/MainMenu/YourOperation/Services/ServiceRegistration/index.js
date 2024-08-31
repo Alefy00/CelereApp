@@ -1,11 +1,18 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import BarTop2 from '../../../../../../components/BarTop2';
 import { COLORS } from '../../../../../../constants';
 import Icon from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
+
+// Constantes para URLs de API
+const BASE_API_URL = 'https://api.celereapp.com.br';
+const UNIT_MEASURE_API_ENDPOINT = `${BASE_API_URL}/api/und_medida_servico/?page=1&page_size=100`;
+const ISS_RATE_API_ENDPOINT = `${BASE_API_URL}/api/aliquota_iss_servico/?page=1&page_size=100`;
+const REGISTER_SERVICE_API_ENDPOINT = `${BASE_API_URL}/cad/servicos/`;
 
 const AddService = ({ navigation }) => {
   const [barcode, setBarcode] = useState('');
@@ -14,41 +21,126 @@ const AddService = ({ navigation }) => {
   const [unitValue, setUnitValue] = useState(''); 
   const [price, setPrice] = useState('');
   const [issRate, setIssRate] = useState('');
-  const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [showPicker, setShowPicker] = useState(false);
   const [pickerType, setPickerType] = useState('');
+  const [empresaId, setEmpresaId] = useState(null);
+  const [unitsOfMeasure, setUnitsOfMeasure] = useState([]); // Estado para armazenar a lista de unidades de medida
+  const [issRates, setIssRates] = useState([]); // Estado para armazenar a lista de alíquotas ISS
 
-  const categories = [
-    "Selecione a categoria",
-    "Fornecedores de matéria-prima",
-    "Marketing e anúncios",
-    "Folha de pagamento",
-    "Taxas e Tributos",
-    "Frete, transporte e logística",
-    "Aluguel",
-    "Máquinas e equipamentos",
-    "Despesas administrativas",
-    "Pró-labore",
-    "Despesas pessoais (não recomendável)",
-    "Outros"
-  ];
+  // Função para obter o ID da empresa
+  const getEmpresaId = async () => {
+    try {
+      const empresaData = await AsyncStorage.getItem('empresaData');
+      if (empresaData !== null) {
+        return JSON.parse(empresaData); // Se o dado for um número, ele será retornado como tal
+      } else {
+        console.log('Nenhum dado de empresa encontrado no AsyncStorage.');
+      }
+    } catch (error) {
+      console.error('Erro ao obter o ID da empresa do AsyncStorage:', error);
+    }
+    return null;
+  };
 
-  const unitsOfMeasure = ["Livre", "M²", "Hora"];
-  const issRates = ["Não Incluir", "2%", "3%", "5%"];
+  // Função para buscar as unidades de medida da API
+  const fetchUnitsOfMeasure = async (empresa_id) => {
+    try {
+      const response = await fetch(`${UNIT_MEASURE_API_ENDPOINT}&empresa_id=${empresa_id}`);
+      const result = await response.json();
 
-  const handleSave = () => {
-    console.log({
-      barcode,
-      name,
-      unitMeasure,
-      unitValue, 
-      price,
-      issRate,
-      category,
-      description,
-    });
-    navigation.navigate('ServicesMenu')
+      if (response.ok && result.status === 'success') {
+        setUnitsOfMeasure(result.data);
+      } else {
+        console.error('Erro ao buscar unidades de medida:', result.message);
+        Alert.alert('Erro', 'Não foi possível carregar as unidades de medida. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar unidades de medida:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao buscar as unidades de medida. Verifique sua conexão com a internet e tente novamente.');
+    }
+  };
+
+  // Função para buscar as alíquotas ISS da API
+  const fetchIssRates = async (empresa_id) => {
+    try {
+      const response = await fetch(`${ISS_RATE_API_ENDPOINT}&empresa_id=${empresa_id}`);
+      const result = await response.json();
+
+      if (response.ok && result.status === 'success') {
+        setIssRates(result.data);
+      } else {
+        console.error('Erro ao buscar alíquotas ISS:', result.message);
+        Alert.alert('Erro', 'Não foi possível carregar as alíquotas ISS. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar alíquotas ISS:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao buscar as alíquotas ISS. Verifique sua conexão com a internet e tente novamente.');
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const empresaData = await getEmpresaId();
+      if (empresaData) {
+        setEmpresaId(empresaData);
+        await fetchUnitsOfMeasure(empresaData); // Busca as unidades de medida após obter o ID da empresa
+        await fetchIssRates(empresaData); // Busca as alíquotas ISS após obter o ID da empresa
+      } else {
+        console.error('ID da empresa não encontrado. Dados recebidos:', empresaData);
+        Alert.alert('Erro', 'Não foi possível carregar os dados da empresa. Tente novamente mais tarde.');
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Função para salvar o serviço
+  const handleSave = async () => {
+    if (!name || !price || !unitMeasure || !issRate) {
+      Alert.alert('Erro', 'Todos os campos obrigatórios devem ser preenchidos.');
+      return;
+    }
+
+    if (!empresaId) {
+      Alert.alert('Erro', 'ID da empresa não disponível. Tente novamente mais tarde.');
+      return;
+    }
+
+    const currentDate = new Date().toISOString().split('T')[0]; // Obtém a data atual no formato 'YYYY-MM-DD'
+
+    const serviceData = {
+      empresa_id: empresaId,
+      dt_servico: currentDate,
+      nome: name,
+      descricao: description,
+      preco_venda: parseFloat(price),
+      status: 'ativo',
+      unidade_medida: unitMeasure,
+      aliquota_iss: issRate,
+    };
+
+    try {
+      const response = await fetch(REGISTER_SERVICE_API_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(serviceData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Sucesso', result.message || 'Serviço registrado com sucesso.');
+        navigation.navigate('ServicesMenu'); // Exemplo de redirecionamento após sucesso
+      } else {
+        Alert.alert('Erro', result.message || 'Ocorreu um erro ao registrar o serviço.');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar o serviço:', error);
+      Alert.alert('Erro', 'Não foi possível registrar o serviço. Verifique sua conexão e tente novamente.');
+    }
   };
 
   const handlePickerSelect = (value) => {
@@ -56,8 +148,6 @@ const AddService = ({ navigation }) => {
       setUnitMeasure(value);
     } else if (pickerType === 'issRate') {
       setIssRate(value);
-    } else if (pickerType === 'category') {
-      setCategory(value);
     }
     setShowPicker(false);
   };
@@ -65,11 +155,9 @@ const AddService = ({ navigation }) => {
   const renderPicker = () => {
     let data = [];
     if (pickerType === 'unitMeasure') {
-      data = unitsOfMeasure;
+      data = unitsOfMeasure.map(item => item.nome); // Mapeia os nomes das unidades de medida para exibição
     } else if (pickerType === 'issRate') {
-      data = issRates;
-    } else if (pickerType === 'category') {
-      data = categories;
+      data = issRates.map(item => item.nome); // Mapeia os nomes das alíquotas ISS para exibição
     }
 
     return (
@@ -85,9 +173,7 @@ const AddService = ({ navigation }) => {
               selectedValue={
                 pickerType === 'unitMeasure'
                   ? unitMeasure
-                  : pickerType === 'issRate'
-                  ? issRate
-                  : category
+                  : issRate
               }
               onValueChange={handlePickerSelect}
             >
@@ -178,17 +264,6 @@ const AddService = ({ navigation }) => {
           onChangeText={setPrice}
           keyboardType="numeric"
         />
-
-        <TouchableOpacity
-          style={styles.dropdown}
-          onPress={() => {
-            setPickerType('category');
-            setShowPicker(true);
-          }}
-        >
-          <Text style={styles.dropdownText}>{category || 'Categoria'}</Text>
-          <Icon name="filter" size={20} color={COLORS.black} />
-        </TouchableOpacity>
 
         <TextInput
           style={styles.textArea}
