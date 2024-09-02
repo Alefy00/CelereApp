@@ -16,6 +16,7 @@ import Entries from '../screens/controls/MainMenu/YourCash/Entries';
 import Exits from '../screens/controls/MainMenu/YourCash/Exits';
 import NewRegisteredSale from '../screens/controls/MainMenu/YourCash/Entries/NewSale/NewRegisteredSale';
 
+import LoginScreen from '../screens/Start/Login';
 import InitialRegistration from '../screens/Start/InitialRegistration';
 import InitialCode from '../screens/Start/InitialCode';
 import InitialBranch from '../screens/Start/InitialBranch';
@@ -88,6 +89,7 @@ export default () => (
     <Stack.Screen name="Others" component={Others} />
     <Stack.Screen name="Report" component={Report} />
 
+    <Stack.Screen name="LoginScreen" component={LoginScreen} />
     <Stack.Screen name="InitialRegistration" component={InitialRegistration} />
     <Stack.Screen name="InitialCode" component={InitialCode} />
     <Stack.Screen name="InitialBranch" component={InitialBranch} />

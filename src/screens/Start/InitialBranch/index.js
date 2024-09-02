@@ -5,8 +5,13 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
 import ProgressBar from '../components/ProgressBar';
-import CustomModal from './components/CustomModal';
-
+import BarTop3 from '../../../components/BarTop3'; // Importando o BarTop3
+import CustomModal from './components/CustomModal'; // Importando o CustomModal
+import { COLORS } from '../../../constants'; // Importando as cores definidas
+import VarejoIcon from '../../../assets/images/svg/initial/Varejo.svg'; // Importando os ícones
+import AlimentosIcon from '../../../assets/images/svg/initial/food.svg';
+import ServicosIcon from '../../../assets/images/svg/initial/service.svg';
+import FabricacaoIcon from '../../../assets/images/svg/initial/fabrication.svg';
 
 const API_URL_RAMO_ATIVIDADE = 'https://api.celereapp.com.br/cad/ramosatividades/';
 const API_URL_ASSOCIAR_RAMO = 'https://api.celereapp.com.br/cad/associar_ramo_atividade/';
@@ -15,9 +20,9 @@ const subcategories = {
   varejo: 'V',
   servicos: 'S',
   fabricacao: 'F',
+  alimentos: 'A',
 };
 
-// Hook personalizado para carregar dados do usuário
 const useUserData = (navigation) => {
   const [userData, setUserData] = useState(null);
 
@@ -91,91 +96,144 @@ const InitialBranch = ({ navigation }) => {
       Alert.alert('Atenção', 'Por favor, selecione um ramo de atividade antes de prosseguir.');
       return;
     }
-
+  
     if (!userData || !userData.id) {
       Alert.alert('Erro', 'Dados do usuário não carregados. Tente novamente.');
       return;
     }
-
+  
     try {
       setLoading(true);
-      const response = await axios.post(API_URL_ASSOCIAR_RAMO, {
+  
+      // Log para verificar os dados que estão sendo enviados
+      console.log('Dados enviados para a API:', {
         empresa_id: userData.id,
         ramo_atividade_id: selectedSubcategory,
       });
-    
+  
+      const response = await axios.post(
+        API_URL_ASSOCIAR_RAMO,
+        {
+          empresa_id: userData.id,
+          ramo_atividade_id: selectedSubcategory,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json', // Adicionando o cabeçalho Content-Type
+          },
+        }
+      );
+  
       console.log('API Response:', response.data);
-    
-      // Verifica se o status HTTP é 200 e se a resposta contém "success" no campo "status"
+  
       if (response.status >= 200 && response.status < 300 && response.data.status && response.data.status.toLowerCase() === 'success') {
-        Alert.alert('Sucesso', 'Ramo de atividade associado com sucesso.', [
-          { text: 'OK', onPress: () => navigation.navigate('Start') }
-        ]);
+        navigation.navigate('MainTab'); // Navegação direta em caso de sucesso
       } else {
         console.log('Unexpected response:', response.data);
         Alert.alert("Erro", response.data.message || 'Erro ao salvar o ramo de atividade. Tente novamente.');
       }
     } catch (error) {
       console.error("Erro ao conectar à API:", error);
-      Alert.alert("Erro", "Não foi possível conectar à API. Verifique sua conexão e tente novamente.");
+      if (error.response) {
+        // Mostrar mensagem de erro mais detalhada do servidor, se disponível
+        console.log('Erro na resposta da API:', error.response.data);
+        Alert.alert("Erro", error.response.data.message || 'Erro ao conectar à API.');
+      } else {
+        Alert.alert("Erro", "Não foi possível conectar à API. Verifique sua conexão e tente novamente.");
+      }
     } finally {
       setLoading(false);
     }
-    
-
+  
     closeModal();
   };
+  
 
   return (
     <View style={styles.container}>
+      <View style={styles.barTopContainer}>
+        <BarTop3
+          titulo={'Voltar'}
+          backColor={COLORS.primary}
+          foreColor={COLORS.black}
+          routeMailer={''}
+          routeCalculator={''}
+        />
+      </View>
+
       <ProgressBar currentStep={4} totalSteps={4} />
-      <Text style={styles.label}>Qual seu ramo de atuação?</Text>
 
-      <TouchableOpacity
-        style={[
-          styles.option,
-          selectedCategory === 'varejo' && styles.optionSelected,
-        ]}
-        onPress={() => openModal('varejo')}
-        disabled={loading}
-      >
-        <Text style={styles.optionText}>Varejo</Text>
-        <Text style={styles.optionSubText}>Revenda de produtos</Text>
-      </TouchableOpacity>
+      <View style={styles.contentContainer}>
+        <Text style={styles.title}>Ramo de atividade predominante</Text>
 
-      <TouchableOpacity
-        style={[
-          styles.option,
-          selectedCategory === 'servicos' && styles.optionSelected,
-        ]}
-        onPress={() => openModal('servicos')}
-        disabled={loading}
-      >
-        <Text style={styles.optionText}>Serviços</Text>
-      </TouchableOpacity>
+        <View style={styles.row}>
+          <TouchableOpacity
+            style={[
+              styles.option,
+              selectedCategory === 'varejo' && styles.optionSelected,
+            ]}
+            onPress={() => openModal('varejo')}
+            disabled={loading}
+          >
+            <VarejoIcon width={50} height={50} />
+            <Text style={styles.optionText}>Varejo</Text>
+            <Text style={styles.optionSubText}>Revenda de produtos</Text>
+          </TouchableOpacity>
 
-      <TouchableOpacity
-        style={[
-          styles.option,
-          selectedCategory === 'fabricacao' && styles.optionSelected,
-        ]}
-        onPress={() => openModal('fabricacao')}
-        disabled={loading}
-      >
-        <Text style={styles.optionText}>Fabricação / Produção</Text>
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.option,
+              selectedCategory === 'alimentos' && styles.optionSelected,
+            ]}
+            onPress={() => openModal('alimentos')}
+            disabled={loading}
+          >
+            <AlimentosIcon width={50} height={50} />
+            <Text style={styles.optionText}>Alimentos</Text>
+            <Text style={styles.optionSubText}>Preparo e venda de alimentos</Text>
+          </TouchableOpacity>
+        </View>
 
-      {loading && <ActivityIndicator size="large" color="#000" style={styles.activityIndicator} />}
+        <View style={styles.row}>
+          <TouchableOpacity
+            style={[
+              styles.option,
+              selectedCategory === 'servicos' && styles.optionSelected,
+            ]}
+            onPress={() => openModal('servicos')}
+            disabled={loading}
+          >
+            <ServicosIcon width={50} height={50} />
+            <Text style={styles.optionText}>Serviços</Text>
+            <Text style={styles.optionSubText}>Serviços prestados</Text>
+          </TouchableOpacity>
 
-      <CustomModal
-        visible={modalVisible}
-        fadeAnim={fadeAnim}
-        subcategories={currentSubcategories}
-        selectedSubcategory={selectedSubcategory}
-        setSelectedSubcategory={setSelectedSubcategory}
-        onClose={closeModal}
-        onSave={handleSave}
-      />
+          <TouchableOpacity
+            style={[
+              styles.option,
+              selectedCategory === 'fabricacao' && styles.optionSelected,
+            ]}
+            onPress={() => openModal('fabricacao')}
+            disabled={loading}
+          >
+            <FabricacaoIcon width={50} height={50} />
+            <Text style={styles.optionText}>Fabricação</Text>
+            <Text style={styles.optionSubText}>Tipo de fabricação</Text>
+          </TouchableOpacity>
+        </View>
+
+        {loading && <ActivityIndicator size="large" color="#000" style={styles.activityIndicator} />}
+
+        <CustomModal
+          visible={modalVisible}
+          fadeAnim={fadeAnim}
+          subcategories={currentSubcategories}
+          selectedSubcategory={selectedSubcategory}
+          setSelectedSubcategory={setSelectedSubcategory}
+          onClose={closeModal}
+          onSave={handleSave}
+        />
+      </View>
     </View>
   );
 };

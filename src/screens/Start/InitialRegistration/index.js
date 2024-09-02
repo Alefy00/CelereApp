@@ -1,9 +1,12 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Text, View, TextInput, Modal, ActivityIndicator, Alert } from 'react-native';
+import { Button, Text, View, TextInput, Modal, ActivityIndicator, TouchableOpacity } from 'react-native';
+import BarTop3 from '../../../components/BarTop3';
+import { COLORS } from '../../../constants';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CountryFlag from 'react-native-country-flag';
+import Icon from 'react-native-vector-icons/Ionicons';
 import LogoApp from '../../../assets/images/logo.svg';
 import ProgressBar from '../components/ProgressBar';
 import styles from './styles';
@@ -21,7 +24,6 @@ const InitialRegistration = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const [isSuccess, setIsSuccess] = useState(false);
 
   useEffect(() => {
     const checkStoredData = async () => {
@@ -42,7 +44,7 @@ const InitialRegistration = ({ navigation }) => {
   }, [navigation]);
 
   const handleDdiChange = useCallback((text) => {
-    const trimmedDdi = text.replace(/\D/g, '').slice(0, 2); // Limita a 2 dígitos
+    const trimmedDdi = text.replace(/\D/g, '').slice(0, 2);
     const isoCodes = { '1': 'US', '55': 'BR', '44': 'GB', '91': 'IN' };
     setPhoneData(prevState => ({
       ...prevState,
@@ -54,17 +56,16 @@ const InitialRegistration = ({ navigation }) => {
   const handleInputChange = useCallback((name, value) => {
     let maxLength = 0;
     if (name === 'ddd') {
-      maxLength = 2; // Limita o DDD a 2 dígitos
+      maxLength = 2;
     } else if (name === 'number') {
-      maxLength = 9; // Limita o número de telefone a 9 dígitos
+      maxLength = 9;
     }
-    const trimmedValue = value.replace(/\D/g, '').slice(0, maxLength); // Limita a entrada conforme necessário
+    const trimmedValue = value.replace(/\D/g, '').slice(0, maxLength);
     setPhoneData(prevState => ({ ...prevState, [name]: trimmedValue }));
   }, []);
 
-  const showModal = useCallback((message, success = false) => {
+  const showModal = useCallback((message) => {
     setModalMessage(message);
-    setIsSuccess(success);
     setModalVisible(true);
   }, []);
 
@@ -84,7 +85,7 @@ const InitialRegistration = ({ navigation }) => {
   const checkUserExists = useCallback(async () => {
     try {
       const response = await axios.get(VERIFY_USER_URL, {
-        params: {  // Usando 'params' para adicionar os parâmetros na URL
+        params: {
           ddi: phoneData.ddi,
           ddd: phoneData.ddd,
           celular: phoneData.number,
@@ -92,17 +93,14 @@ const InitialRegistration = ({ navigation }) => {
       });
 
       if (response.data.status === 'success' && response.data.data.length > 0) {
-        // Se o usuário já existe, redirecionar para MainTab
-        const userData = response.data.data[0]; // Assumindo que o primeiro resultado é o usuário desejado
-
+        const userData = response.data.data[0];
         const newUserData = {
           id: userData.id,
           ...phoneData,
-          isValidated: true, // Marcando como validado
+          isValidated: true,
           codigo_ativacao: userData.codigo_ativacao,
         };
 
-        // Armazena os dados do usuário e da empresa
         await AsyncStorage.setItem('userPhone', JSON.stringify(newUserData));
 
         if (userData.empresa) {
@@ -124,7 +122,6 @@ const InitialRegistration = ({ navigation }) => {
   const handleSend = useCallback(async () => {
     if (!validateFields()) return;
 
-    // Primeiro, verifica se o usuário já existe
     const userExists = await checkUserExists();
     if (userExists) return;
 
@@ -145,7 +142,6 @@ const InitialRegistration = ({ navigation }) => {
           codigo_ativacao,
         };
 
-        // Armazena os dados do usuário e da empresa
         await AsyncStorage.setItem('userPhone', JSON.stringify(newUserData));
 
         if (empresa) {
@@ -153,7 +149,7 @@ const InitialRegistration = ({ navigation }) => {
           console.log('Dados da empresa armazenados:', empresa);
         }
 
-        showModal('Registro realizado com sucesso!', true);
+        navigation.navigate('InitialCode');
       } else {
         showModal(response.data.message || 'Erro ao registrar. Tente novamente.');
       }
@@ -161,54 +157,69 @@ const InitialRegistration = ({ navigation }) => {
       console.error('Erro ao conectar à API:', error.message);
       showModal('Não foi possível conectar à API. Verifique sua conexão e tente novamente.');
     }
-  }, [phoneData, validateFields, checkUserExists, showModal]);
+  }, [phoneData, validateFields, checkUserExists, showModal, navigation]);
 
   const handleModalClose = () => {
     setModalVisible(false);
-    if (isSuccess) {
-      navigation.navigate('InitialCode');
-    }
   };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <LogoApp width="100%" height="110" style={{ marginTop: 100, marginBottom: 50 }} />
-        <ActivityIndicator size="large" color="#000" />
+        <LogoApp width="100%" height="110"/>
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <ProgressBar currentStep={1} totalSteps={4} />
-      <Text style={styles.text}>Informe o seu Telefone: </Text>
-      <View style={styles.inputContainer}>
-        {phoneData.isoCode ? <CountryFlag isoCode={phoneData.isoCode} size={25} /> : null}
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          placeholder="DDI"
-          value={phoneData.ddi}
-          onChangeText={(text) => handleDdiChange(text)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder='DDD'
-          keyboardType="numeric"
-          value={phoneData.ddd}
-          onChangeText={(text) => handleInputChange('ddd', text)}
-        />
-        <TextInput
-          style={styles.inputNumber}
-          placeholder='0 0000-0000'
-          keyboardType="numeric"
-          value={phoneData.number}
-          onChangeText={(text) => handleInputChange('number', text)}
+      <View style={styles.barTopContainer}>
+        <BarTop3
+          titulo={'Voltar'}
+          backColor={COLORS.primary}
+          foreColor={COLORS.black}
+          routeMailer={''}
+          routeCalculator={''}
         />
       </View>
-      <Button title="Enviar" onPress={handleSend} />
-
+      <ProgressBar currentStep={1} totalSteps={4} />
+      <View style={styles.contentContainer}>
+        <Text style={styles.title}>Informe seu telefone</Text>
+        <View style={styles.cardContainer}>
+          <View style={styles.inputWrapper}>
+            <View style={styles.ddiContainer}>
+              <CountryFlag isoCode={phoneData.isoCode} size={25} />
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                placeholder="+55"
+                value={phoneData.ddi}
+                onChangeText={(text) => handleDdiChange(text)}
+              />
+            </View>
+            <TextInput
+              style={styles.inputDDD}
+              placeholder='(XX)'
+              keyboardType="numeric"
+              value={phoneData.ddd}
+              onChangeText={(text) => handleInputChange('ddd', text)}
+            />
+            <TextInput
+              style={styles.inputNumber}
+              placeholder='XXXXX-XXXX'
+              keyboardType="numeric"
+              value={phoneData.number}
+              onChangeText={(text) => handleInputChange('number', text)}
+            />
+          </View>
+          <TouchableOpacity style={styles.button} onPress={handleSend}>
+            <Icon name="arrow-forward" size={20} color="#000" />
+            <Text style={styles.buttonText}>Enviar Código</Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.infoText}>Um código será enviado para o seu WhatsApp.</Text>
+      </View>
       <Modal
         animationType="slide"
         transparent={true}
@@ -227,6 +238,7 @@ const InitialRegistration = ({ navigation }) => {
       </Modal>
     </View>
   );
+  
 };
 
 export default InitialRegistration;

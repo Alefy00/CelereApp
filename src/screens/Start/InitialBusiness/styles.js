@@ -1,98 +1,89 @@
 /* eslint-disable prettier/prettier */
 import { StyleSheet } from "react-native";
+import { COLORS } from "../../../constants";
 
-const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 20,
-      backgroundColor: '#fff',
-    },
-    contentContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      paddingHorizontal: 20,
-      marginTop: 20,
-    },
-    stepText: {
-      marginLeft: 10,
-      fontSize: 12,
-      color: '#000',
-    },
-    input: {
-      height: 50,
-      borderColor: '#000',
-      borderWidth: 1,
-      borderRadius: 10,
-      paddingHorizontal: 10,
-      marginBottom: 20,
-    },
-    label: {
-      fontSize: 14,
-      marginBottom: 5,
-      color: '#000',
-    },
-    pickerContainer: {
-      height: 50,
-      borderColor: '#000',
-      borderWidth: 1,
-      borderRadius: 10,
-      marginBottom: 20,
-      justifyContent: 'center',
-    },
-    picker: {
-      height: 50,
-      width: '100%',
-    },
-    button: {
-      height: 50,
-      backgroundColor: '#FFEB3B',
-      borderRadius: 10,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    buttonText: {
-      fontSize: 18,
-      color: '#000',
-    },
-    modalContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',  // Fundo escurecido
-    },
-    modalView: {
-      width: '80%',
-      backgroundColor: '#fff',
-      borderRadius: 10,
-      padding: 20,
-      alignItems: 'center',
-      shadowColor: '#000',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5,
-    },
-    modalText: {
-      fontSize: 18,
-      color: '#000',
-      marginBottom: 20,
-      textAlign: 'center',
-    },
-    modalButton: {
-      height: 50,
-      backgroundColor: '#FFEB3B',
-      borderRadius: 10,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-    },
-    modalButtonText: {
-      fontSize: 18,
-      color: '#000',
-    },
-  });
-
-export default styles;
+export default StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
+  },
+  barTopContainer: {
+    width: '100%',
+    height: 50,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  progressBarContainer: {
+    width: '100%',
+    paddingVertical: 10,
+    backgroundColor: COLORS.primary,
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#000',
+    textAlign: 'center',
+  },
+  cardContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    width: '90%',
+  },
+  input: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#000',
+    width: '100%',
+    marginBottom: 5,
+    fontSize: 16,
+    paddingHorizontal: 10,
+    color: COLORS.black,
+  },
+  pickerContainer: {
+    width: '100%',
+    borderBottomWidth: 1,
+    borderBottomColor: '#000',
+    marginBottom: 5,
+  },
+  picker: {
+    width: '100%',
+  },
+  button: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 5,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    width: '100%',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#000',
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  errorMessageContainer: {
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  errorMessageText: {
+    color: COLORS.red,
+    textAlign: 'center',
+  },
+});

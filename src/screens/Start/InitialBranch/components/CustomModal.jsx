@@ -13,7 +13,7 @@ const CustomModal = ({
   onSave,
 }) => (
   <Modal
-    animationType="none"
+    animationType="fade"
     transparent={true}
     visible={visible}
     onRequestClose={onClose}
@@ -21,7 +21,7 @@ const CustomModal = ({
     <Animated.View style={[styles.modalContainer, { opacity: fadeAnim }]}>
       <View style={styles.modalContent}>
         <Text style={styles.modalTitle}>Selecione um Ramo de Atividade</Text>
-        <ScrollView>
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
           {subcategories.map((subcategory, index) => (
             <TouchableOpacity
               key={index}
@@ -59,67 +59,74 @@ CustomModal.propTypes = {
   onSave: PropTypes.func.isRequired,
 };
 
-
 const styles = {
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Aumentando a opacidade para um efeito mais escuro
   },
   modalContent: {
-    width: '80%',
-    padding: 20,
+    width: '85%', // Ligeiramente mais largo para melhor usabilidade
+    padding: 25,
     backgroundColor: '#FFF',
-    borderRadius: 10,
+    borderRadius: 15, // Arredondamento maior para um visual mais moderno
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4, // Sombra mais profunda
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.3, // Sombra mais pronunciada
+    shadowRadius: 5,
+    elevation: 10,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color: '#333', // Cores mais escuras para melhor contraste
+  },
+  scrollViewContent: {
+    alignItems: 'center', // Alinhar os itens no centro para uma apresentação limpa
   },
   modalOption: {
-    padding: 15,
+    width: '100%',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
     borderRadius: 10,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: '#F7F7F7', // Cor de fundo mais clara
     marginBottom: 10,
     alignItems: 'center',
   },
   modalOptionSelected: {
-    backgroundColor: '#FFEB3B',
+    backgroundColor: '#FFEB3B', // Cor destacada para seleção
   },
   modalOptionText: {
     fontSize: 16,
     color: '#333',
+    fontWeight: '500', // Peso da fonte para legibilidade
   },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
+    marginTop: 25,
   },
   modalButton: {
     flex: 1,
-    padding: 10,
+    paddingVertical: 12,
     alignItems: 'center',
     borderRadius: 10,
-    backgroundColor: '#CCC',
+    backgroundColor: '#DDD', // Fundo mais claro para o botão 'Fechar'
     marginHorizontal: 5,
   },
   modalSaveButton: {
-    backgroundColor: '#FFEB3B',
+    backgroundColor: '#FFEB3B', // Mantendo a cor consistente com o tema do aplicativo
   },
   modalButtonText: {
     fontSize: 16,
     color: '#333',
+    fontWeight: 'bold', // Textos dos botões mais destacados
   },
 };
 

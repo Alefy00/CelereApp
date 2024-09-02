@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { COLORS } from '../../../constants';
+
 const ProgressBar = ({ currentStep, totalSteps }) => {
   const progressPercentage = (currentStep / totalSteps) * 100;
 
@@ -16,34 +17,30 @@ const ProgressBar = ({ currentStep, totalSteps }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      paddingTop: 20,
-      paddingHorizontal: 10,
-      backgroundColor: '#fff',
-      zIndex: 10,  // Garantir que a barra fique acima de outros elementos
-    },
-    progressBar: {
-      height: 8,
-      width: '100%',
-      backgroundColor: '#e0e0e0',
-      borderRadius: 4,
-      overflow: 'hidden',
-    },
-    progress: {
-      height: '100%',
-      backgroundColor: COLORS.primary,
-    },
-    stepText: {
-      marginTop: 5,
-      textAlign: 'center',
-      fontSize: 14,
-      color: '#333',
-    },
-  });
-  
+  container: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: COLORS.primary,
+    width: '100%',  // Barra de progresso ocupa toda a largura da tela
+  },
+  progressBar: {
+    height: 16,
+    width: '100%',
+    backgroundColor: '#e8cd07',
+    borderRadius: 15,
+    overflow: 'hidden',
+  },
+  progress: {
+    height: '100%',
+    backgroundColor: COLORS.black,
+    borderRadius: 15,
+  },
+  stepText: {
+    marginTop: 5,
+    textAlign: 'center',
+    fontSize: 16,
+    color: COLORS.black,
+  },
+});
 
 export default ProgressBar;

@@ -1,109 +1,74 @@
 /* eslint-disable prettier/prettier */
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
+import { COLORS } from "../../../constants";
 
-const styles = StyleSheet.create({
+export default StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#FFF',
+    backgroundColor: COLORS.primary,
   },
-  label: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 20,
-  },
-  option: {
-    padding: 15,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#DDD',
+  barTopContainer: {
+    width: '100%',
+    height: 50,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
     alignItems: 'center',
   },
+  progressBarContainer: {
+    width: '100%',
+    backgroundColor: COLORS.primary,
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '900',
+    marginBottom: 20,
+    color: '#000',
+    textAlign: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+
+    width: '100%',
+  },
+  option: {
+    width: '45%',
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    marginVertical: 10,
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  optionDisabled: {
+    backgroundColor: '#f0f0f0',
+    opacity: 0.6,
+  },
   optionSelected: {
-    backgroundColor: '#FFEB3B',
-    shadowColor: '#000', // Adiciona sombra
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5, // Apenas para Android
+    borderColor: COLORS.primary,
+    borderWidth: 2,
   },
   optionText: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+    marginTop: 10,
   },
   optionSubText: {
     fontSize: 14,
     color: '#666',
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: '80%',
-    padding: 20,
-    backgroundColor: '#FFF',
-    borderRadius: 10,
-    shadowColor: '#000', // Adiciona sombra
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5, // Apenas para Android
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  modalOption: {
-    padding: 15,
-    borderRadius: 10,
-    backgroundColor: '#F0F0F0',
-    marginBottom: 10,
-    alignItems: 'center',
-  },
-  modalOptionSelected: {
-    backgroundColor: '#FFEB3B',
-  },
-  modalOptionText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  modalButton: {
-    flex: 1,
-    padding: 10,
-    alignItems: 'center',
-    borderRadius: 10,
-    backgroundColor: '#CCC',
-    marginHorizontal: 5,
-  },
-  modalSaveButton: {
-    backgroundColor: '#FFEB3B',
-  },
-  modalButtonText: {
-    fontSize: 16,
-    color: '#333',
-  },
   activityIndicator: {
     marginTop: 20,
   },
 });
-
-export default styles;
