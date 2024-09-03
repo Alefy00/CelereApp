@@ -11,13 +11,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    marginBottom: 0, // Espaçamento para o logo
+    marginBottom: 20, // Espaçamento para o logo
   },
   presentationImage: {
     marginBottom: 20, // Espaçamento para a imagem de apresentação
   },
   description: {
-    fontSize: 20,
+    fontSize: 18,
     textAlign: 'center',
     color: '#000',
     marginBottom: 10,

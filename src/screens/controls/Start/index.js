@@ -4,11 +4,9 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
-  Text,
-  TouchableOpacity,
-  View,
   Platform,
-  ScrollView
+  ScrollView,
+  View
 } from 'react-native';
 import {Container} from './styles';
 import {useNavigation} from '@react-navigation/native';
@@ -24,10 +22,10 @@ import Card from './components/Card';
 import styled from 'styled-components/native';
 
 export const Title = styled.Text`
-  margin-top: 15px;
+  margin-top: 10px;
   margin-left: 15px;
   font-size: 27px;
-  font-weight: bold;
+  font-weight: 900;
   color: #000000;
   font-family: ${FONTS.fregular};
 `;
@@ -36,6 +34,7 @@ export const SubTitle = styled.Text`
   margin-left: 15px;
   margin-right: 15px;
   font-size: 15px;
+  margin-bottom: 15px;
   font-family: ${FONTS.fregular};
   font-weight: normal;
   color: #000000;
@@ -44,10 +43,7 @@ export const SubTitle = styled.Text`
 
 const Start = ({navigation}) => {
   const {t} = useTranslation();
-
-  const handleSave = ()=>{
-    navigation.navigate('MainTab');
-  };
+;
   return (
     <Container
       backColor={COLORS.background}
@@ -57,63 +53,45 @@ const Start = ({navigation}) => {
         <KeyboardAvoidingView behavior="position" enabled>
           <>
             <BarTop2
-              titulo={t('return')}
+              titulo={t('Voltar')}
               backColor={COLORS.primary}
               foreColor={COLORS.black}
               routeMailer={''}
               routeCalculator={''}
             />
 
-            <ScrollView>
-              <Title>{t('start')}</Title>
-              <SubTitle>{t('desc_start')}</SubTitle>
+            <View>
+              <Title>{t('Primeiros Passos')}</Title>
+              <SubTitle>{t('São passos essenciais para te ajudarmos a gerir seu fluxo de caixa com eficácia.')}</SubTitle>
 
               <Card
                 number="1"
                 title={t('item1')}
-                buttontitle={t('start')}
+                buttontitle={t('Começar')}
                 pageScreen="OpeningBalance"
               />
 
               <Card
                 number="2"
-                title={t('item2')}
-                buttontitle={t('start')}
-                pageScreen="InitialSupplier"
+                title={t('Vamos juntos projetar suas vendas')}
+                buttontitle={t('Começar')}
+                pageScreen="MonthlySalesForecast"
               />
 
               <Card
                 number="3"
-                title={t('item3')}
-                buttontitle={t('start')}
-                pageScreen="ExpensePage"
+                title={t('Adicione seu regime tributário')}
+                buttontitle={t('Começar')}
+                pageScreen=""
               />
 
               <Card
                 number="4"
-                title={t('item4')}
-                buttontitle={t('start')}
-                pageScreen="SalesReceive"
+                title={t('CélerePay - Seu celular vira maquininha e você tem mais controle')}
+                buttontitle={t('Começar')}
+                pageScreen=""
               />
-
-              <Card
-                number="5"
-                title={t('item5')}
-                buttontitle={t('start')}
-                pageScreen="MonthlySalesForecast"
-              />
-              <Card
-                number="6"
-                title={t('Previsão de Compras')}
-                buttontitle={t('start')}
-                pageScreen="BuyPrevision"
-              />
-              <View style={{justifyContent: 'center',alignItems: 'center', padding: 25}}>
-                <TouchableOpacity style={{ height: 70, backgroundColor: COLORS.primary, justifyContent: 'center',alignItems: 'center', borderRadius: 4, paddingHorizontal: 46, marginTop: 16}} onPress={handleSave}>
-                      <Text style={{fontSize: 16,color: COLORS.white,fontWeight: 'bold'}}>Salvar</Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
+            </View>
           </>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>

@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Button, Text, TextInput, View, ActivityIndicator, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,7 +16,10 @@ const InitialCode = ({ navigation }) => {
   const [codigoAtivacao1, setCodigoAtivacao1] = useState('');
   const [codigoAtivacao2, setCodigoAtivacao2] = useState('');
   const [loading, setLoading] = useState(false);
-  const [modalMessage, setModalMessage] = useState(''); // Mantendo apenas mensagens de erro
+  const [modalMessage, setModalMessage] = useState('');
+
+  // Adicionar refs para os campos de input
+  const codigoAtivacao2Ref = useRef(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -54,7 +57,7 @@ const InitialCode = ({ navigation }) => {
     }
 
     setLoading(true);
-    const codigoAtivacao = `${codigoAtivacao1}${codigoAtivacao2}`; // Concatenar os dois dígitos
+    const codigoAtivacao = `${codigoAtivacao1}${codigoAtivacao2}`;
     try {
       const response = await axios.patch(`${API_URL}${userData.id}/`, {
         codigo_ativacao: codigoAtivacao,
@@ -74,9 +77,15 @@ const InitialCode = ({ navigation }) => {
     }
   }, [codigoAtivacao1, codigoAtivacao2, userData, validateFields, navigation]);
 
+  const handleCodigoAtivacao1Change = (text) => {
+    setCodigoAtivacao1(text);
+    if (text.length === 1) {
+      codigoAtivacao2Ref.current.focus();
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* BarTop3 no topo */}
       <View style={styles.barTopContainer}>
         <BarTop3
           titulo={'Voltar'}
@@ -87,10 +96,8 @@ const InitialCode = ({ navigation }) => {
         />
       </View>
 
-      {/* Barra de Progresso logo abaixo do BarTop3 */}
       <ProgressBar currentStep={2} totalSteps={4} />
 
-      {/* Conteúdo Centralizado no Meio da Tela */}
       <View style={styles.contentContainer}>
         <Text style={styles.title}>Um código foi enviado para o seu número via WhatsApp</Text>
         <View style={styles.cardContainer}>
@@ -98,17 +105,18 @@ const InitialCode = ({ navigation }) => {
             <TextInput
               style={styles.codeInput}
               value={codigoAtivacao1}
-              onChangeText={setCodigoAtivacao1}
+              onChangeText={handleCodigoAtivacao1Change}
               keyboardType='numeric'
-              maxLength={1} // Limitando a 1 dígito
+              maxLength={1}
               placeholder='-'
             />
             <TextInput
+              ref={codigoAtivacao2Ref}
               style={styles.codeInput}
               value={codigoAtivacao2}
               onChangeText={setCodigoAtivacao2}
               keyboardType='numeric'
-              maxLength={1} // Limitando a 1 dígito
+              maxLength={1}
               placeholder='-'
             />
           </View>

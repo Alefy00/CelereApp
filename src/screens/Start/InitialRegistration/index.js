@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Button, Text, View, TextInput, Modal, ActivityIndicator, TouchableOpacity } from 'react-native';
 import BarTop3 from '../../../components/BarTop3';
 import { COLORS } from '../../../constants';
@@ -24,6 +24,9 @@ const InitialRegistration = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  
+  // Adiciona uma ref para o campo de número de telefone
+  const numberInputRef = useRef(null);
 
   useEffect(() => {
     const checkStoredData = async () => {
@@ -62,6 +65,11 @@ const InitialRegistration = ({ navigation }) => {
     }
     const trimmedValue = value.replace(/\D/g, '').slice(0, maxLength);
     setPhoneData(prevState => ({ ...prevState, [name]: trimmedValue }));
+
+    // Foca no campo de número se o DDD estiver completo
+    if (name === 'ddd' && trimmedValue.length === maxLength) {
+      numberInputRef.current.focus();
+    }
   }, []);
 
   const showModal = useCallback((message) => {
@@ -203,9 +211,10 @@ const InitialRegistration = ({ navigation }) => {
               placeholder='(XX)'
               keyboardType="numeric"
               value={phoneData.ddd}
-              onChangeText={(text) => handleInputChange('ddd', text)}
+              onChangeText={(text) => handleInputChange('ddd', text)}  // Verifica o comprimento do DDD e foca automaticamente
             />
             <TextInput
+              ref={numberInputRef}  // Adiciona a referência aqui
               style={styles.inputNumber}
               placeholder='XXXXX-XXXX'
               keyboardType="numeric"

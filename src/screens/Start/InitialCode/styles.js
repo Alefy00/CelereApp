@@ -18,6 +18,7 @@ export default StyleSheet.create({
     width: '100%',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
+    marginBottom:20,
   },
   contentContainer: {
     flex: 1,
@@ -45,6 +46,7 @@ export default StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
     width: '90%',
+    marginBottom:10
   },
   codeInputContainer: {
     flexDirection: 'row',

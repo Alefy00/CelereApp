@@ -43,6 +43,8 @@ export default StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
     width: '100%',
+    marginBottom:20,
+    justifyContent:'center',
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -94,7 +96,7 @@ export default StyleSheet.create({
     fontSize: 15,
     color: '#000',
     textAlign: 'center',
-    marginTop: 25,
+    marginBottom: 50,
     alignSelf: 'flex-start',
   },
   modalContainer: {
