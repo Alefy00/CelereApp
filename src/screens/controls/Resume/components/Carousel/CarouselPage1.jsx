@@ -8,7 +8,7 @@ const CarouselPage1 = ({ onNext }) => {
   return (
     <View style={styles.pageContainer}>
       <Text style={styles.title}>
-        Saldo Caixa <Icon name="alert-circle" size={16} color={COLORS.gray} />
+        Saldo Caixa <Icon name="alert-circle" size={16} color={COLORS.lightGray} />
       </Text>
       <Text style={styles.amount}>R$1.500</Text>
       <TouchableOpacity 

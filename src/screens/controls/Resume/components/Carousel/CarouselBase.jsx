@@ -25,7 +25,7 @@ const CarouselBase = () => {
     { key: '4', content: <CarouselPage4 onNext={() => goToNextPage()} onPrevious={() => goToPreviousPage()} /> },
     { key: '5', content: <CarouselPage5 onNext={() => goToNextPage()} onPrevious={() => goToPreviousPage()} /> },
     { key: '6', content: <CarouselPage6 onNext={() => goToNextPage()} onPrevious={() => goToPreviousPage()} /> },
-    { key: '7', content: <CarouselPage7 onNext={() => goToNextPage()} onPrevious={() => goToPreviousPage()} /> },
+    { key: '7', content: <CarouselPage7 onPrevious={() => goToPreviousPage()} /> },
     // Adicione aqui outras páginas conforme necessário
   ];
 
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   indicatorContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 10,
+
   },
   indicator: {
     width: 8,

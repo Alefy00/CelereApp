@@ -195,7 +195,7 @@ const Winning = ({ navigation }) => {
                 <Icon name="arrow-down-outline" size={20} color={COLORS.red} />
                 <Text style={[styles.incomeHeaderText, { color: COLORS.red }]}>Despesas</Text>
               </View>
-              <View style={{ marginBottom: 60 }}>
+              <View style={{ marginBottom: 120 }}>
                 <ExpenseDetails />
               </View>
             </View>

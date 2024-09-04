@@ -31,12 +31,6 @@ const CarouselPage7 = ({ onNext, onPrevious }) => {
         <Icon name="arrow-back" size={24} color={COLORS.black} />
       </TouchableOpacity>
 
-      <TouchableOpacity 
-        style={styles.arrowButtonRight}
-        onPress={onNext}
-      >
-        <Icon name="arrow-forward" size={24} color={COLORS.black} />
-      </TouchableOpacity>
 
       {/* Gráfico de Barras Horizontais */}
       <View style={styles.chartContainer}>
@@ -88,7 +82,7 @@ const CarouselPage7 = ({ onNext, onPrevious }) => {
       {/* Resultado */}
       <View style={styles.resultContainer}>
         <Text style={styles.resultTitle}>
-          Saldo <Icon name="alert-circle" size={16} color={COLORS.gray} />
+          Saldo <Icon name="alert-circle" size={16} color={COLORS.lightGray} />
         </Text>
         <Text style={styles.resultAmount}>R$ { saldoAtualizado - saldoMinimo }</Text>
       </View>

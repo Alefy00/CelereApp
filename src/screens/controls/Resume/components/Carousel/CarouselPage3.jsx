@@ -25,7 +25,7 @@ const CarouselPage3 = ({ onNext, onPrevious }) => {
 
       {/* Título e Valor */}
       <Text style={styles.title}>
-        Contas em Atraso <Icon name="alert-circle" size={16} color={COLORS.gray} />
+        Contas em Atraso <Icon name="alert-circle" size={16} color={COLORS.lightGray} />
       </Text>
 
       <Text style={styles.number}>0</Text>

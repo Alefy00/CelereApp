@@ -40,7 +40,7 @@ const CarouselPage5 = ({ onNext, onPrevious }) => {
       {/* Resultado */}
       <View style={styles.resultContainer}>
         <Text style={styles.resultTitle}>
-          Saldo Previsto <Icon name="alert-circle" size={16} color={COLORS.gray} />
+          Saldo Previsto <Icon name="alert-circle" size={16} color={COLORS.lightGray} />
         </Text>
         <Text style={styles.resultAmount}>R$ 150</Text>
       </View>

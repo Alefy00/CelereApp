@@ -6,7 +6,7 @@ import Preload from '../screens/controls/Preload';
 import Expiring from '../screens/controls/Expiring';
 import CashFlow from '../screens/controls/CashFlow';
 import StockInfo from '../screens/controls/MainMenu/YourOperation/Stock';
-
+import AddProductScreen from '../screens/controls/MainMenu/YourOperation/Stock/AddProductScreen';
 
 import MainMenu from '../screens/controls/MainMenu';
 
@@ -65,7 +65,7 @@ export default () => (
     <Stack.Screen name="Expiring" component={Expiring} />
     <Stack.Screen name="CashFlow" component={CashFlow} />
     <Stack.Screen name="StockInfo" component={StockInfo} />
- 
+    <Stack.Screen name="AddProductScreen" component={AddProductScreen} /> 
 
     <Stack.Screen name="MainMenu" component={MainMenu} />
 

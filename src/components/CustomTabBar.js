@@ -1,7 +1,7 @@
-import React, {useContext} from 'react';
+/* eslint-disable prettier/prettier */
+import React, { useContext } from 'react';
 import styled from 'styled-components/native';
-import {COLORS, FONTS, SIZES, icons, images} from '../constants';
-import {UserContext} from '../contexts/UserContext';
+import { COLORS } from '../constants';
 
 import ResumoIcon0 from '../assets/images/svg/iconMnuBottomBarResume.svg';
 import VencendoIcon0 from '../assets/images/svg/iconMnuBottomBarExpired.svg';
@@ -15,15 +15,17 @@ import VencendoIcon1 from '../assets/images/svg/tabbar/iconExpiring1.svg';
 import FluxoCaixa1 from '../assets/images/svg/tabbar/iconCashFlow1.svg';
 import MenuIcon1 from '../assets/images/svg/tabbar/iconMenu1.svg';
 
-import CelereIcon from '../assets/images/svg/celereIcon.svg';
-
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import '../translation';
 
 const TabArea = styled.View`
   height: 70px;
   background-color: ${COLORS.black};
   flex-direction: row;
+  position: absolute;  /* Adicionado */
+  bottom: 0;           /* Adicionado */
+  width: 100%;         /* Adicionado */
+  z-index: 0;         /* Adicionado para garantir que o tab menu fique por cima */
 `;
 const TabItem = styled.TouchableOpacity`
   flex: 1;
@@ -39,11 +41,6 @@ const TabItemCenter = styled.TouchableOpacity`
   background-color: ${COLORS.primary};
   border-radius: 35px;
   margin-top: -30px;
-`;
-const AvatarIcon = styled.Image`
-  width: 24px;
-  height: 24px;
-  border-radius: 12px;
 `;
 export const ItemTitle = styled.Text`
   font-size: 12px;
@@ -69,49 +66,39 @@ export const ItemMsg = styled.Text`
   left: +52px;
 `;
 
-export default ({state, navigation}) => {
-  const {t} = useTranslation();
+export default ({ state, navigation }) => {
+  const { t } = useTranslation();
 
-  const goTo = screenName => {
+  const goTo = (screenName) => {
     navigation.navigate(screenName);
   };
 
   return (
     <TabArea>
       <TabItem onPress={() => goTo('Resumo')}>
-        {state.index === 0 && (
+        {state.index === 0 ? (
           <>
             <ResumoIcon1 width="48" height="48" />
-            <ItemTitle style={{marginTop: +3}}>{t('summary')}</ItemTitle>
+            <ItemTitle style={{ marginTop: +3 }}>{t('summary')}</ItemTitle>
           </>
-        )}
-        {state.index !== 0 && (
+        ) : (
           <>
-            <ResumoIcon0
-              width="26"
-              height="26"
-              style={{marginTop: +15, opacity: state.index !== 0 ? 0.6 : 1}}
-            />
-            <ItemTitle style={{marginTop: +10}}>{t('summary')}</ItemTitle>
+            <ResumoIcon0 width="26" height="26" style={{ marginTop: +15, opacity: state.index !== 0 ? 0.6 : 1 }} />
+            <ItemTitle style={{ marginTop: +10 }}>{t('summary')}</ItemTitle>
           </>
         )}
       </TabItem>
 
       <TabItem onPress={() => goTo('Vencendo')}>
-        {state.index === 1 && (
+        {state.index === 1 ? (
           <>
             <VencendoIcon1 width="48" height="48" />
-            <ItemTitle style={{marginTop: +3}}>{t('expiring')}</ItemTitle>
+            <ItemTitle style={{ marginTop: +3 }}>{t('expiring')}</ItemTitle>
           </>
-        )}
-        {state.index !== 1 && (
+        ) : (
           <>
-            <VencendoIcon0
-              width="26"
-              height="26"
-              style={{marginTop: +15, opacity: state.index !== 1 ? 0.6 : 1}}
-            />
-            <ItemTitle style={{marginTop: +10}}>{t('expiring')}</ItemTitle>
+            <VencendoIcon0 width="26" height="26" style={{ marginTop: +15, opacity: state.index !== 1 ? 0.6 : 1 }} />
+            <ItemTitle style={{ marginTop: +10 }}>{t('expiring')}</ItemTitle>
           </>
         )}
       </TabItem>
@@ -121,39 +108,29 @@ export default ({state, navigation}) => {
       </TabItemCenter>
 
       <TabItem onPress={() => goTo('FluxoCaixa')}>
-        {state.index === 3 && (
+        {state.index === 3 ? (
           <>
             <FluxoCaixa1 width="48" height="48" />
-            <ItemTitle style={{marginTop: +3}}>{t('cash_flow')}</ItemTitle>
+            <ItemTitle style={{ marginTop: +3 }}>{t('cash_flow')}</ItemTitle>
           </>
-        )}
-        {state.index !== 3 && (
+        ) : (
           <>
-            <FluxoCaixa0
-              width="26"
-              height="26"
-              style={{marginTop: +15, opacity: state.index !== 3 ? 0.6 : 1}}
-            />
-            <ItemTitle style={{marginTop: +10}}>{t('cash_flow')}</ItemTitle>
+            <FluxoCaixa0 width="26" height="26" style={{ marginTop: +15, opacity: state.index !== 3 ? 0.6 : 1 }} />
+            <ItemTitle style={{ marginTop: +10 }}>{t('cash_flow')}</ItemTitle>
           </>
         )}
       </TabItem>
 
       <TabItem onPress={() => goTo('Menu')}>
-        {state.index === 4 && (
+        {state.index === 4 ? (
           <>
             <MenuIcon1 width="48" height="48" />
-            <ItemTitle style={{marginTop: +3}}>{t('menu')}</ItemTitle>
+            <ItemTitle style={{ marginTop: +3 }}>{t('menu')}</ItemTitle>
           </>
-        )}
-        {state.index !== 4 && (
+        ) : (
           <>
-            <MenuIcon0
-              width="26"
-              height="26"
-              style={{marginTop: +15, opacity: state.index !== 4 ? 0.6 : 1}}
-            />
-            <ItemTitle style={{marginTop: +10}}>{t('menu')}</ItemTitle>
+            <MenuIcon0 width="26" height="26" style={{ marginTop: +15, opacity: state.index !== 4 ? 0.6 : 1 }} />
+            <ItemTitle style={{ marginTop: +10 }}>{t('menu')}</ItemTitle>
           </>
         )}
       </TabItem>

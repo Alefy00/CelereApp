@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   containerBase:{
-    marginBottom:40,
+    marginBottom:120,
   },
   scrollContainer: {
     padding: 16,

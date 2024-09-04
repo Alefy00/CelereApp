@@ -40,7 +40,7 @@ const CarouselPage2 = ({ onNext, onPrevious }) => {
       {/* Resultado */}
       <View style={styles.resultContainer}>
         <Text style={styles.resultTitle}>
-          Resultado <Icon name="alert-circle" size={16} color={COLORS.gray} />
+          Resultado <Icon name="alert-circle" size={16} color={COLORS.lightGray} />
         </Text>
         <Text style={styles.resultAmount}>R$ 110</Text>
       </View>

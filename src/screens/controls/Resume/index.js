@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, {useEffect, useState} from 'react';
-import {Keyboard, KeyboardAvoidingView, TouchableWithoutFeedback, View, Text} from 'react-native';
+import {Keyboard, KeyboardAvoidingView, TouchableWithoutFeedback, View, Text, ScrollView} from 'react-native';
 import {COLORS} from '../../../constants';
 import BarTop from '../../../components/BarTop';
 import DateCarousel from './components/DateCarousel';
@@ -8,6 +8,9 @@ import {useTranslation} from 'react-i18next';
 import '../../../translation';
 import styles from './styles';
 import CarouselBase from './components/Carousel/CarouselBase';
+import SalesChartCard from './components/SalesChartCard';
+import FilteredListCard from './components/FilteredListCard';
+import ActionButtons from './components/ActionButtons';
 
 const MainMenu = ({navigation}) => {
   const {t} = useTranslation();
@@ -20,7 +23,7 @@ const MainMenu = ({navigation}) => {
 
   return (
         <KeyboardAvoidingView behavior="position" enabled>
-          <View style={{backgroundColor: "#FDFCF0"}}>
+          <ScrollView style={{backgroundColor: "#FDFCF0"}}>
             <BarTop
               uriAvatar={
                 'https://www.apptek.com.br/comercial/2024/manut/images/user/foto1.png'
@@ -32,13 +35,25 @@ const MainMenu = ({navigation}) => {
               routeMailer={''}
               routeCalculator={''}
             />
+          
             <View style={styles.container}>
               <DateCarousel onDateSelected={handleDateSelected} />
-              <View style={styles.ContainerCarousel}>
-                <CarouselBase />
-              </View>
+              <Text style={styles.label}>Resumo do dia</Text>
+                <View style={styles.ContainerCarousel}>
+                  <CarouselBase />
+                </View>
+                <View style={styles.ContainerCircle}>
+                  <SalesChartCard/>
+                </View>
+                <Text style={styles.label2}>Transações do dia</Text>
+                <View style={styles.ContainerFilter}>
+                  <FilteredListCard/>
+                </View>
+                <View style={styles.containerBottons}>
+                  <ActionButtons/>
+                </View>
             </View>
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
 
   );
