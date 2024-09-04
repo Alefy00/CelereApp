@@ -9,13 +9,18 @@ const styles = StyleSheet.create({
   },
   barTopContainer: {
     width: '100%',
-    marginBottom: 10,
+    position: 'absolute',  // Fixa o BarTop2 no topo
+    top: 0,
+    zIndex: 1, // Mantém o BarTop2 no topo do resto do conteúdo
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    marginTop: 50, // Ajuste conforme a altura do BarTop2 para evitar sobreposição
   },
   title: {
     fontSize: 20,
     fontWeight: '900',
     color: COLORS.black,
-    marginTop: 35,
     paddingLeft: 20,
     backgroundColor: COLORS.primary,
   },
@@ -28,13 +33,13 @@ const styles = StyleSheet.create({
   leftContainer: {
     flex: 1,
     alignItems: 'center',
-    marginLeft: -80
+    marginLeft: -80,
   },
   rightContainer: {
     flex: 1,
     justifyContent: 'space-between',
     marginLeft: -80,
-    paddingLeft: 20
+    paddingLeft: 20,
   },
   imageContainer: {
     alignItems: 'center',
@@ -98,7 +103,8 @@ const styles = StyleSheet.create({
   productDetailsContainer: {
     backgroundColor: COLORS.white,
     padding: 20,
-    margin: 20,
+    marginHorizontal: 20,
+    marginVertical: 10,
     borderRadius: 10,
     elevation: 2,
     shadowColor: '#000',
@@ -130,32 +136,70 @@ const styles = StyleSheet.create({
   },
   categoryContainer: {
     backgroundColor: COLORS.white,
-    padding: 20,
-    margin: 20,
     borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    padding: 20,
+    marginHorizontal: 20,
+    marginTop: 15,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
-  categorySelector: {
+  categoryTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.black,
+    marginBottom: 10,
+  },
+  categoryInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
     borderColor: COLORS.black,
-    flex: 1,
-    marginRight: 10,
   },
-  categoryPlaceholder: {
-    color: '#A9A9A9',
+  categoryPicker: {
     flex: 1,
+    color: COLORS.lightGray,
+    paddingVertical: 10,
+    paddingRight: 10,
+    borderBottomWidth: 1,
+    borderColor: COLORS.black,
+    width: '50%',
   },
   addButton: {
-    width: 40,
+    width: 60,
     height: 40,
-    borderRadius: 5,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.primary, 
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 5,
+    marginLeft: 20,
+  },
+  containerProductValues: {
+    marginVertical: 15,
+  },
+  registerButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    marginTop: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    marginBottom: 40,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.black,
+    marginLeft: 10,
   },
 });
 

@@ -3,8 +3,9 @@ import React, { useState } from "react";
 import BarTop2 from "../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../constants";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Alert, Keyboard, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, Button, Keyboard, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import styles from './styles'
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Others = ({ navigation }) => {
     // Estados para armazenar os valores de entrada do usuário
@@ -36,6 +37,18 @@ const Others = ({ navigation }) => {
     const formatDate = (date) => {
         return date.toLocaleDateString('pt-BR');
     };
+
+    const clearAsyncStorage = async () => {
+        try {
+          await AsyncStorage.clear();
+          console.log('AsyncStorage limpo com sucesso!');
+          Alert.alert('Sucesso', 'O armazenamento foi limpo. Você pode testar um novo número.');
+        } catch (error) {
+          console.error('Erro ao limpar AsyncStorage:', error);
+          Alert.alert('Erro', 'Não foi possível limpar o armazenamento.');
+        }
+      };
+    
 
     return (
         <KeyboardAvoidingView
@@ -86,6 +99,7 @@ const Others = ({ navigation }) => {
                     <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                         <Text style={styles.saveButtonText}>Salvar</Text>
                     </TouchableOpacity>
+                    <Button title="Limpar Armazenamento" onPress={clearAsyncStorage} color="#FF0000" />
                 </View>
             </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
