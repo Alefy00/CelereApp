@@ -1,10 +1,12 @@
 /* eslint-disable prettier/prettier */
 import { StyleSheet } from 'react-native';
 import { COLORS } from '../../../../../../constants';
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.background, // Fundo claro, quase branco
+    width: "100%",
   },
   formContainer: {
     padding: 20,
@@ -21,6 +23,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 10,
     borderRadius: 5,
+    backgroundColor: '#fff', // Mantém o fundo branco
   },
   dateButton: {
     flexDirection: 'row',
@@ -36,33 +39,57 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.black,
   },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginBottom: 20,
+    elevation: 3, // Sombra leve
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginRight: 10,
+  },
   searchButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#FFC700', // Amarelo
     padding: 10,
     borderRadius: 5,
-    alignItems: 'center',
-    marginBottom: 20,
   },
   searchButtonText: {
-    color: COLORS.white,
+    color: '#000', // Texto preto
     fontSize: 16,
+    fontWeight: 'bold',
   },
   expenseContainer: {
     padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.lightGray,
+    backgroundColor: '#fff', // Fundo branco para os cards
+    borderRadius: 10,
+    marginBottom: 10,
+    elevation: 3, // Sombra para destacar os cards
   },
   itemText: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
     color: COLORS.black,
   },
   categoryText: {
     fontSize: 14,
     color: COLORS.gray,
+    marginTop: 5,
   },
   valueText: {
-    fontSize: 14,
+    fontSize: 18,
+    fontWeight: 'bold',
     color: COLORS.green,
+    marginTop: 5,
   },
   modalOverlay: {
     flex: 1,
@@ -78,6 +105,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     position: 'relative',
+    elevation: 5, // Sombra para o modal
   },
   modalContent: {
     width: '100%',
@@ -102,29 +130,58 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   liquidateButton: {
-    backgroundColor: COLORS.primary,
-    padding: 8,
+    backgroundColor: '#FFC700', // Amarelo
+    padding: 10,
     borderRadius: 5,
     marginTop: 10,
   },
   liquidateButtonText: {
-    color: COLORS.white,
-    fontSize: 14,
+    color: '#000', // Texto preto
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   closeButtonBottom: {
     marginTop: 20,
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#FFC700', // Amarelo para manter o design
     padding: 10,
     borderRadius: 5,
   },
   closeButtonText: {
-    color: COLORS.white,
+    color: '#000', // Texto preto
     fontSize: 16,
+    fontWeight: 'bold',
   },
   dateText: {
     fontSize: 14,
     color: COLORS.gray,
   },
+  tabContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 5,
+    borderWidth: 1,
+    borderColor: '#000', // Borda preta
+  },
+  tabButtonActive: {
+    backgroundColor: '#FFC700', // Ativo em amarelo
+  },
+  tabButtonInactive: {
+    backgroundColor: '#fff', // Inativo em branco
+  },
+  tabText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+  },
 });
 
 export default styles;
+

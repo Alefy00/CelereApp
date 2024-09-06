@@ -1,16 +1,18 @@
 /* eslint-disable prettier/prettier */
-import React, { useState, useEffect } from "react";
-import { Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from "react-native";
 import BarTop2 from "../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../constants";
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import axios from 'axios';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Importando AsyncStorage
 
 // Constantes para URLs de API
 const API_BASE_URL = "https://api.celereapp.com.br";
 const API_CATEGORIES_URL = `${API_BASE_URL}/mnt/categoriasdespesa/?page=1&page_size=30`;
-const API_EXPENSES_URL = `${API_BASE_URL}/cad/despesa/?page=1&page_size=100&empresa_id=11&data_inicial=2023-01-01&data_final=4030-09-23&status=pendente&valor=`;
+const API_EXPENSES_URL = `${API_BASE_URL}/cad/despesa/`; // Ajustado para não incluir parâmetros fixos
 
 const ConsultExpense = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
@@ -19,16 +21,41 @@ const ConsultExpense = ({ navigation }) => {
   const [categories, setCategories] = useState({});
   const [isSearching, setIsSearching] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [empresaId, setEmpresaId] = useState(null);
 
-
-
-  // Função para buscar despesas da API
-  const fetchExpenses = async () => {
+  const getEmpresaId = async () => {
     try {
-      const response = await axios.get(API_EXPENSES_URL);
+      const empresaData = await AsyncStorage.getItem('empresaData');
+      if (empresaData !== null) {
+        const parsedData = JSON.parse(empresaData);
+        setEmpresaId(parsedData); // Definindo o ID da empresa dinamicamente
+        return parsedData;
+      } else {
+        console.log('Nenhum dado de empresa encontrado no AsyncStorage.');
+      }
+    } catch (error) {
+      console.error('Erro ao obter o ID da empresa do AsyncStorage:', error);
+    }
+    return null;
+  };
+
+  const fetchExpenses = useCallback(async (empresa_id) => {
+    if (!empresa_id) return;
+
+    setLoading(true);
+    try {
+      const response = await axios.get(API_EXPENSES_URL, {
+        params: {
+          page: 1,
+          page_size: 100,
+          empresa_id: empresa_id,
+          data_inicial: '2023-01-01',  // Você pode ajustar essas datas conforme necessário
+          data_final: '4030-09-23',
+          status: 'pendente'
+        }
+      });
       const despesasData = response.data.data;
 
-      // Agrupar despesas pelo campo "despesa_pai" e somar os valores
       const groupedExpenses = despesasData.reduce((acc, curr) => {
         const { despesa_pai, item, valor, categoria_despesa } = curr;
         const key = despesa_pai || curr.id;  // Usar o próprio ID se "despesa_pai" for nulo
@@ -51,10 +78,11 @@ const ConsultExpense = ({ navigation }) => {
       setFilteredExpenses(Object.values(groupedExpenses));
     } catch (error) {
       console.error("Erro ao buscar despesas: ", error);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
-  // Função para buscar categorias da API
   const fetchCategories = async () => {
     try {
       const response = await axios.get(API_CATEGORIES_URL);
@@ -72,13 +100,31 @@ const ConsultExpense = ({ navigation }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      const id = await getEmpresaId();
+      if (id) {
+        fetchExpenses(id);
+      } else {
+        Alert.alert('Erro', 'ID da empresa não encontrado. Por favor, faça login novamente.');
+      }
       await fetchCategories();
-      await fetchExpenses();
       setLoading(false);
     };
 
     fetchData();
-  }, []);
+  }, [fetchExpenses]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const refreshExpenses = async () => {
+        const id = await getEmpresaId();
+        if (id) {
+          fetchExpenses(id);
+        }
+      };
+
+      refreshExpenses();
+    }, [fetchExpenses])
+  );
 
   const handleSearch = (text) => {
     setSearchText(text);

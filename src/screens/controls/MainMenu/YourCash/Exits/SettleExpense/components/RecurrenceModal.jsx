@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from '../styles';
 
-const RecurrenceModal = ({ visible, onClose, expenseGroup, onOpenLiquidateModal, getCategoryNameById }) => {
+const RecurrenceModal = ({ visible, onClose, expenseGroup, onConfirmLiquidateAll, getCategoryNameById }) => {
   return (
     <Modal visible={visible} onRequestClose={onClose} transparent={true}>
       <View style={styles.modalOverlay}>
@@ -20,13 +20,14 @@ const RecurrenceModal = ({ visible, onClose, expenseGroup, onOpenLiquidateModal,
                 <Text style={styles.categoryText}>Categoria: {getCategoryNameById(expense.categoria_despesa)}</Text>
                 <Text style={styles.valueText}>Valor: {expense.valor}</Text>
                 <Text style={styles.dateText}>Vencimento: {expense.dt_vencimento}</Text>
-
-                <TouchableOpacity style={styles.liquidateButton} onPress={() => onOpenLiquidateModal(expense)}>
-                  <Text style={styles.liquidateButtonText}>Baixar</Text>
-                </TouchableOpacity>
               </View>
             ))}
           </ScrollView>
+
+          {/* Botão único para liquidar todas as recorrências */}
+          <TouchableOpacity style={styles.liquidateAllButton} onPress={() => onConfirmLiquidateAll(expenseGroup)}>
+            <Text style={styles.liquidateButtonText}>Baixar Todas</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>

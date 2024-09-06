@@ -1,29 +1,29 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, ActivityIndicator, Alert, Modal, FlatList } from 'react-native';
-import IconAluguel from '../../../../../../assets/images/svg/NewExpense/IconAluguel.svg';
-import IconDespesas from '../../../../../../assets/images/svg/NewExpense/IconDespesas.svg';
-import IconFornecedor from '../../../../../../assets/images/svg/NewExpense/IconFornecedor.svg';
-import IconFrete from '../../../../../../assets/images/svg/NewExpense/IconFrete.svg';
-import IconMaquinas from '../../../../../../assets/images/svg/NewExpense/IconMaquinas.svg';
-import IconMarketing from '../../../../../../assets/images/svg/NewExpense/IconMarketing.svg';
-import IconNaoRecomendavel from '../../../../../../assets/images/svg/NewExpense/IconNaoRecomendavel.svg';
-import IconOutros from '../../../../../../assets/images/svg/NewExpense/IconOutros.svg';
-import IconPagamento from '../../../../../../assets/images/svg/NewExpense/IconPagamento.svg';
-import IconProLabore from '../../../../../../assets/images/svg/NewExpense/IconProLabore.svg';
-import Icontaxas from '../../../../../../assets/images/svg/NewExpense/IconTaxas.svg';
+import IconAluguel from '../../../../../../../assets/images/svg/NewExpense/IconAluguel.svg';
+import IconDespesas from '../../../../../../../assets/images/svg/NewExpense/IconDespesas.svg';
+import IconFornecedor from '../../../../../../../assets/images/svg/NewExpense/IconFornecedor.svg';
+import IconFrete from '../../../../../../../assets/images/svg/NewExpense/IconFrete.svg';
+import IconMaquinas from '../../../../../../../assets/images/svg/NewExpense/IconMaquinas.svg';
+import IconMarketing from '../../../../../../../assets/images/svg/NewExpense/IconMarketing.svg';
+import IconNaoRecomendavel from '../../../../../../../assets/images/svg/NewExpense/IconNaoRecomendavel.svg';
+import IconOutros from '../../../../../../../assets/images/svg/NewExpense/IconOutros.svg';
+import IconPagamento from '../../../../../../../assets/images/svg/NewExpense/IconPagamento.svg';
+import IconProLabore from '../../../../../../../assets/images/svg/NewExpense/IconProLabore.svg';
+import Icontaxas from '../../../../../../../assets/images/svg/NewExpense/IconTaxas.svg';
 import CheckBox from '@react-native-community/checkbox';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BarTop2 from "../../../../../../components/BarTop2";
-import { COLORS } from "../../../../../../constants";
+import BarTop2 from '../../../../../../../components/BarTop2';
+import { COLORS } from '../../../../../../../constants';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import ConfirmModal from './components/ConfirmModal';
-import SucessModal from './components/SucessModal';
-import styles from './styles';
+import ConfirmModal from '../components/ConfirmModal';
+import SucessModal from '../components/SucessModal';
+import styles from '../styles';
 import { Picker } from '@react-native-picker/picker';
 
 // Constantes para os endpoints da API
@@ -46,7 +46,7 @@ const categoryIcons = {
   11: IconOutros, // Outros
 };
 
-const NewExpense = ({ navigation }) => {
+const AccountsPayable = ({ navigation }) => {
   const [categoria, setCategoria] = useState('');
   const [categories, setCategories] = useState([]);
   const [valor, setValor] = useState('');
@@ -65,7 +65,7 @@ const NewExpense = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [loadingMonths, setLoadingMonths] = useState(false);
   const [barcode, setBarcode] = useState('');
-  const [isLiquidateNow, setIsLiquidateNow] = useState(true);
+  const [isLiquidateNow, setIsLiquidateNow] = useState(false);
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
 
@@ -280,11 +280,11 @@ const NewExpense = ({ navigation }) => {
   };
 
   const toggleExpenseType = () => {
-    setIsLiquidateNow(!isLiquidateNow);
+    setIsLiquidateNow(isLiquidateNow);
   };
 
   const handleAcconunts = () => {
-    navigation.navigate('AccountsPayable')
+    navigation.navigate('NewExpense')
   }
 
   return (
@@ -298,22 +298,20 @@ const NewExpense = ({ navigation }) => {
         style={{ height: 50 }}
       />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {loading ? (
-          <ActivityIndicator size="large" color={COLORS.primary} />
-        ) : (
+
           <View style={styles.formContainer}>
             <Text style={styles.Title}>Cadastrar uma Despesa</Text>
             {/* Botões de Alternância para "Liquidar agora" e "Contas a pagar" */}
             <View style={styles.toggleContainer}>
               <TouchableOpacity
                 style={[styles.toggleButton, isLiquidateNow && styles.toggleButtonActive]}
-                onPress={toggleExpenseType}
+                onPress={handleAcconunts}
               >
                 <Text style={styles.toggleButtonText}>Liquidar agora</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.toggleButton, !isLiquidateNow && styles.toggleButtonActive]}
-                onPress={handleAcconunts}
+                onPress={toggleExpenseType}
               >
                 <Text style={styles.toggleButtonText}>Contas a pagar</Text>
               </TouchableOpacity>
@@ -321,7 +319,7 @@ const NewExpense = ({ navigation }) => {
 
             {/* Date Picker para Data de Pagamento */}
             <View style={styles.datePickerContainer}>
-              <Text style={styles.dateLabel}>Data de pagamento</Text>
+              <Text style={styles.dateLabel}>Data de Pagamento </Text>
               <View style={styles.datePickerRow}>
                 <Text style={styles.hora}>Hoje,</Text>
                 <TextInput
@@ -520,7 +518,6 @@ const NewExpense = ({ navigation }) => {
               <Text style={styles.saveButtonText}>Salvar despesa</Text>
             </TouchableOpacity>
           </View>
-        )}
       </ScrollView>
       <ConfirmModal
         visible={modalVisible}
@@ -541,4 +538,4 @@ const NewExpense = ({ navigation }) => {
   );
 };
 
-export default NewExpense;
+export default AccountsPayable;

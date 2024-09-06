@@ -43,6 +43,7 @@ import Loan from '../screens/controls/MainMenu/YourCash/Entries/Loan';
 import Others from '../screens/controls/MainMenu/YourCash/Entries/Others';
 import Report from '../screens/controls/MainMenu/YourCash/Entries/Reports';
 import NewExpense from '../screens/controls/MainMenu/YourCash/Exits/NewExpense';
+import AccountsPayable from '../screens/controls/MainMenu/YourCash/Exits/NewExpense/components/AccountsPayable';
 import CancelExpense from '../screens/controls/MainMenu/YourCash/Exits/CancelExpense';
 import LiquidateExpense from '../screens/controls/MainMenu/YourCash/Exits/SettleExpense';
 import Winning from '../screens/controls/CashFlow';
@@ -107,6 +108,7 @@ export default () => (
     <Stack.Screen name="CashBalance" component={CashBalance} />
 
     <Stack.Screen name="NewExpense" component={NewExpense} />
+    <Stack.Screen name="AccountsPayable" component={AccountsPayable} />
     <Stack.Screen name="CancelExpense" component={CancelExpense} />
     <Stack.Screen name="LiquidateExpense" component={LiquidateExpense} />
     <Stack.Screen name="ConsultExpense" component={ConsultExpense} />

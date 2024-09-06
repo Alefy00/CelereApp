@@ -82,7 +82,7 @@ export default () => {
 
         {/* Linha 2 */}
 
-        <BtnItemMenu style={{backgroundColor: COLORS.lightYellow2}} onPress={NavTeamScreen}>
+        <BtnItemMenu  onPress={NavTeamScreen}>
           <IconUsers width="38" height="38" />
           <TxtItemMenu>{t('Equipe')}</TxtItemMenu>
         </BtnItemMenu>

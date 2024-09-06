@@ -8,15 +8,9 @@ import styles from '../styles';
 const LiquidateExpenseModal = ({ visible, onClose, onConfirmLiquidation }) => {
   const [paymentDate, setPaymentDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [reason, setReason] = useState('');
 
   const handleConfirm = () => {
-    if (!reason) {
-      Alert.alert('Erro', 'Por favor, informe o motivo da liquidação.');
-      return;
-    }
-
-    onConfirmLiquidation(paymentDate, reason);
+    onConfirmLiquidation(paymentDate);
   };
 
   return (
@@ -46,15 +40,6 @@ const LiquidateExpenseModal = ({ visible, onClose, onConfirmLiquidation }) => {
               locale="pt-BR"
             />
           )}
-
-          <Text style={styles.label}>Motivo da Liquidação</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Informe o motivo"
-            value={reason}
-            onChangeText={setReason}
-          />
-
           <TouchableOpacity style={styles.liquidateButton} onPress={handleConfirm}>
             <Text style={styles.liquidateButtonText}>Confirmar</Text>
           </TouchableOpacity>

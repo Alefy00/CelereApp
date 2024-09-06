@@ -1,33 +1,30 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback } from "react";
-import { View, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { View, FlatList, ActivityIndicator, Alert, TextInput, TouchableOpacity, Text } from 'react-native';
 import BarTop2 from "../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../constants";
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import SearchBar from './components/SearchBar';
 import ExpenseGroup from './components/ExpenseGroup';
-import RecurrenceModal from './components/RecurrenceModal';
 import LiquidateExpenseModal from './components/LiquidateExpenseModal';
+import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 
 const EXPENSES_API = 'https://api.celereapp.com.br/cad/despesa/';
 const CATEGORIES_API = 'https://api.celereapp.com.br/mnt/categoriasdespesa/?page=1&page_size=30';
 const LIQUIDATE_EXPENSE_API = 'https://api.celereapp.com.br/cad/despesa/{id}/baixardespesa/';
 
-
 const LiquidateExpense = ({ navigation }) => {
-  const [searchDate, setSearchDate] = useState('');
-  const [searchValue, setSearchValue] = useState('');
   const [expenses, setExpenses] = useState([]);
-  const [groupedExpenses, setGroupedExpenses] = useState({});
+  const [groupedExpenses, setGroupedExpenses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
   const [liquidateModalVisible, setLiquidateModalVisible] = useState(false);
   const [selectedExpenseGroup, setSelectedExpenseGroup] = useState([]);
-  const [selectedExpense, setSelectedExpense] = useState(null);
   const [empresaId, setEmpresaId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredExpenses, setFilteredExpenses] = useState([]);
+  const [activeTab, setActiveTab] = useState('Ativas'); // Aba ativa
 
   const getLiquidateExpenseUrl = (id) => {
     return LIQUIDATE_EXPENSE_API.replace('{id}', id);
@@ -63,8 +60,7 @@ const LiquidateExpense = ({ navigation }) => {
     }
   };
 
-  // Envolva `fetchExpenses` com `useCallback` para evitar a recriação em cada renderização
-  const fetchExpenses = useCallback(async (dataInicial = '', dataFinal = '', empresa_id, valor = '') => {
+  const fetchExpenses = useCallback(async (empresa_id) => {
     if (!empresa_id) return;
 
     setLoading(true);
@@ -74,40 +70,47 @@ const LiquidateExpense = ({ navigation }) => {
           page: 1,
           page_size: 100,
           empresa_id: empresa_id,
-          data_inicial: dataInicial,
-          data_final: dataFinal,
-          status: 'pendente',
-          valor: valor
+          data_inicial: '2023-01-01',
+          data_final: '3030-09-23',
+          status: 'pendente'
         }
       });
 
       if (response.data.status === 200 && response.data.data) {
-        const expenses = response.data.data;
-        setExpenses(expenses);
-        groupExpensesByParent(expenses);
+        const despesasData = response.data.data;
+
+        const grouped = despesasData.reduce((acc, curr) => {
+          const { despesa_pai, item, valor, categoria_despesa } = curr;
+          const key = despesa_pai || curr.id;
+
+          if (!acc[key]) {
+            acc[key] = {
+              despesa_pai: key,
+              item,
+              categoria_despesa,
+              total: 0,
+              despesas: [],
+            };
+          }
+
+          acc[key].total += parseFloat(valor); 
+          acc[key].despesas.push(curr);
+
+          return acc;
+        }, {});
+
+        setExpenses(Object.values(grouped));
+        setFilteredExpenses(Object.values(grouped));
       } else {
         Alert.alert('Erro', response.data.message || 'Erro ao buscar despesas.');
       }
     } catch (error) {
-      console.error('Erro ao buscar despesas:', error);
+      console.error('Erro ao buscar despesas:', error.response ? error.response.data : error.message);
       Alert.alert('Erro', 'Ocorreu um erro ao buscar as despesas. Verifique sua conexão com a internet e tente novamente.');
     } finally {
       setLoading(false);
     }
   }, []);
-
-  const groupExpensesByParent = (expenses) => {
-    const grouped = expenses.reduce((acc, expense) => {
-      const parentId = expense.despesa_pai || expense.id;
-      if (!acc[parentId]) {
-        acc[parentId] = [];
-      }
-      acc[parentId].push(expense);
-      return acc;
-    }, {});
-
-    setGroupedExpenses(grouped);
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -115,7 +118,7 @@ const LiquidateExpense = ({ navigation }) => {
 
       if (id) {
         setEmpresaId(id);
-        fetchExpenses('2023-01-01', '4025-09-23', id);
+        fetchExpenses(id);
       } else {
         Alert.alert('Erro', 'ID da empresa não encontrado. Por favor, faça login novamente.');
       }
@@ -124,98 +127,58 @@ const LiquidateExpense = ({ navigation }) => {
     };
 
     fetchData();
-  }, [fetchExpenses]); // Adicione `fetchExpenses` ao array de dependências
+  }, [fetchExpenses]);
 
-  const handleOpenModal = (expenseGroup) => {
-    setSelectedExpenseGroup(expenseGroup);
-    setModalVisible(true);
+  // Função para filtrar despesas com base no nome
+  const filterExpensesByName = () => {
+    if (!searchQuery) {
+      setFilteredExpenses(expenses);
+    } else {
+      const filtered = expenses.filter(expense =>
+        expense.item.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredExpenses(filtered);
+    }
   };
 
-  const handleCloseModal = () => {
-    setSelectedExpenseGroup([]);
-    setModalVisible(false);
-  };
-
-  const handleOpenLiquidateModal = (expense) => {
-    setSelectedExpense(expense);
+  const handleOpenLiquidateModal = (expenseGroup) => {
+    setSelectedExpenseGroup(expenseGroup.despesas);
     setLiquidateModalVisible(true);
   };
 
   const handleCloseLiquidateModal = () => {
-    setSelectedExpense(null);
+    setSelectedExpenseGroup([]);
     setLiquidateModalVisible(false);
   };
 
-  const handleConfirmLiquidation = async (paymentDate, reason) => {
+  const handleConfirmLiquidateAll = async (paymentDate, reason) => {
     try {
-      const url = getLiquidateExpenseUrl(selectedExpense.id);
-  
-      const response = await axios.patch(url, {
-        empresa_id: empresaId,
-        dt_pagamento: paymentDate.toISOString().split('T')[0], // Formato 'YYYY-MM-DD'
-        motivo: reason,
-      });
-  
-      if (response.status === 200 || response.data.status === 'success') {
-        Alert.alert('Sucesso', 'Despesa liquidada com sucesso!');
-        handleCloseLiquidateModal();
-        handleCloseModal();
-        removeLiquidatedExpense(selectedExpense.id);
-      } else {
-        Alert.alert('Erro', 'Erro ao liquidar a despesa.');
+      for (const expense of selectedExpenseGroup) {
+        const url = getLiquidateExpenseUrl(expense.id);
+        
+        await axios.patch(url, {
+          empresa_id: empresaId,
+          dt_pagamento: paymentDate.toISOString().split('T')[0],
+          motivo: reason,
+        });
       }
+
+      Alert.alert('Sucesso', 'Todas as recorrências foram liquidadas com sucesso!');
+      handleCloseLiquidateModal();
+
+      // Atualiza a lista removendo despesas liquidadas
+      const updatedExpenses = expenses.filter(
+        group => !selectedExpenseGroup.some(expense => expense.despesa_pai === group.despesa_pai)
+      );
+      
+      setExpenses(updatedExpenses);
+      setFilteredExpenses(updatedExpenses); // Atualiza também a lista filtrada
     } catch (error) {
-      console.error('Erro ao liquidar a despesa:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao liquidar a despesa. Verifique sua conexão com a internet e tente novamente.');
+      console.error('Erro ao liquidar todas as despesas:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao liquidar as despesas. Verifique sua conexão com a internet e tente novamente.');
     }
   };
-  
 
-  const removeLiquidatedExpense = (expenseId) => {
-    const updatedExpenses = { ...groupedExpenses };
-    Object.keys(updatedExpenses).forEach(parentId => {
-      updatedExpenses[parentId] = updatedExpenses[parentId].filter(expense => expense.id !== expenseId);
-      if (updatedExpenses[parentId].length === 0) {
-        delete updatedExpenses[parentId];
-      }
-    });
-
-    setGroupedExpenses(updatedExpenses);
-  };
-  const handleSearch = (startDate, endDate, valor) => {
-    const params = {
-      page: 1,
-      page_size: 100,
-      empresa_id: empresaId,
-      data_inicial: startDate,
-      data_final: endDate,
-      status: 'pendente',
-    };
-  
-    if (valor) {
-      params.valor = valor; // Adiciona o parâmetro de valor apenas se ele for fornecido
-    }
-  
-    setLoading(true);
-    axios.get(EXPENSES_API, { params })
-      .then(response => {
-        if (response.data.status === 200 && response.data.data) {
-          const expenses = response.data.data;
-          setExpenses(expenses);
-          groupExpensesByParent(expenses);
-        } else {
-          Alert.alert('Erro', response.data.message || 'Erro ao buscar despesas.');
-        }
-      })
-      .catch(error => {
-        console.error('Erro ao buscar despesas:', error);
-        Alert.alert('Erro', 'Ocorreu um erro ao buscar as despesas. Verifique sua conexão com a internet e tente novamente.');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-  
   const getCategoryNameById = (id) => {
     const category = categories.find((cat) => cat.id === id);
     return category ? category.descricao : 'Categoria não encontrada';
@@ -224,48 +187,69 @@ const LiquidateExpense = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <BarTop2
-        titulo="Liquidar Despesa"
-        backColor={COLORS.primary}
-        foreColor={COLORS.black}
-        routeMailer=""
-        routeCalculator=""
+        titulo="Liquidar valor total de uma despesa"
+        backColor="#FFC700" // Amarelo conforme o design
+        foreColor="#000" // Preto para o título
         style={{ height: 50 }}
       />
-      <SearchBar 
-        searchDate={searchDate} 
-        setSearchDate={setSearchDate} 
-        searchValue={searchValue} 
-        setSearchValue={setSearchValue} 
-        onSearch={handleSearch} 
-      />
+      <Text style={styles.title}>Liquidar valor total de uma despesa</Text>
+      <Text style={styles.subtitle}>Veja e cadastre suas despesas.</Text>
+
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Pesquise uma despesa recente..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        <TouchableOpacity style={styles.searchButton} onPress={filterExpensesByName}>
+          <Icon name="search-outline" size={20} color="#000" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.filterButton}>
+          <Icon name="filter-outline" size={20} color="#000" />
+          <Text style={styles.filterButtonText}>Filtrar</Text> 
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tabButton, activeTab === 'Ativas' ? styles.tabButtonActive : styles.tabButtonInactive]}
+          onPress={() => setActiveTab('Ativas')}
+        >
+          <Text style={styles.tabText}>Ativas ({filteredExpenses.length})</Text> 
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tabButton, activeTab === 'Liquidadas' ? styles.tabButtonActive : styles.tabButtonInactive]}
+          onPress={() => setActiveTab('Liquidadas')}
+        >
+          <Text style={styles.tabText}>Liquidadas (5)</Text> 
+        </TouchableOpacity>
+      </View>
+
       {loading ? (
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator size="large" color="#FFC700" />
       ) : (
         <FlatList
-          data={Object.values(groupedExpenses)}
-          keyExtractor={(item) => item[0].id.toString()}
+          data={filteredExpenses}
+          keyExtractor={(item) => item.despesa_pai.toString()}
           renderItem={({ item }) => (
-            <ExpenseGroup group={item} onPress={handleOpenModal} getCategoryNameById={getCategoryNameById} />
+            <View style={styles.expenseCard}>
+              <Text style={styles.expenseTitle}>{item.item}</Text> 
+              <Text style={styles.expenseSubtitle}>{getCategoryNameById(item.categoria_despesa)}</Text> 
+              <Text style={styles.expenseValue}>R${item.total.toFixed(2)}</Text>
+            </View>
           )}
         />
       )}
-      <RecurrenceModal
-        visible={modalVisible}
-        onClose={handleCloseModal}
-        expenseGroup={selectedExpenseGroup}
-        onOpenLiquidateModal={handleOpenLiquidateModal}
-        getCategoryNameById={getCategoryNameById}
-      />
+  
       <LiquidateExpenseModal
         visible={liquidateModalVisible}
         onClose={handleCloseLiquidateModal}
-        onConfirmLiquidation={handleConfirmLiquidation}
+        onConfirmLiquidation={handleConfirmLiquidateAll}
       />
     </View>
   );
+  
 };
 
 export default LiquidateExpense;
-
-
-

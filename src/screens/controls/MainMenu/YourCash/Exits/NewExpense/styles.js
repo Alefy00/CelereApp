@@ -5,96 +5,205 @@ import { COLORS } from '../../../../../../constants';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.background, // Cor de fundo semelhante ao design
   },
   scrollContainer: {
-    paddingBottom: 20,
+    padding: 16,
   },
   formContainer: {
-    padding: 20,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flex: 1,
     marginBottom: 20,
-    borderWidth:0.5,
-    padding:10,
-    marginHorizontal:30,
-    borderRadius:10,
-    borderColor:COLORS.gray,
   },
-  button: {
-    padding: 10,
-    borderRadius: 10,
+  Title:{
+    fontSize: 18,
+    color:COLORS.black,
+    fontWeight: '900',
+    marginBottom:10,
   },
-  buttonActive: {
-    padding: 10,
-    backgroundColor: COLORS.green,
-    borderRadius: 10,
-  },
-  buttonText: {
-    color: COLORS.black,
-  },
-  buttonTextActive: {
-    color: COLORS.white,
-    fontWeight: 'bold',
-  },
-  datePicker: {
+  toggleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor:COLORS.black
   },
-  dateButton: {
+  toggleButton: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+  },
+  toggleButtonActive: {
+    backgroundColor: COLORS.primary,
+  },
+  toggleButtonText: {
+    fontWeight: 'bold',
+    color: COLORS.black,
+  },
+  datePickerContainer: {
+    marginBottom: 5,
+  },
+  datePickerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.lightGray2,
-    borderRadius: 10,
-    paddingHorizontal:20,
-    padding:10,
+    borderBottomWidth: 1,
+    borderColor: COLORS.black,
+    paddingBottom: 8,
   },
-  textDate:{
-    marginRight:15,
-    color:'black'
+  dateLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: COLORS.black,
+    marginBottom: 2,
+  },
+  hora:{
+    color: COLORS.gray,
+  },
+  dateInput: {
+    flex: 1,
+    padding: 5,
+    fontSize: 16,
+    color: COLORS.gray,
   },
   inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: COLORS.black,
+    marginBottom: 20,
+  },
+  input: {
+    flex: 1,
+    padding: 10,
+    fontSize: 16,
+    color: COLORS.black,
+    borderBottomWidth: 1,
+  },
+  card: {
+    backgroundColor: '#FFF',
+    padding: 16,
+    marginBottom: 20,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: COLORS.black,
+  },
+  pickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: COLORS.black,
     marginBottom: 20,
   },
   picker: {
-    height: 50,
-    width: '100%',
-    backgroundColor: COLORS.lightGray2,
-    borderRadius: 10,
+    flex: 1,
+    color: COLORS.black,
   },
-  input: {
-    height: 50,
-    borderColor: COLORS.lightGray2,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    backgroundColor: COLORS.lightGray2,
+  containerDetalhes:{
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  pickerButton:{
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    width: '80%',
+    justifyContent: 'space-between'
+  },
+  pickerButtonText:{
+    marginLeft:15,
+  },
+  addButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 4,
+    marginLeft: 5,
+    paddingHorizontal: 15,
+    paddingVertical: 5,
   },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
   },
   checkboxLabel: {
     marginLeft: 8,
-    fontSize: 16,
-    color:'#000',
+    color: COLORS.black,
   },
   saveButton: {
     backgroundColor: COLORS.primary,
-    padding: 15,
-    borderRadius: 10,
+    paddingVertical: 15,
+    borderRadius: 8,
     alignItems: 'center',
-    marginHorizontal:80,
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   saveButtonText: {
-    color: COLORS.black,
+    color: '#000',
+    fontSize: 16,
     fontWeight: 'bold',
+    marginLeft: 10,
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '90%',
+    backgroundColor: '#FFF',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color:COLORS.black
+  },
+  modalItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  modalItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  modalItemIcon: {
+    marginRight: 10,
+  },
+  modalItemText: {
+    fontSize: 16,
+    color: COLORS.black,
+  },
+  modalItemIconContainer: {
+    marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
+  
+  
 });
 
 export default styles;

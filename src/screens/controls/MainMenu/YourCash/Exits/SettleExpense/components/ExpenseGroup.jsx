@@ -14,6 +14,6 @@ const ExpenseGroup = ({ group, onPress, getCategoryNameById }) => {
       <Text style={styles.valueText}>Valor Total: {totalValue.toFixed(2)}</Text>
     </TouchableOpacity>
   );
-};
+}; 
 
 export default ExpenseGroup;
