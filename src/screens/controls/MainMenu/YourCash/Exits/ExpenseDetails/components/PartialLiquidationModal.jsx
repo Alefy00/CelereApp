@@ -1,22 +1,29 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/Ionicons';
-import styles from '../styles';
-import { COLORS } from '../../../../../../../constants';
 
+import { COLORS } from '../../../../../../../constants';
 
 const PartialLiquidationModal = ({ visible, onClose, onConfirmPartialLiquidation }) => {
   const [paymentDate, setPaymentDate] = useState(new Date());
   const [partialValue, setPartialValue] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  // Garantir que o valor seja convertido para número corretamente
   const handlePartialLiquidation = () => {
+    const parsedValue = parseFloat(partialValue.replace(',', '.')); // Substitui vírgula por ponto, se houver
+    if (isNaN(parsedValue) || parsedValue <= 0) {
+      // Verifica se o valor é válido
+      alert('Por favor, insira um valor parcial válido.');
+      return;
+    }
+
     onClose(); // Fecha o modal atual
-    onConfirmPartialLiquidation(paymentDate, partialValue); // Abre o modal de confirmação
+    onConfirmPartialLiquidation(parsedValue, paymentDate); // Envia o valor numérico e a data ao componente pai
   };
-  
+
   return (
     <Modal visible={visible} onRequestClose={onClose} transparent={true}>
       <View style={styles.modalOverlay}>
@@ -37,7 +44,6 @@ const PartialLiquidationModal = ({ visible, onClose, onConfirmPartialLiquidation
             </TouchableOpacity>
           </View>
 
-
           {showDatePicker && (
             <DateTimePicker
               value={paymentDate}
@@ -57,7 +63,7 @@ const PartialLiquidationModal = ({ visible, onClose, onConfirmPartialLiquidation
             style={styles.input}
             placeholder="Valor a liquidar parcialmente"
             value={partialValue}
-            onChangeText={setPartialValue}
+            onChangeText={(text) => setPartialValue(text.replace(/[^0-9,.]/g, ''))} // Permite apenas números, vírgula e ponto
             keyboardType="numeric"
           />
 
@@ -73,3 +79,65 @@ const PartialLiquidationModal = ({ visible, onClose, onConfirmPartialLiquidation
 };
 
 export default PartialLiquidationModal;
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '90%',
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 16,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#000',
+  },
+  datePickerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 15,
+    borderBottomWidth: 1,
+    borderColor: COLORS.black,
+    paddingHorizontal: 10,
+  },
+  datePickerButton: {
+    marginBottom: 15,
+    marginTop: 5,
+  },
+  input: {
+    borderBottomWidth: 1,
+    borderColor: COLORS.black,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 16,
+    fontSize: 16,
+  },
+  confirmButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 22,
+    borderRadius: 3,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    color: '#000',
+    marginLeft: 8,
+  },
+  dateLabel: {
+    color: COLORS.lightGray,
+  },
+});

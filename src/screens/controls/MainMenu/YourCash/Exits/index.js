@@ -18,7 +18,6 @@ const menuItems = [
     { name: 'Cadastrar', screen: 'NewExpense', icon: IconCadastrar, description: 'Cadastre uma nova despesa' },
     { name: 'Categorias', screen: 'CategoriesScreen', icon: IconCategorias, description: 'Cadastre e gerencie suas categorias de despesa' },
     { name: 'Liquidar', screen: 'LiquidateExpense', icon: IconLiquidar, description: 'Liquidar valor total de uma despesa' },
-    { name: 'Liquidar parcialmente', screen: 'PartialLiquidation', icon: IconLiquidarParcial, description: 'Liquidar parcialmente uma despesa' },
     { name: 'Relatórios', screen: 'RelatorioDesabilitar', icon: IconRelatorio, description: 'Veja os relatórios de suas saídas', disabled: true },
 ];
 

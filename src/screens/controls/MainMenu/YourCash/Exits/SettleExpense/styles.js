@@ -93,6 +93,11 @@ const styles = StyleSheet.create({
   backgroundColor: '#fff',
   borderRadius: 8,
 },
+expenseDate: {
+  fontSize: 13,
+  color: COLORS.black,
+  marginTop: 4,
+},
 expenseCard: {
   flexDirection: 'row',
   justifyContent: 'space-between',

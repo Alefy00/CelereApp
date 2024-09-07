@@ -1,8 +1,9 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, ActivityIndicator, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import styles from '../styles'; // Certifique-se de importar o novo arquivo de estilos
+import { COLORS } from '../../../../../../../constants';
+
 
 const ConfirmationModal = ({ visible, onClose, onConfirm }) => {
   const [loading, setLoading] = useState(false);  // Adicionando estado para controlar o carregamento
@@ -52,5 +53,69 @@ const ConfirmationModal = ({ visible, onClose, onConfirm }) => {
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  confirmationModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo semi-transparente
+  },
+  confirmationModalContent: {
+    width: '85%',
+    padding: 20,
+    backgroundColor: COLORS.white, // Fundo branco
+    borderRadius: 10, // Bordas arredondadas
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmationModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.black, // Texto preto
+    marginBottom: 10,
+    textAlign: 'left',
+    alignSelf:'flex-start',
+  },
+  confirmationModalMessage: {
+    fontSize: 14,
+    color: COLORS.black, // Texto cinza
+    textAlign: 'left',
+    marginBottom: 20,
+  },
+  confirmationModalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignSelf: 'flex-end',
+    marginLeft: 80,
+  },
+  confirmationCancelButton: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 12,
+  },
+  confirmationConfirmButton: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: COLORS.primary, // Cor do botão de confirmar
+    borderRadius: 3,
+    flexDirection: 'row', // Para ícone e texto ficarem lado a lado
+    justifyContent: 'center',
+  },
+  confirmationCancelButtonText: {
+    color: COLORS.black, // Cor do texto do botão de cancelar
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  confirmationConfirmButtonText: {
+    color: COLORS.black, // Cor do texto do botão de confirmar
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  confirmationIcon: {
+    marginRight: 5, // Espaçamento entre o ícone e o texto
+  },
+})
 
 export default ConfirmationModal;

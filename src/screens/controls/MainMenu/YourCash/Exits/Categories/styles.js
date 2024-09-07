@@ -8,9 +8,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFBE6',
         paddingTop: 16,
       },
+      containerBartop2:{
+        marginTop: -18,
+        marginBottom: 10,
+      },
       contentContainer: {
         flex: 1,
-        marginTop: 60, // Garantir que a lista não fique sobre o BarTop2
+        marginTop: 10, // Garantir que a lista não fique sobre o BarTop2
         padding: 16,
         backgroundColor: '#fff',
         borderRadius: 10,
@@ -20,17 +24,21 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 1.41,
         elevation: 2,
+        marginBottom:100,
+        
       },
       title: {
         fontSize: 22,
-        fontWeight: 'bold',
+        fontWeight: '900',
         color: '#000',
-        marginBottom: 10,
+        marginTop:50,
+        marginLeft: 20,
       },
       subtitle: {
         fontSize: 16,
-        color: '#6C6C6C',
-        marginBottom: 16,
+        color: COLORS.black,
+        marginLeft: 20,
+        marginVertical: 10,
       },
       searchContainer: {
         flexDirection: 'row',
@@ -38,13 +46,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 10,
         paddingHorizontal: 10,
-        paddingVertical: 8,
-        marginBottom: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 1.41,
-        elevation: 2,
+        borderBottomWidth:1,
+        borderColor: COLORS.black,
       },
       searchInput: {
         flex: 1,
@@ -55,21 +58,14 @@ const styles = StyleSheet.create({
       },
       categoryList: {
         flexGrow: 1,
-        marginBottom: 16,
+
       },
       categoryItem: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#fff',
-        paddingVertical: 12,
+        paddingVertical:5,
         paddingHorizontal: 16,
-        marginBottom: 10,
-        borderRadius: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 1.41,
-        elevation: 2,
       },
       checkboxContainer: {
         flexDirection: 'row',
@@ -85,8 +81,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#fff',
-        padding: 16,
-        borderRadius: 10,
+        padding: 10,
+        borderRadius: 5,
         borderColor: '#000',
         borderWidth: 1,
       },
@@ -98,16 +94,14 @@ const styles = StyleSheet.create({
       addButtonContainer: {
         padding: 16,
         backgroundColor: '#FFFBE6',
-        borderTopWidth: 1,
-        borderColor: '#E6E6E6',
       },
       addButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#FFC700',
+        backgroundColor: COLORS.primary,
         padding: 16,
-        borderRadius: 10,
+        borderRadius: 5,
       },
       addButtonText: {
         fontSize: 16,
