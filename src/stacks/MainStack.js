@@ -44,8 +44,10 @@ import Others from '../screens/controls/MainMenu/YourCash/Entries/Others';
 import Report from '../screens/controls/MainMenu/YourCash/Entries/Reports';
 import NewExpense from '../screens/controls/MainMenu/YourCash/Exits/NewExpense';
 import AccountsPayable from '../screens/controls/MainMenu/YourCash/Exits/NewExpense/components/AccountsPayable';
+import CategoriesScreen from '../screens/controls/MainMenu/YourCash/Exits/Categories';
 import CancelExpense from '../screens/controls/MainMenu/YourCash/Exits/CancelExpense';
 import LiquidateExpense from '../screens/controls/MainMenu/YourCash/Exits/SettleExpense';
+import PartialLiquidation from '../screens/controls/MainMenu/YourCash/Exits/PartialLiquidation';
 import Winning from '../screens/controls/CashFlow';
 import BusinessInfoScreen from '../screens/Start/InitialBusiness';
 import ConsultExpense from '../screens/controls/MainMenu/YourCash/Exits/ConsultExpense';
@@ -111,6 +113,8 @@ export default () => (
     <Stack.Screen name="AccountsPayable" component={AccountsPayable} />
     <Stack.Screen name="CancelExpense" component={CancelExpense} />
     <Stack.Screen name="LiquidateExpense" component={LiquidateExpense} />
+    <Stack.Screen name="PartialLiquidation" component={PartialLiquidation} />
+    <Stack.Screen name="CategoriesScreen" component={CategoriesScreen} />
     <Stack.Screen name="ConsultExpense" component={ConsultExpense} />
     <Stack.Screen name="AddService" component={AddService} />
     <Stack.Screen name="TeamScreen" component={TeamScreen} />

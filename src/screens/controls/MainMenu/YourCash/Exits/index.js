@@ -16,9 +16,9 @@ import IconRelatorio from "../../../../../assets/images/svg/Exits/IconRelatorios
 const menuItems = [
     { name: 'Consultar', screen: 'ConsultExpense', icon: IconConsultar, description: 'Consulte suas despesas' },
     { name: 'Cadastrar', screen: 'NewExpense', icon: IconCadastrar, description: 'Cadastre uma nova despesa' },
-    { name: 'Categorias', screen: 'Categorias', icon: IconCategorias, description: 'Cadastre e gerencie suas categorias de despesa' },
+    { name: 'Categorias', screen: 'CategoriesScreen', icon: IconCategorias, description: 'Cadastre e gerencie suas categorias de despesa' },
     { name: 'Liquidar', screen: 'LiquidateExpense', icon: IconLiquidar, description: 'Liquidar valor total de uma despesa' },
-    { name: 'Liquidar parcialmente', screen: 'PartialLiquidateExpense', icon: IconLiquidarParcial, description: 'Liquidar parcialmente uma despesa' },
+    { name: 'Liquidar parcialmente', screen: 'PartialLiquidation', icon: IconLiquidarParcial, description: 'Liquidar parcialmente uma despesa' },
     { name: 'Relatórios', screen: 'RelatorioDesabilitar', icon: IconRelatorio, description: 'Veja os relatórios de suas saídas', disabled: true },
 ];
 

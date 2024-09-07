@@ -105,7 +105,7 @@ const NewExpense = ({ navigation }) => {
                 ? categoryIcons[item.id] 
                 : null, // Usar o ícone importado correspondente ou null se não for válido
         }));
-        setCategories([{ label: 'Selecione uma categoria', value: '' }, ...fetchedCategories]);
+        setCategories([{ label: 'Categoria da despesa', value: '' }, ...fetchedCategories]);
       } else {
         console.error('Erro ao buscar categorias:', data.message || 'Formato de resposta inesperado');
         Alert.alert('Erro', 'Não foi possível carregar as categorias. Tente novamente.');
@@ -268,7 +268,8 @@ const NewExpense = ({ navigation }) => {
   
   const handleRegisterNew = () => {
     setSuccessModalVisible(false);
-    setCategoria('');
+    setCategoria(''); // Resetando o campo de categoria
+    setSelectedCategory(''); // Garantindo que a categoria selecionada seja removida
     setValor('');
     setItem('');
     setParceiro('');
@@ -278,6 +279,7 @@ const NewExpense = ({ navigation }) => {
     setDueDate(new Date());
     setBarcode('');
   };
+  
 
   const toggleExpenseType = () => {
     setIsLiquidateNow(!isLiquidateNow);
