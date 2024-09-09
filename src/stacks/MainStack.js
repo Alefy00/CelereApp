@@ -20,6 +20,10 @@ import LoginScreen from '../screens/Start/Login';
 import InitialRegistration from '../screens/Start/InitialRegistration';
 import InitialCode from '../screens/Start/InitialCode';
 import InitialBranch from '../screens/Start/InitialBranch';
+import VarejoScreen from '../screens/Start/InitialBranch/VarejoScreen';
+import AlimentosScreen from '../screens/Start/InitialBranch/AlimentosScreen';
+import ServicosScreen from '../screens/Start/InitialBranch/ServicosScreen';
+import FabricacaoScreen from '../screens/Start/InitialBranch/FabricacaoScreen';
 
 import OpeningBalance from '../screens/InitialData/OpeningBalance';
 import InitialSupplier from '../screens/InitialData/InitialSupplier';
@@ -97,6 +101,10 @@ export default () => (
     <Stack.Screen name="InitialCode" component={InitialCode} />
     <Stack.Screen name="InitialBranch" component={InitialBranch} />
     <Stack.Screen name="BusinessInfoScreen" component={BusinessInfoScreen} />
+    <Stack.Screen name="VarejoScreen" component={VarejoScreen} />
+    <Stack.Screen name="AlimentosScreen" component={AlimentosScreen} />
+    <Stack.Screen name="ServicosScreen" component={ServicosScreen} />
+    <Stack.Screen name="FabricacaoScreen" component={FabricacaoScreen} />
 
     <Stack.Screen name="OpeningBalance" component={OpeningBalance} />
     <Stack.Screen name="InitialSupplier" component={InitialSupplier} />

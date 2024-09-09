@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
     marginBottom: 20, // Espaçamento para a imagem de apresentação
   },
   description: {
-    fontSize: 18,
+    fontSize: 22,
     textAlign: 'center',
     color: '#000',
     marginBottom: 10,

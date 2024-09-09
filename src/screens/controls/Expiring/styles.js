@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight:'600',
     marginBottom: 12,
     color:COLORS.black,
@@ -38,15 +38,15 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: '#212121',
+    color: COLORS.black,
 
   },
   labelSmall: {
-    fontSize: 10,
+    fontSize: 12,
     color: '#212121',
   },
   value: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
     color: COLORS.black
   },
@@ -62,8 +62,29 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: COLORS.lightGray,
     marginVertical: 8,
+  },
+  forecastContainer: {
+    backgroundColor: '#FFF',
+    borderRadius: 5,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 1,
+  },
+  forecastTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.black,
+  },
+  forecastValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: COLORS.green,
   },
 });
 

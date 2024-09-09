@@ -68,7 +68,7 @@ export default StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: COLORS.primary,
     borderRadius: 5,
-    paddingVertical: 15,
+    paddingVertical: 28,
     paddingHorizontal: 20,
     width: '100%',
     marginTop: 10,

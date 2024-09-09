@@ -29,7 +29,7 @@ const InitialCode = ({ navigation }) => {
           setUserData(JSON.parse(storedUserData));
         } else {
           setModalMessage('Dados do usuário não encontrados.');
-          navigation.navigate('InitialRegistration');
+          
         }
       } catch (error) {
         console.error("Erro ao carregar dados do usuário:", error);

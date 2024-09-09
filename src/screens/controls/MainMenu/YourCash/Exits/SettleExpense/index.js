@@ -1,5 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import { View, FlatList, ActivityIndicator, Alert, TextInput, TouchableOpacity, Text } from 'react-native';
 import BarTop2 from "../../../../../../components/BarTop2";
 import axios from 'axios';
@@ -32,7 +33,7 @@ const LiquidateExpense = ({ navigation }) => {
     }
   };
 
-  // Função para buscar despesas da API sem agrupar por despesa_pai
+  // Função para buscar despesas da API
   const fetchExpenses = useCallback(async (empresa_id) => {
     if (!empresa_id) return;
 
@@ -64,7 +65,7 @@ const LiquidateExpense = ({ navigation }) => {
   }, []);
 
   // Carregar categorias
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const response = await axios.get(CATEGORIES_API);
       if (response.data.results && response.data.results.data) {
@@ -77,40 +78,51 @@ const LiquidateExpense = ({ navigation }) => {
       console.error('Erro ao buscar categorias de despesas:', error);
       Alert.alert('Erro', 'Ocorreu um erro ao buscar as categorias de despesas. Verifique sua conexão com a internet e tente novamente.');
     }
-  };
+  }, []);
+
   // Função para buscar fornecedores da API
-const fetchSuppliers = async () => {
-  try {
-    const response = await axios.get(SUPPLIERS_API);
-    if (response.data.results && response.data.results.data) {
-      setFornecedores(response.data.results.data); // Armazena os fornecedores no estado
-    } else {
-      console.error('Erro ao buscar fornecedores:', response.data.message || 'Formato de resposta inesperado');
-      Alert.alert('Erro', 'Não foi possível carregar os fornecedores. Tente novamente.');
+  const fetchSuppliers = useCallback(async () => {
+    try {
+      const response = await axios.get(SUPPLIERS_API);
+      if (response.data.results && response.data.results.data) {
+        setFornecedores(response.data.results.data); // Armazena os fornecedores no estado
+      } else {
+        console.error('Erro ao buscar fornecedores:', response.data.message || 'Formato de resposta inesperado');
+        Alert.alert('Erro', 'Não foi possível carregar os fornecedores. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar fornecedores:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao buscar os fornecedores. Verifique sua conexão com a internet e tente novamente.');
     }
-  } catch (error) {
-    console.error('Erro ao buscar fornecedores:', error);
-    Alert.alert('Erro', 'Ocorreu um erro ao buscar os fornecedores. Verifique sua conexão com a internet e tente novamente.');
-  }
-};
+  }, []);
 
-useEffect(() => {
-  const fetchData = async () => {
-    const id = await getEmpresaId();
+  // Carregar dados ao montar o componente
+  useEffect(() => {
+    const fetchData = async () => {
+      const id = await getEmpresaId();
 
-    if (id) {
-      setEmpresaId(id);
-      fetchExpenses(id);
-      fetchSuppliers(); // Carregar fornecedores junto com as despesas
-    } else {
-      Alert.alert('Erro', 'ID da empresa não encontrado. Por favor, faça login novamente.');
-    }
+      if (id) {
+        setEmpresaId(id);
+        await fetchExpenses(id); // Chama a função para buscar despesas
+        await fetchSuppliers(); // Carregar fornecedores junto com as despesas
+      } else {
+        Alert.alert('Erro', 'ID da empresa não encontrado. Por favor, faça login novamente.');
+      }
 
-    await fetchCategories();
-  };
+      await fetchCategories(); // Carregar categorias
+    };
 
-  fetchData();
-}, [fetchExpenses]);
+    fetchData(); // Chama a função apenas uma vez na montagem
+  }, [fetchExpenses, fetchSuppliers, fetchCategories]);
+
+   // Usar useFocusEffect para recarregar as despesas quando a tela ganhar foco
+   useFocusEffect(
+    useCallback(() => {
+      if (empresaId) {
+        fetchExpenses(empresaId); // Recarrega as despesas quando a tela for focada
+      }
+    }, [empresaId, fetchExpenses])
+  );
 
   // Função para obter o nome da categoria pelo id
   const getCategoryNameById = (id) => {
@@ -130,22 +142,21 @@ useEffect(() => {
     }
   };
 
-// Navegar para a tela de detalhes da despesa, passando a despesa e as categorias e fornecedores
-const handleOpenExpenseDetails = (expense) => {
-  navigation.navigate('ExpenseDetails', { expense, categories, fornecedores }); // Passa as despesas e os fornecedores
-};
-
+  // Navegar para a tela de detalhes da despesa, passando a despesa e as categorias e fornecedores
+  const handleOpenExpenseDetails = (expense) => {
+    navigation.navigate('ExpenseDetails', { expense, categories, fornecedores }); // Passa as despesas e os fornecedores
+  };
 
   // Função para formatar a data no formato brasileiro
-const formatDateToBrazilian = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('pt-BR');
-};
+  const formatDateToBrazilian = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  };
 
-const sortExpensesByDate = (expenses) => {
-  return expenses.sort((a, b) => new Date(a.dt_vencimento) - new Date(b.dt_vencimento));
-};
-
+  // Ordenar as despesas por data de vencimento
+  const sortExpensesByDate = (expenses) => {
+    return expenses.sort((a, b) => new Date(a.dt_vencimento) - new Date(b.dt_vencimento));
+  };
 
   // Função para renderizar a lista de despesas, agora sem agrupamento
   const renderExpenseList = () => {
@@ -176,6 +187,7 @@ const sortExpensesByDate = (expenses) => {
       />
     );
   };
+
   return (
     <View style={styles.containerMain}>
       <View style={styles.barTopContainer}>
@@ -183,8 +195,6 @@ const sortExpensesByDate = (expenses) => {
           titulo="Voltar"
           backColor={COLORS.primary}
           foreColor={COLORS.black}
-          routeMailer={''}
-          routeCalculator={''}
         />
       </View>
       <View style={styles.container}>

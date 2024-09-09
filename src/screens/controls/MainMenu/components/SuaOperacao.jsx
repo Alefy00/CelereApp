@@ -86,6 +86,10 @@ const handleServices = () => {
           <TxtItemMenu>{t('Notas Fiscais Eletrônicas')}</TxtItemMenu>
         </BtnItemMenu>
         {/* Linha 2 */}
+        <BtnItemMenu backColor="#F0E6E6" disabled>
+          <IconVirtualShop width="38" height="38" />
+          <TxtItemMenu>{t('virtual_shop')}</TxtItemMenu>
+        </BtnItemMenu>
 
         <BtnItemMenu backColor="#F0E6E6" disabled>
           <IconOrders width="38" height="38" />
@@ -97,10 +101,6 @@ const handleServices = () => {
           <TxtItemMenu>{t('Cliente e       Fornecedor')}</TxtItemMenu>
         </BtnItemMenu>
 
-        <BtnItemMenu backColor="#F0E6E6" disabled>
-          <IconVirtualShop width="38" height="38" />
-          <TxtItemMenu>{t('virtual_shop')}</TxtItemMenu>
-        </BtnItemMenu>
 
         <BtnItemMenu backColor="#F0E6E6" disabled>
           <IconCustomers width="38" height="38" />

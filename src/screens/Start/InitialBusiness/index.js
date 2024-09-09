@@ -31,7 +31,7 @@ const BusinessInfoScreen = ({ navigation }) => {
           setUserData(JSON.parse(storedUserData));
         } else {
           setErrorMessage('Dados do usuário não encontrados.');
-          navigation.navigate('InitialRegistration');
+          
         }
       } catch (error) {
         console.error('Erro ao carregar dados do usuário:', error);
@@ -133,7 +133,7 @@ const BusinessInfoScreen = ({ navigation }) => {
           <TextInput
             style={styles.input}
             placeholder="Seu nome"
-            placeholderTextColor="#ccc"
+            placeholderTextColor={COLORS.gray}
             value={name}
             onChangeText={setName}
           />
@@ -141,7 +141,7 @@ const BusinessInfoScreen = ({ navigation }) => {
           <TextInput
             style={styles.input}
             placeholder="Nome do seu negócio"
-            placeholderTextColor="#ccc"
+            placeholderTextColor={COLORS.gray}
             value={businessName}
             onChangeText={setBusinessName}
           />
@@ -152,7 +152,7 @@ const BusinessInfoScreen = ({ navigation }) => {
               style={styles.picker}
               onValueChange={(itemValue) => setRole(itemValue)}
             >
-              <Picker.Item label="Sua posição no negócio" value=""  color='#ccc'/>
+              <Picker.Item label="Sua posição no negócio" value=""  color={COLORS.gray}/>
               {rolesList && rolesList.length > 0 && rolesList.map((roleItem) => (
                 <Picker.Item key={roleItem.id} label={roleItem.nome} value={roleItem.id} />
               ))}
@@ -162,7 +162,7 @@ const BusinessInfoScreen = ({ navigation }) => {
           <TextInput
             style={styles.input}
             placeholder="Digite o CNPJ (se houver)"
-            placeholderTextColor="#ccc"
+            placeholderTextColor={COLORS.gray}
             value={cnpj}
             onChangeText={setCnpj}
             keyboardType="numeric"

@@ -82,10 +82,11 @@ export default StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: COLORS.primary,
     borderRadius: 5,
-    paddingVertical: 15,
+    paddingVertical: 28,
     paddingHorizontal: 20,
     marginTop: 10,
     width: '100%',
+   
   },
   buttonText: {
     color: '#000',

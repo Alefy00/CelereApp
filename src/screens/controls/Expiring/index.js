@@ -18,23 +18,26 @@ const Expiring = () => {
         <Text style={styles.valuePositive}>{`R$ ${receivable}`}</Text>
       </View>
       <View style={styles.row}>
-        <Text style={styles.label}>Despesas</Text>
+        <Text style={styles.label}>Contas a pagar</Text>
         <Text style={styles.valueNegative}>{`R$ ${expenses}`}</Text>
       </View>
       <View style={styles.divider} />
       <View style={styles.row}>
         <Text style={styles.label}>
-          Saldo{' '}
-          <Text style={styles.labelSmall}>(Contas a receber - Despesas)</Text>
-        </Text>
-        <Text style={styles.value}>{`R$ ${balance}`}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>
-          Saldo de caixa previsto{' '}
-          <Text style={styles.labelSmall}>(fim do dia)</Text>
+          Diferença
         </Text>
         <Text style={styles.value}>{`R$ ${forecast}`}</Text>
+      </View>
+    </View>
+  );
+   // Novo container para previsão de saldo de caixa
+   const renderForecastContainer = (title, balance) => (
+    <View style={styles.forecastContainer}>
+      <Text style={styles.forecastTitle}>{title}</Text>
+      <View style={styles.divider} />
+      <View style={styles.row}>
+        <Text style={styles.label}>Saldo</Text>
+        <Text style={styles.forecastValue}>{`R$ ${balance}`}</Text>
       </View>
     </View>
   );
@@ -51,10 +54,11 @@ const Expiring = () => {
         routeCalculator={''}
       />
       <ScrollView style={styles.scrollContainer}>
-        {renderSection('Vencendo hoje', '210', '100', '110', '1.310')}
-        {renderSection('Próximos 7 dias', '2.100', '1.000', '1.100', '2.810')}
+        {renderSection('Vencendo hoje', '210,00', '100,00', '110,00', '110,00')}
+        {renderSection('Próximos 7 dias', '2.100', '1.000', '1.100', '1.000,00')}
         <View style={styles.containerBase}>
-        {renderSection('Próximos 30 dias', '21.000', '10.000', '11.000', '14.540')}
+        {renderSection('Próximos 30 dias', '21.000', '10.000', '11.000', '11.000,00')}
+        {renderForecastContainer('Previsão de saldo de caixa daqui 30 dias', '23.000,00')}
         </View>
       </ScrollView>
     </View>

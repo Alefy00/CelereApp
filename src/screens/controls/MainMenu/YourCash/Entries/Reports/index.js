@@ -111,17 +111,17 @@ const Report = ({ navigation }) => {
         {/* Barra de saldo */}
         <View style={styles.balanceBarContainer}>
           <View style={styles.balanceBarGreen} />
-          <View style={styles.balanceBarRed} />
+          <View style={styles.balanceBarOrange} />
         </View>
         {/* Linha de menor saldo e saldo médio diário */}
         <View style={styles.balanceRow2}>
           <View style={styles.balanceBox2}>
-            <Text style={[styles.balanceText, styles.balancenumber]}>Menor Saldo - Dia 5</Text>
-            <Text style={[styles.balanceAmount, styles.balenceValue]}>R$4.380</Text>
+            <Text style={[styles.balanceText, styles.balancenumber]}>Saldo Médio Diário</Text>
+            <Text style={[styles.balanceAmount, styles.balenceValue]}>R$4.560</Text>
           </View>
           <View style={styles.balanceBox3}>
-            <Text style={[styles.balanceText, styles.balancenumber2]}>Saldo Médio Diário</Text>
-            <Text style={[styles.balanceAmount, styles.balenceValue2]}>R$4.560</Text>
+            <Text style={[styles.balanceText, styles.balancenumber2]}>Menor Saldo - Dia 5</Text>
+            <Text style={[styles.balanceAmount, styles.balenceValue2]}>R$4.380</Text>
           </View>
         </View>
         <View style={styles.containerInfo}>

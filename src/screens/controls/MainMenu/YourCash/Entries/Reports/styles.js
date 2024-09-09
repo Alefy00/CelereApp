@@ -122,10 +122,10 @@ const styles = StyleSheet.create({
     color: COLORS.red,
   },
   balancenumber2: {
-    color: COLORS.red,
+    color: COLORS.orange,
   },
   balenceValue2: {
-    color: COLORS.red,
+    color: COLORS.orange,
   },
   arrow: {
     flexDirection: "row",
@@ -150,9 +150,9 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 5,
     borderBottomLeftRadius: 5
   },
-  balanceBarRed: {
+  balanceBarOrange: {
     flex: 1,
-    backgroundColor: COLORS.red,
+    backgroundColor: COLORS.orange,
     borderTopRightRadius: 5,
     borderBottomRightRadius: 5,
   },

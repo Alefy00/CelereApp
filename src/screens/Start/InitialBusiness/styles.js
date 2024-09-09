@@ -64,7 +64,7 @@ export default StyleSheet.create({
   button: {
     backgroundColor: COLORS.primary,
     borderRadius: 5,
-    paddingVertical: 15,
+    paddingVertical: 28,
     paddingHorizontal: 20,
     width: '100%',
     alignItems: 'center',
@@ -74,8 +74,9 @@ export default StyleSheet.create({
   },
   buttonText: {
     color: '#000',
-    fontWeight: 'bold',
+    fontWeight: '500',
     marginLeft: 10,
+    fontSize:15,
   },
   errorMessageContainer: {
     padding: 10,
