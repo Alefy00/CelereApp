@@ -11,7 +11,7 @@ const DatePickerModal = ({ modalVisible, setModalVisible, onMonthSelect }) => (
     onRequestClose={() => setModalVisible(false)}
   >
     <View style={styles.modalContainer}>
-      <Text>Selecione o Mês</Text>
+
       {Array.from({ length: 12 }).map((_, i) => (
         <TouchableOpacity
           key={i}

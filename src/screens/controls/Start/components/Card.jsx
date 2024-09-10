@@ -1,14 +1,16 @@
-/* eslint-disable no-dupe-keys */
+/* eslint-disable prettier/prettier */
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import IconSeta from '../../../../assets/images/svg/iconArrowRight.svg';
 import {useNavigation} from '@react-navigation/native';
+import { COLORS } from '../../../../constants';
 
-const Card = ({number, title, buttontitle, pageScreen}) => {
+const Card = ({ number, title, buttontitle, pageScreen, buttonStyle }) => {
   const navigation = useNavigation();
   const navigateToScreen = screenName => {
     navigation.navigate(screenName);
   };
+
   return (
     <View style={styles.card}>
       <View style={styles.leftColumn}>
@@ -17,11 +19,15 @@ const Card = ({number, title, buttontitle, pageScreen}) => {
       <View style={styles.rightColumn}>
         <Text style={styles.title}>{title}</Text>
         <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigateToScreen(pageScreen)}>
-          <IconSeta style={styles.arrowImg} />
-          <Text style={styles.buttonText}>{buttontitle}</Text>
-        </TouchableOpacity>
+            style={[styles.button, buttonStyle]} // Combina o estilo padrão com o estilo condicional recebido
+            onPress={() => navigateToScreen(pageScreen)}
+          >
+            <IconSeta style={styles.arrowImg} />
+            <Text style={buttonStyle === styles.updateButton ? styles.updateButtonText : styles.startButtonText}>
+              {buttontitle}
+            </Text>
+          </TouchableOpacity>
+
       </View>
     </View>
   );
@@ -47,7 +53,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 8,
     marginRight: 16,
   },
   numberText: {
@@ -88,6 +93,43 @@ const styles = StyleSheet.create({
   arrowImg: {
     marginRight: 10,
   },
+
+  // Novo estilo para o botão de "Alterar saldo"
+  updateButton: {
+    backgroundColor: COLORS.secondary, // Cor diferente para indicar a alteração
+    borderColor: '#FFC107', // Borda amarela para destaque
+    borderWidth: 2,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  updateButtonText: {
+    color: '#000', // Cor do texto diferente
+    fontWeight: 'bold',
+    fontSize: 16, // Texto um pouco maior
+    marginRight: 10,
+  },
+
+  // Estilo para o botão de "Começar"
+  startButton: {
+    backgroundColor: COLORS.secondary, // Cor principal para o botão de começar
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  startButtonText: {
+    color: '#FFFFFF', // Texto branco para "Começar"
+    fontWeight: '500',
+    fontSize: 16,
+    marginRight: 10,
+  },
 });
+
 
 export default Card;

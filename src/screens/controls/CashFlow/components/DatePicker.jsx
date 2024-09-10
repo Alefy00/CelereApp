@@ -80,7 +80,7 @@ const DatePicker = ({ dates, selectedDateIndex, onDateSelect }) => {
         ))}
       </ScrollView>
       <TouchableOpacity onPress={handleFilterPress} style={styles.filterButton}>
-        <Icon name="filter-outline" size={24} color="#000" />
+        <Icon name="filter" size={24} color="#000" />
       </TouchableOpacity>
 
       <DatePickerModal

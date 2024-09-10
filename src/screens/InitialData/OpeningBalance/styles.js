@@ -67,6 +67,59 @@ export default StyleSheet.create({
   buttonText: {
     fontSize: 18,
     color: COLORS.black,
-    paddingLeft:10
+    paddingLeft:10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 40,
+    alignItems: 'center',
+  },
+  modalContent2: {
+    width: '80%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 22,
+    color: '#000',
+  },
+  secondModalText:{
+    fontSize: 22,
+    color:COLORS.black,
+    marginBottom:10,
+    fontWeight: 'bold',
+  },
+  modalBalance: {
+    fontSize: 24,
+    color: COLORS.green, // Verde para o valor
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  confirmButton: {
+    backgroundColor: COLORS.primary, // Amarelo para o botão
+    borderRadius: 5,
+    paddingVertical: 20,
+    paddingHorizontal: 80,
+  },
+  confirmButton2: {
+    backgroundColor: COLORS.primary, // Amarelo para o botão
+    borderRadius: 5,
+    paddingVertical: 20,
+    paddingHorizontal:120,
+  },
+  confirmButtonText: {
+    color: '#000',
+    fontSize: 16,
+
   },
 });

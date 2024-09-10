@@ -4,6 +4,7 @@ import { COLORS } from '../../../constants';
 
 const { width } = Dimensions.get('window');
 const DAY_WIDTH = width / 6; // Largura de cada dia no carrossel
+const { height } = Dimensions.get('window');
 
 export default StyleSheet.create({
   container: {
@@ -24,13 +25,12 @@ export default StyleSheet.create({
     width: DAY_WIDTH, // Largura fixa para cada dia no carrossel
   },
   selectedDate: {
-    backgroundColor: '#FFD700',
+    backgroundColor: COLORS.primary,
     borderRadius: 8,
     padding: 8,
   },
   todayDate: {
-    borderColor: '#FFD700',
-    borderWidth: 2,
+
     borderRadius: 8,
     padding: 8,
   },
@@ -52,6 +52,8 @@ export default StyleSheet.create({
   filterButton: {
     padding: 8,
     marginLeft: 8, // Espaçamento para afastar o botão de filtro das datas
+    backgroundColor: COLORS.primary,
+    borderRadius:8,
   },
   contentContainer: {
     padding: 16,
@@ -152,6 +154,7 @@ export default StyleSheet.create({
     flexDirection:"row",
     justifyContent:'space-between',
     marginHorizontal:15,
+    marginTop: -10,
   },
   incomeHeaderContainer: {
     flexDirection: 'row',
@@ -172,5 +175,71 @@ export default StyleSheet.create({
     backgroundColor: '#E0E0E0',
     marginVertical: 8,
     marginHorizontal:15,
+  },
+   // Estilos para TimePeriodFilter
+   periodFilterContainer: {
+    marginVertical: 5,
+    paddingHorizontal: 16,
+  },
+  periodLabel: {
+    fontSize: 14,
+    color: COLORS.black,
+    marginBottom: 10,
+  },
+  periodButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  periodButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    backgroundColor: COLORS.background, // Cor padrão para botões
+  },
+  selectedPeriodButton: {
+    backgroundColor: COLORS.primary, // Amarelo destacado para botão selecionado
+  },
+  periodButtonText: {
+    fontSize: 16,
+    color: COLORS.black,
+  },
+  selectedPeriodButtonText: {
+    fontWeight: '800',
+    color: COLORS.black, // Mantendo a cor preta para texto selecionado
+  },
+
+  // Estilos para ViewSwitcher
+  viewSwitcherContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+    borderRadius: 5,
+    borderColor: COLORS.black,
+    borderWidth: 1,
+    overflow: 'hidden',
+    marginHorizontal: 15,
+  },
+  viewButton: {
+    flex: 1,
+    paddingVertical: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.background, // Fundo padrão para os botões
+  },
+  selectedViewButton: {
+    backgroundColor: COLORS.primary, // Amarelo para o botão selecionado
+  },
+  viewButtonText: {
+    fontSize: 14,
+    color: COLORS.black, // Texto preto nos botões
+  },
+  selectedViewButtonText: {
+    fontWeight: 'bold',
+    color: COLORS.black, // Texto preto e em negrito para o selecionado
+  },
+  // Estilo para limitar a altura do DailyTable
+  containerDaily: {
+
+
   },
 });
