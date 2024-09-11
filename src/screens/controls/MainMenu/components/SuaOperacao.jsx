@@ -96,7 +96,7 @@ const handleServices = () => {
           <TxtItemMenu>{t('orders')}</TxtItemMenu>
         </BtnItemMenu>
 
-        <BtnItemMenu backColor="#F0E6E6" disabled>
+        <BtnItemMenu backColor="#F0E6E6"  onPress={() => navigateToScreen('CustomerSupplierScreen')}d>
           <IconSuppliers width="38" height="38" />
           <TxtItemMenu>{t('Cliente e       Fornecedor')}</TxtItemMenu>
         </BtnItemMenu>

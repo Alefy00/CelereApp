@@ -26,7 +26,6 @@ import ServicosScreen from '../screens/Start/InitialBranch/ServicosScreen';
 import FabricacaoScreen from '../screens/Start/InitialBranch/FabricacaoScreen';
 
 import OpeningBalance from '../screens/InitialData/OpeningBalance';
-import InitialSupplier from '../screens/InitialData/InitialSupplier';
 import ExpensePage from '../screens/InitialData/ExpensePage';
 import SalesReceive from '../screens/InitialData/SalesReceive';
 import MonthlySalesForecast from '../screens/InitialData/SalesForecast/MonthlySalesForecast';
@@ -37,6 +36,11 @@ import PurchaseFrequency from '../screens/InitialData/BuyPrevision/PurchaseFrequ
 import SaleDetails from '../screens/controls/MainMenu/YourCash/Entries/NewSale/SalesDetails';
 import SellOnCredit from '../screens/controls/MainMenu/YourCash/Entries/NewSale/SellOnCredit';
 import LooseProduct from '../screens/controls/MainMenu/YourCash/Entries/NewSale/LooseProduct';
+import CustomerSupplierScreen from '../screens/InitialData/CustomerSupplierScreen';
+import IncludeSupplier from '../screens/InitialData/CustomerSupplierScreen/IncludeSupplier';
+import IncludeClient from '../screens/InitialData/CustomerSupplierScreen/IncludeClient';
+import ConsultClient from '../screens/InitialData/CustomerSupplierScreen/ConsultClient';
+import ConsultSupplier from '../screens/InitialData/CustomerSupplierScreen/ConsultSupplier';
 
 import CashBalance from '../screens/controls/MainMenu/YourCash/CashBalance';
 
@@ -87,6 +91,11 @@ export default () => (
     <Stack.Screen name="SaleDetails" component={SaleDetails} />
     <Stack.Screen name="SellOnCredit" component={SellOnCredit} />
     <Stack.Screen name="LooseProduct" component={LooseProduct} />
+    <Stack.Screen name="CustomerSupplierScreen" component={CustomerSupplierScreen} />
+    <Stack.Screen name="IncludeSupplier" component={IncludeSupplier} />
+    <Stack.Screen name="IncludeClient" component={IncludeClient} />
+    <Stack.Screen name="ConsultClient" component={ConsultClient} />
+    <Stack.Screen name="ConsultSupplier" component={ConsultSupplier} />
 
     <Stack.Screen name="CancelSale" component={CancelSale} />
     <Stack.Screen name="SettleCredit" component={SettleCredit} />
@@ -106,7 +115,6 @@ export default () => (
     <Stack.Screen name="FabricacaoScreen" component={FabricacaoScreen} />
 
     <Stack.Screen name="OpeningBalance" component={OpeningBalance} />
-    <Stack.Screen name="InitialSupplier" component={InitialSupplier} />
     <Stack.Screen name="ExpensePage" component={ExpensePage} />
     <Stack.Screen name="SalesReceive" component={SalesReceive} />
     <Stack.Screen name="MonthlySalesForecast" component={MonthlySalesForecast} />
