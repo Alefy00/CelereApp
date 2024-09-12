@@ -67,12 +67,17 @@ export default () => {
 
 
   const handleExits = () => {
-    navigation.navigate("Exits")
+    navigation.navigate('Exits');
   };
 
   const handleCashFlow = () => {
-    navigation.navigate('Winning')
-  }
+    navigation.navigate('Winning');
+  };
+
+  const handleCelerePay = () => {
+    navigation.navigate('CelerePay');
+  };
+
   return (
     <ContainerGroupButtons style={{flex: 1, width: '92%'}}>
       <GroupButton>
@@ -118,7 +123,7 @@ export default () => {
 
         {/* Linha 2 */}
 
-        <BtnItemMenu backColor={COLORS.lightYellow2}>
+        <BtnItemMenu backColor={COLORS.lightYellow2} onPress={handleCelerePay}>
           <IconCelerePay
             width="38"
             height="38"

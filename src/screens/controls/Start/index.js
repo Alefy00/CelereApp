@@ -109,7 +109,7 @@ const Start = ({navigation}) => {
                 number="4"
                 title={t('CélerePay - Seu celular vira maquininha e você tem mais controle')}
                 buttontitle={t('Começar')}
-                pageScreen=""
+                pageScreen="CelerePay"
               />
             </View>
           </>

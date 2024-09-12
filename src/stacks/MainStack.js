@@ -61,6 +61,7 @@ import TaxRegime from '../screens/InitialData/TaxRegime';
 import CelerePay from '../screens/InitialData/CelerePay';
 import MaxTransparency from '../screens/InitialData/CelerePay/MaxTransparency';
 import CelerePayRegister from '../screens/InitialData/CelerePay/CelerePayRegister';
+import CelerePayBank from '../screens/InitialData/CelerePay/CelerePayBank';
 
 import TeamScreen from '../screens/controls/MainMenu/YourControls/Users';
 
@@ -123,6 +124,7 @@ export default () => (
     <Stack.Screen name="CelerePay" component={CelerePay} />
     <Stack.Screen name="MaxTransparency" component={MaxTransparency} />
     <Stack.Screen name="CelerePayRegister" component={CelerePayRegister} />
+    <Stack.Screen name="CelerePayBank" component={CelerePayBank} />
 
     <Stack.Screen name="NewExpense" component={NewExpense} />
     <Stack.Screen name="AccountsPayable" component={AccountsPayable} />

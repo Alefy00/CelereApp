@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Keyboard, TouchableWithoutFeedback, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Keyboard, TouchableWithoutFeedback, ScrollView, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import BarTop3 from '../../../../components/BarTop3';
 import styles from './styles';
@@ -22,10 +22,16 @@ const CelerePayRegister = ({ navigation }) => {
     const [state, setState] = useState('');
     const [hasCnpj, setHasCnpj] = useState(true); // Estado para controlar se o usuário tem CNPJ
     const [isKeyboardVisible, setIsKeyboardVisible] = useState(false); // Estado para controlar a visibilidade do teclado
+    const [isModalVisible, setIsModalVisible] = useState(false);
   
     const handleConfirm = () => {
-      navigation.navigate('NextScreen');
-    };
+      setIsModalVisible(true); // Exibe o modal quando o usuário clicar em confirmar
+  };
+
+  const closeModal = () => {
+      navigation.navigate('CelerePayBank');
+      setIsModalVisible(false); // Fecha o modal
+  };
   
     // Função para formatar o CNPJ com limite de 14 dígitos
     const formatCnpj = (text) => {
@@ -92,7 +98,11 @@ const CelerePayRegister = ({ navigation }) => {
                 keyboardType="numeric"
               />
               <View style={styles.checkboxContainer}>
-                <CheckBox value={!hasCnpj} onValueChange={() => setHasCnpj(!hasCnpj)} />
+                <CheckBox 
+                value={!hasCnpj} 
+                onValueChange={() => setHasCnpj(!hasCnpj)}
+                tintColors={{ true: COLORS.black, false: COLORS.grey }}
+                />
                 <Text style={styles.checkboxLabel}>Não tenho CNPJ</Text>
               </View>
   
@@ -106,8 +116,8 @@ const CelerePayRegister = ({ navigation }) => {
               />
               <View style={styles.rowContainer}>
                 <TextInput
-                  style={[styles.input, styles.inputSmall]}
-                  placeholder="RG"
+                  style={[styles.input, styles.inputSmallRG]}
+                  placeholder="Digite o n° do seu RG"
                   value={rg}
                   onChangeText={setRg}
                 />
@@ -130,8 +140,8 @@ const CelerePayRegister = ({ navigation }) => {
                 <>
                   {/* CEP */}
                   <TextInput
-                    style={styles.input}
-                    placeholder="CEP"
+                    style={styles.inputCEP}
+                    placeholder="Digite seu CEP"
                     value={cep}
                     onChangeText={formatCep}
                     keyboardType="numeric"
@@ -140,8 +150,8 @@ const CelerePayRegister = ({ navigation }) => {
                   {/* Rua, Número */}
                   <View style={styles.rowContainer}>
                     <TextInput
-                      style={[styles.input, styles.inputLarge]}
-                      placeholder="Rua"
+                      style={[styles.input, styles.inputLargeRUA]}
+                      placeholder="Digite o seu endereço"
                       value={street}
                       onChangeText={setStreet}
                     />
@@ -157,13 +167,13 @@ const CelerePayRegister = ({ navigation }) => {
                   {/* Complemento, Bairro */}
                   <View style={styles.rowContainer}>
                     <TextInput
-                      style={[styles.input, styles.inputLarge]}
-                      placeholder="Complemento"
+                      style={[styles.input, styles.inputLargeComplemento]}
+                      placeholder="Digite o Complemento"
                       value={complement}
                       onChangeText={setComplement}
                     />
                     <TextInput
-                      style={[styles.input, styles.inputSmall]}
+                      style={[styles.input, styles.inputSmallBairro]}
                       placeholder="Bairro"
                       value={neighborhood}
                       onChangeText={setNeighborhood}
@@ -173,17 +183,18 @@ const CelerePayRegister = ({ navigation }) => {
                   {/* Cidade, Estado */}
                   <View style={styles.rowContainer}>
                     <TextInput
-                      style={[styles.input, styles.inputLarge]}
+                      style={[styles.input, styles.inputLargeComplemento]}
                       placeholder="Cidade"
                       value={city}
                       onChangeText={setCity}
                     />
                     <TextInput
-                      style={[styles.input, styles.inputSmall]}
+                      style={[styles.input, styles.inputSmallBairro]}
                       placeholder="Estado"
                       value={state}
                       onChangeText={setState}
                     />
+
                   </View>
                 </>
               )}
@@ -199,6 +210,67 @@ const CelerePayRegister = ({ navigation }) => {
               </TouchableOpacity>
             </View>
           )}
+                          {/* Modal de confirmação dos dados */}
+                          <Modal visible={isModalVisible} transparent={true} animationType="slide">
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContent}>
+      <View style={styles.modalHeader}>
+        <Text style={styles.modalTitle}>Confirme os seguintes dados</Text>
+        <TouchableOpacity onPress={closeModal}>
+          <Icon name="close" size={24} color={COLORS.grey} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Exibição dos dados preenchidos em duas colunas */}
+      <View style={styles.modalRow}>
+        <View style={styles.modalColumn}>
+          <Text style={styles.modalLabel}>CNPJ:</Text>
+          <Text style={styles.modalValue}>{hasCnpj ? cnpj : 'Não tenho CNPJ'}</Text>
+
+          <Text style={styles.modalLabel}>RG:</Text>
+          <Text style={styles.modalValue}>{rg}</Text>
+
+          <Text style={styles.modalLabel}>CEP:</Text>
+          <Text style={styles.modalValue}>{cep}</Text>
+
+          <Text style={styles.modalLabel}>Endereço:</Text>
+          <Text style={styles.modalValue}>{street}</Text>
+
+          <Text style={styles.modalLabel}>Complemento:</Text>
+          <Text style={styles.modalValue}>{complement}</Text>
+
+          <Text style={styles.modalLabel}>Cidade:</Text>
+          <Text style={styles.modalValue}>{city}</Text>
+        </View>
+
+        <View style={styles.modalColumn}>
+          <Text style={styles.modalLabel}>CPF:</Text>
+          <Text style={styles.modalValue}>{cpf}</Text>
+
+          <Text style={styles.modalLabel}>Expeditor:</Text>
+          <Text style={styles.modalValue}>{expeditor}</Text>
+
+          <Text style={styles.modalLabel}>UF:</Text>
+          <Text style={styles.modalValue}>{uf}</Text>
+
+          <Text style={styles.modalLabel}>Número:</Text>
+          <Text style={styles.modalValue}>{number}</Text>
+
+          <Text style={styles.modalLabel}>Bairro:</Text>
+          <Text style={styles.modalValue}>{neighborhood}</Text>
+
+          <Text style={styles.modalLabel}>Estado:</Text>
+          <Text style={styles.modalValue}>{state}</Text>
+        </View>
+      </View>
+
+      <TouchableOpacity style={styles.modalButton} onPress={closeModal}>
+        <Icon name="checkmark-circle" size={24} color="#000" />
+        <Text style={styles.modalButtonText}>Confirmar dados</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
         </View>
       </TouchableWithoutFeedback>
     );

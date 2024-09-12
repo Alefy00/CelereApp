@@ -10,7 +10,7 @@ const Preload = props => {
 
   useEffect(() => {
     setTimeout(() => {
-      navigation.navigate('CelerePayRegister');
+      navigation.navigate('Entries');
     }, 0);
   }, [navigation]);
 

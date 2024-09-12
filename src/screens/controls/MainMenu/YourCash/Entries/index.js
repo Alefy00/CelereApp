@@ -10,39 +10,44 @@ import {
   TouchableWithoutFeedback,
   View,
   Animated,
+  ScrollView
 } from 'react-native';
 import BarTop2 from '../../../../../components/BarTop2';
 import { COLORS } from '../../../../../constants';
 import styles from './styles';
+import NewSaleIcon from '../../../../../assets/images/svg/Entries/NewSale.svg'; // SVG importado
+import CancelSaleIcon from '../../../../../assets/images/svg/Entries/CancelSale.svg';
+import ContasReceberIcon from '../../../../../assets/images/svg/Entries/ContasReceber.svg';
+import AporteIcon from '../../../../../assets/images/svg/Entries/Aporte.svg';
+import EmprestimoIcon from '../../../../../assets/images/svg/Entries/Emprestimo.svg';
+import OutrasIcon from '../../../../../assets/images/svg/Entries/Outras.svg';
+import RelatorioIcon from '../../../../../assets/images/svg/Entries/Relatorio.svg';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const Entries = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [slideAnim] = useState(new Animated.Value(-100));
-  const [isNavigating, setIsNavigating] = useState(false); // Estado para prevenir múltiplos cliques
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  // Função para abrir o modal de Nova Venda com animação
   const handleNewSalePress = () => {
     setModalVisible(true);
     Animated.timing(slideAnim, {
-      toValue: 0, // Move o pop-up para a posição final (dentro da tela)
-      duration: 300, // Duração da animação
-      useNativeDriver: true, // Usa o driver nativo para melhor desempenho
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
     }).start();
   };
 
-  // Função para fechar o modal com animação
   const closeModal = () => {
     Animated.timing(slideAnim, {
-      toValue: -100, // Move o pop-up para fora da tela
-      duration: 300, // Duração da animação
+      toValue: -100,
+      duration: 300,
       useNativeDriver: true,
     }).start(() => {
-      setModalVisible(false); // Depois da animação, fecha o modal
+      setModalVisible(false);
     });
   };
 
-  // Função para navegar para uma tela específica
   const handleOptionPress = (screenName) => {
     if (!isNavigating) {
       setIsNavigating(true);
@@ -50,7 +55,6 @@ const Entries = ({ navigation }) => {
     }
   };
 
-  // Função para navegar para a tela de Nova Venda Registrada
   const NewRegisteredSale = () => {
     if (!isNavigating) {
       setIsNavigating(true);
@@ -59,7 +63,6 @@ const Entries = ({ navigation }) => {
     }
   };
 
-  // Função para navegar para a tela de Produto ou Serviço Avulso
   const LooseProduct = () => {
     if (!isNavigating) {
       setIsNavigating(true);
@@ -68,26 +71,24 @@ const Entries = ({ navigation }) => {
     }
   };
 
-  // Opções do menu com suas respectivas ações
   const options = [
-    { id: 1, label: 'Nova Venda', action: handleNewSalePress },
-    { id: 2, label: 'Cancelar venda', screen: 'CancelSale' },
-    { id: 3, label: 'Liquidar Fiado', screen: 'SettleCredit' },
-    { id: 4, label: 'Aporte', screen: 'Contribution' },
-    { id: 5, label: 'Empréstimo', screen: 'Loan' },
-    { id: 7, label: 'Outros', screen: 'Others' },
-    { id: 8, label: 'Relatórios', screen: 'Report' },
+    { id: 1, label: 'Nova venda', icon: NewSaleIcon, description: 'Registre uma nova venda', action: handleNewSalePress },
+    { id: 2, label: 'Cancelar venda', icon: CancelSaleIcon, description: 'Estorne uma venda efetuada', screen: 'CancelSale' },
+    { id: 3, label: 'Contas a Receber', icon: ContasReceberIcon, description: 'Liquidar total ou parcial, adiar, cancelar ou excluir contas.', screen: 'SettleCredit' },
+    { id: 4, label: 'Aporte', icon: AporteIcon, description: 'Registre um aporte financeiro', screen: 'Contribution' },
+    { id: 5, label: 'Empréstimo', icon: EmprestimoIcon, description: 'Cadastre um empréstimo', screen: 'Loan' },
+    { id: 6, label: 'Outras Entradas', icon: OutrasIcon, description: 'Cadastre uma entrada manualmente', screen: 'Others' },
+    { id: 7, label: 'Relatórios', icon: RelatorioIcon, description: 'Veja os relatórios de suas entradas', screen: 'Report' },
   ];
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      setIsNavigating(false); // Reseta o estado de navegação ao retornar para a tela
+      setIsNavigating(false);
     });
 
     return unsubscribe;
   }, [navigation]);
 
-  // Função para lidar com o botão de voltar no BarTop2
   const handleBackPress = () => {
     if (!isNavigating) {
       setIsNavigating(true);
@@ -95,14 +96,13 @@ const Entries = ({ navigation }) => {
     }
   };
 
-  // Retorna o layout principal do componente
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1 }}>
+        <ScrollView style={{ flex: 1 }}>
           <View style={{ height: 50 }}>
             <BarTop2
               titulo={'Menu'}
@@ -110,21 +110,31 @@ const Entries = ({ navigation }) => {
               foreColor={COLORS.black}
               routeMailer={''}
               routeCalculator={''}
-              onPress={handleBackPress} // Adiciona a função de voltar
+              onPress={handleBackPress}
             />
           </View>
-          <View style={styles.content}>
+
+          <View style={styles.header}>
+            <Text style={styles.title}>Suas entradas</Text>
+            <Text style={styles.subtitle}>Gerencie as entradas financeiras do seu negócio.</Text>
+          </View>
+
+          <View style={styles.grid}>
             {options.map(option => (
               <TouchableOpacity
                 key={option.id}
                 style={styles.option}
                 onPress={option.action ? option.action : () => handleOptionPress(option.screen)}
               >
-                <Text style={styles.optionLabel}>{option.label}</Text>
-                <Text style={styles.arrow}>›</Text>
+                <option.icon width={40} height={40} />
+                <View style={styles.optionTextContainer}>
+                  <Text style={styles.optionLabel}>{option.label}</Text>
+                  <Text style={styles.optionDescription}>{option.description}</Text>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
+
           <Modal
             transparent={true}
             visible={modalVisible}
@@ -150,7 +160,7 @@ const Entries = ({ navigation }) => {
               </Animated.View>
             </View>
           </Modal>
-        </View>
+        </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );

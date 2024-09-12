@@ -11,7 +11,7 @@ const MaxTransparency = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const handleContinue = () => {
-    navigation.navigate('NextScreen');
+    navigation.navigate('CelerePayRegister');
   };
 
   const toggleModal = () => {

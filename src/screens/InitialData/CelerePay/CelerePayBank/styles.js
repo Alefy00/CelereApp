@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
-import { StyleSheet } from "react-native";
-import { COLORS } from "../../../../constants";
+import { StyleSheet } from 'react-native';
+import { COLORS } from '../../../../constants';
 
 const styles = StyleSheet.create({
   containerBase: {
@@ -12,77 +12,63 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
     paddingHorizontal: 20,
+    justifyContent: 'center',
   },
   title: {
-    fontSize: 30,
+    fontSize: 24,
     fontWeight: 'bold',
     color: COLORS.black,
-    marginBottom: 15,
+    marginBottom: 30,
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 30,
   },
   subTitle: {
-    fontSize: 20,
+    fontSize: 19,
+    color: COLORS.black,
+    marginBottom: 5,
+  },
+  description: {
+    fontSize: 16,
+    color: COLORS.black,
+    marginBottom: 20,
+  },
+  checkboxTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
     color: COLORS.black,
     marginBottom: 10,
-  },
-  boldText: {
-    fontWeight: 'bold',
-  },
-  input: {
-    height: 40,
-    borderColor: COLORS.black,
-    borderBottomWidth: 1,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-  },
-  inputCEP: {
-    height: 40,
-    borderColor: COLORS.black,
-    borderBottomWidth: 1,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-    width:'50%'
   },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
-    color: COLORS.black,
   },
   checkboxLabel: {
-    marginLeft: 10,
     fontSize: 16,
     color: COLORS.black,
+    marginRight: 20,
+  },
+  input: {
+    height: 40,
+    borderColor: COLORS.grey,
+    borderBottomWidth: 1,
+    marginBottom: 5,
+    fontSize: 16,
+    paddingHorizontal: 10,
   },
   rowContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 5,
   },
-  inputSmall: {
-    width: '21%',
-  },
-  inputSmallBairro: {
-    width: '47%',
-  },
-  inputSmallRG: {
-    width: '50%',
-  },
-  inputLarge: {
-    width: '65%',
-  },
-  inputLargeComplemento: {
-    width: '47%',
-  },
-  inputLargeRUA: {
-    width: '75%',
+  inputHalf: {
+    width: '48%',
   },
   confirmButtonContainer: {
     justifyContent: 'flex-end',
     paddingHorizontal: 20,
-    marginBottom: 10,
+    marginBottom: 20,
   },
   confirmButton: {
     flexDirection: 'row',
@@ -90,7 +76,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.primary,
     paddingVertical: 20,
-    borderRadius: 8,
+    borderRadius: 5,
   },
   confirmButtonText: {
     fontSize: 18,
@@ -104,63 +90,98 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: '90%',
+    width: 350,
+    padding: 20,
     backgroundColor: COLORS.white,
     borderRadius: 10,
-    padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
   },
+  modalContent2: {
+    width: 350,
+    padding: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    alignItems:'center',
+  },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
+  },
+  modalHeader2: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.black,
   },
-  modalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  modalColumn: {
-    flex: 1,
-    marginRight: 10,
-  },
-  modalLabel: {
-    fontSize: 16,
+  modalTitle2: {
+    fontSize: 22,
     fontWeight: 'bold',
     color: COLORS.black,
-    marginBottom: 5,
   },
-  modalValue: {
+  modalDataContainer: {
+    marginBottom: 20,
+  },
+  modalDataRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  modalDataItem: {
+    marginBottom: 10,
+  },
+  modalText: {
     fontSize: 16,
     color: COLORS.black,
-    marginBottom: 8,
+    marginBottom: 5,
+    fontWeight: 'bold',
+  },
+  modalText2: {
+    fontSize: 14,
+    color: COLORS.black,
+    marginBottom: 25,
+    textAlign:'center',
+
+  },
+  modalValue: {
+    fontSize: 14,
+    color: COLORS.black,
   },
   modalButton: {
-    marginTop: 5,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.primary,
-    paddingVertical: 22,
+    paddingVertical: 18,
     borderRadius: 5,
+  },
+  modalButton2: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary,
+    paddingVertical: 18,
+    borderRadius: 5,
+    width:'100%'
   },
   modalButtonText: {
     fontSize: 16,
     color: COLORS.black,
     marginLeft: 10,
   },
-  
-  
 });
 
 export default styles;
