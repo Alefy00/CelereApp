@@ -102,7 +102,7 @@ const Start = ({navigation}) => {
                 number="3"
                 title={t('Adicione seu regime tributário')}
                 buttontitle={t('Começar')}
-                pageScreen=""
+                pageScreen="TaxRegime"
               />
 
               <Card

@@ -1,40 +1,38 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from "react";
-import BarTop2 from "../../../../components/BarTop2";
+import BarTop3 from "../../../../components/BarTop3";
 import { COLORS } from "../../../../constants";
 import styles from "./styles";
 import { Keyboard, KeyboardAvoidingView, Platform, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
-
+import ProgressBar2 from "../components/ProgressBar2";
+import CheckBox from '@react-native-community/checkbox';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const HowBusiness = ({ navigation }) => {
-    const [selectedOption, setSelectedOption] = useState(null);
+    const [selectedDays, setSelectedDays] = useState([]);
+    const [includeHolidays, setIncludeHolidays] = useState(false);
 
-    // Opções de funcionamento do negócio
-    const options = [
-        { id: 1, label: 'Segunda à sexta e fecho nos feriados' },
-        { id: 2, label: 'Segunda à sábado e abro nos feriados de meio de semana' },
-        { id: 3, label: 'Segunda à sábado e fecho nos feriados' },
-        { id: 4, label: '7 dias por semana' },
+    // Dias da semana disponíveis para seleção
+    const daysOfWeek = [
+        'Segundas', 'Terças', 'Quartas', 'Quintas', 'Sextas', 'Sábados', 'Domingos'
     ];
 
-    // Função para selecionar uma opção
-    const handleSelect = (id) => {
-        setSelectedOption(id);
+    // Função para selecionar/deselecionar os dias
+    const toggleDay = (day) => {
+        if (selectedDays.includes(day)) {
+            setSelectedDays(selectedDays.filter(d => d !== day));
+        } else {
+            setSelectedDays([...selectedDays, day]);
+        }
     };
 
     // Função para salvar os dados e navegar para a próxima tela
     const handleNext = () => {
-        // TODO: lógica para salvar os dados no banco
-        console.log("Opção selecionada: ", selectedOption);
-        navigation.navigate("DistributionSales"); // Navega para a tela de Distribuição de Vendas
+        console.log("Dias selecionados: ", selectedDays);
+        console.log("Inclui feriados: ", includeHolidays);
+        navigation.navigate("DistributionSales"); // Navega para a próxima tela
     };
 
-    // Função para voltar para a tela anterior
-    const handlePrevious = () => {
-        navigation.goBack();
-    };
-
-    // Retorna o layout principal do componente
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -43,37 +41,52 @@ const HowBusiness = ({ navigation }) => {
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={{ flex: 1 }}>
                     <View style={{ height: 50 }}>
-                        <BarTop2
-                            titulo={'Retorno'}
+                        <BarTop3
+                            titulo={'Voltar'}
                             backColor={COLORS.primary}
                             foreColor={COLORS.black}
                             routeMailer={''}
                             routeCalculator={''}
                         />
                     </View>
+                    
+                    {/* Barra de progresso */}
+                    <ProgressBar2 currentStep={2} totalSteps={3} />
+
                     <View style={styles.content}>
-                        <Text style={styles.label}>Como funciona seu negócio?</Text>
-                        {options.map(option => (
-                            <TouchableOpacity
-                                key={option.id}
-                                style={[
-                                    styles.option,
-                                    selectedOption === option.id && styles.selectedOption
-                                ]}
-                                onPress={() => handleSelect(option.id)}
-                            >
-                                <Text style={styles.optionLabel}>{option.label}</Text>
-                            </TouchableOpacity>
-                        ))}
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity style={styles.button} onPress={handlePrevious}>
-                                <Text style={styles.buttonText}>Anterior</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.button} onPress={handleNext}>
-                                <Text style={styles.buttonText}>Próximo</Text>
-                            </TouchableOpacity>
+                        <Text style={styles.label}>Clique nos dias em que seu negócio funciona</Text>
+
+                        {/* Botões dos dias da semana */}
+                        <View style={styles.daysContainer}>
+                            {daysOfWeek.map(day => (
+                                <TouchableOpacity
+                                    key={day}
+                                    style={[
+                                        styles.dayButton,
+                                        selectedDays.includes(day) && styles.selectedDayButton
+                                    ]}
+                                    onPress={() => toggleDay(day)}
+                                >
+                                    <Text style={styles.dayButtonText}>{day}</Text>
+                                </TouchableOpacity>
+                            ))}
                         </View>
+
+                        {/* Checkbox para incluir feriados */}
+                        <View style={styles.checkboxContainer}>
+                            <CheckBox
+                                value={includeHolidays}
+                                onValueChange={setIncludeHolidays}
+                            />
+                            <Text style={styles.checkboxLabel}>Incluindo feriados neste período</Text>
+                        </View>
+
+                        {/* Botão de continuar */}
                     </View>
+                        <TouchableOpacity style={styles.button} onPress={handleNext}>
+                        <Icon name="arrow-forward" size={24} color={COLORS.black} />
+                            <Text style={styles.buttonText}>Continuar</Text>
+                        </TouchableOpacity>
                 </View>
             </TouchableWithoutFeedback>
         </KeyboardAvoidingView>

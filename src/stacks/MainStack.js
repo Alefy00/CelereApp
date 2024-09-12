@@ -26,13 +26,10 @@ import ServicosScreen from '../screens/Start/InitialBranch/ServicosScreen';
 import FabricacaoScreen from '../screens/Start/InitialBranch/FabricacaoScreen';
 
 import OpeningBalance from '../screens/InitialData/OpeningBalance';
-import ExpensePage from '../screens/InitialData/ExpensePage';
-import SalesReceive from '../screens/InitialData/SalesReceive';
+
 import MonthlySalesForecast from '../screens/InitialData/SalesForecast/MonthlySalesForecast';
 import HowBusiness from '../screens/InitialData/SalesForecast/HowBusiness';
 import DistributionSales from '../screens/InitialData/SalesForecast/DistributionSales';
-import BuyPrevision from '../screens/InitialData/BuyPrevision/AveragePurchase';
-import PurchaseFrequency from '../screens/InitialData/BuyPrevision/PurchaseFrequency';
 import SaleDetails from '../screens/controls/MainMenu/YourCash/Entries/NewSale/SalesDetails';
 import SellOnCredit from '../screens/controls/MainMenu/YourCash/Entries/NewSale/SellOnCredit';
 import LooseProduct from '../screens/controls/MainMenu/YourCash/Entries/NewSale/LooseProduct';
@@ -60,9 +57,12 @@ import ConsultExpense from '../screens/controls/MainMenu/YourCash/Exits/ConsultE
 import ServicesMenu from '../screens/controls/MainMenu/YourOperation/Services';
 import AddService from '../screens/controls/MainMenu/YourOperation/Services/ServiceRegistration';
 import ExpenseDetails from '../screens/controls/MainMenu/YourCash/Exits/ExpenseDetails';
+import TaxRegime from '../screens/InitialData/TaxRegime';
+import CelerePay from '../screens/InitialData/CelerePay';
+import MaxTransparency from '../screens/InitialData/CelerePay/MaxTransparency';
+import CelerePayRegister from '../screens/InitialData/CelerePay/CelerePayRegister';
 
 import TeamScreen from '../screens/controls/MainMenu/YourControls/Users';
-
 
 const Stack = createStackNavigator();
 
@@ -115,14 +115,14 @@ export default () => (
     <Stack.Screen name="FabricacaoScreen" component={FabricacaoScreen} />
 
     <Stack.Screen name="OpeningBalance" component={OpeningBalance} />
-    <Stack.Screen name="ExpensePage" component={ExpensePage} />
-    <Stack.Screen name="SalesReceive" component={SalesReceive} />
     <Stack.Screen name="MonthlySalesForecast" component={MonthlySalesForecast} />
     <Stack.Screen name="HowBusiness" component={HowBusiness} />
     <Stack.Screen name="DistributionSales" component={DistributionSales} />
-    <Stack.Screen name="BuyPrevision" component={BuyPrevision} />
-    <Stack.Screen name="PurchaseFrequency" component={PurchaseFrequency} />
     <Stack.Screen name="CashBalance" component={CashBalance} />
+    <Stack.Screen name="TaxRegime" component={TaxRegime} />
+    <Stack.Screen name="CelerePay" component={CelerePay} />
+    <Stack.Screen name="MaxTransparency" component={MaxTransparency} />
+    <Stack.Screen name="CelerePayRegister" component={CelerePayRegister} />
 
     <Stack.Screen name="NewExpense" component={NewExpense} />
     <Stack.Screen name="AccountsPayable" component={AccountsPayable} />
