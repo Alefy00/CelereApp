@@ -2,15 +2,26 @@
 import React, { useState } from "react";
 import BarTop2 from "../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../constants";
-import { Alert, FlatList, Keyboard, KeyboardAvoidingView, Modal, Platform, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { FlatList, Keyboard, KeyboardAvoidingView, Modal, Platform, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import styles from './styles';
 import Icon from 'react-native-vector-icons/Ionicons';
+
 
 const Others = ({ navigation }) => {
     const [entries, setEntries] = useState([
         { id: '1', data: '02/08/2024', justificativa: 'Processo trabalhista liquidado a favor da empresa, dinheiro da indenização.', valor: '8000,00' }
     ]);
+    const [modalVisible, setModalVisible] = useState(false);
+
+        // Função para abrir o modal de filtro
+        const openFilterModal = () => {
+            setModalVisible(true);
+        };
+    
+        // Função para fechar o modal de filtro
+        const closeFilterModal = () => {
+            setModalVisible(false);
+        };
 
 
     // Função para renderizar cada item da lista de entradas
@@ -57,10 +68,58 @@ const Others = ({ navigation }) => {
                     </View>
 
                     {/* Botão para cadastrar nova entrada, fixado no final da tela */}
-                    <TouchableOpacity style={styles.addButton}>
+                    <TouchableOpacity style={styles.addButton}  onPress={openFilterModal}>
                          <Icon name="add" size={24} color="black" />
                         <Text style={styles.addButtonText}>Cadastrar nova entrada</Text>
                     </TouchableOpacity>
+                    <Modal
+              visible={modalVisible}
+              transparent={true}
+              animationType="slide"
+              onRequestClose={closeFilterModal}
+            >
+              <View style={styles.modalBackground}>
+                <View style={styles.modalContainer}>
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalTitle}>Detalhes da nova entrada</Text>
+                    <TouchableOpacity onPress={closeFilterModal}>
+                      <Icon name="close" size={26} color={COLORS.gray} />
+                    </TouchableOpacity>
+                  </View>
+                    <Text style={styles.modalSubTitle}>Antes de preencher os campos abaixo, observe adequadamente se a nova entrada não cabe em alguma das seções anteriores, isso ajuda a manter a organização do seu negócio.</Text>
+                  <View style={styles.modalInputContainer}>
+                    <View style={styles.modalInputRow}>
+                      <TextInput
+                        style={styles.modalInput}
+                        placeholder="Data"
+                        placeholderTextColor={COLORS.gray}
+                      />
+                      <Icon name="calendar" size={24} color={COLORS.gray} />
+                    </View>
+                    <View style={styles.modalInputRow}>
+                      <TextInput
+                        style={styles.modalInput}
+                        placeholder="Valor"
+                        placeholderTextColor={COLORS.gray}
+                      />
+                    </View>
+                    <View style={styles.modalInputRow}>
+                      <TextInput
+                        style={styles.modalInput}
+                        placeholder="Origem"
+                        placeholderTextColor={COLORS.gray}
+                      />
+                    </View>
+                  </View>
+                  <TouchableOpacity style={styles.modalFilterButton}>
+                    <Icon name="checkmark-circle" size={20} color={COLORS.black} />
+                    <Text style={styles.modalFilterButtonText}>Cadastrar nova entrada manual</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+
+
                 </View>
             </TouchableWithoutFeedback>
         </KeyboardAvoidingView>

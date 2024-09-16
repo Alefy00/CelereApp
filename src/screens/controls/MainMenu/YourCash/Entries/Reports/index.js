@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from "react";
-import { ScrollView, TouchableOpacity, View, Text} from "react-native";
+import { ScrollView, TouchableOpacity, View, Text, Alert, Button} from "react-native";
 import Icon from 'react-native-vector-icons/Ionicons';
 import BarTop from "../../../../../../components/BarTop";
 import { COLORS } from "../../../../../../constants";
@@ -8,6 +8,7 @@ import RoundedBarsChart from './components/RoundedBarsChart';
 import DonutChartWithLegend from './components/DonutChartWithLegend';
 import BottomRoundedBarsChart from './components/BottomRoundedBarsCharts';
 import styles from './styles';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Report = ({ navigation }) => {
   // Estados para armazenar o mês selecionado e o intervalo de tempo selecionado
@@ -40,6 +41,17 @@ const Report = ({ navigation }) => {
     { value: 100, amount: 22740, label: "Capital de Giro" },
     { value: 80, amount: 21900, label: "Capital de Giro mínimo recomendado" },
   ];
+
+  const clearAsyncStorage = async () => {
+    try {
+      await AsyncStorage.clear();
+      console.log('AsyncStorage limpo com sucesso!');
+      Alert.alert('Sucesso', 'O armazenamento foi limpo. Você pode testar um novo número.');
+    } catch (error) {
+      console.error('Erro ao limpar AsyncStorage:', error);
+      Alert.alert('Erro', 'Não foi possível limpar o armazenamento.');
+    }
+  };
 
 
   return (
@@ -167,6 +179,7 @@ const Report = ({ navigation }) => {
           valueStyle={{ color: "#000", fontSize: "14", fontWeight: "bold" }}
         />
       </View>
+      <Button title="Limpar Armazenamento" onPress={clearAsyncStorage} color="#FF0000" />
     </ScrollView>
   );
 };

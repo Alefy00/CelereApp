@@ -1,153 +1,126 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useState } from "react";
-import { Alert, FlatList, Keyboard, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View, Modal } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, FlatList } from "react-native";
 import BarTop2 from "../../../../../../components/BarTop2";
-import { COLORS } from "../../../../../../constants";
+import Icon from "react-native-vector-icons/Ionicons";
 import styles from './styles';
+import { COLORS } from "../../../../../../constants";
+import FilterModal from "./components/FilterModal";
 
 const SettleCredit = ({ navigation }) => {
-    const [dataVenda, setDataVenda] = useState('');
-    const [valorVenda, setValorVenda] = useState('');
-    const [vendas, setVendas] = useState([
-      { id: '1', data: '2024-07-29', valor: '100.00' },
-      { id: '2', data: '2024-07-28', valor: '200.00' },
-      { id: '3', data: '2024-07-27', valor: '150.00' }
-    ]);
-    const [filteredVendas, setFilteredVendas] = useState(vendas); // Estado para armazenar as vendas filtradas
-    const [modalVisible, setModalVisible] = useState(false); // Estado para controlar a visibilidade do modal
-    const [selectedVenda, setSelectedVenda] = useState(null); // Estado para armazenar a venda selecionada
-    const [abatimento, setAbatimento] = useState(''); // Estado para armazenar o valor do abatimento
+  const [selectedTab, setSelectedTab] = useState('open'); // Estado para alternar entre "Em Aberto" e "Liquidadas"
+  const [searchText, setSearchText] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
-    // Efeito que filtra as vendas com base na data e valor fornecidos pelo usuário
-    useEffect(() => {
-      if (dataVenda || valorVenda) {
-        const filtered = vendas.filter(venda => 
-          venda.data.includes(dataVenda) && venda.valor.includes(valorVenda)
-        );
-        setFilteredVendas(filtered);
-      } else {
-        setFilteredVendas(vendas);
-      }
-    }, [dataVenda, valorVenda]);
+  // Função para abrir o modal
+  const openFilterModal = () => {
+    setModalVisible(true);
+  };
+
+  // Função para fechar o modal
+  const closeFilterModal = () => {
+    setModalVisible(false);
+  };
   
-    // Função para lidar com o abatimento de uma venda
-    const handleAbater = (venda) => {
-      setSelectedVenda(venda);
-      setModalVisible(true);
-    };
-  
-    // Função para baixar uma venda
-    const handleBaixar = (id) => {
-      setVendas(vendas.filter(venda => venda.id !== id));
-      setFilteredVendas(filteredVendas.filter(venda => venda.id !== id));
-      Alert.alert("Baixa", "Venda baixada com sucesso!");
-    };
-  
-    // Função para confirmar o abatimento do valor de uma venda
-    const confirmarAbatimento = () => {
-      const valorAbatido = parseFloat(abatimento);
-      setVendas(vendas.map(venda => 
-        venda.id === selectedVenda.id 
-          ? { ...venda, valor: (parseFloat(venda.valor) - valorAbatido).toFixed(2) } 
-          : venda
-      ));
-      setFilteredVendas(filteredVendas.map(venda => 
-        venda.id === selectedVenda.id 
-          ? { ...venda, valor: (parseFloat(venda.valor) - valorAbatido).toFixed(2) } 
-          : venda
-      ));
-      setModalVisible(false);
-      setAbatimento('');
-      Alert.alert("Abatimento", "Valor abatido com sucesso!");
-    };
-  
-    // Função para renderizar cada item da lista de vendas
-    const renderItem = ({ item }) => (
-      <View style={styles.vendaItem}>
-        <View style={styles.vendaInfo}>
-          <Text>Data: {item.data}</Text>
-          <Text>Valor: {item.valor}</Text>
+  const contas = [
+    { id: '1', nome: 'Mariana Souza', valor: 'R$84,00', produtos: 4 }
+  ]; // Dados fictícios para replicar o design
+
+  // Função para alternar entre "Em Aberto" e "Liquidadas"
+  const toggleTab = (tab) => {
+    setSelectedTab(tab);
+  };
+
+  // Função para renderizar a conta
+  const renderItem = ({ item }) => (
+    <View style={styles.contaItem}>
+      <View style={styles.contaInfo}>
+        <Icon name="person-circle-outline" size={40} color="black" />
+        <View style={styles.contaTextContainer}>
+          <Text style={styles.contaNome}>{item.nome}</Text>
+          <Text style={styles.contaProdutos}>{item.produtos} produtos</Text>
         </View>
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={styles.abaterButton} onPress={() => handleAbater(item)}>
-            <Text style={styles.buttonText}>Abater parte do valor</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.baixarButton} onPress={() => handleBaixar(item.id)}>
-            <Text style={styles.buttonText}>Baixar</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.contaValor}>{item.valor}</Text>
       </View>
-    );
-  
-    return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={{ flex: 1 }}>
-            <View style={{ height: 50 }}>
-              <BarTop2
-                titulo={'Entradas'}
-                backColor={COLORS.primary}
-                foreColor={COLORS.black}
-                routeMailer={''}
-                routeCalculator={''}
-              />
-            </View>
-            <Text style={styles.textLiquida}>Liquidar Fiado</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Data da venda"
-                value={dataVenda}
-                onChangeText={setDataVenda}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Valor da venda"
-                value={valorVenda}
-                onChangeText={setValorVenda}
-              />
-              <TouchableOpacity style={styles.searchButton} onPress={() => {}}>
-                <Text style={styles.searchButtonText}>Pesquisar</Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.listTitle}>Lista</Text>
-            <FlatList
-              data={filteredVendas}
-              keyExtractor={(item) => item.id}
-              renderItem={renderItem}
-            />
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={modalVisible}
-              onRequestClose={() => setModalVisible(false)}
-            >
-              <View style={styles.modalContainer}>
-                <View style={styles.modalView}>
-                  <Text style={styles.modalTitle}>Abater parte do valor</Text>
-                  <TextInput
-                    style={styles.modalInput}
-                    placeholder="Valor a abater"
-                    value={abatimento}
-                    onChangeText={setAbatimento}
-                    keyboardType="numeric"
-                  />
-                  <TouchableOpacity style={styles.confirmButton} onPress={confirmarAbatimento}>
-                    <Text style={styles.confirmButtonText}>Confirmar</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
-                    <Text style={styles.cancelButtonText}>Cancelar</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </Modal>
-          </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    );
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.containerBartop}>
+      <BarTop2 
+        titulo="Voltar"
+        backColor={COLORS.primary}
+        foreColor={COLORS.black}
+        routeMailer=""
+        routeCalculator=""
+        onPress={() => navigation.goBack()}
+      />
+      </View>
+
+      {/* Título */}
+      <Text style={styles.title}>Contas a receber</Text>
+      <Text style={styles.subtitle}>Localize a dívida de seu cliente e liquide parcialmente ou 100%.</Text>
+
+      {/* Campo de pesquisa */}
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Pesquise um cliente ou valor..."
+          value={searchText}
+          onChangeText={setSearchText}
+        />
+        <Icon name="search" size={24} color={COLORS.gray} />
+        <TouchableOpacity style={styles.filterButton} onPress={openFilterModal}>
+          <Icon name="filter-outline" size={24} color="black" />
+          <Text style={styles.filterButtonText}>Filtrar</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Botões de alternância */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity 
+          style={[styles.tabButton, selectedTab === 'open' ? styles.tabButtonActive : {}]} 
+          onPress={() => toggleTab('open')}
+        >
+          <Text style={selectedTab === 'open' ? styles.tabButtonTextActive : styles.tabButtonText}>
+            Em aberto
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.tabButton, selectedTab === 'settled' ? styles.tabButtonActive : {}]} 
+          onPress={() => toggleTab('settled')}
+        >
+          <Text style={selectedTab === 'settled' ? styles.tabButtonTextActive : styles.tabButtonText}>
+            Liquidadas
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Lista de contas */}
+      {selectedTab === 'open' ? (
+        <FlatList
+          data={contas}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContainer}
+        />
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Nenhuma conta liquidada.</Text>
+        </View>
+      )}
+      <FilterModal
+        visible={modalVisible}
+        onClose={closeFilterModal}
+        onFilter={() => {
+          // Lógica de filtro pode ser aplicada aqui
+          closeFilterModal();
+        }}
+      />
+    </View>
+  );
 };
 
 export default SettleCredit;

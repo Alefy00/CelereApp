@@ -81,6 +81,67 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     marginLeft: 5,
   },
+      // Estilos do modal
+      modalBackground: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      },
+      modalContainer: {
+        width: '90%',
+        backgroundColor: COLORS.white,
+        borderRadius: 10,
+        padding: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+      modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+      },
+      modalTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: COLORS.black,
+      },
+      modalSubTitle:{
+        color: COLORS.black,
+        marginBottom:10,
+      },
+      modalInputContainer: {
+        marginBottom: 20,
+      },
+      modalInputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.grey,
+        marginBottom: 10,
+      },
+      modalInput: {
+        flex: 1,
+        height:35,
+        paddingHorizontal: 8,
+      },
+      modalFilterButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: COLORS.primary,
+        paddingVertical: 18,
+        borderRadius: 5,
+      },
+      modalFilterButtonText: {
+        marginLeft: 8,
+        color: COLORS.black,
+       
+      },
 
 
 });
