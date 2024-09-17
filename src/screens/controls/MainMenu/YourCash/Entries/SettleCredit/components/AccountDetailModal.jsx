@@ -3,13 +3,18 @@ import React, { useState } from "react";
 import { View, Text, Modal, TextInput, TouchableOpacity, FlatList } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import styles from './styles';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { COLORS } from "../../../../../../../constants";
 
 const AccountDetailModal = ({ visible, onClose }) => {
   const [partialValue, setPartialValue] = useState('');
-  const [newDueDate, setNewDueDate] = useState(new Date());
+  const [newDueDate, setNewDueDate] = useState(null);
   const [isSecondModalVisible, setSecondModalVisible] = useState(false);
   const [isThirdModalVisible, setThirdModalVisible] = useState(false);
   const [isFirstModalVisible, setFirstModalVisible] = useState(visible);
+  const [isFourthModalVisible, setFourthModalVisible] = useState(false); 
+  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+
   // Dados fictícios da lista de compras
   const products = [
     { id: '1', nome: 'Cabo tipo-C Preto', valor: 'R$18,00' },
@@ -21,45 +26,66 @@ const AccountDetailModal = ({ visible, onClose }) => {
 
   const totalValue = 'R$84,00';  // Valor fictício
 
-  const handlePartialLiquidation = () => {
-    // Lógica para liquidar parcialmente
-    console.log('Liquidar parcialmente:', partialValue);
-  };
-
-  const handleTotalLiquidation = () => {
-    // Fecha o primeiro modal
-    setFirstModalVisible(false);
-    // Abre o segundo modal
-    setSecondModalVisible(true);
-  };
-  const closeSecondModal = () => {
-    // Fecha o segundo modal e abre o terceiro modal de confirmação
-    setSecondModalVisible(false);
-    setThirdModalVisible(true);
-  };
-  const closeThirdModal = () => {
-    // Fecha o terceiro modal e confirma a liquidação
-    setThirdModalVisible(false);
-    onClose();  // Fecha o fluxo completo
-  };
-
-
-
 
   const handleReminder = () => {
-    // Lógica para ativar lembrete
     console.log('Lembrete ativado');
   };
 
   const handlePostpone = () => {
-    // Lógica para adiar a conta
     console.log('Conta adiada para:', newDueDate);
   };
 
   const handleDelete = () => {
-    // Lógica para excluir a conta
     console.log('Conta excluída');
   };
+
+  const handlePartialLiquidation = () => {
+    console.log('Liquidar parcialmente:', partialValue);
+  };
+
+  const handleTotalLiquidation = () => {
+    // Fecha o primeiro modal e abre o segundo modal
+    setFirstModalVisible(false);
+    setSecondModalVisible(true);
+  };
+
+  const closeFirstModal = () => {
+    // Fecha apenas o primeiro modal
+    setFirstModalVisible(false);
+    onClose(); // Opcional: fechar o fluxo todo se o primeiro modal fechar tudo
+  };
+
+  const closeSecondModal = () => {
+    // Fecha o segundo modal e abre o terceiro modal
+    setSecondModalVisible(false);
+    setThirdModalVisible(true);
+  };
+
+  const closeThirdModal = () => {
+    // Fecha o terceiro modal e abre o quarto modal de confirmação de sucesso
+    setThirdModalVisible(false);
+    setFourthModalVisible(true);
+  };
+
+  const closeFourthModal = () => {
+    // Fecha o quarto modal e retorna ao fluxo principal
+    setFourthModalVisible(false);
+    onClose(); // Voltar à tela principal ou ao fluxo anterior
+  };
+
+  const showDatePicker = () => {
+    setDatePickerVisible(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisible(false);
+  };
+
+  const handleConfirmDate = (date) => {
+    setNewDueDate(date);  // Salva a data selecionada
+    hideDatePicker();
+  };
+
 
   return (
     <>
@@ -69,7 +95,7 @@ const AccountDetailModal = ({ visible, onClose }) => {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Liquidar Contas a receber{'\n'}de Mariana Souza</Text>
-              <TouchableOpacity onPress={onClose}>
+              <TouchableOpacity onPress={closeFirstModal}>
                 <Text style={styles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
@@ -145,16 +171,25 @@ const AccountDetailModal = ({ visible, onClose }) => {
           <View style={styles.modalContent2}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Liquidação total</Text>
-              <TouchableOpacity onPress={closeSecondModal}>
+              <TouchableOpacity onPress={() => setSecondModalVisible(false)}>
                 <Text style={styles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
 
             {/* Campo para selecionar a data */}
-            <View style={styles.datePickerContainer}>
-              <Text style={styles.dateLabel}>Hoje, {newDueDate.toLocaleDateString()}</Text>
+            <TouchableOpacity onPress={showDatePicker} style={styles.datePickerContainer}>
+              <Text style={styles.dateLabel}>
+                {newDueDate ? newDueDate.toLocaleDateString() : 'Escolha a data'}
+              </Text>
               <Icon name="calendar-outline" size={24} color="gray" />
-            </View>
+            </TouchableOpacity>
+
+            <DateTimePickerModal
+              isVisible={isDatePickerVisible}
+              mode="date"
+              onConfirm={handleConfirmDate}
+              onCancel={hideDatePicker}
+            />
 
             {/* Botão de confirmação */}
             <TouchableOpacity style={styles.confirmButton} onPress={closeSecondModal}>
@@ -164,8 +199,9 @@ const AccountDetailModal = ({ visible, onClose }) => {
           </View>
         </View>
       </Modal>
-           {/* Terceiro Modal para confirmação final */}
-           <Modal visible={isThirdModalVisible} transparent={true} animationType="slide">
+
+      {/* Terceiro Modal para confirmação final */}
+      <Modal visible={isThirdModalVisible} transparent={true} animationType="slide">
         <View style={styles.modalContainer3}>
           <View style={styles.modalContent3}>
             <Text style={styles.modalTitle3}>Tem certeza disso?</Text>
@@ -181,6 +217,25 @@ const AccountDetailModal = ({ visible, onClose }) => {
                 <Text style={styles.buttonText3}>Liquidar</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Quarto Modal - Confirmação de Sucesso */}
+      <Modal visible={isFourthModalVisible} transparent={true} animationType="slide">
+        <View style={styles.modalContainer4}>
+          <View style={styles.modalContent4}>
+            {/* Ícone de Sucesso */}
+            <Icon name="checkmark-circle" size={100} color={COLORS.green} />
+
+            {/* Texto de Sucesso */}
+            <Text style={styles.successText}>Conta liquidada com sucesso</Text>
+
+            {/* Botão Voltar */}
+            <TouchableOpacity style={styles.successButton} onPress={closeFourthModal}>
+              <Icon name="arrow-back-outline" size={24} color="black" />
+              <Text style={styles.buttonText4}>Voltar</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>

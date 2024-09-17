@@ -1,176 +1,93 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useState, useCallback } from "react";
-import { useIsFocused } from '@react-navigation/native';
+import React, { useState, useCallback, useEffect } from "react";
 import BarTop2 from "../../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../../constants";
-import Icon from 'react-native-vector-icons/Ionicons';
-import { FlatList, Keyboard, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View, Image, ScrollView, Modal } from "react-native";
-import ToggleButton from "./components/ToggleButton";
+import { KeyboardAvoidingView, Platform, View, TouchableOpacity, Text } from "react-native";
+import LiquidateNow from './components/LiquidateNow'; // Importando o novo componente
 import styles from "./styles";
+import ReceivableDetails from "./components/ReceivableDetails";
+
 
 const SaleDetails = ({ navigation, route }) => {
-  const { products, totalPrice } = route.params; // Recebe os produtos selecionados e o preço total
-  const [currentDate, setCurrentDate] = useState(''); // Estado para armazenar a data atual
-  const [paymentMethod, setPaymentMethod] = useState('PIX'); // Estado para armazenar o método de pagamento
-  const [filteredProducts, setFilteredProducts] = useState(products); // Estado para os produtos filtrados
-  const [search, setSearch] = useState(''); // Estado para a busca
-  const [isModalVisible, setIsModalVisible] = useState(false); // Estado para controlar a visibilidade do modal
-  const paymentMethods = ['PIX', 'Dinheiro', 'Cartão de Crédito', 'Cartão de Débito']; // Métodos de pagamento 
-  const [viewMode, setViewMode] = useState('Immediately'); // Estado para alternância de modos
-  const isFocused = useIsFocused();
+  const { products, totalPrice } = route.params;
+  const [viewMode, setViewMode] = useState('Liquidar agora');
+  // Dados fictícios de clientes
+  const clients = [
+    { id: 1, name: "João Silva" },
+    { id: 2, name: "Maria Oliveira" },
+    { id: 3, name: "Pedro Souza" },
+    { id: 4, name: "Ana Santos" },
+    { id: 5, name: "Lucas Martins" },
+    { id: 6, name: "Carla Figueiredo" },
+    { id: 7, name: "Gabriel Alves" },
+    { id: 8, name: "Luiza Ferreira" },
+    { id: 9, name: "Ricardo Lima" },
+  ];
 
-  // Memoiza a função toggleViewMode para evitar recriação em cada renderização
+
   const toggleViewMode = useCallback((mode) => {
     setViewMode(mode);
-    if (mode === 'Sell on Credit') {
-      navigation.navigate('SellOnCredit', { products, totalPrice });
-    }
-  }, [navigation, products, totalPrice]);
-
-  useEffect(() => {
-    if (isFocused) {
-      setViewMode('Immediately'); // Sincroniza o estado viewMode ao focar na tela
-    }
-  }, [isFocused]);
-
-  useEffect(() => {
-    // Define a data atual do dispositivo
-    const date = new Date();
-    const formattedDate = date.toLocaleDateString('pt-BR');
-    setCurrentDate(formattedDate);
   }, []);
 
-  // Filtra os produtos com base na busca do usuário
-  useEffect(() => {
-    if (search) {
-      const filtered = products.filter(product => 
-        product.nome.toLowerCase().includes(search.toLowerCase())
-      );
-      setFilteredProducts(filtered);
-    } else {
-      setFilteredProducts(products);
-    }
-  }, [search, products]);
 
-  // Função para mudar o método de pagamento
-  const handlePaymentMethodChange = (method) => {
-    setPaymentMethod(method);
-  };
-
-  // Função para confirmar a venda e exibir o modal
-  const handleConfirm = () => {
-    setIsModalVisible(true);
-  };
-
-  // Função para fechar o modal e navegar para a tela de Entries
-  const handleCloseModal = () => {
-    setIsModalVisible(false);
-    navigation.navigate('Entries'); 
-  };
-
-  // Função para registrar uma nova venda
-  const handleNewRegistered = () => {
-    setIsModalVisible(false);
-    navigation.navigate('NewRegisteredSale');
-  };
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1 }}>
-
-          <View style={{ height: 50 }}>
-            <BarTop2
-              titulo={'Retorno'}
-              backColor={COLORS.primary}
-              foreColor={COLORS.black}
-              routeMailer={''}
-              routeCalculator={''}
-            />
-          </View>
-          <ScrollView contentContainerStyle={styles.content}>
-            <ToggleButton viewMode={viewMode} toggleViewMode={toggleViewMode} />
-            <View style={styles.searchContainer}>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Buscar..."
-                value={search}
-                onChangeText={setSearch}
-              />
-              <Icon name="search" size={20} color={COLORS.grey} style={styles.searchIcon} />
-            </View>
-            {/* Lista de produtos filtrados */}
-            <View style={styles.productContainer}>
-              {filteredProducts.map((product, index) => (
-                <View key={index} style={styles.productDetail}>
-                  <Image source={{ uri: product.imagem }} style={styles.productImage} />
-                  <View style={styles.productInfo}>
-                    <Text style={styles.productText}>{product.nome}</Text>
-                    <Text style={styles.productAmount}>Quantidade: {product.amount}</Text>
-                  </View>
-                  <Text style={styles.productTotal}>R${product.total.toFixed(2)}</Text>
-                </View>
-              ))}
-            </View>
-            <Text style={styles.label}>Método de pagamento</Text>
-
-            <FlatList
-              horizontal
-              data={paymentMethods}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[styles.paymentButton, paymentMethod === item && styles.selectedPaymentButton]}
-                  onPress={() => handlePaymentMethodChange(item)}
-                >
-                  <Text style={styles.paymentButtonText}>{item}</Text>
-                </TouchableOpacity>
-              )}
-              keyExtractor={item => item}
-              showsHorizontalScrollIndicator={false}
-            />
-            <View>
-              <TextInput
-                placeholder="% de desconto"
-                style={styles.discount}
-              />
-            </View>
-            <View style={styles.totalContainer}>
-              <Text style={styles.totalLabel}>Total a Receber:</Text>
-              <Text style={styles.totalValue}>R$ {totalPrice.toFixed(2)}</Text>
-            </View>
-
-            <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-              <Icon name="checkmark-circle" size={25} color={COLORS.black} />
-              <Text style={styles.confirmButtonText}>Finalizar venda</Text>
-            </TouchableOpacity>
-          </ScrollView>
-
-          <Modal
-            transparent={true}
-            animationType="slide"
-            visible={isModalVisible}
-            onRequestClose={() => setIsModalVisible(false)}
-          >
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <Icon name="checkmark-circle" size={80} color={COLORS.green} />
-                <Text style={styles.modalText}>Sua venda foi registrada</Text>
-                <TouchableOpacity style={styles.modalButton} onPress={handleNewRegistered}>
-                  <Icon name="cart" size={20} color={COLORS.black} />
-                  <Text style={styles.modalButtonText}>Registrar outra venda</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.modalBackButton} onPress={handleCloseModal}>
-                  <Icon name="arrow-back" size={20} color={COLORS.black} />
-                  <Text style={styles.modalBackButtonText}>Menu Entradas</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
+      <View style={{ flex: 1 }}>
+        {/* Barra superior */}
+        <View style={{ height: 55 }}>
+          <BarTop2
+            titulo={'Voltar'}
+            backColor={COLORS.primary}
+            foreColor={COLORS.black}
+            routeMailer={''}
+            routeCalculator={''}
+          />
         </View>
-      </TouchableWithoutFeedback>
+
+        {/* Botões de alternância */}
+        <View style={styles.toggleContainer}>
+          <TouchableOpacity
+            style={[styles.toggleButton, viewMode === 'Liquidar agora' && styles.activeButton]}
+            onPress={() => toggleViewMode('Liquidar agora')}
+          >
+            <Text style={viewMode === 'Liquidar agora' ? styles.activeButtonText : styles.inactiveButtonText}>
+              Liquidar agora
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleButton, viewMode === 'Contas a receber' && styles.activeButton]}
+            onPress={() => toggleViewMode('Contas a receber')}
+          >
+            <Text style={viewMode === 'Contas a receber' ? styles.activeButtonText : styles.inactiveButtonText}>
+              Contas a receber
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Renderizando o conteúdo da aba selecionada */}
+        {viewMode === 'Liquidar agora' && (
+          <LiquidateNow 
+            products={products}
+            totalPrice={totalPrice}
+            clients={clients}
+            navigation={navigation}
+          />
+        )}
+
+        {viewMode === 'Contas a receber' && (
+          <ReceivableDetails
+            products={products}
+            totalPrice={totalPrice}
+            clients={clients}
+            navigation={navigation}
+          />
+        )}
+
+      </View>
     </KeyboardAvoidingView>
   );
 };

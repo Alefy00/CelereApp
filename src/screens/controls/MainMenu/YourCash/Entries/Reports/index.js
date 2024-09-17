@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { ScrollView, TouchableOpacity, View, Text, Alert, Button} from "react-native";
 import Icon from 'react-native-vector-icons/Ionicons';
-import BarTop from "../../../../../../components/BarTop";
+import BarTop2 from "../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../constants";
 import RoundedBarsChart from './components/RoundedBarsChart';
 import DonutChartWithLegend from './components/DonutChartWithLegend';
@@ -56,12 +56,9 @@ const Report = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <BarTop
-      uriAvatar={
-      'https://www.apptek.com.br/comercial/2024/manut/images/user/foto1.png'
-      }
-      titulo={('Proprietário')}
-      subtitulo={'Planeta Cell'}
+      <BarTop2
+
+      titulo={('Voltar')}
         backColor={COLORS.primary}
         foreColor={COLORS.black}
         routeMailer=""

@@ -6,7 +6,7 @@ import { COLORS } from "../../../../../../../constants";
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Keyboard, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View, Image, ScrollView, Modal } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import ToggleButton from "../SalesDetails/components/ToggleButton";
+
 import styles from "./styles";
 import moment from 'moment';
 import 'moment/locale/pt-br';
@@ -94,7 +94,7 @@ const SellOnCredit = ({ navigation, route }) => {
             />
           </View>
           <ScrollView contentContainerStyle={styles.content}>
-            <ToggleButton viewMode={viewMode} toggleViewMode={toggleViewMode} />
+ 
             <Text style={styles.label}>Detalhes da venda</Text>
             <View style={styles.dateContainer}>
               <TouchableOpacity onPress={showDatePicker} style={styles.dateButton}>

@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, FlatList, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { View, Text, TextInput, FlatList, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert, ScrollView } from "react-native";
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
 import BarTop2 from "../../../../../../../components/BarTop2";
@@ -14,6 +14,8 @@ const NewRegisteredSale = ({ navigation }) => {
   const [search, setSearch] = useState('');
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [categories, setCategories] = useState(['Todos', 'Serviços', 'Diversos', 'Celulares']); // Filtros fictícios
+  const [selectedCategory, setSelectedCategory] = useState('Todos'); // Categoria selecionada
   const [quantities, setQuantities] = useState({});
   const [totalPrice, setTotalPrice] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -21,20 +23,13 @@ const NewRegisteredSale = ({ navigation }) => {
 
   const ITEM_HEIGHT = 150;
 
-  useEffect(() => {
-    fetchProducts();
-  }, [search]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}${search.toLowerCase()}`); // Padroniza o termo de busca para minúsculas
-      console.log('Resposta da API:', response.data);
-
+      const response = await axios.get(`${API_URL}${search.toLowerCase()}`);
       if (response.status === 200 && response.data.status === 200) {
         const produtos = response.data.data.map(product => ({
           ...product,
-
         }));
         setProducts(produtos);
         setFilteredProducts(produtos);
@@ -47,7 +42,11 @@ const NewRegisteredSale = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   useEffect(() => {
     const total = Object.keys(quantities).reduce((sum, key) => {
@@ -55,14 +54,25 @@ const NewRegisteredSale = ({ navigation }) => {
       return sum + (product.preco_venda * quantities[key]);
     }, 0);
     setTotalPrice(total);
-  }, [quantities]);
+  }, [quantities, products]);
 
   const handleSearch = (text) => {
     setSearch(text);
 
-    // Filtra os produtos com base na pesquisa, ignorando maiúsculas/minúsculas
+    // Filtra os produtos com base na pesquisa e na categoria
     const filtered = products.filter(product => 
-      product.nome.includes(text.toLowerCase())
+      product.nome.toLowerCase().includes(text.toLowerCase()) && 
+      (selectedCategory === 'Todos' || product.categoria === selectedCategory)
+    );
+    setFilteredProducts(filtered);
+  };
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+
+    // Filtra os produtos com base na categoria
+    const filtered = products.filter(product =>
+      (category === 'Todos' || product.categoria === category)
     );
     setFilteredProducts(filtered);
   };
@@ -77,10 +87,6 @@ const NewRegisteredSale = ({ navigation }) => {
         imagem: product.imagem ? `https://api.celereapp.com.br${product.imagem}` : null,
       };
     });
-    const filteredProducts = selectedProducts.map(product => ({
-      ...product,
-      imagem: product.imagem || 'https://via.placeholder.com/150', // Define uma imagem padrão caso esteja null
-    }));
   
     navigation.navigate(nextScreen, { products: selectedProducts, totalPrice });
   };
@@ -94,6 +100,7 @@ const NewRegisteredSale = ({ navigation }) => {
     });
   };
 
+  // Implementação do renderFooter para exibir o botão de confirmação e o botão de código de barras
   const renderFooter = () => (
     <>
       {totalPrice > 0 && (
@@ -120,18 +127,22 @@ const NewRegisteredSale = ({ navigation }) => {
         <View style={{ flex: 1 }}>
           <View style={{ height: 50 }}>
             <BarTop2
-              titulo={'Retorno'}
+              titulo={'Voltar'}
               backColor={COLORS.primary}
               foreColor={COLORS.black}
               routeMailer={''}
               routeCalculator={''}
             />
           </View>
+
           <View style={styles.header}>
             <TouchableOpacity style={styles.registerButton}>
-              <Text style={styles.registerButtonText}>+ Registrar novo produto</Text>
+            <Icon name="add" size={20} color={COLORS.black} />
+              <Text style={styles.registerButtonText}>Cadastrar um novo produto</Text>
             </TouchableOpacity>
             <Text style={styles.title}>Nova Venda</Text>
+            
+            {/* Campo de Pesquisa */}
             <View style={styles.searchContainer}>
               <TextInput
                 style={styles.searchInput}
@@ -141,7 +152,31 @@ const NewRegisteredSale = ({ navigation }) => {
               />
               <Icon name="search" size={20} color={COLORS.grey} />
             </View>
+
+            {/* Filtro de Categorias */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
+              {categories.map(category => (
+                <TouchableOpacity
+                  key={category}
+                  style={[
+                    styles.categoryButton,
+                    selectedCategory === category && styles.categoryButtonActive
+                  ]}
+                  onPress={() => handleCategoryChange(category)}
+                >
+                  <Text
+                    style={[
+                      styles.categoryText,
+                      selectedCategory === category && styles.categoryTextActive
+                    ]}
+                  >
+                    {category}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
+
           {loading ? (
             <ActivityIndicator size="large" color="#000" />
           ) : (
@@ -157,18 +192,19 @@ const NewRegisteredSale = ({ navigation }) => {
               keyExtractor={(item) => item.id.toString()}
               contentContainerStyle={styles.productsList}
               numColumns={2}
-              ListFooterComponent={renderFooter}
+              ListFooterComponent={renderFooter}  // Usando o renderFooter aqui
               getItemLayout={(data, index) => (
                 { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
               )}
             />
           )}
+          
           <View style={styles.buttonRow}>
             <TouchableOpacity style={[styles.button, { flex: 1 }]} onPress={() => setNextScreen("SaleDetails")}>
-              <Text style={styles.buttonText}>Immediately</Text>
+              <Text style={styles.buttonText}>Imediatamente</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.buttonSell, { flex: 1 }]} onPress={() => setNextScreen("SellOnCredit")}>
-              <Text style={styles.buttonText}>Sell on Credit</Text>
+              <Text style={styles.buttonText}>Venda a Crédito</Text>
             </TouchableOpacity>
           </View>
         </View>

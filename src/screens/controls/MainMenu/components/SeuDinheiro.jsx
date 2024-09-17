@@ -78,6 +78,10 @@ export default () => {
     navigation.navigate('CelerePay');
   };
 
+  const handleReport = () => {
+    navigation.navigate('Report');
+  };
+
   return (
     <ContainerGroupButtons style={{flex: 1, width: '92%'}}>
       <GroupButton>
@@ -153,7 +157,7 @@ export default () => {
           <TxtItemMenu>{t('cash_flow')}</TxtItemMenu>
         </BtnItemMenu>
 
-        <BtnItemMenu backColor={'#F0E6E6'} disabled>
+        <BtnItemMenu backColor={'#F0E6E6'} onPress={handleReport}>
           <IconControlPanel
             width="38"
             height="38"

@@ -234,6 +234,48 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     marginLeft: 5,
   },
+    // Estilos para o Quarto Modal de Sucesso
+    modalContainer4: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo escurecido
+    },
+    modalContent4: {
+      backgroundColor: '#fff',
+      width: 300,
+      padding: 20,
+      borderRadius: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 10,
+    },
+    successText: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      color: 'black',
+      marginTop: 10,
+      marginBottom: 20,
+      textAlign: 'center',
+    },
+    successButton: {
+      backgroundColor: COLORS.primary,
+      borderRadius: 5,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical:22,
+      paddingHorizontal:100,
+    },
+    buttonText4: {
+      fontSize: 16,
+      color: 'black',
+      marginLeft: 8,
+    },
 });
 
 export default styles;

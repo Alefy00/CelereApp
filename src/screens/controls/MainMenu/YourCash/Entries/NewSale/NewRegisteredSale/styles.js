@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 import { COLORS } from "../../../../../../../constants";
 
 
-export default styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
@@ -16,9 +16,10 @@ export default styles = StyleSheet.create({
   registerButton: {
     backgroundColor: COLORS.primary,
     paddingVertical: 10,
-    paddingHorizontal: 100,
+    paddingHorizontal: 80,
     borderRadius: 5,
     marginBottom: 10,
+    flexDirection: 'row',
   },
   registerButtonText: {
     color: COLORS.black,
@@ -30,7 +31,7 @@ export default styles = StyleSheet.create({
     color: COLORS.black,
     marginBottom: 10,
     width:'100%',
-    marginLeft:28
+    marginLeft:28,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -40,6 +41,7 @@ export default styles = StyleSheet.create({
     paddingVertical: 5,
     width: '100%',
     borderBottomWidth:1,
+    marginTop: -10,
   },
   searchInput: {
     flex: 1,
@@ -138,5 +140,33 @@ export default styles = StyleSheet.create({
     marginLeft:310,
     marginTop: 10,
   },
+  categoriesContainer: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  categoryButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    backgroundColor: COLORS.white,
+    borderRadius: 5,
+    marginHorizontal: 5,
+    borderWidth:1,
+  },
+  categoryButtonActive: {
+    backgroundColor: COLORS.primary,
+    borderWidth: 0,
 
-})
+  },
+  categoryText: {
+    color: COLORS.black,
+    fontSize: 14,
+  },
+  categoryTextActive: {
+    color: COLORS.black,
+    fontWeight: 'bold',
+  },
+
+
+});
+
+export default styles;
