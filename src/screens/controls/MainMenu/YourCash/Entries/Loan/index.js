@@ -1,25 +1,26 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, Modal, Alert, KeyboardAvoidingView, Keyboard, Platform, TextInput, TouchableWithoutFeedback } from "react-native";
 import BarTop2 from "../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../constants";
-import { Alert, Keyboard, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
-import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DateTimePicker from "@react-native-community/datetimepicker";
 import styles from './styles';
+import Icon from 'react-native-vector-icons/Ionicons';
 
-// Constantes para URLs da API
 const BASE_API_URL = 'https://api.celereapp.com.br';
 const LOAN_API_ENDPOINT = `${BASE_API_URL}/cad/emprestimos/`;
 
 const Loan = ({ navigation }) => {
   const [valorEmprestimo, setValorEmprestimo] = useState('');
-  const [dataLiberacao, setDataLiberacao] = useState(new Date());
+  const [dataLiberacao, setDataLiberacao] = useState(null); // Inicializando como null
   const [valorPrestacao, setValorPrestacao] = useState('');
   const [prazoMeses, setPrazoMeses] = useState('');
-  const [dataVencimento, setDataVencimento] = useState(new Date());
+  const [dataVencimento, setDataVencimento] = useState(null); // Inicializando como null
   const [showDatePickerLiberacao, setShowDatePickerLiberacao] = useState(false);
   const [showDatePickerVencimento, setShowDatePickerVencimento] = useState(false);
   const [empresaId, setEmpresaId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   const getEmpresaId = async () => {
     try {
@@ -41,8 +42,7 @@ const Loan = ({ navigation }) => {
       if (empresaData) {
         setEmpresaId(empresaData);
       } else {
-        console.error('ID da empresa não encontrado. Dados recebidos:', empresaData);
-        Alert.alert('Erro', 'Não foi possível carregar os dados da empresa. Tente novamente mais tarde.');
+        Alert.alert('Erro', 'Não foi possível carregar os dados da empresa.');
       }
     };
 
@@ -82,13 +82,21 @@ const Loan = ({ navigation }) => {
 
       if (response.ok) {
         Alert.alert('Sucesso', result.message || 'Empréstimo registrado com sucesso.');
- 
+        
+        // Limpar os campos do modal após o sucesso da requisição
+        setValorEmprestimo('');
+        setValorPrestacao('');
+        setPrazoMeses('');
+        setDataLiberacao(null); // Reset para null
+        setDataVencimento(null); // Reset para null
+        
+        // Fechar o modal
+        setShowModal(false);
       } else {
         Alert.alert('Erro', result.message || 'Ocorreu um erro ao registrar o empréstimo.');
       }
     } catch (error) {
-      console.error('Erro ao salvar o empréstimo:', error);
-      Alert.alert('Erro', 'Não foi possível registrar o empréstimo. Verifique sua conexão e tente novamente.');
+      Alert.alert('Erro', 'Não foi possível registrar o empréstimo. Verifique sua conexão.');
     }
   };
 
@@ -105,91 +113,121 @@ const Loan = ({ navigation }) => {
   };
 
   const formatDate = (date) => {
-    return date.toLocaleDateString('pt-BR');
+    return date ? date.toLocaleDateString('pt-BR') : ''; // Se a data for null, retorna string vazia
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.innerContainer}>
-          <BarTop2
-            titulo={'Empréstimo'}
-            backColor={COLORS.primary}
-            foreColor={COLORS.black}
-            routeMailer={''}
-            routeCalculator={''}
-          />
-          <View style={styles.inputContainer}>
-            <Text style={styles.textEmprestimo}>Empréstimo</Text>
+    <View style={styles.container}>
+      <View style={styles.barTop}>
+        <BarTop2
+          titulo={'Seus Empréstimos'}
+          backColor={COLORS.primary}
+          foreColor={COLORS.black}
+          routeMailer={''}
+          routeCalculator={''}
+        />
+      </View>
 
-            <Text style={styles.label}>Valor do empréstimo</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite o valor do empréstimo"
-              value={valorEmprestimo}
-              onChangeText={setValorEmprestimo}
-              keyboardType="numeric"
-            />
+      <View style={styles.listContainer}>
+        <Text style={styles.title}>Seus Empréstimos</Text>
+        <Text style={styles.description}>
+          Declare uma venda a receber registrada para algum de seus clientes como paga.
+        </Text>
 
-            <Text style={styles.label}>Data da liberação do empréstimo</Text>
-            <TouchableOpacity onPress={() => setShowDatePickerLiberacao(true)} style={styles.input}>
-              <Text>{formatDate(dataLiberacao)}</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.label}>Valor da prestação</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite o valor da prestação"
-              value={valorPrestacao}
-              onChangeText={setValorPrestacao}
-              keyboardType="numeric"
-            />
-
-            <Text style={styles.label}>Prazo em meses</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite o prazo em meses"
-              value={prazoMeses}
-              onChangeText={setPrazoMeses}
-              keyboardType="numeric"
-            />
-
-            <Text style={styles.label}>Data de vencimento da primeira prestação</Text>
-            <TouchableOpacity onPress={() => setShowDatePickerVencimento(true)} style={styles.input}>
-              <Text>{formatDate(dataVencimento)}</Text>
-            </TouchableOpacity>
-
-            {showDatePickerLiberacao && (
-              <DateTimePicker
-                testID="dateTimePickerLiberacao"
-                value={dataLiberacao}
-                mode={'date'}
-                display="default"
-                onChange={handleDateChangeLiberacao}
-                locale="pt-BR"
-              />
-            )}
-            {showDatePickerVencimento && (
-              <DateTimePicker
-                testID="dateTimePickerVencimento"
-                value={dataVencimento}
-                mode={'date'}
-                display="default"
-                onChange={handleDateChangeVencimento}
-                locale="pt-BR"
-              />
-            )}
-          </View>
-
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Salvar</Text>
-          </TouchableOpacity>
+        {/* Exemplo de dados fictícios, pode ser substituído pelos reais futuramente */}
+        <View style={styles.loanItem}>
+          <Text>06/09/2024</Text>
+          <Text style={styles.loanValue}>R$24000,00</Text>
+          <Text>Vence todo dia 28</Text>
+          <Text>24 parcelas restantes</Text>
         </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+      </View>
+
+      <TouchableOpacity style={styles.addButton} onPress={() => setShowModal(true)}>
+        <Icon name="add" size={24} color="black" />
+        <Text style={styles.addButtonText}>Cadastrar novo empréstimo</Text>
+      </TouchableOpacity>
+
+      {/* Modal para cadastrar novo empréstimo */}
+      <Modal visible={showModal} transparent={true} animationType="slide">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalContainer}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Detalhes do empréstimo</Text>
+                <TouchableOpacity onPress={() => setShowModal(false)}>
+                  <Text style={styles.modalClose}>✕</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Campo 1: Valor do Empréstimo */}
+              <TextInput
+                style={styles.input}
+                placeholder="Valor que entrou no caixa"
+                value={valorEmprestimo}
+                onChangeText={setValorEmprestimo}
+                keyboardType="numeric"
+              />
+
+              {/* Campo 2: Data de Liberação com Placeholder */}
+              <TouchableOpacity onPress={() => setShowDatePickerLiberacao(true)} style={styles.input}>
+                <Text>{formatDate(dataLiberacao) || "Selecione a data de liberação"}</Text>
+              </TouchableOpacity>
+
+              {/* Campo 3: Valor da Prestação */}
+              <TextInput
+                style={styles.input}
+                placeholder="Valor da prestação"
+                value={valorPrestacao}
+                onChangeText={setValorPrestacao}
+                keyboardType="numeric"
+              />
+
+              {/* Campo 4: Prazo em Meses */}
+              <TextInput
+                style={styles.input}
+                placeholder="Prazo (em meses, somente números)"
+                value={prazoMeses}
+                onChangeText={setPrazoMeses}
+                keyboardType="numeric"
+              />
+
+              {/* Campo 5: Data de Vencimento com Placeholder */}
+              <TouchableOpacity onPress={() => setShowDatePickerVencimento(true)} style={styles.input}>
+                <Text>{formatDate(dataVencimento) || "Selecione a data de vencimento"}</Text> 
+              </TouchableOpacity>
+
+              {showDatePickerLiberacao && (
+                <DateTimePicker
+                  testID="dateTimePickerLiberacao"
+                  value={dataLiberacao || new Date()} // Se null, usa a data atual
+                  mode={'date'}
+                  display="default"
+                  onChange={handleDateChangeLiberacao}
+                />
+              )}
+              {showDatePickerVencimento && (
+                <DateTimePicker
+                  testID="dateTimePickerVencimento"
+                  value={dataVencimento || new Date()} // Se null, usa a data atual
+                  mode={'date'}
+                  display="default"
+                  onChange={handleDateChangeVencimento}
+                />
+              )}
+
+              <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                <Icon name="checkmark-circle" size={24} color="black" />
+                <Text style={styles.saveButtonText}>Cadastrar novo empréstimo</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </Modal>
+    </View>
   );
 };
 
