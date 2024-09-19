@@ -70,7 +70,7 @@ const SaleDetails = ({ navigation, route }) => {
 
         {/* Renderizando o conteúdo da aba selecionada */}
         {viewMode === 'Liquidar agora' && (
-          <LiquidateNow 
+          <LiquidateNow
             products={products}
             totalPrice={totalPrice}
             clients={clients}

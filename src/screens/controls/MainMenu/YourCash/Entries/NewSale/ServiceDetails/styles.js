@@ -29,10 +29,30 @@ Container: {
         color: COLORS.black,
         marginVertical: 10,
       },
+      dateContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+        marginHorizontal: 20,
+      },
+      datePicker: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.black,
+        paddingBottom: 8,
+        flex: 1,
+      },
       dateText: {
-        fontSize: 14,
-        marginLeft: 20,
+        flex: 1,
+        fontSize: 16,
         color: COLORS.black,
+      },
+      dateText2: {
+        flex: 1,
+        fontSize: 16,
+        color: COLORS.black,
+        marginHorizontal:20
       },
       boldText: {
         fontWeight: 'bold',
@@ -74,7 +94,7 @@ Container: {
         backgroundColor: COLORS.primary,
         padding: 10,
         borderRadius: 5,
-        marginLeft: 10,
+        marginRight: 20,
       },
       cartSection: {
         marginTop: 10,
@@ -264,7 +284,6 @@ Container: {
         flexDirection: 'row',
         alignItems: 'center',
         marginVertical: 10,
-        marginHorizontal: 20,
       },
       clientPicker: {
         flex: 1,
@@ -274,19 +293,20 @@ Container: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        marginHorizontal: 20,
       },
       clientText: {
         color: COLORS.black,
       },
-      dropdownContainer: {
+      dropdownContainerPag: {
         borderWidth: 1,
         borderColor: COLORS.lightGray,
         borderRadius: 5,
-        marginTop: -5,
         marginHorizontal: 20,
       },
       dropdownItem: {
         padding: 10,
+        marginHorizontal:10,
       },
       dropdownItemText: {
         color: COLORS.black,
@@ -340,6 +360,75 @@ Container: {
         fontSize: 16,
         marginLeft: 10,
       },
+      
+    paymentSelectionContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginVertical: 15,
+      marginHorizontal: 20,
+    },
+    paymentOptionButton: {
+      flex: 1,
+      paddingVertical: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 10,
+      backgroundColor: '#efebc4',
+      marginRight: 5,
+    },
+    selectedPaymentOptionButton: {
+      backgroundColor: COLORS.green,  // Cor verde para o botão selecionado
+    },
+    paymentOptionText: {
+      fontSize: 16,
+      color: COLORS.black,
+    },
+    selectedPaymentOptionText: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: COLORS.black,  // Texto branco para o botão selecionado
+    },
+    paymentTypeContainer: {
+      borderBottomWidth: 1,
+      marginTop: -10,
+    },
+    picker: {
+      height: 50,
+      width: '100%',
+      borderWidth: 1,
+      borderColor: '#000',
+      borderRadius: 5,
+    },
+    valueSummaryContainer: {
+      marginVertical: 20,
+      marginHorizontal: 20,
+    },
+    valueItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginVertical: 5,
+    },
+    valueLabel: {
+      fontSize: 16,
+      color: '#000',
+      fontWeight: 'bold',
+    },
+    
+    valueAmount: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: COLORS.green,
+    },
+    valueAmount2: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: COLORS.black,
+    },
+    valueAmountTaxa:{
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: COLORS.red,
+    },
   });
 
 export default styles;

@@ -304,6 +304,7 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     marginLeft: 10,
   },
+
   
 });
 

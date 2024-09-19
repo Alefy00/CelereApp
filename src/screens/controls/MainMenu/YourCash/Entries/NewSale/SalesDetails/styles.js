@@ -89,7 +89,14 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     maxHeight: 150, // Limita a altura do dropdown
     marginTop: -25,
-    elevation: 3,
+    elevation: 2,
+    width: '100%', // Certifica-se que o dropdown tenha a largura completa
+  },
+  dropdownContainerPag: {
+    backgroundColor: COLORS.white,
+    borderRadius: 5,
+    maxHeight: 150, // Limita a altura do dropdown
+    elevation: 2,
     width: '100%', // Certifica-se que o dropdown tenha a largura completa
   },
   dropdownItem: {
@@ -210,7 +217,7 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 15,
+    paddingVertical: 20,
     borderRadius: 5,
     flexDirection: 'row',
     alignItems: 'center',
@@ -287,6 +294,74 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 10,
   },
+    // ...existing styles
+
+    paymentSelectionContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginVertical: 15,
+    },
+    paymentOptionButton: {
+      flex: 1,
+      paddingVertical: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 10,
+      backgroundColor: '#efebc4',
+      marginRight: 5,
+    },
+    selectedPaymentOptionButton: {
+      backgroundColor: COLORS.green,  // Cor verde para o botão selecionado
+    },
+    paymentOptionText: {
+      fontSize: 16,
+      color: COLORS.black,
+    },
+    selectedPaymentOptionText: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: COLORS.black,  // Texto branco para o botão selecionado
+    },
+    paymentTypeContainer: {
+      borderBottomWidth: 1,
+      marginTop: -10,
+    },
+    picker: {
+      height: 50,
+      width: '100%',
+      borderWidth: 1,
+      borderColor: '#000',
+      borderRadius: 5,
+    },
+    valueSummaryContainer: {
+      marginVertical: 20,
+    },
+    valueItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginVertical: 5,
+    },
+    valueLabel: {
+      fontSize: 16,
+      color: '#000',
+      fontWeight: 'bold',
+    },
+    
+    valueAmount: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: COLORS.green,
+    },
+    valueAmount2: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: COLORS.black,
+    },
+    valueAmountTaxa:{
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: COLORS.red,
+    },
 });
 
 export default styles;

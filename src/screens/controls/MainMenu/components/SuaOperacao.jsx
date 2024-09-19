@@ -1,13 +1,14 @@
 /* eslint-disable prettier/prettier */
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import {COLORS, FONTS, SIZES} from '../../../../constants';
 import {useTranslation} from 'react-i18next';
 import '../../../../translation';
 import {StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import { Modal, Text, TouchableOpacity, View } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 
-import Svg, {Image, Defs, Filter, FeColorMatrix} from 'react-native-svg';
 
 import IconStock from '../../../../assets/images/svg/iconStock.svg';
 import IconServices from '../../../../assets/images/svg/iconServices.svg';
@@ -50,9 +51,12 @@ export const TxtItemMenu = styled.Text`
   margin-top: 3px;
 `;
 
+
 export default () => {
   const {t} = useTranslation();
   const navigation = useNavigation();
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+
   const navigateToScreen = screenName => {
     navigation.navigate(screenName);
   };
@@ -60,6 +64,10 @@ export default () => {
 const handleServices = () => {
   navigation.navigate("ServicesMenu");
 };
+const togglePopup = () => {
+  setIsPopupVisible(!isPopupVisible);
+};
+
   return (
     <ContainerGroupButtons style={{flex: 1, width: '92%'}}>
       <GroupButton>
@@ -76,7 +84,7 @@ const handleServices = () => {
           <TxtItemMenu>{t('Estoque')}</TxtItemMenu>
         </BtnItemMenu>
 
-        <BtnItemMenu backColor="#F0E6E6" disabled>
+        <BtnItemMenu backColor="#F0E6E6" onPress={togglePopup} >
           <IconBudget width="38" height="38" />
           <TxtItemMenu>{t('Recibos e Orçamento')}</TxtItemMenu>
         </BtnItemMenu>
@@ -107,6 +115,31 @@ const handleServices = () => {
           <TxtItemMenu>{t('customers')}</TxtItemMenu>
         </BtnItemMenu>
       </GroupButton>
+
+      {/* Modal para o Pop-up */}
+      <Modal transparent={true} visible={isPopupVisible} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.popupContainer}>
+            <View style={styles.popupHeader}>
+              <Text style={styles.popupTitle}>Recibos e Orçamentos</Text>
+              <TouchableOpacity onPress={togglePopup}>
+                <Icon name="close" size={26} color={COLORS.gray} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.popupSubtitle}>Selecione uma das opções abaixo:</Text>
+
+            {/* Botões do pop-up */}
+            <TouchableOpacity style={styles.popupButtonYellow} onPress={() => {navigation.navigate('Receipts')}}>
+              <Text style={styles.popupButtonText}>Recibos</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.popupButtonWhite} onPress={() => {navigation.navigate('Budget')}}>
+              <Text style={styles.popupButtonText}>Orçamentos</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </ContainerGroupButtons>
   );
 };
@@ -114,5 +147,82 @@ const handleServices = () => {
 const styles = StyleSheet.create({
   grayscale: {
     filter: 'grayscale(100%)',
+  },
+  groupButton: {
+    flexDirection: 'row',
+    height: 204,
+    paddingTop: 1,
+    justifyContent: 'space-between',
+    width: '100%',
+    flexWrap: 'wrap',
+  },
+  btnItemMenu: {
+    height: 96,
+    width: 90,
+    alignItems: 'center',
+    borderRadius: 5,
+    paddingTop: 15,
+    marginBottom: 10,
+    backgroundColor: '#fff',
+  },
+  txtItemMenu: {
+    color: COLORS.secondary,
+    fontSize: SIZES.s14,
+    fontFamily: FONTS.fregular,
+    textAlign: 'center',
+    marginTop: 3,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  popupContainer: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 20,
+    width: '80%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  popupHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  popupTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.black,
+  },
+  popupSubtitle: {
+    color: COLORS.black,
+    alignSelf: 'flex-start',
+    fontSize: 15,
+  },
+  popupButtonYellow: {
+    width: '100%',
+    padding: 10,
+    marginTop: 10,
+    alignItems: 'center',
+    backgroundColor: COLORS.primary,
+    borderRadius: 5,
+    paddingVertical:20,
+  },
+  popupButtonWhite: {
+    width: '100%',
+    padding: 10,
+    marginTop: 10,
+    alignItems: 'center',
+    paddingVertical:20,
+  },
+  popupButtonText: {
+    fontSize: SIZES.s16,
+    fontFamily: FONTS.fregular,
+    color: COLORS.black,
   },
 });

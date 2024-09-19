@@ -1,10 +1,11 @@
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, Modal, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from '../styles';
 import PixIcon from "../../../../../../../../assets/images/svg/iconPix.svg";
 import { COLORS } from '../../../../../../../../constants';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const AccountsReceivable = ({ service, navigation }) => {
     const [quantity, setQuantity] = useState(1);
@@ -15,6 +16,8 @@ const AccountsReceivable = ({ service, navigation }) => {
     const [isDropdownVisible, setDropdownVisible] = useState(false);
     const [selectedClient, setSelectedClient] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [paymentDate, setPaymentDate] = useState(new Date());
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
 
      // Obtém a data atual
@@ -62,13 +65,38 @@ const AccountsReceivable = ({ service, navigation }) => {
     const handleConfirm = () => {
       setIsModalVisible(true);
     };
+    const showDatePickerModal = () => {
+      setShowDatePicker(true);
+    };
+  
+    const handleDateChange = (event, selectedDate) => {
+      const currentDate = selectedDate || paymentDate;
+      setShowDatePicker(Platform.OS === 'ios');
+      setPaymentDate(currentDate);
+    };
   
     return (
       <ScrollView style={styles.containerBase}>
       <Text style={styles.title}>Detalhes da venda</Text>
-      <Text style={styles.dateText}>
-        Data da Venda: <Text style={styles.boldText}>Hoje, {currentDate}</Text>
-      </Text>
+
+              {/* Data do pagamento */}
+              <View style={styles.dateContainer}>
+          <TouchableOpacity onPress={showDatePickerModal} style={styles.datePicker}>
+            <Text style={styles.dateText}>
+              {`Data do pagamento: ${paymentDate.toLocaleDateString('pt-BR')}`}
+            </Text>
+            <Icon name="calendar" size={24} color={COLORS.lightGray} />
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={paymentDate}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+            />
+          )}
+        </View>
+ 
         {/* Campo para associar cliente */}
         <View style={styles.clientContainer}>
           <TouchableOpacity style={styles.clientPicker} onPress={toggleDropdown}>

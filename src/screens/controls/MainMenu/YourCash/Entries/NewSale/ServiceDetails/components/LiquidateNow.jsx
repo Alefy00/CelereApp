@@ -1,20 +1,26 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from '../styles';
 import PixIcon from "../../../../../../../../assets/images/svg/iconPix.svg";
 import { COLORS } from '../../../../../../../../constants';
 
-const LiquidateNow = ({ service, navigation }) => {
+const LiquidateNow = ({ service, navigation, totalPrice }) => {
     const [quantity, setQuantity] = useState(1);
-    const [price, setPrice] = useState(service.preco_venda);
+    const [price, setPrice] = useState(service.preco_venda || 0);
     const [discountType, setDiscountType] = useState('%');
     const [discount, setDiscount] = useState('');
     const [selectedPayment, setSelectedPayment] = useState('PIX');
     const [isDropdownVisible, setDropdownVisible] = useState(false);
     const [selectedClient, setSelectedClient] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [paymentMethod2, setPaymentMethod2] = useState('CelerePay');
+    const [paymentType, setPaymentType] = useState('À vista');
+    const [installments, setInstallments] = useState(1);  // Default to 1 (À vista)
+    const [taxRate, setTaxRate] = useState(0.01);  // 1% for now
+    const [liquidValue, setLiquidValue] = useState(price);  // Inicializamos com `price`
+    const [isPaymentDropdownVisible, setIsPaymentDropdownVisible] = useState(false);
 
      // Obtém a data atual
     const [currentDate, setCurrentDate] = useState('');
@@ -59,13 +65,44 @@ const LiquidateNow = ({ service, navigation }) => {
       navigation.navigate('NewRegisteredSale');
     };
     const handleConfirm = () => {
-      setIsModalVisible(true);
+      if (paymentMethod2 === 'CelerePay') {
+        // Se o método de pagamento for CélerePay, navega para a tela de confirmação
+        navigation.navigate('CelerePayConfirmation', {
+          totalPrice: price * quantity,
+          onConfirm: () => setIsModalVisible(true),  // Exibe o modal após confirmação
+        });
+      } else {
+        // Caso contrário, exibe o modal diretamente
+        setIsModalVisible(true);
+      }
     };
+    const paymentOptions = ['À vista', '2x', '3x', '4x'];
+
+  const togglePaymentDropdown = () => {
+    setIsPaymentDropdownVisible(!isPaymentDropdownVisible);
+  };
+
+  const selectPaymentOption = (option) => {
+    setPaymentType(option);
+    setInstallments(option === 'À vista' ? 1 : parseInt(option));  // Define as parcelas com base na escolha
+    setIsPaymentDropdownVisible(false);
+  };
+   // UseCallback to memoize the calculateLiquidValue function
+   const calculateLiquidValue = useCallback(() => {
+    const calculatedTotalPrice = price * quantity;
+    const taxAmount = calculatedTotalPrice * taxRate;
+    setLiquidValue(calculatedTotalPrice - taxAmount);
+  }, [price, quantity, taxRate]);
+  
+  useEffect(() => {
+    calculateLiquidValue();
+  }, [price, quantity, taxRate, calculateLiquidValue]);
+  
   
     return (
       <ScrollView style={styles.containerBase}>
       <Text style={styles.title}>Detalhes da venda</Text>
-      <Text style={styles.dateText}>
+      <Text style={styles.dateText2}>
         Data da Venda: <Text style={styles.boldText}>Hoje, {currentDate}</Text>
       </Text>
         {/* Campo para associar cliente */}
@@ -125,10 +162,11 @@ const LiquidateNow = ({ service, navigation }) => {
           <TextInput
             style={styles.priceInput}
             keyboardType="numeric"
-            value={price.toFixed(2)}
-            onChangeText={text => setPrice(parseFloat(text))}
+            value={(price ? price.toFixed(2) : '0.00')}  // Garantimos que price seja numérico
+            onChangeText={text => setPrice(parseFloat(text) || 0)}  // Garante que o valor sempre seja um número
             placeholder="Preço de venda (R$)"
           />
+
         </View>
   
         <TextInput
@@ -200,7 +238,73 @@ const LiquidateNow = ({ service, navigation }) => {
             </TouchableOpacity>
           </View>
         </ScrollView>
-        
+
+      {/* Botões de seleção: CélerePay e Maquininha */}
+      <View style={styles.paymentSelectionContainer}>
+        <TouchableOpacity
+          style={[
+            styles.paymentOptionButton,
+            paymentMethod2 === 'CelerePay' && styles.selectedPaymentOptionButton
+          ]}
+          onPress={() => setPaymentMethod2('CelerePay')}
+        >
+          <Text style={paymentMethod2 === 'CelerePay' ? styles.selectedPaymentOptionText : styles.paymentOptionText}>
+            CélerePay
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.paymentOptionButton,
+            paymentMethod2 === 'Maquininha' && styles.selectedPaymentOptionButton
+          ]}
+          onPress={() => setPaymentMethod2('Maquininha')}
+        >
+          <Text style={paymentMethod2 === 'Maquininha' ? styles.selectedPaymentOptionText : styles.paymentOptionText}>
+            Maquininha
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+       {/* Seleção de tipo de pagamento */}
+      <TouchableOpacity style={styles.clientPicker} onPress={togglePaymentDropdown}>
+        <Text style={styles.clientText}>{paymentType}</Text>
+        <Icon name={isPaymentDropdownVisible ? "arrow-up" : "arrow-down"} size={24} color="black" />
+      </TouchableOpacity>
+
+      {isPaymentDropdownVisible && (
+        <View style={[styles.dropdownContainerPag, { maxHeight: 150 }]}>
+          <ScrollView nestedScrollEnabled={true}>
+            {paymentOptions.map((option, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.dropdownItem}
+                onPress={() => selectPaymentOption(option)}
+              >
+                <Text style={styles.dropdownItemText}>{option}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      {/* Campos para mostrar Valor Bruto, Taxa, e Valor Líquido */}
+      <View style={styles.valueSummaryContainer}>
+        <View style={styles.valueItem}>
+          <Text style={styles.valueLabel}>Valor Bruto <Icon name="alert-circle" size={18} color={COLORS.lightGray} /></Text>
+          <Text style={styles.valueAmount2}>R$ {price ? (price * quantity).toFixed(2) : '0.00'}</Text> 
+        </View>
+
+        <View style={styles.valueItem}>
+          <Text style={styles.valueLabel}>Taxa do cartão <Icon name="alert-circle" size={18} color={COLORS.lightGray} /></Text>
+          <Text style={styles.valueAmountTaxa}>({(taxRate * 100).toFixed(0)}%) R$ {(price * quantity * taxRate).toFixed(2)}</Text>
+        </View>
+
+        <View style={styles.valueItem}>
+          <Text style={styles.valueLabel}>Valor Líquido a Receber Amanhã <Icon name="alert-circle" size={18} color={COLORS.lightGray} /></Text>
+          <Text style={styles.valueAmount}>R$ {liquidValue.toFixed(2)}</Text> 
+        </View>
+      </View>
   
         {/* Botão de Concluir Venda */}
         <View style={styles.footer}>
