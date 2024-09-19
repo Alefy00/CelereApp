@@ -189,10 +189,6 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation }) => {
               <Icon name="cart" size={20} color={COLORS.black} />
               <Text style={styles.modalPrimaryButtonText}>Registrar outra venda</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.modalSecondaryButton} onPress={handleEmitReceipt}>
-              <Icon name="document" size={20} color={COLORS.black} />
-              <Text style={styles.modalSecondaryButtonText}>Emitir NF-e ou Recibo</Text>
-            </TouchableOpacity>
             <TouchableOpacity style={styles.modalBackButton} onPress={handleCloseModal}>
               <Icon name="arrow-back" size={20} color={COLORS.black} />
               <Text style={styles.modalBackButtonText}>Voltar ao resumo</Text>

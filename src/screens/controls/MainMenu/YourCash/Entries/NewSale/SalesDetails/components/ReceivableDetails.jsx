@@ -215,13 +215,6 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
               <Icon name="cart" size={20} color="black" />
               <Text style={styles.modalPrimaryButtonText}>Registrar outra venda</Text>
             </TouchableOpacity>
-
-            {/* Botão Emitir NF-e ou Recibo */}
-            <TouchableOpacity style={styles.modalSecondaryButton} onPress={handleEmitReceipt}>
-              <Icon name="document" size={20} color="black" />
-              <Text style={styles.modalSecondaryButtonText}>Emitir NF-e ou Recibo</Text>
-            </TouchableOpacity>
-
             {/* Botão Voltar ao resumo */}
             <TouchableOpacity style={styles.modalBackButton} onPress={handleCloseModal}>
               <Icon name="arrow-back" size={20} color="black" />

@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   saleDetailsTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: COLORS.black,
   },
@@ -272,7 +272,6 @@ const styles = StyleSheet.create({
   },
   modalPrimaryButtonText: {
     fontSize: 16,
-    fontWeight: 'bold',
     color: COLORS.black,
     marginLeft: 10,
   },

@@ -31,7 +31,7 @@ import MonthlySalesForecast from '../screens/InitialData/SalesForecast/MonthlySa
 import HowBusiness from '../screens/InitialData/SalesForecast/HowBusiness';
 import DistributionSales from '../screens/InitialData/SalesForecast/DistributionSales';
 import SaleDetails from '../screens/controls/MainMenu/YourCash/Entries/NewSale/SalesDetails';
-import SellOnCredit from '../screens/controls/MainMenu/YourCash/Entries/NewSale/SellOnCredit';
+import ServiceDetails from '../screens/controls/MainMenu/YourCash/Entries/NewSale/ServiceDetails';
 import LooseProduct from '../screens/controls/MainMenu/YourCash/Entries/NewSale/LooseProduct';
 import CustomerSupplierScreen from '../screens/InitialData/CustomerSupplierScreen';
 import IncludeSupplier from '../screens/InitialData/CustomerSupplierScreen/IncludeSupplier';
@@ -90,7 +90,7 @@ export default () => (
 
     <Stack.Screen name="NewRegisteredSale" component={NewRegisteredSale} />
     <Stack.Screen name="SaleDetails" component={SaleDetails} />
-    <Stack.Screen name="SellOnCredit" component={SellOnCredit} />
+    <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
     <Stack.Screen name="LooseProduct" component={LooseProduct} />
     <Stack.Screen name="CustomerSupplierScreen" component={CustomerSupplierScreen} />
     <Stack.Screen name="IncludeSupplier" component={IncludeSupplier} />

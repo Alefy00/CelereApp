@@ -9,11 +9,18 @@ import RenderProduct from './components/RenderProduct.jsx'; // Importa o compone
 import styles from "./styles";
 
 const API_URL = 'https://api.celereapp.com.br/cad/produtos/listaprodutovenda/?page_size=100&empresa_id=1&search=';
+// Adicionar serviços fictícios ao estado
+const fakeServices = [
+{ id: 's1', nome: 'Consultoria', categoria: 'Serviços', preco_venda: 0 },
+{ id: 's2', nome: 'Manutenção de Software', categoria: 'Serviços', preco_venda: 0 },
+{ id: 's3', nome: 'Design de Logo', categoria: 'Serviços', preco_venda: 0 }
+];
 
 const NewRegisteredSale = ({ navigation }) => {
   const [search, setSearch] = useState('');
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
   const [categories, setCategories] = useState(['Todos', 'Serviços', 'Diversos', 'Celulares']); // Filtros fictícios
   const [selectedCategory, setSelectedCategory] = useState('Todos'); // Categoria selecionada
   const [quantities, setQuantities] = useState({});
@@ -21,28 +28,33 @@ const NewRegisteredSale = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [nextScreen, setNextScreen] = useState("SaleDetails");
 
+
+
   const ITEM_HEIGHT = 150;
 
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${API_URL}${search.toLowerCase()}`);
-      if (response.status === 200 && response.data.status === 200) {
-        const produtos = response.data.data.map(product => ({
-          ...product,
-        }));
-        setProducts(produtos);
-        setFilteredProducts(produtos);
-      } else {
-        Alert.alert("Erro", "Não foi possível carregar os produtos. Tente novamente.");
-      }
-    } catch (error) {
-      console.error('Erro ao conectar à API:', error.message);
-      Alert.alert("Erro", "Erro ao conectar à API. Verifique sua conexão e tente novamente.");
-    } finally {
-      setLoading(false);
+// Atualizar fetchProducts para incluir serviços fictícios
+const fetchProducts = useCallback(async () => {
+  setLoading(true);
+  try {
+    const response = await axios.get(`${API_URL}${search.toLowerCase()}`);
+    if (response.status === 200 && response.data.status === 200) {
+      const produtos = response.data.data.map(product => ({
+        ...product,
+      }));
+      // Adicionar serviços fictícios aos produtos
+      setProducts([...produtos, ...fakeServices]);
+      setFilteredProducts([...produtos, ...fakeServices]);
+    } else {
+      Alert.alert("Erro", "Não foi possível carregar os produtos. Tente novamente.");
     }
-  }, [search]);
+  } catch (error) {
+    console.error('Erro ao conectar à API:', error.message);
+    Alert.alert("Erro", "Erro ao conectar à API. Verifique sua conexão e tente novamente.");
+  } finally {
+    setLoading(false);
+  }
+}, [search]);
+
 
   useEffect(() => {
     fetchProducts();
@@ -88,16 +100,41 @@ const NewRegisteredSale = ({ navigation }) => {
       };
     });
   
-    navigation.navigate(nextScreen, { products: selectedProducts, totalPrice });
+    // Verificar se algum dos itens selecionados é um serviço
+    const isService = selectedProducts.some(item => item.categoria === 'Serviços');
+  
+    if (isService) {
+      // Redirecionar para a tela de detalhes de serviços
+      navigation.navigate('ServiceDetails', { services: selectedProducts, totalPrice });
+    } else {
+      // Redirecionar para a tela de detalhes de produtos
+      navigation.navigate(nextScreen, { products: selectedProducts, totalPrice });
+    }
   };
 
   const handleQuantityChange = (id, delta) => {
-    setQuantities(prevQuantities => {
-      const newQuantities = { ...prevQuantities, [id]: (prevQuantities[id] || 0) + delta };
-      if (newQuantities[id] < 0) newQuantities[id] = 0;
-      if (newQuantities[id] === 0) delete newQuantities[id];
-      return newQuantities;
-    });
+    // Encontra o item com o ID correspondente (produto ou serviço)
+    const selectedItem = products.find(p => p.id.toString() === id);
+  
+    // Verifica se o item é um serviço
+    if (selectedItem && selectedItem.categoria === 'Serviços') {
+      const selectedService = {
+        ...selectedItem,
+        amount: 1, // Define quantidade fixa de 1 para serviços
+        total: selectedItem.preco_venda, // Calcula o preço total do serviço
+      };
+      
+      // Redireciona imediatamente para a tela de detalhes de serviço
+      navigation.navigate('ServiceDetails', { services: [selectedService], totalPrice: selectedService.total });
+    } else {
+      // Se for um produto, segue a lógica normal de adicionar/remover quantidades
+      setQuantities(prevQuantities => {
+        const newQuantities = { ...prevQuantities, [id]: (prevQuantities[id] || 0) + delta };
+        if (newQuantities[id] < 0) newQuantities[id] = 0;
+        if (newQuantities[id] === 0) delete newQuantities[id];
+        return newQuantities;
+      });
+    }
   };
 
   // Implementação do renderFooter para exibir o botão de confirmação e o botão de código de barras
