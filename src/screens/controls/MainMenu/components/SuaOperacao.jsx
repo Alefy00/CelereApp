@@ -5,7 +5,7 @@ import {COLORS, FONTS, SIZES} from '../../../../constants';
 import {useTranslation} from 'react-i18next';
 import '../../../../translation';
 import {StyleSheet} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Modal, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -57,16 +57,24 @@ export default () => {
   const navigation = useNavigation();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
 
-  const navigateToScreen = screenName => {
+  // Recarregar o estado da tela ao focar
+  useFocusEffect(
+    React.useCallback(() => {
+      setIsPopupVisible(false); // Fechar o modal ao voltar para a tela
+    }, [])
+  );
+
+  const navigateToScreen = (screenName) => {
     navigation.navigate(screenName);
   };
 
-const handleServices = () => {
-  navigation.navigate("ServicesMenu");
-};
-const togglePopup = () => {
-  setIsPopupVisible(!isPopupVisible);
-};
+  const handleServices = () => {
+    navigation.navigate('ServicesMenu');
+  };
+
+  const togglePopup = () => {
+    setIsPopupVisible(!isPopupVisible);
+  };
 
   return (
     <ContainerGroupButtons style={{flex: 1, width: '92%'}}>

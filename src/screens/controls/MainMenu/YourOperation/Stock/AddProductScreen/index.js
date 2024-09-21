@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, Modal } from 'react-native';
 import styles from './styles';
 import BarTop2 from '../../../../../../components/BarTop2';
 import { COLORS } from '../../../../../../constants';
@@ -15,6 +15,21 @@ const AddProductScreen = ({ navigation }) => {
   const [productName, setProductName] = useState('');
   const [serviceDescription, setServiceDescription] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [isModalVisible, setIsModalVisible] = useState(false); // Estado do modal
+
+  const handleAddCategory = () => {
+    navigation.navigate('AddCategory');
+  };
+  const handleConfirm = () => {
+    // Lógica para confirmação da categoria
+    setIsModalVisible(true); // Exibir o modal após a confirmação
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false); // Fechar o modal
+  };
+
+
 
   return (
     <View style={styles.mainContainer}>
@@ -124,7 +139,7 @@ const AddProductScreen = ({ navigation }) => {
               <Picker.Item label="Categoria 1" value="categoria1" />
               <Picker.Item label="Categoria 2" value="categoria2" />
             </Picker>
-            <TouchableOpacity style={styles.addButton}>
+            <TouchableOpacity style={styles.addButton} onPress={handleAddCategory}>
               <Icon name="add" size={20} color="black" />
             </TouchableOpacity>
           </View>
@@ -136,12 +151,29 @@ const AddProductScreen = ({ navigation }) => {
         </View>
 
         {/* Botão de Cadastrar Produto */}
-        <TouchableOpacity style={styles.registerButton}>
-          <View style={styles.buttonContent}>
+        <TouchableOpacity style={styles.registerButton} onPress={handleConfirm}>
             <Icon name="checkmark-circle" size={20} color="black" />
             <Text style={styles.buttonText}>Cadastrar produto</Text>
-          </View>
         </TouchableOpacity>
+                        {/* Modal de confirmação */}
+        <Modal
+          visible={isModalVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={closeModal}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Icon name="checkmark-circle" size={90} color={COLORS.green} />
+              <Text style={styles.modalText}>Produto cadastrado{'\n'}com sucesso!</Text>
+
+              {/* Botão Ok */}
+              <TouchableOpacity style={styles.modalButton} onPress={closeModal}>
+                <Text style={styles.modalButtonText}>Ok</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </View>
   );

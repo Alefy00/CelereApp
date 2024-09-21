@@ -57,20 +57,31 @@ export default () => {
     navigation.navigate('TeamScreen');
   };
 
+  const handleSettleCredit = () => {
+    navigation.navigate('SettleCredit');
+  };
+
+  const handleConsultExpense = () => {
+    navigation.navigate('ConsultExpense');
+  };
+  const handleNewExpense = () => {
+    navigation.navigate('NewExpense');
+  };
+
   return (
     <ContainerGroupButtons style={{flex: 1, width: '92%'}}>
       <GroupButton>
-        <BtnItemMenu disabled>
+        <BtnItemMenu onPress={handleSettleCredit}>
           <IconSalesOnCredit width="38" height="38" />
           <TxtItemMenu>{t('Contas a Receber')}</TxtItemMenu>
         </BtnItemMenu>
 
-        <BtnItemMenu disabled>
+        <BtnItemMenu onPress={handleConsultExpense} >
           <IconExpenses2 width="38" height="38" style={styles.grayscale} />
           <TxtItemMenu>{t('Contas a Pagar')}</TxtItemMenu>
         </BtnItemMenu>
 
-        <BtnItemMenu disabled>
+        <BtnItemMenu onPress={handleNewExpense}>
           <IconWithDraws width="38" height="38" style={styles.grayscale} />
           <TxtItemMenu>{t('Retiradas e Pró-Labore')}</TxtItemMenu>
         </BtnItemMenu>

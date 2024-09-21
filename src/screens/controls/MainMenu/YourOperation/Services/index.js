@@ -1,52 +1,69 @@
 /* eslint-disable prettier/prettier */
 import React from 'react';
-import { View, Text, TouchableOpacity, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
+import { View, Text, TouchableOpacity,ScrollView } from 'react-native';
 import BarTop2 from '../../../../../components/BarTop2';
-import styles from './styles'
+import styles from './styles';
 import { COLORS } from '../../../../../constants';
+import Icon from 'react-native-vector-icons/Ionicons';
+
+// Importação correta dos ícones
+import IconProduct from '../../../../../assets/images/svg/Service/ProductIcon.svg';
+import IconService from '../../../../../assets/images/svg/Service/ProductIcon.svg';
+import IconCategories from '../../../../../assets/images/svg/Service/CategoryIcon.svg';
+import IconBudget from '../../../../../assets/images/svg/Service/BugetsIcon.svg';
+import IconSchedule from '../../../../../assets/images/svg/Service/AgendIcon.svg';
+import IconWorkOrder from '../../../../../assets/images/svg/Service/OrderServiceIcon.svg';
+import IconPMOC from '../../../../../assets/images/svg/Service/PMOCIcon.svg';
+import IconReports from '../../../../../assets/images/svg/Service/ReportIcon.svg';
 
 const ServicesMenu = ({ navigation }) => {
   const menuItems = [
-    { title: 'Cadastrar Serviço', screen: 'AddService' },
-    { title: 'Orçamento', screen: 'Budget' },
-    { title: 'Agendar Serviço', screen: 'ScheduleService' },
-    { title: 'PMOC', screen: 'PMOC' },
-    { title: 'Ordem de Serviço', screen: 'WorkOrder' },
+    { title: 'Produtos', screen: 'AddProductScreen', description: 'Consulte ou cadastre um novo produto', icon: <IconProduct width={40} height={40} /> },
+    { title: 'Serviços', screen: 'RegisteredServices', description: 'Consulte ou cadastre um novo serviço', icon: <IconService width={40} height={40} /> },
+    { title: 'Categorias', screen: 'Categories', description: 'Veja ou cadastre categorias de serviço', icon: <IconCategories width={40} height={40} /> },
+    { title: 'Orçamento', screen: 'Budget', description: 'Faça um orçamento de um serviço', icon: <IconBudget width={40} height={40} /> },
+    { title: 'Agendar serviço', screen: 'ScheduleService', description: 'Agende um serviço para um membro da sua equipe', icon: <IconSchedule width={40} height={40} /> },
+    { title: 'Ordem de Serviço', screen: 'WorkOrder', description: 'Gerencie ou inclua ordens de serviço', icon: <IconWorkOrder width={40} height={40} /> },
+    { title: 'PMOC', screen: 'PMOC', description: 'Plano de Manutenção, Operação e Controle', icon: <IconPMOC width={40} height={40} /> },
+    { title: 'Relatórios', screen: 'Reports', description: 'Veja os relatórios de suas saídas', icon: <IconReports width={40} height={40} /> },
   ];
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1 }}>
-          <View style={{ height: 50 }}>
-            <BarTop2
-              titulo={'Serviços'}
-              backColor={COLORS.primary}
-              foreColor={COLORS.black}
-              routeMailer={''}
-              routeCalculator={''}
-            />
-          </View>
-          
-          <View style={styles.menuContainer}>
-            {menuItems.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.menuItem,
-                ]}
-                onPress={() => navigation.navigate(item.screen)}
-              >
-                <Text style={styles.menuItemText}>{item.title}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+    <ScrollView style={styles.container}>
+      <View style={styles.barTop}>
+        <BarTop2
+          titulo={'Produtos e Serviços'}
+          backColor={COLORS.primary}
+          foreColor={COLORS.black}
+          routeMailer={''}
+          routeCalculator={''}
+        />
+      </View>
+
+      <Text style={styles.headerText}>Gerencie os serviços que seu negócio opera.</Text>
+
+      {/* Menu de ícones */}
+      <View style={styles.menuContainer}>
+        {menuItems.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.menuItem}
+            onPress={() => navigation.navigate(item.screen)}
+          >
+            {/* Ícone correspondente a cada item */}
+            {item.icon}
+            <Text style={styles.menuItemTitle}>{item.title}</Text>
+            <Text style={styles.menuItemDescription}>{item.description}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Botão de Nova Venda */}
+      <TouchableOpacity style={styles.newSaleButton} onPress={() => navigation.navigate('NewSale')}>
+        <Text style={styles.newSaleButtonText}> <Icon name="add" size={24} color="black" /> Nova venda</Text>
+        <Text style={styles.newSaleButtonSubText}>Registre uma nova venda</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 };
 

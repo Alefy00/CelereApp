@@ -9,13 +9,10 @@ const styles = StyleSheet.create({
   },
   barTopContainer: {
     width: '100%',
-    position: 'absolute',  // Fixa o BarTop2 no topo
-    top: 0,
-    zIndex: 1, // Mantém o BarTop2 no topo do resto do conteúdo
   },
   scrollContainer: {
     flexGrow: 1,
-    marginTop: 50, // Ajuste conforme a altura do BarTop2 para evitar sobreposição
+    marginTop: 55, // Ajuste conforme a altura do BarTop2 para evitar sobreposição
   },
   title: {
     fontSize: 20,
@@ -181,25 +178,57 @@ const styles = StyleSheet.create({
   },
   registerButton: {
     backgroundColor: COLORS.primary,
-    borderRadius: 10,
-    paddingVertical: 15,
+    borderRadius: 8,
+    paddingVertical: 25,
     paddingHorizontal: 20,
     marginHorizontal: 20,
     marginTop: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
     marginBottom: 40,
-  },
-  buttonContent: {
     flexDirection: 'row',
-    alignItems: 'center',
   },
   buttonText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: COLORS.black,
     marginLeft: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+    width:'90%'
+  },
+  modalText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.black,
+    textAlign: 'center',
+  },
+  modalButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 25,
+    paddingHorizontal: 30,
+    borderRadius: 5,
+    marginTop: 20,
+    width: '100%',
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: COLORS.black,
   },
 });
 

@@ -7,6 +7,8 @@ import Expiring from '../screens/controls/Expiring';
 import CashFlow from '../screens/controls/CashFlow';
 import StockInfo from '../screens/controls/MainMenu/YourOperation/Stock';
 import AddProductScreen from '../screens/controls/MainMenu/YourOperation/Stock/AddProductScreen';
+import AddCategory from '../screens/controls/MainMenu/YourOperation/Stock/AddCategory';
+import IncludeCategoryProducts from '../screens/controls/MainMenu/YourOperation/Stock/IncludeCategoryProducts';
 
 import MainMenu from '../screens/controls/MainMenu';
 
@@ -56,6 +58,7 @@ import BusinessInfoScreen from '../screens/Start/InitialBusiness';
 import ConsultExpense from '../screens/controls/MainMenu/YourCash/Exits/ConsultExpense';
 import ServicesMenu from '../screens/controls/MainMenu/YourOperation/Services';
 import AddService from '../screens/controls/MainMenu/YourOperation/Services/ServiceRegistration';
+import RegisteredServices from '../screens/controls/MainMenu/YourOperation/Services/RegisteredServices';
 import ExpenseDetails from '../screens/controls/MainMenu/YourCash/Exits/ExpenseDetails';
 import TaxRegime from '../screens/InitialData/TaxRegime';
 import CelerePay from '../screens/InitialData/CelerePay';
@@ -66,6 +69,9 @@ import CelerePayConfirmation from '../screens/controls/MainMenu/YourCash/Entries
 
 import Budget from '../screens/controls/MainMenu/YourOperation/ReceiptsBudgets/Budgets';
 import Receipts from '../screens/controls/MainMenu/YourOperation/ReceiptsBudgets/Receipts';
+import NewBudgets from '../screens/controls/MainMenu/YourOperation/ReceiptsBudgets/Newbudgets';
+import DetailsBudgets from '../screens/controls/MainMenu/YourOperation/ReceiptsBudgets/DetailsBudgets';
+
 
 import TeamScreen from '../screens/controls/MainMenu/YourControls/Users';
 
@@ -80,7 +86,9 @@ export default () => (
     <Stack.Screen name="Expiring" component={Expiring} />
     <Stack.Screen name="CashFlow" component={CashFlow} />
     <Stack.Screen name="StockInfo" component={StockInfo} />
-    <Stack.Screen name="AddProductScreen" component={AddProductScreen} /> 
+    <Stack.Screen name="AddProductScreen" component={AddProductScreen} />
+    <Stack.Screen name="AddCategory" component={AddCategory} />
+    <Stack.Screen name="IncludeCategoryProducts" component={IncludeCategoryProducts} />
 
     <Stack.Screen name="MainMenu" component={MainMenu} />
 
@@ -91,6 +99,7 @@ export default () => (
     <Stack.Screen name="Exits" component={Exits} />
     <Stack.Screen name="Winning" component={Winning} />
     <Stack.Screen name="ServicesMenu" component={ServicesMenu} />
+    <Stack.Screen name="RegisteredServices" component={RegisteredServices} />
 
     <Stack.Screen name="NewRegisteredSale" component={NewRegisteredSale} />
     <Stack.Screen name="SaleDetails" component={SaleDetails} />
@@ -132,7 +141,9 @@ export default () => (
     <Stack.Screen name="CelerePayConfirmation" component={CelerePayConfirmation} />
     <Stack.Screen name="Budget" component={Budget} />
     <Stack.Screen name="Receipts" component={Receipts} />
-
+    <Stack.Screen name="NewBudgets" component={NewBudgets} />
+    <Stack.Screen name="DetailsBudgets" component={DetailsBudgets} />
+    
     <Stack.Screen name="NewExpense" component={NewExpense} />
     <Stack.Screen name="AccountsPayable" component={AccountsPayable} />
    
