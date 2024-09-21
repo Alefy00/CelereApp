@@ -71,6 +71,7 @@ import Budget from '../screens/controls/MainMenu/YourOperation/ReceiptsBudgets/B
 import Receipts from '../screens/controls/MainMenu/YourOperation/ReceiptsBudgets/Receipts';
 import NewBudgets from '../screens/controls/MainMenu/YourOperation/ReceiptsBudgets/Newbudgets';
 import DetailsBudgets from '../screens/controls/MainMenu/YourOperation/ReceiptsBudgets/DetailsBudgets';
+import AddCategoryService from '../screens/controls/MainMenu/YourOperation/Services/Category';
 
 
 import TeamScreen from '../screens/controls/MainMenu/YourControls/Users';
@@ -89,6 +90,7 @@ export default () => (
     <Stack.Screen name="AddProductScreen" component={AddProductScreen} />
     <Stack.Screen name="AddCategory" component={AddCategory} />
     <Stack.Screen name="IncludeCategoryProducts" component={IncludeCategoryProducts} />
+    <Stack.Screen name="AddCategoryService" component={AddCategoryService} />
 
     <Stack.Screen name="MainMenu" component={MainMenu} />
 

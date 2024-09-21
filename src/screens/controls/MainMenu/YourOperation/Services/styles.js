@@ -71,6 +71,49 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     marginTop: 5,
   },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '90%',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalCloseButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  modalTitle: {
+    fontSize: 20,
+    marginBottom: 20,
+    fontWeight: 'bold',
+    color: COLORS.black,
+  },
+  modalButtonYellow: {
+    width: '100%',
+    backgroundColor: COLORS.primary,
+    paddingVertical: 25,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  modalButtonWhite: {
+    width: '100%',
+    backgroundColor: 'white',
+    paddingVertical: 25,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: COLORS.black,
+  },
 });
 
 export default styles;

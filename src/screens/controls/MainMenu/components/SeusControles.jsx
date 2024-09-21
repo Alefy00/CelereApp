@@ -68,6 +68,10 @@ export default () => {
     navigation.navigate('NewExpense');
   };
 
+  const handleTaxRegime = () => {
+    navigation.navigate('TaxRegime');
+  };
+
   return (
     <ContainerGroupButtons style={{flex: 1, width: '92%'}}>
       <GroupButton>
@@ -88,7 +92,7 @@ export default () => {
 
         <BtnItemMenu disabled>
           <IconEFT_POS width="38" height="38" />
-          <TxtItemMenu>{t('Recebimento Cartões')}</TxtItemMenu>
+          <TxtItemMenu>{t('Configuração Maquininha')}</TxtItemMenu>
         </BtnItemMenu>
 
         {/* Linha 2 */}
@@ -98,7 +102,7 @@ export default () => {
           <TxtItemMenu>{t('Equipe')}</TxtItemMenu>
         </BtnItemMenu>
 
-        <BtnItemMenu disabled>
+        <BtnItemMenu onPress={handleTaxRegime}>
           <IconImpostos width="38" height="38" />
           <TxtItemMenu>{t('Impostos')}</TxtItemMenu>
         </BtnItemMenu>

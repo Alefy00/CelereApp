@@ -8,6 +8,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
 
+
 // Constantes para URLs de API
 const BASE_API_URL = 'https://api.celereapp.com.br';
 const UNIT_MEASURE_API_ENDPOINT = `${BASE_API_URL}/api/und_medida_servico/?page=1&page_size=100`;
@@ -27,6 +28,8 @@ const AddService = ({ navigation }) => {
   const [empresaId, setEmpresaId] = useState(null);
   const [unitsOfMeasure, setUnitsOfMeasure] = useState([]); // Estado para armazenar a lista de unidades de medida
   const [issRates, setIssRates] = useState([]); // Estado para armazenar a lista de alíquotas ISS
+  const [isUnitMeasureDropdownVisible, setIsUnitMeasureDropdownVisible] = useState(false);
+  const [isIssRateDropdownVisible, setIsIssRateDropdownVisible] = useState(false);
 
   // Função para obter o ID da empresa
   const getEmpresaId = async () => {
@@ -43,39 +46,31 @@ const AddService = ({ navigation }) => {
     return null;
   };
 
-  // Função para buscar as unidades de medida da API
   const fetchUnitsOfMeasure = async (empresa_id) => {
     try {
       const response = await fetch(`${UNIT_MEASURE_API_ENDPOINT}&empresa_id=${empresa_id}`);
       const result = await response.json();
-
       if (response.ok && result.status === 'success') {
         setUnitsOfMeasure(result.data);
       } else {
-        console.error('Erro ao buscar unidades de medida:', result.message);
-        Alert.alert('Erro', 'Não foi possível carregar as unidades de medida. Tente novamente.');
+        Alert.alert('Erro', 'Não foi possível carregar as unidades de medida.');
       }
     } catch (error) {
-      console.error('Erro ao buscar unidades de medida:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao buscar as unidades de medida. Verifique sua conexão com a internet e tente novamente.');
+      Alert.alert('Erro', 'Ocorreu um erro ao buscar as unidades de medida.');
     }
   };
 
-  // Função para buscar as alíquotas ISS da API
   const fetchIssRates = async (empresa_id) => {
     try {
       const response = await fetch(`${ISS_RATE_API_ENDPOINT}&empresa_id=${empresa_id}`);
       const result = await response.json();
-
       if (response.ok && result.status === 'success') {
         setIssRates(result.data);
       } else {
-        console.error('Erro ao buscar alíquotas ISS:', result.message);
-        Alert.alert('Erro', 'Não foi possível carregar as alíquotas ISS. Tente novamente.');
+        Alert.alert('Erro', 'Não foi possível carregar as alíquotas ISS.');
       }
     } catch (error) {
-      console.error('Erro ao buscar alíquotas ISS:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao buscar as alíquotas ISS. Verifique sua conexão com a internet e tente novamente.');
+      Alert.alert('Erro', 'Ocorreu um erro ao buscar as alíquotas ISS.');
     }
   };
 
@@ -143,51 +138,23 @@ const AddService = ({ navigation }) => {
     }
   };
 
-  const handlePickerSelect = (value) => {
-    if (pickerType === 'unitMeasure') {
-      setUnitMeasure(value);
-    } else if (pickerType === 'issRate') {
-      setIssRate(value);
-    }
-    setShowPicker(false);
+
+  const toggleUnitMeasureDropdown = () => {
+    setIsUnitMeasureDropdownVisible(!isUnitMeasureDropdownVisible);
   };
 
-  const renderPicker = () => {
-    let data = [];
-    if (pickerType === 'unitMeasure') {
-      data = unitsOfMeasure.map(item => item.nome); // Mapeia os nomes das unidades de medida para exibição
-    } else if (pickerType === 'issRate') {
-      data = issRates.map(item => item.nome); // Mapeia os nomes das alíquotas ISS para exibição
-    }
+  const toggleIssRateDropdown = () => {
+    setIsIssRateDropdownVisible(!isIssRateDropdownVisible);
+  };
 
-    return (
-      <Modal
-        visible={showPicker}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowPicker(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={
-                pickerType === 'unitMeasure'
-                  ? unitMeasure
-                  : issRate
-              }
-              onValueChange={handlePickerSelect}
-            >
-              {data.map((item, index) => (
-                <Picker.Item key={index} label={item} value={item} />
-              ))}
-            </Picker>
-            <TouchableOpacity onPress={() => setShowPicker(false)} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Fechar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    );
+  const selectUnitMeasure = (unit) => {
+    setUnitMeasure(unit);
+    setIsUnitMeasureDropdownVisible(false);
+  };
+
+  const selectIssRate = (rate) => {
+    setIssRate(rate);
+    setIsIssRateDropdownVisible(false);
   };
 
   return (
@@ -196,15 +163,15 @@ const AddService = ({ navigation }) => {
       style={styles.container}
     >
       <BarTop2
-        titulo="Adicionar serviço"
+        titulo="Voltar"
         backColor={COLORS.primary}
         foreColor={COLORS.black}
-        routeMailer={''}
-        routeCalculator={''}
       />
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.imageContainer}>
+          <Text style={styles.imageLabelTitle}>Adicionar um novo serviço</Text>
+        <View style={styles.containerColor}>
           <View style={styles.imageWrapper}>
             <Icon name="camera" size={40} color={COLORS.black} />
           </View>
@@ -215,69 +182,85 @@ const AddService = ({ navigation }) => {
             onChangeText={setBarcode}
             keyboardType="numeric"
           />
-          <TouchableOpacity>
-            <Icon name="barcode-outline" size={30} color={COLORS.black} />
-          </TouchableOpacity>
+        </View>
+        <Text style={styles.imageLabel}>  Imagem{'\n'}do serviço</Text>
         </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Nome*"
-          value={name}
-          onChangeText={setName}
-        />
-
-        <View style={styles.row}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Detalhes do Serviço</Text>
           <TextInput
-            style={[styles.input, styles.unitInput]}
-            placeholder={unitMeasure ? `Valor ${unitMeasure}` : 'Valor'}
-            value={unitValue}
-            onChangeText={setUnitValue}
+            style={styles.input}
+            placeholder="Nome do serviço"
+            value={name}
+            onChangeText={setName}
+          />
+          <TextInput
+            style={styles.textArea}
+            placeholder="Descrição do Serviço"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+          />
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Valores do Serviço</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Preço de Venda (R$)"
+            value={price}
+            onChangeText={setPrice}
             keyboardType="numeric"
           />
-          <TouchableOpacity
-            style={styles.iconDropdown}
-            onPress={() => {
-              setPickerType('unitMeasure');
-              setShowPicker(true);
-            }}
-          >
-            <Icon name="filter" size={20} color={COLORS.black} />
-          </TouchableOpacity>
+
+
+
+
+        {/* Dropdown para Un. de Medida */}
+        <View style={styles.clientContainer}>
+            <TouchableOpacity style={styles.clientPicker} onPress={toggleUnitMeasureDropdown}>
+              <Text style={styles.clientText}>{unitMeasure || 'Un. de Medida'}</Text>
+              <Icon name={isUnitMeasureDropdownVisible ? 'arrow-up' : 'arrow-down'} size={24} color={COLORS.lightGray} />
+            </TouchableOpacity>
+          </View>
+          {isUnitMeasureDropdownVisible && (
+            <View style={[styles.dropdownContainer, { maxHeight: 150 }]}>
+              <ScrollView nestedScrollEnabled={true}>
+                {unitsOfMeasure.map((unit) => (
+                  <TouchableOpacity key={unit.id} style={styles.dropdownItem} onPress={() => selectUnitMeasure(unit.nome)}>
+                    <Text style={styles.dropdownItemText}>{unit.nome}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
+          {/* Dropdown para Alíquota ISS */}
+          <View style={styles.clientContainer}>
+            <TouchableOpacity style={styles.clientPicker} onPress={toggleIssRateDropdown}>
+              <Text style={styles.clientText}>{issRate || 'Alíquota ISS'}</Text>
+              <Icon name={isIssRateDropdownVisible ? 'arrow-up' : 'arrow-down'} size={24} color={COLORS.lightGray} />
+            </TouchableOpacity>
+          </View>
+          {isIssRateDropdownVisible && (
+            <View style={[styles.dropdownContainer, { maxHeight: 150 }]}>
+              <ScrollView nestedScrollEnabled={true}>
+                {issRates.map((rate) => (
+                  <TouchableOpacity key={rate.id} style={styles.dropdownItem} onPress={() => selectIssRate(rate.nome)}>
+                    <Text style={styles.dropdownItemText}>{rate.nome}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
         </View>
 
-        <TouchableOpacity
-          style={styles.dropdown}
-          onPress={() => {
-            setPickerType('issRate');
-            setShowPicker(true);
-          }}
-        >
-          <Text style={styles.dropdownText}>{issRate || 'Alíquota ISS'}</Text>
-          <Icon name="filter" size={20} color={COLORS.black} />
-        </TouchableOpacity>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Preço de venda*"
-          value={price}
-          onChangeText={setPrice}
-          keyboardType="numeric"
-        />
-
-        <TextInput
-          style={styles.textArea}
-          placeholder="Descrição"
-          value={description}
-          onChangeText={setDescription}
-          multiline
-        />
-
         <TouchableOpacity style={styles.button} onPress={handleSave}>
-          <Text style={styles.buttonText}>Adicionar</Text>
+        <Icon name="checkmark-circle" size={25} color={COLORS.black} />
+          <Text style={styles.buttonText}>Cadastrar serviço</Text>
         </TouchableOpacity>
 
-        {renderPicker()}
+  
       </ScrollView>
     </KeyboardAvoidingView>
   );
