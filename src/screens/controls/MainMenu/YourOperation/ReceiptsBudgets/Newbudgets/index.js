@@ -16,6 +16,7 @@ const fakeServices = [
 { id: 's3', nome: 'Design de Logo', categoria: 'Serviços', preco_venda: 0 }
 ];
 
+
 const NewBudgets = ({ navigation }) => {
   const [search, setSearch] = useState('');
   const [products, setProducts] = useState([]);
@@ -27,9 +28,12 @@ const NewBudgets = ({ navigation }) => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [loading, setLoading] = useState(false);
   const [nextScreen, setNextScreen] = useState("DetailsBudgets");
-
-
-
+  
+  
+  
+  const handleAddProductScreen = () => {
+    navigation.navigate('AddProductScreen')
+  }
   const ITEM_HEIGHT = 150;
 
 // Atualizar fetchProducts para incluir serviços fictícios
@@ -170,7 +174,7 @@ const fetchProducts = useCallback(async () => {
           </View>
 
           <View style={styles.header}>
-            <TouchableOpacity style={styles.registerButton}>
+            <TouchableOpacity style={styles.registerButton} onPress={handleAddProductScreen}>
             <Icon name="add" size={20} color={COLORS.black} />
               <Text style={styles.registerButtonText}>Cadastrar um novo produto</Text>
             </TouchableOpacity>

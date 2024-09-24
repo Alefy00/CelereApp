@@ -155,6 +155,10 @@ const fetchProducts = useCallback(async () => {
     </>
   );
 
+  const handleAddProductScreen = () => {
+    navigation.navigate("AddProductScreen");
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -173,7 +177,7 @@ const fetchProducts = useCallback(async () => {
           </View>
 
           <View style={styles.header}>
-            <TouchableOpacity style={styles.registerButton}>
+            <TouchableOpacity style={styles.registerButton} onPress={handleAddProductScreen}>
             <Icon name="add" size={20} color={COLORS.black} />
               <Text style={styles.registerButtonText}>Cadastrar um novo produto</Text>
             </TouchableOpacity>

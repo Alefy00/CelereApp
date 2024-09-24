@@ -11,7 +11,8 @@ const LoginScreen = ({ navigation }) => {
 
     const handleNext = () => {
         navigation.navigate("InitialRegistration");
-    }
+    };
+    
   return (
     <View style={styles.container}>
       <Logo width={120} height={55} style={styles.logo} />

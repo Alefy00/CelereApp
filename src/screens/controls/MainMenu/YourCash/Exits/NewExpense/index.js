@@ -279,15 +279,23 @@ const NewExpense = ({ navigation }) => {
     setDueDate(new Date());
     setBarcode('');
   };
-  
+
 
   const toggleExpenseType = () => {
     setIsLiquidateNow(!isLiquidateNow);
   };
 
   const handleAcconunts = () => {
-    navigation.navigate('AccountsPayable')
-  }
+    navigation.navigate('AccountsPayable');
+  };
+
+  const handleCategoriesScreen = () => {
+    navigation.navigate('CategoriesScreen');
+  };
+
+  const handleIncludeSupplier = () => {
+    navigation.navigate('IncludeSupplier');
+  };
 
   return (
     <View style={styles.container}>
@@ -396,7 +404,7 @@ const NewExpense = ({ navigation }) => {
                 </Text>
                   <Icon name="arrow-down" size={22} color={COLORS.gray} />
               </TouchableOpacity>
-                  <TouchableOpacity style={styles.addButton}>
+                  <TouchableOpacity style={styles.addButton} onPress={handleCategoriesScreen}>
                     <Icon name="add" size={30} color={COLORS.black} />
                   </TouchableOpacity>
               </View>
@@ -480,7 +488,7 @@ const NewExpense = ({ navigation }) => {
                     <Picker.Item key={supplier.value} label={supplier.label} value={supplier.value} />
                   ))}
                 </Picker>
-                <TouchableOpacity style={styles.addButton}>
+                <TouchableOpacity style={styles.addButton} onPress={handleIncludeSupplier}>
                    <Icon name="add" size={30} color={COLORS.black} />
                 </TouchableOpacity>
               </View>

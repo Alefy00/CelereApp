@@ -134,8 +134,6 @@ const OpeningBalance = ({ navigation }) => {
 
   const handleSecondModalConfirm = () => {
     setIsSecondModalVisible(false); // Fecha o segundo modal
-    clearInputs(); // Limpa os inputs após o redirecionamento
-    navigation.navigate('Start'); // Navega para a tela 'Start'
   };
 
   return (

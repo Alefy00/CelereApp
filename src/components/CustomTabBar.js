@@ -89,7 +89,7 @@ export default ({ state, navigation }) => {
         )}
       </TabItem>
 
-      <TabItem onPress={() => goTo('Vencendo')}>
+      <TabItem onPress={() => goTo('Vencendo')} disabled>
         {state.index === 1 ? (
           <>
             <VencendoIcon1 width="48" height="48" />
@@ -103,11 +103,11 @@ export default ({ state, navigation }) => {
         )}
       </TabItem>
 
-      <TabItemCenter onPress={() => goTo('Microphone')}>
+      <TabItemCenter onPress={() => goTo('Microphone')} disabled>
         <IconMicrophone width="32" height="32" />
       </TabItemCenter>
 
-      <TabItem onPress={() => goTo('FluxoCaixa')}>
+      <TabItem onPress={() => goTo('FluxoCaixa')} disabled>
         {state.index === 3 ? (
           <>
             <FluxoCaixa1 width="48" height="48" />
@@ -121,7 +121,7 @@ export default ({ state, navigation }) => {
         )}
       </TabItem>
 
-      <TabItem onPress={() => goTo('Menu')}>
+      <TabItem onPress={() => goTo('Menu')} disabled>
         {state.index === 4 ? (
           <>
             <MenuIcon1 width="48" height="48" />

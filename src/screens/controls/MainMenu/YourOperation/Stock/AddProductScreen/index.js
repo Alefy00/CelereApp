@@ -155,7 +155,7 @@ const AddProductScreen = ({ navigation }) => {
             <Icon name="checkmark-circle" size={20} color="black" />
             <Text style={styles.buttonText}>Cadastrar produto</Text>
         </TouchableOpacity>
-                        {/* Modal de confirmação */}
+      {/* Modal de confirmação */}
         <Modal
           visible={isModalVisible}
           transparent={true}

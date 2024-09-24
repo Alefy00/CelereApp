@@ -26,6 +26,10 @@ const Budget = ({ navigation }) => {
     </View>
   );
 
+  const handleNewBudgets = () => {
+    navigation.navigate('NewBudgets');
+  };
+
   return (
     <View style={styles.containerBase}>
         <View style={styles.containerBartop}>
@@ -61,7 +65,7 @@ const Budget = ({ navigation }) => {
       />
 
       {/* Botão de Incluir Orçamento */}
-      <TouchableOpacity style={styles.addButton}>
+      <TouchableOpacity style={styles.addButton} onPress={handleNewBudgets}>
         <Icon name="add" size={24} color="black" />
         <Text style={styles.addButtonText}>Incluir orçamento</Text>
       </TouchableOpacity>

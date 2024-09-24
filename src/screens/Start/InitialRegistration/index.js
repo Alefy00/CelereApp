@@ -113,8 +113,13 @@ const InitialRegistration = ({ navigation }) => {
 
         if (userData.empresa) {
           await AsyncStorage.setItem('empresaData', JSON.stringify(userData.empresa));
-          console.log('Dados da empresa armazenados:', userData.empresa);
+          console.log('Dados da empresa armazenados:', userData.empresa); // Verifique aqui se o ID da empresa é o correto
+        
+          // Verifique imediatamente se o dado foi armazenado corretamente
+          const empresaData = await AsyncStorage.getItem('empresaData');
+          console.log('Dados da empresa no AsyncStorage:', JSON.parse(empresaData));
         }
+        
 
         navigation.navigate('MainTab');
         return true;
@@ -129,10 +134,10 @@ const InitialRegistration = ({ navigation }) => {
 
   const handleSend = useCallback(async () => {
     if (!validateFields()) return;
-
+  
     const userExists = await checkUserExists();
     if (userExists) return;
-
+  
     try {
       const response = await axios.post(API_URL, {
         ddi: phoneData.ddi,
@@ -140,23 +145,24 @@ const InitialRegistration = ({ navigation }) => {
         celular: phoneData.number,
         usuario: 1,
       });
-
+  
       if (response.status === 201 && response.data.status === 'success') {
-        const { id, codigo_ativacao, empresa } = response.data.data;
+        const { id, codigo_ativacao, empresa } = response.data.data; // Aqui o ID da empresa é retornado da API
         const newUserData = {
-          id,
+          id, // ID do usuário
           ...phoneData,
           isValidated: false,
           codigo_ativacao,
         };
-
+  
         await AsyncStorage.setItem('userPhone', JSON.stringify(newUserData));
-
+  
         if (empresa) {
-          await AsyncStorage.setItem('empresaData', JSON.stringify(empresa));
-          console.log('Dados da empresa armazenados:', empresa);
+          // Aqui, garantimos que o ID da empresa correto é armazenado no AsyncStorage
+          await AsyncStorage.setItem('empresaId', empresa.toString()); // Armazena o ID da empresa, que é 6 no seu exemplo
+          console.log('ID da empresa armazenado:', empresa); // Verifique o ID armazenado
         }
-
+  
         navigation.navigate('InitialCode');
       } else {
         showModal(response.data.message || 'Erro ao registrar. Tente novamente.');
@@ -166,6 +172,8 @@ const InitialRegistration = ({ navigation }) => {
       showModal('Não foi possível conectar à API. Verifique sua conexão e tente novamente.');
     }
   }, [phoneData, validateFields, checkUserExists, showModal, navigation]);
+  
+  
 
   const handleModalClose = () => {
     setModalVisible(false);

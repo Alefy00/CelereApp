@@ -22,6 +22,10 @@ const AddCategory = ({ navigation }) => {
     setCategories(updatedCategories);
   };
 
+  const handleIncludeCategoryProducts = () => {
+    navigation.navigate("IncludeCategoryProducts");
+  };
+
   return (
     <View style={styles.containerBase}>
       <View style={styles.containerBartop}>
@@ -67,7 +71,7 @@ const AddCategory = ({ navigation }) => {
       </View>
 
       {/* Botão adicionar nova categoria */}
-      <TouchableOpacity style={styles.addButton}>
+      <TouchableOpacity style={styles.addButton} onPress={handleIncludeCategoryProducts}>
         <Icon name="add" size={25} color={COLORS.black} />
         <Text style={styles.addButtonText}>Adicionar nova categoria</Text>
       </TouchableOpacity>

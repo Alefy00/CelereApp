@@ -38,7 +38,7 @@ const IncludeSupplier = ({ navigation }) => {
   };
 
   const handleMenu = () => {
-    navigation.navigate("CustomerSupplierScreen");
+    navigation.goBack();
   };
 
   const handleFocus = () => {
@@ -147,7 +147,7 @@ const IncludeSupplier = ({ navigation }) => {
               style={styles.modalButtonSecondary}
               onPress={handleMenu}
             >
-              <Text style={styles.modalButtonText}>Retornar para Menu</Text>
+              <Text style={styles.modalButtonText}>Retornar</Text>
             </TouchableOpacity>
           </View>
         </View>
