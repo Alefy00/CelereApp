@@ -27,6 +27,7 @@ const AddProductScreen = ({ navigation }) => {
 
   const closeModal = () => {
     setIsModalVisible(false); // Fechar o modal
+    navigation.navigate('StockInfo');
   };
 
 

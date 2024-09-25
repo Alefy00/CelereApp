@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, ScrollView, View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { KeyboardAvoidingView, ScrollView, View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS } from '../../../constants';
 import BarTop from '../../../components/BarTop';
@@ -19,24 +19,50 @@ const MainMenu = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false); // Estado para controlar a visibilidade do modal
   const [saldoCaixa, setSaldoCaixa] = useState(null); // Estado para armazenar o saldo de caixa
   const [loading, setLoading] = useState(true); // Estado para exibir o indicador de carregamento
+  const [modalWasShown, setModalWasShown] = useState(false); // Controle para verificar se o modal já foi mostrado
 
-  // Função para recuperar o ID da empresa e buscar o saldo de caixa
-  const fetchSaldoCaixa = async () => {
+  // Função para buscar o ID da empresa logada
+  const getEmpresaId = async () => {
     try {
-      const empresaId = await AsyncStorage.getItem('empresaId'); // Aqui pegamos o ID da empresa corretamente
-      if (empresaId) {
+      const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+      if (storedEmpresaId) {
+        console.log('ID da empresa recuperado:', storedEmpresaId); // Verifica se o ID foi recuperado corretamente
+        return Number(storedEmpresaId);
+      } else {
+        Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
+        console.log('ID da empresa não encontrado no AsyncStorage.');
+      }
+    } catch (error) {
+      console.error('Erro ao obter o ID da empresa do AsyncStorage:', error);
+    }
+    return null;
+  };
+
+  // Função para recuperar o saldo de caixa com base no ID da empresa logada
+  const fetchSaldoCaixa = useCallback(async () => {
+    try {
+      const empresaId = await getEmpresaId(); // Usamos a função para pegar o ID da empresa
+      console.log('ID da empresa recuperado:', empresaId); // Log para verificar o ID da empresa
+
+      if (empresaId !== null) {
         // Faz a requisição para buscar o saldo de caixa
         const response = await axios.get(`${API_URL_SALDO}?empresa_id=${empresaId}`);
-        
+        console.log('Resposta da API:', response.data); // Log para verificar a resposta completa da API
+
         if (response.status === 200 && response.data.results.length > 0) {
           // Pega o último saldo inserido (maior ID ou mais recente)
           const saldoData = response.data.results.reduce((latest, current) => {
             return current.id > latest.id ? current : latest;
           });
-          
+
+          console.log('Último saldo encontrado:', saldoData); // Log para verificar o saldo retornado
+
           const saldoTotal = parseFloat(saldoData.valor_especie) + parseFloat(saldoData.saldo_banco); // Soma valor_especie e saldo_banco
+          console.log('Saldo total calculado:', saldoTotal); // Log para verificar o saldo total
+          
           setSaldoCaixa(saldoTotal); // Armazena o saldo total
         } else {
+          console.log('Nenhum saldo encontrado para a empresa'); // Log para caso não haja resultados
           setSaldoCaixa(0); // Se não houver saldo, define como 0
         }
       }
@@ -46,16 +72,26 @@ const MainMenu = ({ navigation }) => {
     } finally {
       setLoading(false); // Finaliza o carregamento
     }
-  };
-
-  // Carrega o saldo de caixa ao montar o componente
-  useEffect(() => {
-    fetchSaldoCaixa();
   }, []);
+
+  // Exibe o modal automaticamente na primeira vez que o usuário acessa a tela e não inseriu o saldo inicial
+  useEffect(() => {
+    const checkInitialBalance = async () => {
+      const initialBalanceAdded = await AsyncStorage.getItem('initialBalanceAdded');
+      if (!initialBalanceAdded && !modalWasShown) {
+        setIsModalVisible(true);
+        setModalWasShown(true); // Marca que o modal foi exibido
+      }
+    };
+
+    checkInitialBalance();
+    fetchSaldoCaixa(); // Carrega o saldo de caixa quando a tela é montada
+  }, [fetchSaldoCaixa, modalWasShown]);
 
   // Função para fechar o modal
   const handleCloseModal = () => {
     setIsModalVisible(false); // Fecha o modal após adicionar o saldo
+    fetchSaldoCaixa(); // Atualiza o saldo de caixa ao fechar o modal, exibindo o valor inserido
   };
 
   // Função para abrir o modal ao clicar em "Saldo Caixa" se o saldo inicial ainda não foi preenchido
@@ -63,6 +99,8 @@ const MainMenu = ({ navigation }) => {
     const initialBalanceAdded = await AsyncStorage.getItem('initialBalanceAdded');
     if (!initialBalanceAdded) {
       setIsModalVisible(true); // Se o saldo ainda não foi adicionado, exibe o modal
+    } else {
+      Alert.alert("Informação", "O saldo inicial já foi adicionado.");
     }
   };
 
@@ -119,4 +157,3 @@ const MainMenu = ({ navigation }) => {
 };
 
 export default MainMenu;
-

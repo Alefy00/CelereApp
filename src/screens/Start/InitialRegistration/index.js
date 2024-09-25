@@ -112,15 +112,15 @@ const InitialRegistration = ({ navigation }) => {
         await AsyncStorage.setItem('userPhone', JSON.stringify(newUserData));
 
         if (userData.empresa) {
-          await AsyncStorage.setItem('empresaData', JSON.stringify(userData.empresa));
-          console.log('Dados da empresa armazenados:', userData.empresa); // Verifique aqui se o ID da empresa é o correto
-        
-          // Verifique imediatamente se o dado foi armazenado corretamente
-          const empresaData = await AsyncStorage.getItem('empresaData');
-          console.log('Dados da empresa no AsyncStorage:', JSON.parse(empresaData));
+          // Armazena o ID da empresa
+          await AsyncStorage.setItem('empresaId', userData.empresa.toString());
+          console.log('ID da empresa armazenado:', userData.empresa);
+
+          // Verifica imediatamente após armazenar
+          const empresaData = await AsyncStorage.getItem('empresaId');
+          console.log('ID da empresa recuperado do AsyncStorage:', empresaData);
         }
         
-
         navigation.navigate('MainTab');
         return true;
       }
@@ -134,10 +134,10 @@ const InitialRegistration = ({ navigation }) => {
 
   const handleSend = useCallback(async () => {
     if (!validateFields()) return;
-  
+
     const userExists = await checkUserExists();
     if (userExists) return;
-  
+
     try {
       const response = await axios.post(API_URL, {
         ddi: phoneData.ddi,
@@ -145,25 +145,35 @@ const InitialRegistration = ({ navigation }) => {
         celular: phoneData.number,
         usuario: 1,
       });
-  
+
       if (response.status === 201 && response.data.status === 'success') {
-        const { id, codigo_ativacao, empresa } = response.data.data; // Aqui o ID da empresa é retornado da API
+        const { id, codigo_ativacao, empresa } = response.data.data;
         const newUserData = {
-          id, // ID do usuário
+          id,
           ...phoneData,
           isValidated: false,
           codigo_ativacao,
         };
-  
+
+        // Armazena os dados do usuário
         await AsyncStorage.setItem('userPhone', JSON.stringify(newUserData));
-  
+
         if (empresa) {
-          // Aqui, garantimos que o ID da empresa correto é armazenado no AsyncStorage
-          await AsyncStorage.setItem('empresaId', empresa.toString()); // Armazena o ID da empresa, que é 6 no seu exemplo
-          console.log('ID da empresa armazenado:', empresa); // Verifique o ID armazenado
+          // Armazena o ID da empresa
+          await AsyncStorage.setItem('empresaId', empresa.toString());
+          console.log('ID da empresa armazenado:', empresa);
+
+          // Verifica imediatamente após o armazenamento
+          const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+          console.log('ID da empresa armazenado no AsyncStorage:', storedEmpresaId);
+
+          // Navegação somente se o ID for armazenado corretamente
+          if (storedEmpresaId) {
+            navigation.navigate('InitialCode');
+          } else {
+            console.error('Erro ao armazenar o ID da empresa.');
+          }
         }
-  
-        navigation.navigate('InitialCode');
       } else {
         showModal(response.data.message || 'Erro ao registrar. Tente novamente.');
       }
@@ -172,8 +182,6 @@ const InitialRegistration = ({ navigation }) => {
       showModal('Não foi possível conectar à API. Verifique sua conexão e tente novamente.');
     }
   }, [phoneData, validateFields, checkUserExists, showModal, navigation]);
-  
-  
 
   const handleModalClose = () => {
     setModalVisible(false);
@@ -182,7 +190,7 @@ const InitialRegistration = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <LogoApp width="100%" height="110"/>
+        <LogoApp width="100%" height="110" />
         <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
@@ -219,10 +227,10 @@ const InitialRegistration = ({ navigation }) => {
               placeholder='(XX)'
               keyboardType="numeric"
               value={phoneData.ddd}
-              onChangeText={(text) => handleInputChange('ddd', text)}  // Verifica o comprimento do DDD e foca automaticamente
+              onChangeText={(text) => handleInputChange('ddd', text)}
             />
             <TextInput
-              ref={numberInputRef}  // Adiciona a referência aqui
+              ref={numberInputRef}
               style={styles.inputNumber}
               placeholder='XXXXX-XXXX'
               keyboardType="numeric"
@@ -246,16 +254,12 @@ const InitialRegistration = ({ navigation }) => {
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>{modalMessage}</Text>
-            <Button
-              title="OK"
-              onPress={handleModalClose}
-            />
+            <Button title="OK" onPress={handleModalClose} />
           </View>
         </View>
       </Modal>
     </View>
   );
-  
 };
 
 export default InitialRegistration;

@@ -93,7 +93,7 @@ secondModalOverlay: {
     alignItems: 'center',
   },
   secondModalContent: {
-    width: '80%',
+    width: '90%',
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 20,

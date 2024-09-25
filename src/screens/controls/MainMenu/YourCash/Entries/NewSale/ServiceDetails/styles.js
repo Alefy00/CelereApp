@@ -129,6 +129,7 @@ Container: {
         color: COLORS.black,
         marginLeft: 100,
         fontWeight: '700',
+        marginRight: -20
       },
       quantitySection: {
         flexDirection: 'row',
@@ -160,12 +161,12 @@ Container: {
       priceInput: {
         borderBottomWidth: 1,
         textAlign: 'right',
-        width: 120,
+        width: 140,
       },
       additionalCostsInput: {
         marginHorizontal: 20,
         borderBottomWidth: 1,
-        marginTop: 20,
+        marginBottom: 15,
       },
       Desconto: {
         fontSize: 18,
@@ -344,6 +345,18 @@ Container: {
         marginBottom: 10,
         width: '100%',
       },
+      modalPrimaryButton2: {
+        paddingVertical: 30,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 10,
+        width: '100%',
+        borderWidth: 1,
+        borderColor: COLORS.black,
+      },
       modalPrimaryButtonText: {
         color: COLORS.black,
         fontSize: 16,
@@ -429,6 +442,94 @@ Container: {
       fontWeight: 'bold',
       color: COLORS.red,
     },
+    //produto
+    cartContainer: {
+
+  
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: COLORS.black,
+      marginBottom: 10,
+      marginHorizontal: 20,
+    },
+    productDetail: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 10,
+      borderRadius: 5,
+      marginBottom: 10,
+    },
+    productInfo: {
+      flex: 1,
+    },
+    productText: {
+      fontSize: 16,
+      color: COLORS.black,
+      marginBottom: 5,
+      fontWeight:'bold',
+    },
+    productAmount: {
+      fontSize: 14,
+      color: COLORS.green,
+    },
+    productTotal: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: COLORS.black,
+      marginRight: 50
+    },
+
+  invoiceModalContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  invoiceModalContent: {
+      width: '80%',
+      backgroundColor: 'white',
+      borderRadius: 10,
+      padding: 20,
+      alignItems: 'center',
+  },
+  invoiceModalTitle: {
+      fontSize: 18,
+      marginBottom: 20,
+      fontWeight: 'bold',
+      color: COLORS.black,
+  },
+  invoiceOptionButtonRecibo: {
+      width: '100%',
+      backgroundColor: COLORS.primary,
+      padding: 25,
+      borderRadius: 5,
+      alignItems: 'center',
+      marginBottom: 10,
+  },
+  invoiceOptionTextRecibo: {
+      fontSize: 16,
+      color: COLORS.black,
+  },
+  invoiceOptionButtonNotaFiscal: {
+      width: '100%',
+      padding: 25,
+      borderRadius: 5,
+      alignItems: 'center',
+
+  },
+  invoiceOptionTextNotaFiscal: {
+      fontSize: 16,
+      color: COLORS.black,
+  },
+  closeButton: {
+      position: 'absolute',
+      top: 10,
+      right: 10,
+  },
+
   });
 
 export default styles;

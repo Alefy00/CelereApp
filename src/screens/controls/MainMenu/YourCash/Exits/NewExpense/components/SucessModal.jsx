@@ -19,7 +19,7 @@ const SucessModal = ({visible, onClose, onRegisterNew}) => {
               </View>
               <Text style={styles.title}>Sua despesa foi registrada!</Text>
               <TouchableOpacity style={styles.returnButton} onPress={onClose}>
-                <Text>Voltar ao Menu de Saídas</Text>
+                <Text>Voltar ao Menu</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.newExpenseButton} onPress={onRegisterNew}>
                 <Text style={styles.newExpenseButtonText}> Registrar nova despesa</Text>

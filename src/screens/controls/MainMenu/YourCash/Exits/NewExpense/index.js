@@ -73,19 +73,20 @@ const NewExpense = ({ navigation }) => {
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
     try {
-      const empresaData = await AsyncStorage.getItem('empresaData');
-      if (empresaData !== null) {
-        const parsedData = JSON.parse(empresaData);
-        console.log('ID da Empresa Obtido:', parsedData); // Confirmando que o ID é obtido corretamente
-        return parsedData; // Retorna o ID da empresa
+      const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+      if (storedEmpresaId) {
+        console.log('ID da empresa recuperado:', storedEmpresaId); // Verifica se o ID foi recuperado corretamente
+        return Number(storedEmpresaId);
       } else {
-        console.log('Nenhum dado de empresa encontrado no AsyncStorage.');
+        Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
+        console.log('ID da empresa não encontrado no AsyncStorage.');
       }
     } catch (error) {
       console.error('Erro ao obter o ID da empresa do AsyncStorage:', error);
     }
     return null;
   };
+
 
   const getSupplierNameById = (id) => {
     const supplier = suppliers.find((s) => s.value === id);
@@ -544,7 +545,7 @@ const NewExpense = ({ navigation }) => {
       />
       <SucessModal
         visible={successModalVisible}
-        onClose={() => navigation.navigate('Exits')}
+        onClose={() => navigation.navigate('MainTab')}
         onRegisterNew={handleRegisterNew}
       />
     </View>

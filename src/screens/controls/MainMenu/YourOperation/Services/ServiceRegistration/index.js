@@ -8,8 +8,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
 
-
-// Constantes para URLs de API
 const BASE_API_URL = 'https://api.celereapp.com.br';
 const UNIT_MEASURE_API_ENDPOINT = `${BASE_API_URL}/api/und_medida_servico/?page=1&page_size=100`;
 const ISS_RATE_API_ENDPOINT = `${BASE_API_URL}/api/aliquota_iss_servico/?page=1&page_size=100`;
@@ -26,19 +24,21 @@ const AddService = ({ navigation }) => {
   const [showPicker, setShowPicker] = useState(false);
   const [pickerType, setPickerType] = useState('');
   const [empresaId, setEmpresaId] = useState(null);
-  const [unitsOfMeasure, setUnitsOfMeasure] = useState([]); // Estado para armazenar a lista de unidades de medida
-  const [issRates, setIssRates] = useState([]); // Estado para armazenar a lista de alíquotas ISS
+  const [unitsOfMeasure, setUnitsOfMeasure] = useState([]); // Unidades de medida
+  const [issRates, setIssRates] = useState([]); // Alíquotas ISS
   const [isUnitMeasureDropdownVisible, setIsUnitMeasureDropdownVisible] = useState(false);
   const [isIssRateDropdownVisible, setIsIssRateDropdownVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false); // Estado para controlar o modal de sucesso
 
-  // Função para obter o ID da empresa
+  // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
     try {
-      const empresaData = await AsyncStorage.getItem('empresaData');
-      if (empresaData !== null) {
-        return JSON.parse(empresaData); // Se o dado for um número, ele será retornado como tal
+      const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+      if (storedEmpresaId) {
+        return Number(storedEmpresaId);
       } else {
-        console.log('Nenhum dado de empresa encontrado no AsyncStorage.');
+        Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
+        console.log('ID da empresa não encontrado no AsyncStorage.');
       }
     } catch (error) {
       console.error('Erro ao obter o ID da empresa do AsyncStorage:', error);
@@ -79,18 +79,15 @@ const AddService = ({ navigation }) => {
       const empresaData = await getEmpresaId();
       if (empresaData) {
         setEmpresaId(empresaData);
-        await fetchUnitsOfMeasure(empresaData); // Busca as unidades de medida após obter o ID da empresa
-        await fetchIssRates(empresaData); // Busca as alíquotas ISS após obter o ID da empresa
+        await fetchUnitsOfMeasure(empresaData);
+        await fetchIssRates(empresaData);
       } else {
-        console.error('ID da empresa não encontrado. Dados recebidos:', empresaData);
         Alert.alert('Erro', 'Não foi possível carregar os dados da empresa. Tente novamente mais tarde.');
       }
     };
-
     fetchData();
   }, []);
 
-  // Função para salvar o serviço
   const handleSave = async () => {
     if (!name || !price || !unitMeasure || !issRate) {
       Alert.alert('Erro', 'Todos os campos obrigatórios devem ser preenchidos.');
@@ -102,7 +99,7 @@ const AddService = ({ navigation }) => {
       return;
     }
 
-    const currentDate = new Date().toISOString().split('T')[0]; // Obtém a data atual no formato 'YYYY-MM-DD'
+    const currentDate = new Date().toISOString().split('T')[0]; 
 
     const serviceData = {
       empresa_id: empresaId,
@@ -127,8 +124,14 @@ const AddService = ({ navigation }) => {
       const result = await response.json();
 
       if (response.ok) {
-        Alert.alert('Sucesso', result.message || 'Serviço registrado com sucesso.');
-        navigation.navigate('ServicesMenu'); // Exemplo de redirecionamento após sucesso
+        setModalVisible(true); // Exibe o modal de sucesso
+        // Limpa os campos do formulário
+        setBarcode('');
+        setName('');
+        setUnitMeasure('');
+        setPrice('');
+        setIssRate('');
+        setDescription('');
       } else {
         Alert.alert('Erro', result.message || 'Ocorreu um erro ao registrar o serviço.');
       }
@@ -137,7 +140,6 @@ const AddService = ({ navigation }) => {
       Alert.alert('Erro', 'Não foi possível registrar o serviço. Verifique sua conexão e tente novamente.');
     }
   };
-
 
   const toggleUnitMeasureDropdown = () => {
     setIsUnitMeasureDropdownVisible(!isUnitMeasureDropdownVisible);
@@ -157,6 +159,11 @@ const AddService = ({ navigation }) => {
     setIsIssRateDropdownVisible(false);
   };
 
+  const handleCloseModal = () => {
+    setModalVisible(false); // Fecha o modal
+    navigation.navigate('RegisteredServices'); // Redireciona para a próxima tela
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -171,19 +178,19 @@ const AddService = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.imageContainer}>
           <Text style={styles.imageLabelTitle}>Adicionar um novo serviço</Text>
-        <View style={styles.containerColor}>
-          <View style={styles.imageWrapper}>
-            <Icon name="camera" size={40} color={COLORS.black} />
+          <View style={styles.containerColor}>
+            <View style={styles.imageWrapper}>
+              <Icon name="camera" size={40} color={COLORS.black} />
+            </View>
+            <TextInput
+              style={styles.barcodeInput}
+              placeholder="Código"
+              value={barcode}
+              onChangeText={setBarcode}
+              keyboardType="numeric"
+            />
           </View>
-          <TextInput
-            style={styles.barcodeInput}
-            placeholder="Código"
-            value={barcode}
-            onChangeText={setBarcode}
-            keyboardType="numeric"
-          />
-        </View>
-        <Text style={styles.imageLabel}>  Imagem{'\n'}do serviço</Text>
+          <Text style={styles.imageLabel}>  Imagem{'\n'}do serviço</Text>
         </View>
 
         <View style={styles.section}>
@@ -213,11 +220,7 @@ const AddService = ({ navigation }) => {
             keyboardType="numeric"
           />
 
-
-
-
-        {/* Dropdown para Un. de Medida */}
-        <View style={styles.clientContainer}>
+          <View style={styles.clientContainer}>
             <TouchableOpacity style={styles.clientPicker} onPress={toggleUnitMeasureDropdown}>
               <Text style={styles.clientText}>{unitMeasure || 'Un. de Medida'}</Text>
               <Icon name={isUnitMeasureDropdownVisible ? 'arrow-up' : 'arrow-down'} size={24} color={COLORS.lightGray} />
@@ -235,7 +238,6 @@ const AddService = ({ navigation }) => {
             </View>
           )}
 
-          {/* Dropdown para Alíquota ISS */}
           <View style={styles.clientContainer}>
             <TouchableOpacity style={styles.clientPicker} onPress={toggleIssRateDropdown}>
               <Text style={styles.clientText}>{issRate || 'Alíquota ISS'}</Text>
@@ -256,12 +258,29 @@ const AddService = ({ navigation }) => {
         </View>
 
         <TouchableOpacity style={styles.button} onPress={handleSave}>
-        <Icon name="checkmark-circle" size={25} color={COLORS.black} />
+          <Icon name="checkmark-circle" size={25} color={COLORS.black} />
           <Text style={styles.buttonText}>Cadastrar serviço</Text>
         </TouchableOpacity>
-
-  
       </ScrollView>
+
+      {/* Modal de sucesso */}
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={handleCloseModal}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Icon name="checkmark-circle" size={90} color={COLORS.green} />
+            <Text style={styles.modalText}>Serviço cadastrado com sucesso!</Text>
+            <TouchableOpacity style={styles.confirmButton} onPress={handleCloseModal}>
+              <Text style={styles.confirmButtonText}>Ok</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </KeyboardAvoidingView>
   );
 };

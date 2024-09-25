@@ -278,6 +278,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: '100%',
   },
+  modalPrimaryButton2: {
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: COLORS.black,
+  },
   modalSecondaryButtonText: {
     color: COLORS.black,
     fontSize: 16,
@@ -362,6 +374,53 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       color: COLORS.red,
     },
+    invoiceModalContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  invoiceModalContent: {
+      width: '80%',
+      backgroundColor: 'white',
+      borderRadius: 10,
+      padding: 20,
+      alignItems: 'center',
+  },
+  invoiceModalTitle: {
+      fontSize: 18,
+      marginBottom: 20,
+      fontWeight: 'bold',
+      color: COLORS.black,
+  },
+  invoiceOptionButtonRecibo: {
+      width: '100%',
+      backgroundColor: COLORS.primary,
+      padding: 25,
+      borderRadius: 5,
+      alignItems: 'center',
+      marginBottom: 10,
+  },
+  invoiceOptionTextRecibo: {
+      fontSize: 16,
+      color: COLORS.black,
+  },
+  invoiceOptionButtonNotaFiscal: {
+      width: '100%',
+      padding: 25,
+      borderRadius: 5,
+      alignItems: 'center',
+
+  },
+  invoiceOptionTextNotaFiscal: {
+      fontSize: 16,
+      color: COLORS.black,
+  },
+  closeButton: {
+      position: 'absolute',
+      top: 10,
+      right: 10,
+  },
 });
 
 export default styles;

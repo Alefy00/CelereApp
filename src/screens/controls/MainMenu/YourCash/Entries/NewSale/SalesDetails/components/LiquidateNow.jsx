@@ -10,7 +10,7 @@ import CashIcon from "../../../../../../../../assets/images/svg/iconMoney.svg";
 import CreditCardIcon from "../../../../../../../../assets/images/svg/iconCard.svg";
 import DebitCardIcon from "../../../../../../../../assets/images/svg/iconCard.svg";
 import { COLORS } from "../../../../../../../../constants";
-import { Picker } from "@react-native-picker/picker";
+
 
 
 const LiquidateNow = ({ products, totalPrice, clients, navigation }) => {
@@ -27,6 +27,7 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation }) => {
   const [taxRate, setTaxRate] = useState(0.01);  // 1% for now
   const [liquidValue, setLiquidValue] = useState(totalPrice); // Default as total price
   const [isPaymentDropdownVisible, setIsPaymentDropdownVisible] = useState(false);
+  const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
 
   const paymentMethods = [
     { id: 'PIX', label: 'PIX', icon: <PixIcon width={20} height={20} /> },
@@ -42,16 +43,8 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation }) => {
   }, []);
 
   const handleConfirm = () => {
-    if (paymentMethod2 === 'CelerePay') {
-      // Navegar para a nova tela de confirmação do CelerePay
-      navigation.navigate('CelerePayConfirmation', {
-        totalPrice,
-        onConfirm: () => setIsModalVisible(true),  // Chama o modal depois da confirmação
-      });
-    } else {
-      // Exibir o modal diretamente se o método de pagamento não for CelerePay
       setIsModalVisible(true);
-    }
+
   };
   const paymentOptions = ['À vista', '2x', '3x', '4x'];
 
@@ -87,9 +80,13 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation }) => {
     navigation.navigate("IncludeClient");
   };
 
-  const handleEmitReceipt = () => {
-    console.log('Emitir NF-e ou Recibo');
-  };
+  const handleOpenInvoiceModal = () => {
+    setIsInvoiceModalVisible(true);
+};
+
+const handleCloseInvoiceModal = () => {
+    setIsInvoiceModalVisible(false);
+};
 
   
   // UseCallback to memoize the calculateLiquidValue function
@@ -290,6 +287,10 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation }) => {
               <Icon name="cart" size={20} color={COLORS.black} />
               <Text style={styles.modalPrimaryButtonText}>Registrar outra venda</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.modalPrimaryButton2} onPress={handleOpenInvoiceModal}>
+                            <Icon name="cart" size={20} color={COLORS.black} />
+                            <Text style={styles.modalPrimaryButtonText}>Emitir NF-e ou Recibo</Text>
+                        </TouchableOpacity>
             <TouchableOpacity style={styles.modalBackButton} onPress={handleCloseModal}>
               <Icon name="arrow-back" size={20} color={COLORS.black} />
               <Text style={styles.modalBackButtonText}>Voltar ao resumo</Text>
@@ -297,6 +298,23 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation }) => {
           </View>
         </View>
       </Modal>
+                              {/* Modal para escolha entre Recibo e Nota Fiscal */}
+                              <Modal transparent={true} animationType="fade" visible={isInvoiceModalVisible} onRequestClose={handleCloseInvoiceModal}>
+                <View style={styles.invoiceModalContainer}>
+                    <View style={styles.invoiceModalContent}>
+                        <Text style={styles.invoiceModalTitle}>Escolha uma opção:</Text>
+                        <TouchableOpacity style={styles.invoiceOptionButtonRecibo} onPress={() => console.log("Emitir Recibo")}>
+                            <Text style={styles.invoiceOptionTextRecibo}>Recibo</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.invoiceOptionButtonNotaFiscal} onPress={() => console.log("Emitir Nota Fiscal")}>
+                            <Text style={styles.invoiceOptionTextNotaFiscal}>Nota Fiscal</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.closeButton} onPress={handleCloseInvoiceModal}>
+                            <Icon name="close" size={25} color={COLORS.black} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
     </ScrollView>
   );
 };

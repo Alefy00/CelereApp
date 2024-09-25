@@ -165,6 +165,61 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     fontWeight: 'bold',
   },
+      // Estilos do Quarto Modal - Cadastrar Produtos ou Serviços
+      fourthModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      fourthModalContent: {
+        width: '90%',
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+      fourthModalHeader: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+      },
+      fourthModalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginLeft: 75,
+        color: COLORS.black,
+      },
+      fourthModalButton: {
+        width: '100%',
+        padding: 15,
+        borderRadius: 5,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        paddingVertical: 30,
+      },
+      fourthModalText: {
+        fontSize: 16,
+        color: COLORS.black,
+      },
+      yellowButton: {
+        backgroundColor: COLORS.primary,
+      },
 
 
 });

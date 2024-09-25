@@ -10,7 +10,7 @@ const Preload = props => {
 
   useEffect(() => {
     setTimeout(() => {
-      navigation.navigate('LoginScreen');
+      navigation.navigate('MainTab');
     }, 0);
   }, [navigation]);
 

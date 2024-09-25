@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import BarTop3 from '../../../../../../../components/BarTop3';
@@ -9,10 +9,16 @@ import LiquidateNow from './components/LiquidateNow';
 import AccountsReceivable from './components/AccountsReceivable';
 
 const ServiceDetails = ({ navigation, route }) => {
-  const { services } = route.params;
-  const service = services[0];
+  const { services, products = [] } = route.params; // Recebe serviços e produtos via rota
+  const [activeTab, setActiveTab] = useState('liquidar');
 
-  const [activeTab, setActiveTab] = useState('liquidar'); 
+  // Verifica se há serviços disponíveis
+  if (!services || services.length === 0) {
+    Alert.alert('Erro', 'Nenhum serviço encontrado.');
+    return null; // Não renderiza a tela caso não haja serviços
+  }
+
+  const service = services[0]; // Acessa o primeiro serviço da lista
 
   return (
     <View style={styles.containerBase}>
@@ -44,11 +50,18 @@ const ServiceDetails = ({ navigation, route }) => {
 
       {/* Renderiza o componente correspondente */}
       {activeTab === 'liquidar' ? (
-        <LiquidateNow service={service}
-        navigation={navigation} />
+        <LiquidateNow 
+          service={service} 
+          products={products}  // Passa os produtos para o LiquidateNow
+          navigation={navigation} 
+          route={route} 
+        />
       ) : (
-        <AccountsReceivable service={service}
-        navigation={navigation}  />
+        <AccountsReceivable 
+          service={service} 
+          navigation={navigation}
+          route={route} 
+        />
       )}
     </View>
   );

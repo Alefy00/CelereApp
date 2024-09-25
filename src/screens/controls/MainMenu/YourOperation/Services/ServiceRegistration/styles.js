@@ -205,6 +205,46 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.black,
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo escurecido
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 30,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5, // Sombra para Android
+  },
+  modalText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+    marginVertical: 10,
+    textAlign: 'center',
+  },
+  confirmButton: {
+    backgroundColor: '#FFD700', // Amarelo do botão
+    borderRadius: 5,
+    paddingVertical: 25,
+    paddingHorizontal: 120,
+    alignItems: 'center',
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000', // Texto preto
+  },
 });
 
 export default styles;

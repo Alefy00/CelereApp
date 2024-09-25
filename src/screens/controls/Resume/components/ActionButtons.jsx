@@ -88,6 +88,10 @@ const ActionButtons = ({navigation}) => {
     setSecondModalVisible(false);
     navigation.navigate('ConsultExpense');
   };
+  const handleBudget2 = () => {
+    setSecondModalVisible(false);
+    navigation.navigate('ConsultExpense');
+  };
 
   const handleBudget = () => {
     setModalVisible(false);
@@ -161,22 +165,21 @@ const ActionButtons = ({navigation}) => {
             </View>
 
             <TouchableOpacity style={styles.secondModalButton} onPress={handleStockInfo}>
-              <Ionicons name="bookmark" size={20} color={COLORS.black} />
               <Text style={styles.secondModalText}>Estoque</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.secondModalButton} onPress={handleRegisteredServices}>
               <Text style={styles.secondModalText}>Serviços cadastrados</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.secondModalButton} onPress={handleSettleCredit}>
-            <SalesIcon size={25} />
               <Text style={styles.secondModalText}>Vendas</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.secondModalButton} onPress={handleConsultExpense}>
-            <RemoveIcon size={25} />
               <Text style={styles.secondModalText}>Despesas</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.secondModalButton} onPress={handleBudget2}>
+              <Text style={styles.secondModalText}>Orçamentos cadastrados</Text>
             </TouchableOpacity>
           </View>
         </View>

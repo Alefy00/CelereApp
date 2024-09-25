@@ -18,6 +18,7 @@ const IncludeCategoryProducts = ({ navigation }) => {
 
   const closeModal = () => {
     setIsModalVisible(false); // Fechar o modal
+    navigation.navigate('AddProductScreen');
   };
 
 
