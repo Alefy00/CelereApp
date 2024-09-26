@@ -25,6 +25,8 @@ import ConfirmModal from '../components/ConfirmModal';
 import SucessModal from '../components/SucessModal';
 import styles from '../styles';
 import { Picker } from '@react-native-picker/picker';
+import RecurrenceField from './RecurrenceField';
+import SupplierDropdown from './SupplierDropdown';
 
 // Constantes para os endpoints da API
 const CATEGORIES_API = 'https://api.celereapp.com.br/mnt/categoriasdespesa/?page=1&page_size=30';
@@ -68,6 +70,7 @@ const AccountsPayable = ({ navigation }) => {
   const [isLiquidateNow, setIsLiquidateNow] = useState(false);
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
 
 
   // Função para buscar o ID da empresa logada
@@ -119,27 +122,32 @@ const AccountsPayable = ({ navigation }) => {
   
   
 
-  const fetchSuppliers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(SUPPLIERS_API);
-      const data = response.data;
-      if (data.results && data.results.data) {
-        const fetchedSuppliers = data.results.data.map((item) => ({
-          label: item.nome,
-          value: item.id, // Armazenar o ID para envio
-        }));
-        setSuppliers([{ label: 'Selecione um Fornecedor', value: '' }, ...fetchedSuppliers]);
-      } else {
-        console.error('Erro ao buscar fornecedores:', data.message || 'Formato de resposta inesperado');
-        Alert.alert('Erro', 'Não foi possível carregar os fornecedores. Tente novamente.');
-      }
-    } catch (error) {
-      console.error('Erro ao buscar fornecedores:', error);
-      handleRequestError(error);
+ // Função para buscar fornecedores da API
+ const fetchSuppliers = useCallback(async () => {
+  setLoading(true);
+  try {
+    const response = await axios.get(SUPPLIERS_API);
+    const data = response.data;
+    if (data.results && data.results.data) {
+      const fetchedSuppliers = data.results.data.map((item) => ({
+        label: item.nome,
+        value: item.id, // ID do fornecedor
+      }));
+      setSuppliers([{ label: 'Selecione um Fornecedor', value: '' }, ...fetchedSuppliers]);
+    } else {
+      console.error('Erro ao buscar fornecedores:', data.message || 'Formato de resposta inesperado');
+      Alert.alert('Erro', 'Não foi possível carregar os fornecedores. Tente novamente.');
     }
-    setLoading(false);
-  }, []);
+  } catch (error) {
+    console.error('Erro ao buscar fornecedores:', error);
+    handleRequestError(error);
+  }
+  setLoading(false);
+}, []);
+
+useEffect(() => {
+  fetchSuppliers();
+}, [fetchSuppliers]);
 
   const fetchMonths = useCallback(async () => {
     setLoadingMonths(true);
@@ -284,11 +292,15 @@ const AccountsPayable = ({ navigation }) => {
   };
 
   const handleAcconunts = () => {
-    navigation.navigate('NewExpense')
+    navigation.navigate('NewExpense');
   }
 
+  // Função para definir o fornecedor selecionado
+const handleSelectSupplier = (supplier) => {
+  setSelectedSupplier(supplier);  // Define o fornecedor selecionado
+};
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <BarTop2
         titulo="Voltar"
         backColor={COLORS.primary}
@@ -315,32 +327,6 @@ const AccountsPayable = ({ navigation }) => {
               >
                 <Text style={styles.toggleButtonText}>Contas a pagar</Text>
               </TouchableOpacity>
-            </View>
-
-            {/* Date Picker para Data de Pagamento */}
-            <View style={styles.datePickerContainer}>
-              <Text style={styles.dateLabel}>Data de Pagamento </Text>
-              <View style={styles.datePickerRow}>
-                <Text style={styles.hora}>Hoje,</Text>
-                <TextInput
-                  style={styles.dateInput}
-                  value={format(date,'dd/MM/yyyy', { locale: ptBR })}
-                  editable={false}
-                />
-                <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-                  <Icon name="calendar" size={20} color={COLORS.gray} />
-                </TouchableOpacity>
-                {showDatePicker && (
-                  <DateTimePicker
-                    value={date}
-                    mode="date"
-                    display="default"
-                    onChange={onChangeDate}
-                    maximumDate={new Date()}
-                    locale="pt-BR"
-                  />
-                )}
-              </View>
             </View>
 
             {/* Date Picker para Data de Vencimento */}
@@ -463,54 +449,23 @@ const AccountsPayable = ({ navigation }) => {
               />
             </View>
 
-            {/* Cartão de Fornecedor */}
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Fornecedor</Text>
-              <View style={styles.pickerRow}>
-                <Picker
-                  selectedValue={parceiro}
-                  style={styles.picker}
-                  onValueChange={(itemValue) => setParceiro(itemValue)}
-                >
-                  {suppliers.map((supplier) => (
-                    <Picker.Item key={supplier.value} label={supplier.label} value={supplier.value} />
-                  ))}
-                </Picker>
-                <TouchableOpacity style={styles.addButton}>
-                   <Icon name="add" size={30} color={COLORS.black} />
-                </TouchableOpacity>
-              </View>
+           {/* Fornecedor com novo Dropdown */}
+           <View style={styles.card}>
+              <Text style={styles.cardTitle}>Fornecedor (Opcional)</Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="#000" />
+              ) : (
+                <SupplierDropdown
+                  suppliers={suppliers}
+                  selectedSupplier={selectedSupplier}
+                  onSelectSupplier={handleSelectSupplier}
+                  navigation={navigation}
+                />
+              )}
             </View>
 
             {/* Cartão de Recorrência */}
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Recorrência</Text>
-              <View style={styles.checkboxContainer}>
-                <CheckBox
-                  value={repeats}
-                  onValueChange={setRepeats}
-                  tintColors={{ true: COLORS.green, false: COLORS.black }}
-                />
-                <Text style={styles.checkboxLabel}>É uma despesa recorrente</Text>
-              </View>
-              {repeats && (
-                <View style={styles.inputContainer}>
-                  {loadingMonths ? (
-                    <ActivityIndicator size="small" color={COLORS.primary} />
-                  ) : (
-                    <Picker
-                      selectedValue={quantosMeses}
-                      style={styles.picker}
-                      onValueChange={(itemValue) => setQuantosMeses(itemValue)}
-                    >
-                      {months.map((month) => (
-                        <Picker.Item key={month.value} label={month.label} value={month.value} />
-                      ))}
-                    </Picker>
-                  )}
-                </View>
-              )}
-            </View>
+            <RecurrenceField />
 
             {/* Botão de Salvar Despesa */}
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -534,7 +489,7 @@ const AccountsPayable = ({ navigation }) => {
         onClose={() => navigation.navigate('Exits')}
         onRegisterNew={handleRegisterNew}
       />
-    </View>
+    </ScrollView>
   );
 };
 

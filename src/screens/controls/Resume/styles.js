@@ -5,6 +5,7 @@ import { COLORS } from "../../../constants";
 const styles = StyleSheet.create({
   container: {
     backgroundColor: COLORS.background,
+    marginBottom: 150,
   },
   ContainerCarousel:{
     marginBottom:10
@@ -29,7 +30,17 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   containerBottons:{
-    marginTop:'40%',
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    zIndex: 1000,
+    elevation: 5, // Para destacar a visualização
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    backgroundColor: 'transparent',
+    
   },
   pageContainer: {
     backgroundColor: COLORS.white,
@@ -121,13 +132,23 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     backgroundColor: COLORS.primary, // Botão amarelo
-    borderRadius: 8,
+    borderRadius: 5,
     paddingVertical: 25,
     paddingHorizontal: 110,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
+  },
+  saveButton2: {
+    borderRadius: 5,
+    paddingVertical: 25,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    width: '100%',
+    borderWidth: 1,
   },
   buttonText: {
     fontSize: 16,
@@ -138,6 +159,40 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 10,
     top: 10,
+  },
+  //modal sucesso
+  successModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  successModalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  successMessage: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: COLORS.black,
+  },
+  successButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 8,
+    paddingVertical: 25,
+    paddingHorizontal: 20,
+    marginTop: 20,
+    width: '100%',
+    alignItems: 'center',
+  },
+  successButtonText: {
+    color: COLORS.black,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 
 });

@@ -2,6 +2,7 @@
 import React from "react";
 import { COLORS } from "../../../../../../../constants";
 import { Modal, View, StyleSheet, Text, TouchableOpacity } from "react-native";
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const ConfirmModal = ({ visible, onClose, onConfirm, valor, parceiro, dataPagamento, dataVencimento, recorrencia }) => {
   
@@ -26,37 +27,38 @@ const ConfirmModal = ({ visible, onClose, onConfirm, valor, parceiro, dataPagame
         <View style={styles.modalContainer}>
           {/* Botão de Fechar */}
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeButtonText}>X</Text>
+          <Icon name="close" size={30} color={COLORS.black} />
           </TouchableOpacity>
           
           <Text style={styles.title}>Confirme os dados</Text>
           
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Valor</Text>
+            <Text style={styles.label}>Valor:</Text>
             <Text style={styles.input}>{formatCurrency(valor)}</Text>
           </View>
           
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Parceiro</Text>
+            <Text style={styles.label}>Parceiro:</Text>
             <Text style={styles.input}>{parceiro}</Text>
           </View>
           
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Data de pagamento</Text>
+            <Text style={styles.label}>Data de pagamento:</Text>
             <Text style={styles.input}>{dataPagamento}</Text>
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Data de vencimento</Text>
+            <Text style={styles.label}>Data de vencimento:</Text>
             <Text style={styles.input}>{dataVencimento}</Text>
           </View>
           
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Recorrência</Text>
+            <Text style={styles.label}>Recorrência:</Text>
             <Text style={styles.input}>{recorrencia}</Text>
           </View>
           
           <TouchableOpacity style={styles.confirmButton} onPress={onConfirm}>
+          <Icon name="checkmark-circle" size={22} color={COLORS.black} />
             <Text style={styles.confirmButtonText}>Confirmar</Text>
           </TouchableOpacity>
         </View>
@@ -73,7 +75,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
-    width: '80%',
+    width: '90%',
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 20,
@@ -84,7 +86,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: COLORS.lightGray2,
     borderRadius: 15,
     width: 30,
     height: 30,
@@ -106,29 +107,35 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   label: {
-    fontSize: 14,
-    color: '#000',
+    fontSize: 15,
+    color:COLORS.black,
     justifyContent: 'center',
+    fontWeight: '600',
+    marginLeft: 10,
   },
   input: {
     height: 40,
     borderRadius: 10,
     paddingHorizontal: 10,
-    backgroundColor: COLORS.lightGray2,
     justifyContent: 'center',
     paddingVertical: 10,
-    color:'#000',
+    color:COLORS.black,
+    borderBottomWidth: 1,
   },
   confirmButton: {
-    backgroundColor: COLORS.green,
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: COLORS.primary,
+    padding: 25,
+    borderRadius: 5,
     alignItems: 'center',
     marginTop: 20,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: "center",
   },
   confirmButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: '#000',
+    marginLeft: 10,
+    fontSize: 16,
   },
 });
 

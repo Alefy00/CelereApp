@@ -15,7 +15,8 @@ const API_URL_CLASSIFICAR = 'https://api.celereapp.com.br/config/classificar_emp
 
 const BusinessInfoScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
-  const [name, setName] = useState(''); // Novo estado para o nome do usuário
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState(''); 
   const [businessName, setBusinessName] = useState('');
   const [role, setRole] = useState('');
   const [cnpj, setCnpj] = useState('');
@@ -61,6 +62,10 @@ const BusinessInfoScreen = ({ navigation }) => {
       setErrorMessage('O nome é obrigatório.');
       return false;
     }
+    if (!email) {
+      setErrorMessage('O E-mail é obrigatório.');
+      return false;
+    }
     if (!businessName) {
       setErrorMessage('O nome do negócio é obrigatório.');
       return false;
@@ -70,7 +75,7 @@ const BusinessInfoScreen = ({ navigation }) => {
       return false;
     }
     return true;
-  }, [name, businessName, role]);
+  }, [name, businessName, role, email]);
 
   const handleNext = useCallback(async () => {
     if (!validateFields()) return;
@@ -84,6 +89,7 @@ const BusinessInfoScreen = ({ navigation }) => {
     try {
       const dataToSend = {
         nome: name, // Enviar o nome do usuário para a API
+        email: email,
         nome_negocio: businessName,
         cargo: role,
         cnpj: cnpj || null,
@@ -108,7 +114,7 @@ const BusinessInfoScreen = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
-  }, [name, businessName, role, cnpj, userData, validateFields, navigation]);
+  }, [name, email,businessName, role, cnpj, userData, validateFields, navigation]);
 
   return (
     <View style={styles.container}>
@@ -136,6 +142,13 @@ const BusinessInfoScreen = ({ navigation }) => {
             placeholderTextColor={COLORS.gray}
             value={name}
             onChangeText={setName}
+          />
+            <TextInput
+            style={styles.input}
+            placeholder="E-mail"
+            placeholderTextColor={COLORS.gray}
+            value={email}
+            onChangeText={setEmail}
           />
 
           <TextInput

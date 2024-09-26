@@ -3,31 +3,38 @@ import { StyleSheet } from "react-native";
 import { COLORS } from "../../../../constants";
 
 const styles = StyleSheet.create({
-    container: {
-      alignItems: 'center',
-      position: 'absolute',
-      right: 20,
-      bottom: 100,
-    },
-    button: {
-      width: 60,
-      height: 60,
-      borderRadius: 30,
-      backgroundColor: COLORS.primary,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 10,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      elevation: 5,
-    },
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'flex-end',
-    },
+  container: {
+    alignItems: 'center',
+    position: 'absolute',
+    right: 20,
+    bottom: 80,
+    zIndex: 10,  // Garante que o botão fique acima de outros elementos
+  },
+  floatingContainer: {
+    position: 'absolute',  // Permite que o container flutue sobre o conteúdo
+    right: 20,  // Distância do lado direito da tela
+    bottom: 30,  // Distância da parte inferior da tela
+    zIndex: 10,  // Garante que fique acima de outros elementos
+  },
+  button: {
+    width: 50,
+    height: 50,
+    borderRadius: 30,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
     modalContent: {
       width: '100%',
       backgroundColor: '#fff',
@@ -144,7 +151,7 @@ secondModalOverlay: {
       alignItems: 'center',
     },
     thirdModalContent: {
-      width: '90%',
+      width: '100%',
       backgroundColor: '#fff',
       borderRadius: 10,
       padding: 20,

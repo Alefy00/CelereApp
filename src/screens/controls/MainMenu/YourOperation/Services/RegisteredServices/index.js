@@ -5,7 +5,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import BarTop3 from '../../../../../../components/BarTop3';
 import { COLORS } from '../../../../../../constants';
-import { Picker } from '@react-native-picker/picker';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 const RegisteredServices = ({ navigation }) => {
@@ -14,9 +13,9 @@ const RegisteredServices = ({ navigation }) => {
     const [filterModalVisible, setFilterModalVisible] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState('');
     const [value, setValue] = useState('');
-    const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+    const [nome, setNome] = useState('');
+
 
   // Dados fictícios dos serviços
   const services = [
@@ -24,11 +23,6 @@ const RegisteredServices = ({ navigation }) => {
     { id: '2', name: 'Formatação de aparelho', price: 120, image: require('../../../../../../assets/images/png/formaçaoaparelho.png'), type: 'Serviço livre' },
   ];
 
-  const categories = [
-    { id: '1', name: 'Categoria 1' },
-    { id: '2', name: 'Categoria 2' },
-    { id: '3', name: 'Categoria 3' },
-  ];
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -42,16 +36,6 @@ const RegisteredServices = ({ navigation }) => {
     setSelectedDate(date);
     hideDatePicker();
   };
-
-  const toggleDropdown = () => {
-    setIsDropdownVisible(!isDropdownVisible);
-  };
-
-  const selectCategory = (category) => {
-    setSelectedCategory(category);
-    setIsDropdownVisible(false);
-  };
-
   const openFilterModal = () => {
     setFilterModalVisible(true);
   };
@@ -147,35 +131,15 @@ const RegisteredServices = ({ navigation }) => {
                 onConfirm={handleConfirm}
                 onCancel={hideDatePicker}
               />
-
-              {/* Campo de Categoria com Dropdown */}
-              <View style={styles.inputContainer}>
-                <TouchableOpacity style={styles.clientPicker} onPress={toggleDropdown}>
-                  <Text style={styles.input}>
-                    {selectedCategory ? selectedCategory.name : 'Categoria'}
-                  </Text>
-                  <Icon name={isDropdownVisible ? 'arrow-up' : 'arrow-down'} size={24} color={COLORS.black} />
-                </TouchableOpacity>
+                <View style={styles.inputContainer3}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nome"
+                  value={nome}
+                  onChangeText={setNome}
+                />
               </View>
-
-              {/* Lista de categorias */}
-              {isDropdownVisible && (
-                <View style={[styles.dropdownContainer, { maxHeight: 150 }]}>
-                  <ScrollView nestedScrollEnabled={true}>
-                    {categories.map((category) => (
-                      <TouchableOpacity
-                        key={category.id}
-                        style={styles.dropdownItem}
-                        onPress={() => selectCategory(category)}
-                      >
-                        <Text style={styles.dropdownItemText}>{category.name}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
-              )}
-
-              {/* Campo de Valor */}
+               {/* Campo de Valor */}
               <View style={styles.inputContainer2}>
                 <TextInput
                   style={styles.input}

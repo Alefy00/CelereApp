@@ -6,6 +6,7 @@ import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../constants';
 import styles from '../styles'; // Adapte seus estilos ao design enviado
+import TimeIcon from '../../../../assets/images/svg/MainMenu/timeIcon.svg';
 
 const API_URL_SALDO = 'https://api.celereapp.com.br/cad/saldo_caixa_inicial/';
 
@@ -15,6 +16,8 @@ const OpeningBalanceModal = ({ visible, onClose }) => {
   const [bank, setBank] = useState('');
   const [totalBalance, setTotalBalance] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false); // Adiciona o estado do modal de sucesso
+
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
@@ -74,6 +77,10 @@ const OpeningBalanceModal = ({ visible, onClose }) => {
     return true;
   };
 
+  const handleOnclose = () => {
+    onClose();
+  };
+
   // Função para salvar o saldo inicial
   const handleSave = async () => {
     if (!validateFields()) return;
@@ -94,8 +101,7 @@ const OpeningBalanceModal = ({ visible, onClose }) => {
 
       if (response.status === 201 && response.data.status === 'success') {
         await AsyncStorage.setItem('initialBalanceAdded', 'true');
-        Alert.alert('Sucesso', 'Saldo inicial salvo com sucesso!');
-        onClose(); // Fecha o modal após salvar
+        setSuccessModalVisible(true); // Exibe o modal de sucesso
       } else {
         Alert.alert('Erro', response.data.message || 'Erro ao salvar o saldo inicial.');
       }
@@ -146,8 +152,30 @@ const OpeningBalanceModal = ({ visible, onClose }) => {
             <Icon name="checkmark-circle" size={20} color={COLORS.black} />
             <Text style={styles.buttonText}>Salvar Tudo</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.saveButton2} onPress={handleOnclose}>
+            <TimeIcon size={20} color={COLORS.black} />
+            <Text style={styles.buttonText}>Deixa para depois</Text>
+          </TouchableOpacity>
 
           {loading && <ActivityIndicator size="large" color={COLORS.primary} />}
+          <Modal visible={successModalVisible} animationType="slide" transparent={true}>
+            <View style={styles.successModalContainer}>
+              <View style={styles.successModalContent}>
+                <Icon name="checkmark-circle" size={90} color={COLORS.green} />
+                <Text style={styles.successMessage}>Saldo inicial inserido com sucesso!</Text>
+                <TouchableOpacity
+                  style={styles.successButton}
+                  onPress={() => {
+                    setSuccessModalVisible(false); // Fecha o modal de sucesso
+                    onClose(); // Fecha o modal principal após sucesso
+                  }}
+                >
+                  <Text style={styles.successButtonText}>Ok</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
         </View>
       </View>
     </Modal>

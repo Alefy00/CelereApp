@@ -34,8 +34,8 @@ import HowBusiness from '../screens/InitialData/SalesForecast/HowBusiness';
 import DistributionSales from '../screens/InitialData/SalesForecast/DistributionSales';
 import SaleDetails from '../screens/controls/MainMenu/YourCash/Entries/NewSale/SalesDetails';
 import ServiceDetails from '../screens/controls/MainMenu/YourCash/Entries/NewSale/ServiceDetails';
-import LooseProduct from '../screens/controls/MainMenu/YourCash/Entries/NewSale/LooseProduct';
 import CustomerSupplierScreen from '../screens/InitialData/CustomerSupplierScreen';
+import SingleSale from '../screens/controls/MainMenu/YourCash/Entries/NewSale/SingleSale';
 import IncludeSupplier from '../screens/InitialData/CustomerSupplierScreen/IncludeSupplier';
 import IncludeClient from '../screens/InitialData/CustomerSupplierScreen/IncludeClient';
 import ConsultClient from '../screens/InitialData/CustomerSupplierScreen/ConsultClient';
@@ -103,10 +103,10 @@ export default () => (
     <Stack.Screen name="ServicesMenu" component={ServicesMenu} />
     <Stack.Screen name="RegisteredServices" component={RegisteredServices} />
 
+    <Stack.Screen name="SingleSale" component={SingleSale} />
     <Stack.Screen name="NewRegisteredSale" component={NewRegisteredSale} />
     <Stack.Screen name="SaleDetails" component={SaleDetails} />
     <Stack.Screen name="ServiceDetails" component={ServiceDetails} />
-    <Stack.Screen name="LooseProduct" component={LooseProduct} />
     <Stack.Screen name="CustomerSupplierScreen" component={CustomerSupplierScreen} />
     <Stack.Screen name="IncludeSupplier" component={IncludeSupplier} />
     <Stack.Screen name="IncludeClient" component={IncludeClient} />

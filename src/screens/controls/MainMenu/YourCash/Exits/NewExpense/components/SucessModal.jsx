@@ -15,11 +15,11 @@ const SucessModal = ({visible, onClose, onRegisterNew}) => {
           <View style={styles.modalBackground}>
             <View style={styles.modalContainer}>
               <View style={styles.iconContainer}>
-                <Icon name="checkmark-circle-outline" size={80} color={COLORS.green} />
+                <Icon name="checkmark-circle" size={80} color={COLORS.green} />
               </View>
               <Text style={styles.title}>Sua despesa foi registrada!</Text>
               <TouchableOpacity style={styles.returnButton} onPress={onClose}>
-                <Text>Voltar ao Menu</Text>
+                <Text style={styles.titleBack}>Voltar ao Menu</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.newExpenseButton} onPress={onRegisterNew}>
                 <Text style={styles.newExpenseButtonText}> Registrar nova despesa</Text>
@@ -58,29 +58,37 @@ const styles = StyleSheet.create({
       fontSize: 18,
       fontWeight: 'bold',
       marginBottom: 20,
+      color: '#000'
     },
     returnButton: {
       backgroundColor: COLORS.primary,
-      padding: 15,
-      borderRadius: 10,
+      padding: 25,
+      borderRadius: 5,
       alignItems: 'center',
       width: '100%',
       marginBottom: 10,
     },
     returnButtonText: {
       color: COLORS.black,
-      fontWeight: 'bold',
+
+    },
+    titleBack:{
+      fontSize: 15,
+      color: COLORS.black,
+      fontWeight: '500'
     },
     newExpenseButton: {
       backgroundColor: COLORS.green,
-      padding: 15,
-      borderRadius: 10,
+      padding: 25,
+      borderRadius: 5,
       alignItems: 'center',
       width: '100%',
     },
     newExpenseButtonText: {
       color: '#fff',
-      fontWeight: 'bold',
+      fontSize: 15,
+      fontWeight: '500'
+
     },
   });
 

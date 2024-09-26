@@ -18,7 +18,7 @@ const AddProductScreen = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false); // Estado do modal
 
   const handleAddCategory = () => {
-    navigation.navigate('AddCategory');
+    navigation.navigate('IncludeCategoryProducts');
   };
   const handleConfirm = () => {
     // Lógica para confirmação da categoria

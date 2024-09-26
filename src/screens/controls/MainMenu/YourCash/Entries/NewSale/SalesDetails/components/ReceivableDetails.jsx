@@ -77,7 +77,7 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
         <View style={styles.dateContainer}>
           <TouchableOpacity onPress={showDatePickerModal} style={styles.datePicker}>
             <Text style={styles.dateText}>
-              {`Data do pagamento: ${paymentDate.toLocaleDateString('pt-BR')}`}
+              {`Data do Vencimento: ${paymentDate.toLocaleDateString('pt-BR')}`}
             </Text>
             <Icon name="calendar" size={24} color={COLORS.lightGray} />
           </TouchableOpacity>

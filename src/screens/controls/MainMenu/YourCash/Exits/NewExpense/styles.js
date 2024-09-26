@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 1,
     width: '80%',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
   pickerButtonText:{
     marginLeft:15,
@@ -136,8 +136,8 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 15,
-    borderRadius: 8,
+    paddingVertical: 25,
+    borderRadius: 5,
     alignItems: 'center',
     marginTop: 20,
     flexDirection: 'row',
@@ -201,7 +201,49 @@ const styles = StyleSheet.create({
     marginRight: 10,
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
+  //fornecedor
+  dropdownButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderColor: COLORS.black,
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    width: '82%',
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: COLORS.gray,
+  },
+  dropdownContainer: {
+    borderRadius: 5,
+    marginBottom: 10,
+    borderWidth: 1,
+    marginTop: -9.5,
+  },
+  dropdownItem: {
+    padding: 10,
+  },
+  dropdownItemText: {
+    fontSize: 16,
+    color: COLORS.black,
+  },
+  containerSupplier:{
+    flexDirection: 'row',
+  },
+  addButton2: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 4,
+    marginLeft: 5,
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    alignItems: "center",
+    marginBottom: 10
+
+  },
   
   
 });

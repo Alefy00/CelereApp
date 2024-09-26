@@ -12,7 +12,6 @@ import DebitCardIcon from "../../../../../../../../assets/images/svg/iconCard.sv
 import { COLORS } from "../../../../../../../../constants";
 
 
-
 const LiquidateNow = ({ products, totalPrice, clients, navigation }) => {
   const [paymentMethod, setPaymentMethod] = useState('PIX');
   const [paymentMethod2, setPaymentMethod2] = useState('CelerePay');

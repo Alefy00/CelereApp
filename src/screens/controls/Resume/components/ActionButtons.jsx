@@ -1,13 +1,16 @@
 /* eslint-disable prettier/prettier */
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, TouchableOpacity, Modal, Text, StyleSheet, Animated, Dimensions } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // Use esta linha se você estiver usando Ionicons
 import { COLORS } from '../../../../constants';
 import styles from './styles';
 import ArrowIcon from '../../../../assets/images/svg/MainMenu/ArrowIcon.svg';
 import CellphoneIcon from '../../../../assets/images/svg/MainMenu/cellphoneIcon.svg';
-import SalesIcon from '../../../../assets/images/svg/MainMenu/SaleIcon.svg';
-import RemoveIcon from '../../../../assets/images/svg/MainMenu/removeIcon.svg';
+import BugetIcon from '../../../../assets/images/svg/MainMenu/BugetIcon.svg';
+import EstoqueIcon from '../../../../assets/images/svg/MainMenu/EstoqueIcon.svg';
+import ExpenseIcon from '../../../../assets/images/svg/MainMenu/ExpenseIcon.svg';
+import SalesIcon from '../../../../assets/images/svg/MainMenu/SalesIcon.svg';
+import ServicoIcon from '../../../../assets/images/svg/MainMenu/ServicoIcon.svg';
 
 const ActionButtons = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -15,8 +18,28 @@ const ActionButtons = ({navigation}) => {
   const [thirdModalVisible, setThirdModalVisible] = useState(false);  // Terceiro modal
   const [fourthModalVisible, setFourthModalVisible] = useState(false);  // Quarto modal
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').height)).current;
+  const slideAnimThirdModal = useRef(new Animated.Value(Dimensions.get('window').height)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  
 
-  // Função para abrir e fechar o primeiro modal com animação
+  // Iniciar a animação de pulso ao montar o componente
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.2,  // Escala maior para pulsar
+          duration: 700,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,  // Voltar ao tamanho original
+          duration: 700,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [pulseAnim]);
+
   const toggleModal = () => {
     if (!modalVisible) {
       setModalVisible(true);
@@ -34,15 +57,42 @@ const ActionButtons = ({navigation}) => {
     }
   };
 
+  
   // Função para abrir o segundo modal de consulta
   const toggleSecondModal = () => {
     setSecondModalVisible(!secondModalVisible);
   };
 
-  // Função para abrir o terceiro modal de "Nova Venda"
-  const toggleThirdModal = () => {
-    setThirdModalVisible(!thirdModalVisible);
+   // Toggle third modal with slide animation
+   const toggleThirdModal = () => {
+    if (!thirdModalVisible) {
+      // Close the first modal and open the third modal
+      Animated.timing(slideAnim, {
+        toValue: Dimensions.get('window').height,
+        duration: 200,
+        useNativeDriver: true,
+      }).start(() => {
+        setModalVisible(false); // Fecha o primeiro modal
+        setThirdModalVisible(true);
+        Animated.timing(slideAnimThirdModal, {
+          toValue: Dimensions.get('window').height - 530, // Ajuste este valor conforme necessário
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      });
+    } else {
+      // Close the third modal and reopen the first modal
+      Animated.timing(slideAnimThirdModal, {
+        toValue: Dimensions.get('window').height,
+        duration: 200,
+        useNativeDriver: true,
+      }).start(() => {
+        setThirdModalVisible(false);
+        toggleModal(); // Reabre o primeiro modal
+      });
+    }
   };
+
 
   // Função para abrir o quarto modal de "Cadastrar Produtos ou Serviços"
   const toggleFourthModal = () => {
@@ -98,19 +148,26 @@ const ActionButtons = ({navigation}) => {
     navigation.navigate('Budget');
   };
 
+  
+
 
   return (
     <View style={styles.container}>
-      {/* Botão de código de barras */}
-      <TouchableOpacity style={styles.button}>
-        <Ionicons name="barcode-outline" size={30} color={COLORS.black} />
-      </TouchableOpacity>
+      
+        {/* Botão de código de barras com animação de pulsar */}
+        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+          <TouchableOpacity style={styles.button}>
+            <Ionicons name="barcode-outline" size={30} color={COLORS.black} />
+          </TouchableOpacity>
+        </Animated.View>
 
-      {/* Botão de adicionar que abre o modal */}
-      <TouchableOpacity style={styles.button} onPress={toggleModal}>
-        <Ionicons name="add-outline" size={30} color={COLORS.black} />
-      </TouchableOpacity>
-
+        {/* Botão de adicionar com animação de pulsar */}
+        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+          <TouchableOpacity style={styles.button} onPress={toggleModal}>
+            <Ionicons name="add-outline" size={30} color={COLORS.black} />
+          </TouchableOpacity>
+        </Animated.View>
+      
       {/* Primeiro Modal */}
       <Modal
         animationType="none"
@@ -130,17 +187,17 @@ const ActionButtons = ({navigation}) => {
               <Text style={[styles.modalText, { color: COLORS.red }]}> Nova Despesa</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.modalButton, styles.yellowButton]} onPress={toggleFourthModal}>
+            <TouchableOpacity style={[styles.modalButton2]} onPress={toggleFourthModal}>
               <ArrowIcon size={25} />
               <Text style={[styles.modalText, styles.blackText]}>Cadastrar Produtos ou Serviços</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.modalButton, styles.yellowButton]} onPress={handleBudget}>
+            <TouchableOpacity style={[styles.modalButton2]} onPress={handleBudget}>
               <CellphoneIcon size={25} />
               <Text style={[styles.modalText, styles.blackText]}>Incluir orçamento</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.modalButton2} onPress={toggleSecondModal}>
+            <TouchableOpacity style={[styles.modalButton, styles.yellowButton]} onPress={toggleSecondModal}>
               <Ionicons name="search" size={25} color={COLORS.black} />
               <Text style={[styles.modalText, styles.blackText]}>Consultas</Text>
             </TouchableOpacity>
@@ -165,35 +222,40 @@ const ActionButtons = ({navigation}) => {
             </View>
 
             <TouchableOpacity style={styles.secondModalButton} onPress={handleStockInfo}>
+            <EstoqueIcon size={25} />
               <Text style={styles.secondModalText}>Estoque</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.secondModalButton} onPress={handleRegisteredServices}>
+            <ServicoIcon size={25} />
               <Text style={styles.secondModalText}>Serviços cadastrados</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.secondModalButton} onPress={handleSettleCredit}>
+            <SalesIcon size={25} />
               <Text style={styles.secondModalText}>Vendas</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.secondModalButton} onPress={handleConsultExpense}>
+            <ExpenseIcon size={25} />
               <Text style={styles.secondModalText}>Despesas</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.secondModalButton} onPress={handleBudget2}>
+            <BugetIcon size={25} />
               <Text style={styles.secondModalText}>Orçamentos cadastrados</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* Terceiro Modal - Nova Venda */}
-      <Modal
-        animationType="slide"
+       {/* Terceiro Modal - Nova Venda com efeito de deslizamento */}
+       <Modal
+        animationType="none"
         transparent={true}
         visible={thirdModalVisible}
         onRequestClose={toggleThirdModal}
       >
-        <View style={styles.thirdModalOverlay}>
-          <View style={styles.thirdModalContent}>
+        <TouchableOpacity style={styles.thirdModalOverlay} activeOpacity={1} onPress={toggleThirdModal}>
+          <Animated.View style={[styles.thirdModalContent, { transform: [{ translateY: slideAnimThirdModal }] }]}>
             <View style={styles.thirdModalHeader}>
               <TouchableOpacity onPress={toggleThirdModal}>
                 <Ionicons name="arrow-back" size={25} color={COLORS.black} />
@@ -216,10 +278,10 @@ const ActionButtons = ({navigation}) => {
                 <Ionicons name="alert" size={25} color={COLORS.black} />
                 <Text style={styles.thirdModalText}>Venda Avulsa</Text>
               </View>
-                <Text style={styles.thirdModalSubtitle}>(Não cadastrados)</Text>
+              <Text style={styles.thirdModalSubtitle}>(Não cadastrados)</Text>
             </TouchableOpacity>
-          </View>
-        </View>
+          </Animated.View>
+        </TouchableOpacity>
       </Modal>
             {/* Quarto Modal - Cadastrar Produtos ou Serviços */}
         <Modal
@@ -250,7 +312,5 @@ const ActionButtons = ({navigation}) => {
     </View>
   );
 };
-
-
 
 export default ActionButtons;

@@ -12,7 +12,6 @@ import IconOutros from '../../../../../../assets/images/svg/NewExpense/IconOutro
 import IconPagamento from '../../../../../../assets/images/svg/NewExpense/IconPagamento.svg';
 import IconProLabore from '../../../../../../assets/images/svg/NewExpense/IconProLabore.svg';
 import Icontaxas from '../../../../../../assets/images/svg/NewExpense/IconTaxas.svg';
-import CheckBox from '@react-native-community/checkbox';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -23,8 +22,11 @@ import { COLORS } from "../../../../../../constants";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import ConfirmModal from './components/ConfirmModal';
 import SucessModal from './components/SucessModal';
+import RecurrenceField from './components/RecurrenceField';
+import SupplierDropdown from './components/SupplierDropdown';
 import styles from './styles';
-import { Picker } from '@react-native-picker/picker';
+
+
 
 // Constantes para os endpoints da API
 const CATEGORIES_API = 'https://api.celereapp.com.br/mnt/categoriasdespesa/?page=1&page_size=30';
@@ -68,6 +70,7 @@ const NewExpense = ({ navigation }) => {
   const [isLiquidateNow, setIsLiquidateNow] = useState(true);
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
 
 
   // Função para buscar o ID da empresa logada
@@ -92,6 +95,7 @@ const NewExpense = ({ navigation }) => {
     const supplier = suppliers.find((s) => s.value === id);
     return supplier ? supplier.label : 'Parceiro não encontrado';
   };
+
 
   const fetchCategories = useCallback(async () => {
     setLoading(true);
@@ -120,27 +124,37 @@ const NewExpense = ({ navigation }) => {
   
   
 
-  const fetchSuppliers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(SUPPLIERS_API);
-      const data = response.data;
-      if (data.results && data.results.data) {
-        const fetchedSuppliers = data.results.data.map((item) => ({
-          label: item.nome,
-          value: item.id, // Armazenar o ID para envio
-        }));
-        setSuppliers([{ label: 'Selecione um Fornecedor', value: '' }, ...fetchedSuppliers]);
-      } else {
-        console.error('Erro ao buscar fornecedores:', data.message || 'Formato de resposta inesperado');
-        Alert.alert('Erro', 'Não foi possível carregar os fornecedores. Tente novamente.');
-      }
-    } catch (error) {
-      console.error('Erro ao buscar fornecedores:', error);
-      handleRequestError(error);
+ // Função para buscar fornecedores da API
+ const fetchSuppliers = useCallback(async () => {
+  setLoading(true);
+  try {
+    const response = await axios.get(SUPPLIERS_API);
+    const data = response.data;
+    if (data.results && data.results.data) {
+      const fetchedSuppliers = data.results.data.map((item) => ({
+        label: item.nome,
+        value: item.id, // ID do fornecedor
+      }));
+      setSuppliers([{ label: 'Selecione um Fornecedor', value: '' }, ...fetchedSuppliers]);
+    } else {
+      console.error('Erro ao buscar fornecedores:', data.message || 'Formato de resposta inesperado');
+      Alert.alert('Erro', 'Não foi possível carregar os fornecedores. Tente novamente.');
     }
-    setLoading(false);
-  }, []);
+  } catch (error) {
+    console.error('Erro ao buscar fornecedores:', error);
+    handleRequestError(error);
+  }
+  setLoading(false);
+}, []);
+
+useEffect(() => {
+  fetchSuppliers();
+}, [fetchSuppliers]);
+
+// Função para definir o fornecedor selecionado
+const handleSelectSupplier = (supplier) => {
+  setSelectedSupplier(supplier);  // Define o fornecedor selecionado
+};
 
   const fetchMonths = useCallback(async () => {
     setLoadingMonths(true);
@@ -195,17 +209,6 @@ const NewExpense = ({ navigation }) => {
     }
   };
 
-  const onChangeDueDate = (event, selectedDate) => {
-    setShowDueDatePicker(Platform.OS === 'ios');
-    const currentDueDate = selectedDate || dueDate;
-    const localDueDate = new Date(currentDueDate.getTime() - (currentDueDate.getTimezoneOffset() * 60000));
-
-    if (localDueDate >= new Date()) {
-      setDueDate(localDueDate);
-    } else {
-      Alert.alert('Erro', 'Por favor, selecione uma data de vencimento futura.');
-    }
-  };
 
   const handleSave = () => {
     if (!categoria || !valor || !parceiro) {
@@ -294,12 +297,10 @@ const NewExpense = ({ navigation }) => {
     navigation.navigate('CategoriesScreen');
   };
 
-  const handleIncludeSupplier = () => {
-    navigation.navigate('IncludeSupplier');
-  };
+
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <BarTop2
         titulo="Voltar"
         backColor={COLORS.primary}
@@ -356,30 +357,7 @@ const NewExpense = ({ navigation }) => {
               </View>
             </View>
 
-            {/* Date Picker para Data de Vencimento */}
-            <View style={styles.datePickerContainer}>
-              <Text style={styles.dateLabel}>Data de vencimento</Text>
-              <View style={styles.datePickerRow}>
-                <TextInput
-                  style={styles.dateInput}
-                  value={format(dueDate, 'dd/MM/yyyy', { locale: ptBR })}
-                  editable={false}
-                />
-                <TouchableOpacity onPress={() => setShowDueDatePicker(true)}>
-                  <Icon name="calendar" size={20} color={COLORS.gray} />
-                </TouchableOpacity>
-                {showDueDatePicker && (
-                  <DateTimePicker
-                    value={dueDate}
-                    mode="date"
-                    display="default"
-                    onChange={onChangeDueDate}
-                    minimumDate={new Date()}
-                    locale="pt-BR"
-                  />
-                )}
-              </View>
-            </View>
+
 
             {/* Campo de Código de Barras */}
             <View style={styles.inputContainer}>
@@ -476,58 +454,27 @@ const NewExpense = ({ navigation }) => {
               />
             </View>
 
-            {/* Cartão de Fornecedor */}
+            {/* Fornecedor com novo Dropdown */}
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>Fornecedor</Text>
-              <View style={styles.pickerRow}>
-                <Picker
-                  selectedValue={parceiro}
-                  style={styles.picker}
-                  onValueChange={(itemValue) => setParceiro(itemValue)}
-                >
-                  {suppliers.map((supplier) => (
-                    <Picker.Item key={supplier.value} label={supplier.label} value={supplier.value} />
-                  ))}
-                </Picker>
-                <TouchableOpacity style={styles.addButton} onPress={handleIncludeSupplier}>
-                   <Icon name="add" size={30} color={COLORS.black} />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Cartão de Recorrência */}
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Recorrência</Text>
-              <View style={styles.checkboxContainer}>
-                <CheckBox
-                  value={repeats}
-                  onValueChange={setRepeats}
-                  tintColors={{ true: COLORS.green, false: COLORS.black }}
+              <Text style={styles.cardTitle}>Fornecedor (Opcional)</Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="#000" />
+              ) : (
+                <SupplierDropdown
+                  suppliers={suppliers}
+                  selectedSupplier={selectedSupplier}
+                  onSelectSupplier={handleSelectSupplier}
+                  navigation={navigation}
                 />
-                <Text style={styles.checkboxLabel}>É uma despesa recorrente</Text>
-              </View>
-              {repeats && (
-                <View style={styles.inputContainer}>
-                  {loadingMonths ? (
-                    <ActivityIndicator size="small" color={COLORS.primary} />
-                  ) : (
-                    <Picker
-                      selectedValue={quantosMeses}
-                      style={styles.picker}
-                      onValueChange={(itemValue) => setQuantosMeses(itemValue)}
-                    >
-                      {months.map((month) => (
-                        <Picker.Item key={month.value} label={month.label} value={month.value} />
-                      ))}
-                    </Picker>
-                  )}
-                </View>
               )}
             </View>
 
+           {/* Recorrencia */}
+            <RecurrenceField />
+
             {/* Botão de Salvar Despesa */}
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-              <Icon name="checkmark-circle" size={30} color={COLORS.black} />
+              <Icon name="checkmark-circle" size={24} color={COLORS.black} />
               <Text style={styles.saveButtonText}>Salvar despesa</Text>
             </TouchableOpacity>
           </View>
@@ -548,7 +495,7 @@ const NewExpense = ({ navigation }) => {
         onClose={() => navigation.navigate('MainTab')}
         onRegisterNew={handleRegisterNew}
       />
-    </View>
+    </ScrollView>
   );
 };
 

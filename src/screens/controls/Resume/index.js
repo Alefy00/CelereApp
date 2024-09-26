@@ -103,7 +103,11 @@ const MainMenu = ({ navigation }) => {
       Alert.alert("Informação", "O saldo inicial já foi adicionado.");
     }
   };
-
+  const formatCurrency = (value) => {
+    const cleanedValue = value.replace(/\D/g, '');
+    const formattedValue = (cleanedValue / 100).toFixed(2);
+    return formattedValue.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
   return (
     <KeyboardAvoidingView behavior="position" enabled>
       <ScrollView style={{ backgroundColor: "#FDFCF0" }}>
@@ -118,19 +122,16 @@ const MainMenu = ({ navigation }) => {
           <DateCarousel onDateSelected={() => {}} />
           <Text style={styles.label}>Resumo do dia</Text>
 
-          {/* Campo de Saldo Caixa */}
           <View style={styles.ContainerCarousel}>
             <View style={styles.pageContainer}>
               <Text style={styles.title}>
                 Saldo Caixa <Icon name="alert-circle" size={16} color={COLORS.lightGray} />
               </Text>
-              
-              {/* Verifica se está carregando os dados */}
               {loading ? (
                 <ActivityIndicator size="large" color={COLORS.primary} />
               ) : (
                 <TouchableOpacity onPress={handleBalanceClick}>
-                  <Text style={styles.amount}>R$ {saldoCaixa ? saldoCaixa.toFixed(2) : '0,00'}</Text>
+                  <Text style={styles.amount}>R${saldoCaixa ?  formatCurrency(saldoCaixa.toFixed(2)) : '0,00'}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -143,15 +144,15 @@ const MainMenu = ({ navigation }) => {
           <View style={styles.ContainerFilter}>
             <FilteredListCard />
           </View>
-          <View style={styles.containerBottons}>
-            <ActionButtons navigation={navigation} />
-          </View>
         </View>
 
-        {/* Modal de saldo inicial */}
         <OpeningBalanceModal visible={isModalVisible} onClose={handleCloseModal} />
-
       </ScrollView>
+
+      {/* View que contém os botões ActionButtons, flutuando e acompanhando o scroll */}
+      <View style={styles.containerBottons}>
+        <ActionButtons navigation={navigation} />
+      </View>
     </KeyboardAvoidingView>
   );
 };
