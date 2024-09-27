@@ -103,8 +103,6 @@ const ConsultExpense = ({ navigation }) => {
       const id = await getEmpresaId();
       if (id) {
         fetchExpenses(id);
-      } else {
-        Alert.alert('Erro', 'ID da empresa não encontrado. Por favor, faça login novamente.');
       }
       await fetchCategories();
       setLoading(false);

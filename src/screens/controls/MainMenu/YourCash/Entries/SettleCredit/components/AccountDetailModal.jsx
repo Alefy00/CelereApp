@@ -94,10 +94,14 @@ const AccountDetailModal = ({ visible, onClose }) => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Liquidar Contas a receber{'\n'}de Mariana Souza</Text>
+            <Text style={styles.sectionTitle}>Detalhes da venda</Text>
               <TouchableOpacity onPress={closeFirstModal}>
                 <Text style={styles.modalClose}>✕</Text>
               </TouchableOpacity>
+            </View>
+            <View style={styles.containerTitle}>
+              <Text style={styles.sectionTitle}>Situação:</Text>
+              <Text style={styles.sectionTitleRed}> Contas a pagar</Text>
             </View>
 
             {/* Lista de compras com scroll */}
@@ -109,8 +113,8 @@ const AccountDetailModal = ({ visible, onClose }) => {
                 <View style={styles.productItem}>
                   <Icon name="pricetag-outline" size={24} color="gray" />
                   <View style={styles.productInfo}>
-                    <Text>{item.nome}</Text>
-                    <Text>{item.valor}</Text>
+                    <Text style={styles.productNome}>{item.nome}</Text>
+                    <Text style={{color: COLORS.black}}>{item.valor}</Text>
                   </View>
                 </View>
               )}
@@ -124,18 +128,6 @@ const AccountDetailModal = ({ visible, onClose }) => {
               <Text style={styles.totalValue}>{totalValue}</Text>
             </View>
 
-            {/* Campo de valor parcial */}
-            <TextInput
-              style={styles.input}
-              placeholder="Valor parcial"
-              value={partialValue}
-              onChangeText={setPartialValue}
-              keyboardType="numeric"
-            />
-            <View style={styles.newTotalContainer}>
-              <Text style={styles.newTotalLabel}>Novo valor total:</Text>
-              <Text style={styles.newTotalValue}>R$46,00</Text>
-            </View>
 
             {/* Botões */}
             <TouchableOpacity style={styles.partialButton} onPress={handlePartialLiquidation}>
@@ -158,7 +150,7 @@ const AccountDetailModal = ({ visible, onClose }) => {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-              <Icon name="trash-outline" size={24} color="black" />
+              <Icon name="close-circle-outline" size={24} color="black" />
               <Text style={styles.buttonText}>Excluir conta</Text>
             </TouchableOpacity>
           </View>

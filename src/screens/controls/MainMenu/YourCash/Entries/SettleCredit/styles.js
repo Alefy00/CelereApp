@@ -78,38 +78,51 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   contaItem: {
-    flexDirection: 'row',
+    backgroundColor: 'white',
+    borderRadius: 5,
     padding: 15,
-    backgroundColor: COLORS.white,
-    borderRadius: 8,
+    marginVertical: 5,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
-    elevation:1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
     marginHorizontal: 15,
   },
   contaInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    justifyContent: 'space-between',
+  
   },
   contaTextContainer: {
-    flex: 1,
     marginLeft: 10,
   },
   contaNome: {
     fontSize: 16,
-    fontWeight: 'bold',
+    color: 'black',
+  },
+  contaData: {
+    fontSize: 14,
     color: COLORS.black,
   },
   contaProdutos: {
-    fontSize: 14,
-    color: COLORS.grey,
+    fontSize: 12,
+    color: COLORS.gray,
   },
+  contaSituacao: (status) => ({
+    fontSize: 14,
+    color: status === 'Liquidada' ? COLORS.green : COLORS.red,
+  }),
   contaValor: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.black,
-    marginTop:-22,
+    color: 'black',
+    marginLeft: 70,
+    marginTop: -75
   },
   emptyContainer: {
     flex: 1,
@@ -117,8 +130,58 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    color: COLORS.grey,
+    color: COLORS.bl,
     fontSize: 16,
+  },
+
+  //estilo molde contas a receber
+  contaItem2: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 15,
+    marginVertical: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  contaInfo2: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  contaTextContainer2: {
+    marginLeft: 10,
+  },
+  contaNome2: {
+    fontSize: 16,
+    color: 'black',
+  },
+  contaData2: {
+    fontSize: 14,
+    color: COLORS.black,
+  },
+  contaVencimento: {
+    fontSize: 14,
+    color: COLORS.black,
+  },
+  contaProdutos2: {
+    fontSize: 12,
+    color: COLORS.gray,
+  },
+  contaSituacaoLiquidada2: {
+    fontSize: 14,
+    color: COLORS.green,
+  },
+  contaValor2: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'black',
+    marginLeft: 110,
+    marginTop: -70,
   },
 });
 

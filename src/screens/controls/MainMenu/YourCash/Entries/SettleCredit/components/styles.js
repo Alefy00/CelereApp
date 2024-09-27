@@ -20,6 +20,17 @@ const styles = StyleSheet.create({
     elevation: 10,
     height: "100%",
   },
+  modalContentLiquidate: {
+    backgroundColor: COLORS.white,
+    marginHorizontal: 20,
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+  },
   modalContent2: {
     backgroundColor: COLORS.white,
     marginHorizontal: 20,
@@ -36,7 +47,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+
   },
   modalTitle: {
     fontSize: 18,
@@ -46,13 +57,29 @@ const styles = StyleSheet.create({
   modalClose: {
     fontSize: 20,
     color: COLORS.black,
-    marginTop:-30,
+    marginTop:-20,
+  },
+  containerTitle:{
+    flexDirection: 'row',
+    marginBottom: -5,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: COLORS.black,
+  },
+  sectionTitleRed: {
+    fontSize: 14,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: COLORS.black,
+    color: COLORS.red,
+  },
+  sectionTitleGreen: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: COLORS.green,
   },
   productList: {
     marginBottom: 10,
@@ -64,6 +91,15 @@ const styles = StyleSheet.create({
   },
   productInfo: {
     marginLeft: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '90%',
+
+  },
+  productNome:{
+    width: '50%',
+    color: COLORS.black
+
   },
   totalContainer: {
     flexDirection: 'row',
@@ -113,6 +149,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.black,
     borderWidth: 1,
     marginBottom: 10,
+    paddingVertical: 20,
   },
   totalButton: {
     backgroundColor: COLORS.primary,
@@ -122,6 +159,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
     marginBottom: 10,
+    paddingVertical: 20,
+  },
+  cancelButtonModal: {
+    backgroundColor: COLORS.primary,
+    padding: 12,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    marginBottom: 10,
+    paddingVertical: 20,
   },
   reminderButton: {
     backgroundColor: COLORS.white,
@@ -132,6 +180,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 10,
     elevation: 1,
+    paddingVertical: 20,
+  },
+  reciboButton: {
+    backgroundColor: COLORS.white,
+    padding: 12,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    marginBottom: 10,
+    elevation: 1,
+    paddingVertical: 20,
   },
   postponeButton: {
     backgroundColor: COLORS.white,
@@ -142,6 +202,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 10,
     elevation:1,
+    paddingVertical: 20,
   },
   deleteButton: {
     backgroundColor: COLORS.white,
@@ -150,8 +211,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    elevation:1
-
+    elevation:1,
+    paddingVertical: 20,
+  },
+  backButton: {
+    backgroundColor: COLORS.white,
+    padding: 12,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    elevation:1,
+    paddingVertical: 20,
   },
   buttonText: {
     marginLeft: 10,

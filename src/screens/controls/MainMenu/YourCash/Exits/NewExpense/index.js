@@ -81,7 +81,6 @@ const NewExpense = ({ navigation }) => {
         console.log('ID da empresa recuperado:', storedEmpresaId); // Verifica se o ID foi recuperado corretamente
         return Number(storedEmpresaId);
       } else {
-        Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
         console.log('ID da empresa não encontrado no AsyncStorage.');
       }
     } catch (error) {

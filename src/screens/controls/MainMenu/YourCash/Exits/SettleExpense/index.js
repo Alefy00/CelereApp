@@ -105,8 +105,6 @@ const LiquidateExpense = ({ navigation }) => {
         setEmpresaId(id);
         await fetchExpenses(id); // Chama a função para buscar despesas
         await fetchSuppliers(); // Carregar fornecedores junto com as despesas
-      } else {
-        Alert.alert('Erro', 'ID da empresa não encontrado. Por favor, faça login novamente.');
       }
 
       await fetchCategories(); // Carregar categorias

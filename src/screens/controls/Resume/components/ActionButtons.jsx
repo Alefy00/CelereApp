@@ -140,12 +140,12 @@ const ActionButtons = ({navigation}) => {
   };
   const handleBudget2 = () => {
     setSecondModalVisible(false);
-    navigation.navigate('ConsultExpense');
+    navigation.navigate('Budget');
   };
 
   const handleBudget = () => {
     setModalVisible(false);
-    navigation.navigate('Budget');
+    navigation.navigate('NewBudgets');
   };
 
   

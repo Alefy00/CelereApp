@@ -203,7 +203,7 @@ const DetailsBudgets = ({ navigation, route }) => {
           <Text style={styles.sectionTitle2}>Informações adicionais (Opcional)</Text>
           <TextInput
             style={styles.additionalInfoInput}
-            placeholder="ex: Cabo Tipo C"
+            placeholder="Ex: Condições, prazo de execução, etc"
             value={additionalInfo}
             onChangeText={setAdditionalInfo}
           />
