@@ -19,8 +19,7 @@ const LoginScreen = ({ navigation }) => {
       <PresentationImage width="100%" height={300} style={styles.presentationImage} />
 
       <Text style={styles.description}>
-        Seu negócio na palma da sua mão. {'\n'}
-        É mamão com açúcar!
+        Seu negócio na palma da sua mão. É mamão com açúcar!
       </Text>
 
       <TouchableOpacity style={styles.createAccountButton} onPress={handleNext}>
@@ -33,10 +32,6 @@ const LoginScreen = ({ navigation }) => {
         <Text style={styles.loginButtonText}>Já tenho uma conta</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.linkButton}>
-      <Icon name="link" size={23} color="#000" />
-        <Text style={styles.linkButtonText}>Recebi um link com meu cadastro</Text>
-      </TouchableOpacity>
     </View>
   );
 };

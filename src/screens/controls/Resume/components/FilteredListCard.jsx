@@ -57,7 +57,7 @@ const FilteredListCard = () => {
             style={[styles.toggleButton, selectedTab === 'sales' && styles.activeButton]}
             onPress={() => setSelectedTab('sales')}
           >
-            <Text style={[styles.toggleText, selectedTab === 'sales' && styles.activeText3]}>Vendas Liquidadas</Text>
+            <Text style={[styles.toggleText, selectedTab === 'sales' && styles.activeText3]}>Vendas Pagas</Text>
             <View style={styles.containerArrow}>
               <Ionicons name="arrow-up-outline" size={20} color={COLORS.green} />
               <Text style={[styles.toggleValue2, selectedTab === 'sales' && styles.activeText2]}>R$210</Text>
@@ -67,7 +67,7 @@ const FilteredListCard = () => {
             style={[styles.toggleButton, selectedTab === 'expenses' && styles.activeButton]}
             onPress={() => setSelectedTab('expenses')}
           >
-            <Text style={[styles.toggleText, selectedTab === 'expenses' && styles.activeText3]}>Despesas Liquidadas</Text>
+            <Text style={[styles.toggleText, selectedTab === 'expenses' && styles.activeText3]}>Despesas Pagas</Text>
             <View style={styles.containerArrow}>
               <Ionicons name="arrow-down-outline" size={20} color={COLORS.red} />
               <Text style={[styles.toggleValue, selectedTab === 'expenses' && styles.activeText]}>R$100</Text>
@@ -78,7 +78,7 @@ const FilteredListCard = () => {
         {/* Saldo */}
         <View style={styles.balanceContainer}>
           <Text style={styles.balanceText}>
-            Saldo <Text style={styles.balanceSubText}>(Vendas - Despesas liquidadas)</Text>
+            Saldo <Text style={styles.balanceSubText}>(Vendas - Despesas Pagas)</Text>
           </Text>
           <Text style={styles.balanceValue}>R$110</Text>
         </View>

@@ -17,6 +17,7 @@ const ActionButtons = ({navigation}) => {
   const [secondModalVisible, setSecondModalVisible] = useState(false);
   const [thirdModalVisible, setThirdModalVisible] = useState(false);  // Terceiro modal
   const [fourthModalVisible, setFourthModalVisible] = useState(false);  // Quarto modal
+  const [FiveModalVisible, setFiveModalVisible] = useState(false); // Quinto Modal
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').height)).current;
   const slideAnimThirdModal = useRef(new Animated.Value(Dimensions.get('window').height)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -99,6 +100,11 @@ const ActionButtons = ({navigation}) => {
     setFourthModalVisible(!fourthModalVisible);
   };
 
+    // Função para abrir o quinto modal de "orçamento ou PMOC"
+    const toggleFiveModal = () => {
+      setFiveModalVisible(!FiveModalVisible);
+    };
+
   const handleNewExpense = () => {
     setModalVisible(false);  // Fechar modal antes de navegar
     navigation.navigate('NewExpense');
@@ -112,6 +118,10 @@ const ActionButtons = ({navigation}) => {
   const handleAddProductScreen = () => {
     setFourthModalVisible(false);
     navigation.navigate('AddProductScreen');
+  };
+  const handleBudgetScreen = () => {
+    setFiveModalVisible(false);
+    navigation.navigate('Budget');
   };
 
   const handleAddService = () => {
@@ -148,7 +158,7 @@ const ActionButtons = ({navigation}) => {
     navigation.navigate('NewBudgets');
   };
 
-  
+
 
 
   return (
@@ -192,7 +202,7 @@ const ActionButtons = ({navigation}) => {
               <Text style={[styles.modalText, styles.blackText]}>Cadastrar Produtos ou Serviços</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.modalButton2]} onPress={handleBudget}>
+            <TouchableOpacity style={[styles.modalButton2]} onPress={toggleFiveModal}>
               <CellphoneIcon size={25} />
               <Text style={[styles.modalText, styles.blackText]}>Incluir orçamento</Text>
             </TouchableOpacity>
@@ -239,10 +249,6 @@ const ActionButtons = ({navigation}) => {
             <ExpenseIcon size={25} />
               <Text style={styles.secondModalText}>Despesas</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.secondModalButton} onPress={handleBudget2}>
-            <BugetIcon size={25} />
-              <Text style={styles.secondModalText}>Orçamentos cadastrados</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -283,7 +289,8 @@ const ActionButtons = ({navigation}) => {
           </Animated.View>
         </TouchableOpacity>
       </Modal>
-            {/* Quarto Modal - Cadastrar Produtos ou Serviços */}
+
+        {/* Quarto Modal - Cadastrar Produtos ou Serviços */}
         <Modal
         animationType="slide"
         transparent={true}
@@ -305,6 +312,32 @@ const ActionButtons = ({navigation}) => {
 
             <TouchableOpacity style={styles.fourthModalButton} onPress={handleAddService}>
               <Text style={styles.fourthModalText}>Serviços</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+              {/* Quinto Modal - Cadastrar Orçamnetos ou PMOC */}
+        <Modal
+        animationType="slide"
+        transparent={true}
+        visible={FiveModalVisible}
+        onRequestClose={toggleFiveModal}
+        >
+        <View style={styles.fourthModalOverlay}>
+          <View style={styles.fourthModalContent}>
+            <View style={styles.fourthModalHeader}>
+              <Text style={styles.fourthModalTitle}>Selecione uma opção:</Text>
+              <TouchableOpacity onPress={toggleFiveModal}>
+                <Ionicons name="close" size={25} color={COLORS.black} />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity style={[styles.fourthModalButton, styles.yellowButton]} onPress={handleBudgetScreen}>
+              <Text style={styles.fourthModalText}>Orçamentos</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.fourthModalButton} onPress={handleAddService}>
+              <Text style={styles.fourthModalText}>PMOC</Text>
             </TouchableOpacity>
           </View>
         </View>

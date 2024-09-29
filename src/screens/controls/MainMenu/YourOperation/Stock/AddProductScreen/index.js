@@ -1,12 +1,14 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView, Modal } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, Modal, Alert, ActivityIndicator } from 'react-native';
 import styles from './styles';
 import BarTop2 from '../../../../../../components/BarTop2';
 import { COLORS } from '../../../../../../constants';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ProductValues from './componentes/ProductValues';
 import { Picker } from '@react-native-picker/picker';
+import axios from 'axios';
+import { useFocusEffect } from '@react-navigation/native';
 
 const AddProductScreen = ({ navigation }) => {
   const [barcode, setBarcode] = useState('');
@@ -15,26 +17,85 @@ const AddProductScreen = ({ navigation }) => {
   const [productName, setProductName] = useState('');
   const [serviceDescription, setServiceDescription] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [isModalVisible, setIsModalVisible] = useState(false); // Estado do modal
+  const [custo, setCusto] = useState(''); // Novo campo: custo
+  const [precoVenda, setPrecoVenda] = useState(''); // Novo campo: preço de venda
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  // Função para buscar categorias
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(
+        'https://api.celereapp.com.br/mnt/categoriasprodutos/?page_size=100&max_page_size=100&empresa=1'
+      );
+      setCategories(response.data.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Erro ao buscar categorias:', error);
+      setLoading(false);
+    }
+  };
+
+  // Atualizar lista de categorias quando a tela for focada
+  useFocusEffect(
+    useCallback(() => {
+      fetchCategories();
+    }, [])
+  );
+
+  // Função para navegar para a tela de adicionar categoria
   const handleAddCategory = () => {
     navigation.navigate('IncludeCategoryProducts');
   };
-  const handleConfirm = () => {
-    // Lógica para confirmação da categoria
-    setIsModalVisible(true); // Exibir o modal após a confirmação
+
+  // Função para registrar produto
+  const handleConfirm = async () => {
+    if (!productName || !serviceDescription || !barcode || !quantity || !selectedCategory || !custo || !precoVenda) {
+      Alert.alert("Erro", "Preencha todos os campos obrigatórios!");
+      return;
+    }
+
+    const productData = {
+      status: true,
+      nome: productName,
+      descricao: serviceDescription,
+      ean: barcode,
+      custo: parseFloat(custo), // Convertendo custo para número
+      preco_venda: parseFloat(precoVenda), // Convertendo preço de venda para número
+      qtd_estoque: quantity,
+      super_categoria: 1, // Ajuste conforme necessário
+      categoria: selectedCategory,
+      unidade: 1, // Ajuste conforme necessário
+      empresa: 1, // Ajuste conforme necessário
+      usuario: 1, // Ajuste conforme necessário
+    };
+
+    try {
+      const response = await axios.post(
+        'https://api.celereapp.com.br/cad/produtos/',
+        productData,
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      if (response.data.status === 'success') {
+        setIsModalVisible(true); // Exibir modal de sucesso
+      } else {
+        Alert.alert("Erro", "Falha ao cadastrar o produto. Tente novamente.");
+      }
+    } catch (error) {
+      console.error('Erro ao cadastrar produto:', error);
+      Alert.alert("Erro", "Ocorreu um erro ao cadastrar o produto.");
+    }
   };
 
   const closeModal = () => {
-    setIsModalVisible(false); // Fechar o modal
-    navigation.navigate('StockInfo');
+    setIsModalVisible(false);
+    navigation.navigate('StockInfo'); // Navegar após fechar o modal
   };
-
-
 
   return (
     <View style={styles.mainContainer}>
-      {/* Barra Superior Fixa no Topo */}
+      {/* Barra Superior */}
       <View style={styles.barTopContainer}>
         <BarTop2
           titulo="Voltar"
@@ -45,11 +106,10 @@ const AddProductScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* ScrollView para o Conteúdo Abaixo da Barra Superior */}
       <ScrollView style={styles.scrollContainer}>
         <Text style={styles.title}>Adicionar um produto no estoque</Text>
 
-        {/* Primeira Parte do Design */}
+        {/* Primeira Parte */}
         <View style={styles.contentContainer}>
           <View style={styles.leftContainer}>
             <View style={styles.imageContainer}>
@@ -103,11 +163,9 @@ const AddProductScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Segunda Parte do Design */}
+        {/* Detalhes do Produto */}
         <View style={styles.productDetailsContainer}>
           <Text style={styles.sectionTitle}>Detalhes do Produto</Text>
-
-          {/* Campo de Nome do Produto */}
           <TextInput
             style={styles.productNameInput}
             placeholder="Nome do produto"
@@ -115,8 +173,6 @@ const AddProductScreen = ({ navigation }) => {
             value={productName}
             onChangeText={setProductName}
           />
-
-          {/* Campo de Descrição do Serviço */}
           <TextInput
             style={styles.serviceDescriptionInput}
             placeholder="Descrição do Serviço"
@@ -130,20 +186,55 @@ const AddProductScreen = ({ navigation }) => {
         {/* Categoria do Produto */}
         <View style={styles.categoryContainer}>
           <Text style={styles.categoryTitle}>Categoria do produto</Text>
-          <View style={styles.categoryInputContainer}>
-            <Picker
-              selectedValue={selectedCategory}
-              style={styles.categoryPicker}
-              onValueChange={(itemValue) => setSelectedCategory(itemValue)}
-            >
-              <Picker.Item label="Escolha uma categoria" value="" />
-              <Picker.Item label="Categoria 1" value="categoria1" />
-              <Picker.Item label="Categoria 2" value="categoria2" />
-            </Picker>
-            <TouchableOpacity style={styles.addButton} onPress={handleAddCategory}>
-              <Icon name="add" size={20} color="black" />
-            </TouchableOpacity>
-          </View>
+
+          {/* Exibir indicador de carregamento enquanto busca categorias */}
+          {loading ? (
+            <ActivityIndicator size="large" color={COLORS.primary} />
+          ) : (
+            <View style={styles.categoryInputContainer}>
+              <Picker
+                selectedValue={selectedCategory}
+                style={styles.categoryPicker}
+                onValueChange={(itemValue) => setSelectedCategory(itemValue)}
+              >
+                <Picker.Item label="Escolha uma categoria" value="" />
+                {categories.map((category) => (
+                  <Picker.Item key={category.id} label={category.nome} value={category.id} />
+                ))}
+              </Picker>
+
+              {/* Botão para adicionar categoria */}
+              <TouchableOpacity style={styles.addButton} onPress={handleAddCategory}>
+                <Icon name="add" size={20} color="black" />
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
+        {/* Campo de Custo */}
+        <View style={styles.productDetailsContainer}>
+          <Text style={styles.sectionTitle}>Custo do Produto</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Insira o custo"
+            placeholderTextColor={COLORS.lightGray}
+            value={custo}
+            onChangeText={setCusto}
+            keyboardType="numeric" // Definir como numérico
+          />
+        </View>
+
+        {/* Campo de Preço de Venda */}
+        <View style={styles.productDetailsContainer}>
+          <Text style={styles.sectionTitle}>Preço de Venda</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Insira o preço de venda"
+            placeholderTextColor={COLORS.lightGray}
+            value={precoVenda}
+            onChangeText={setPrecoVenda}
+            keyboardType="numeric" // Definir como numérico
+          />
         </View>
 
         {/* Valores do Produto */}
@@ -153,22 +244,16 @@ const AddProductScreen = ({ navigation }) => {
 
         {/* Botão de Cadastrar Produto */}
         <TouchableOpacity style={styles.registerButton} onPress={handleConfirm}>
-            <Icon name="checkmark-circle" size={20} color="black" />
-            <Text style={styles.buttonText}>Cadastrar produto</Text>
+          <Icon name="checkmark-circle" size={20} color="black" />
+          <Text style={styles.buttonText}>Cadastrar produto</Text>
         </TouchableOpacity>
-      {/* Modal de confirmação */}
-        <Modal
-          visible={isModalVisible}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={closeModal}
-        >
+
+        {/* Modal de confirmação */}
+        <Modal visible={isModalVisible} transparent={true} animationType="slide" onRequestClose={closeModal}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
               <Icon name="checkmark-circle" size={90} color={COLORS.green} />
               <Text style={styles.modalText}>Produto cadastrado{'\n'}com sucesso!</Text>
-
-              {/* Botão Ok */}
               <TouchableOpacity style={styles.modalButton} onPress={closeModal}>
                 <Text style={styles.modalButtonText}>Ok</Text>
               </TouchableOpacity>

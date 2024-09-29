@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#000',
     marginBottom: 10,
+    width:'80%',
   },
   createAccountButton: {
     backgroundColor: '#212121', // Botão preto conforme o design

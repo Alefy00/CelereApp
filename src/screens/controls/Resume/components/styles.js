@@ -135,7 +135,7 @@ secondModalOverlay: {
     marginBottom: 10,
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingVertical: 25,
+    paddingVertical: 35,
   },
   secondModalText: {
     fontSize: 16,
@@ -270,7 +270,7 @@ secondModalOverlay: {
     elevation: 1,
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingVertical: 30,
+    paddingVertical: 40,
   },
   fourthModalText: {
     fontSize: 16,

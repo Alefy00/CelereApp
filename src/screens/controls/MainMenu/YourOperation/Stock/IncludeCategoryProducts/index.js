@@ -1,26 +1,52 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Modal, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import BarTop3 from '../../../../../../components/BarTop3';
 import { COLORS } from '../../../../../../constants';
+import axios from 'axios';
 
 const IncludeCategoryProducts = ({ navigation }) => {
   const [categoryName, setCategoryName] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false); // Estado do modal
 
-  const handleConfirm = () => {
-    // Lógica para confirmação da categoria
-    console.log("Categoria confirmada:", categoryName);
-    setIsModalVisible(true); // Exibir o modal após a confirmação
+  const handleConfirm = async () => {
+    if (!categoryName) {
+      Alert.alert("Erro", "O campo nome da categoria é obrigatório!");
+      return;
+    }
+
+    const categoryData = {
+      status: true,
+      nome: categoryName,
+      descricao: null, // Descrição enviada como null
+      empresa: 1, // Ajustar conforme necessário
+      usuario: 1, // Ajustar conforme necessário
+    };
+
+    try {
+      const response = await axios.post(
+        'https://api.celereapp.com.br/mnt/categoriasprodutos/',
+        categoryData,
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      if (response.data.status === 'success') {
+        setIsModalVisible(true); // Exibir modal de sucesso
+      } else {
+        Alert.alert("Erro", "Falha ao registrar a categoria. Tente novamente.");
+      }
+    } catch (error) {
+      console.error('Erro ao registrar categoria:', error);
+      Alert.alert("Erro", "Ocorreu um erro ao registrar a categoria.");
+    }
   };
 
   const closeModal = () => {
     setIsModalVisible(false); // Fechar o modal
     navigation.navigate('AddProductScreen');
   };
-
 
   return (
     <View style={styles.containerBase}>
@@ -42,7 +68,7 @@ const IncludeCategoryProducts = ({ navigation }) => {
           <Text style={styles.inputLabel}>Nome da categoria</Text>
           <TextInput
             style={styles.input}
-            placeholder="ex: Manutenção de motor"
+            placeholder="ex: Eletrônicos"
             value={categoryName}
             onChangeText={setCategoryName}
           />
@@ -53,7 +79,8 @@ const IncludeCategoryProducts = ({ navigation }) => {
           <Icon name="checkmark-circle" size={25} color={COLORS.black} />
           <Text style={styles.confirmButtonText}>Confirmar</Text>
         </TouchableOpacity>
-                {/* Modal de confirmação */}
+
+        {/* Modal de confirmação */}
         <Modal
           visible={isModalVisible}
           transparent={true}

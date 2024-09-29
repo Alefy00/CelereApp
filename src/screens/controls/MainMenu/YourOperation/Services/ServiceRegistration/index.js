@@ -17,7 +17,7 @@ const AddService = ({ navigation }) => {
   const [barcode, setBarcode] = useState('');
   const [name, setName] = useState('');
   const [unitMeasure, setUnitMeasure] = useState('');
-  const [unitValue, setUnitValue] = useState(''); 
+  const [unitValue, setUnitValue] = useState('');
   const [price, setPrice] = useState('');
   const [issRate, setIssRate] = useState('');
   const [description, setDescription] = useState('');
@@ -89,7 +89,7 @@ const AddService = ({ navigation }) => {
   }, []);
 
   const handleSave = async () => {
-    if (!name || !price || !unitMeasure || !issRate) {
+    if (!name || !price || !unitMeasure ) {
       Alert.alert('Erro', 'Todos os campos obrigatórios devem ser preenchidos.');
       return;
     }
@@ -109,7 +109,7 @@ const AddService = ({ navigation }) => {
       preco_venda: parseFloat(price),
       status: 'ativo',
       unidade_medida: unitMeasure,
-      aliquota_iss: issRate,
+
     };
 
     try {
@@ -238,23 +238,6 @@ const AddService = ({ navigation }) => {
             </View>
           )}
 
-          <View style={styles.clientContainer}>
-            <TouchableOpacity style={styles.clientPicker} onPress={toggleIssRateDropdown}>
-              <Text style={styles.clientText}>{issRate || 'Alíquota ISS'}</Text>
-              <Icon name={isIssRateDropdownVisible ? 'arrow-up' : 'arrow-down'} size={24} color={COLORS.lightGray} />
-            </TouchableOpacity>
-          </View>
-          {isIssRateDropdownVisible && (
-            <View style={[styles.dropdownContainer, { maxHeight: 150 }]}>
-              <ScrollView nestedScrollEnabled={true}>
-                {issRates.map((rate) => (
-                  <TouchableOpacity key={rate.id} style={styles.dropdownItem} onPress={() => selectIssRate(rate.nome)}>
-                    <Text style={styles.dropdownItemText}>{rate.nome}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          )}
         </View>
 
         <TouchableOpacity style={styles.button} onPress={handleSave}>
