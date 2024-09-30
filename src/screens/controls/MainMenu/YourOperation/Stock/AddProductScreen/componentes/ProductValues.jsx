@@ -1,120 +1,182 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../../../../constants';
 
-
-const ProductValues = () => {
+// Usamos forwardRef para permitir o uso de ref pelo componente pai
+const ProductValues = forwardRef(({ onCustoChange, onPrecoVendaChange }, ref) => {
   const [costPrice, setCostPrice] = useState('');
   const [salePrice, setSalePrice] = useState('');
-  const [margin, setMargin] = useState(0);
+  const [grossMargin, setGrossMargin] = useState('');
 
-  const increaseMargin = () => {
-    setMargin(margin + 1);
+  const formatCurrency = (value) => {
+    const formatted = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+    return formatted;
   };
 
-  const decreaseMargin = () => {
-    if (margin > 0) {
-      setMargin(margin - 1);
+  const handleCostPriceChange = (text) => {
+    const numericValue = text.replace(/[^0-9]/g, ''); // Remove caracteres não numéricos
+    const formattedValue = (numericValue / 100).toFixed(2); // Ajusta centavos
+    setCostPrice(formatCurrency(formattedValue));
+    calculateGrossMargin(parseFloat(formattedValue), parseFloat(salePrice.replace(/[^\d,.-]/g, '')));
+    onCustoChange(formattedValue);  // Atualizando o valor no componente pai
+  };
+
+  const handleSalePriceChange = (text) => {
+    const numericValue = text.replace(/[^0-9]/g, ''); // Remove caracteres não numéricos
+    const formattedValue = (numericValue / 100).toFixed(2); // Ajusta centavos
+    setSalePrice(formatCurrency(formattedValue));
+    calculateGrossMargin(parseFloat(costPrice.replace(/[^\d,.-]/g, '')), parseFloat(formattedValue));
+    onPrecoVendaChange(formattedValue);  // Atualizando o valor no componente pai
+  };
+
+  const handleGrossMarginChange = (text) => {
+    const marginValue = parseFloat(text);
+    setGrossMargin(text);
+
+    if (marginValue >= 0 && costPrice !== '') {
+      const cost = parseFloat(costPrice.replace(/[^\d,.-]/g, '')); // Remove caracteres de moeda
+      const newSalePrice = (cost / (1 - marginValue / 100)).toFixed(2);
+      setSalePrice(formatCurrency(newSalePrice)); // Atualiza o preço de venda
+      onPrecoVendaChange(newSalePrice);  // Atualizando o valor no componente pai
     }
   };
 
+  const calculateGrossMargin = (cost, sale) => {
+    if (cost > 0 && sale > 0 && sale > cost) {
+      const margin = ((sale - cost) / sale) * 100;
+      setGrossMargin(margin.toFixed(2)); // Calcula margem bruta
+    } else {
+      setGrossMargin('');
+    }
+  };
+
+  const handleIncrement = () => {
+    if (grossMargin !== '') {
+      const newMargin = parseFloat(grossMargin) + 1;
+      handleGrossMarginChange(newMargin.toString());
+    }
+  };
+
+  const handleDecrement = () => {
+    if (grossMargin !== '') {
+      const newMargin = parseFloat(grossMargin) - 1;
+      if (newMargin >= 0) {
+        handleGrossMarginChange(newMargin.toString());
+      }
+    }
+  };
+
+  // Definindo a função clearValues acessível pelo ref
+  useImperativeHandle(ref, () => ({
+    clearValues() {
+      setCostPrice('');
+      setSalePrice('');
+      setGrossMargin('');
+    }
+  }));
+
   return (
-    <View style={styles.productValuesContainer}>
-      <Text style={styles.productValuesTitle}>Valores do produto</Text>
-      <View style={styles.productInputContainer}>
+    <View style={styles.container}>
+      <Text style={styles.title}>Valores do produto</Text>
+
+      <View style={styles.row}>
         <TextInput
-          style={styles.productInput}
-          placeholder="Preço de custo (R$)"
-          placeholderTextColor={COLORS.lightGray}
-          value={costPrice}
-          onChangeText={setCostPrice}
+          style={styles.input}
+          placeholder="Preço de custo"
           keyboardType="numeric"
+          value={costPrice}
+          onChangeText={handleCostPriceChange} // Formata e calcula dinamicamente
         />
       </View>
-      <View style={styles.productInputContainer}>
+
+      <View style={styles.row}>
         <TextInput
-          style={styles.productInput}
-          placeholder="Preço de venda (R$)"
-          placeholderTextColor={COLORS.lightGray}
-          value={salePrice}
-          onChangeText={setSalePrice}
+          style={styles.input}
+          placeholder="Preço de venda"
           keyboardType="numeric"
+          value={salePrice}
+          onChangeText={handleSalePriceChange} // Formata e calcula dinamicamente
         />
-        <Text style={styles.marginLabel}>Margem %</Text>
-        <View style={styles.marginControls}>
-          <TouchableOpacity onPress={decreaseMargin} style={styles.marginButton}>
-            <Icon name="remove-outline" size={25} color="black" />
+        <Text style={styles.marginLabel}>Margem{'\n'} Bruta %</Text>
+        <View style={styles.marginControl}>
+          <TouchableOpacity style={styles.marginButton} onPress={handleDecrement}>
+            <Icon name="remove" size={20} color={COLORS.black} />
           </TouchableOpacity>
-          <Text style={styles.marginValue}>{margin}</Text>
-          <TouchableOpacity onPress={increaseMargin} style={styles.marginButton}>
-            <Icon name="add-outline" size={25} color="black" />
+          <TextInput
+            style={styles.marginInput}
+            keyboardType="numeric"
+            value={grossMargin}
+            onChangeText={handleGrossMarginChange} // Permite inserção manual da margem
+          />
+          <TouchableOpacity style={styles.marginButton} onPress={handleIncrement}>
+            <Icon name="add" size={20} color={COLORS.black} />
           </TouchableOpacity>
         </View>
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
-    
-  
-    productValuesContainer: {
-      backgroundColor: COLORS.white,
-      borderRadius: 10,
-      padding: 20,
-      marginHorizontal: 20,
-      marginTop: 10,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
-    },
-    productValuesTitle: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: COLORS.black,
-      marginBottom: 10,
-    },
-    productInputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 15,
-    },
-    productInput: {
-      flex: 1,
-      paddingVertical: 10,
-      paddingRight: 0,
-      color: COLORS.black,
-      borderBottomWidth: 1,
-      borderColor: COLORS.black,
-    },
-    marginLabel: {
-      marginHorizontal:20,
-      color: COLORS.lightGray,
-
-    },
-    marginControls: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    marginButton: {
-      width: 25,
-      height: 25,
-      backgroundColor: COLORS.primary, // Ajuste a cor conforme o design
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 5,
-      marginHorizontal: 5,
-    },
-    marginValue: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: COLORS.black,
-      marginHorizontal: 5,
-    },
+  container: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    marginTop: 20,
+    marginHorizontal: 20,
+  },
+  title: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: COLORS.black,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  input: {
+    flex: 1,
+    height: 40,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.black,
+    fontSize: 16,
+    paddingHorizontal: 10,
+    color: COLORS.black,
+  },
+  marginLabel: {
+    marginHorizontal: 10,
+    fontSize: 16,
+    color: COLORS.black,
+  },
+  marginControl: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 4,
+  },
+  marginInput: {
+    width: 50,
+    height: 40,
+    textAlign: 'center',
+    borderRadius: 4,
+    marginHorizontal: 5,
+  },
+  marginButton: {
+    backgroundColor: '#FFD700',
+    borderRadius: 4,
+    padding: 5,
+  },
 });
 
 export default ProductValues;

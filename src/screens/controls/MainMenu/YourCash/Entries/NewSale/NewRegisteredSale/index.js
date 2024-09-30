@@ -177,7 +177,9 @@ const NewRegisteredSale = ({ navigation, route }) => {
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
-          <BarTop2 titulo="Voltar" backColor={COLORS.primary} foreColor={COLORS.black} />
+          <View style={{height: 55}} >
+          <BarTop2 titulo="Voltar" backColor={COLORS.primary} foreColor={COLORS.black}/>
+          </View>
           <View style={styles.header}>
             <TouchableOpacity style={styles.registerButton} onPress={toggleFourthModal}>
               <Icon name="add" size={20} color={COLORS.black} />

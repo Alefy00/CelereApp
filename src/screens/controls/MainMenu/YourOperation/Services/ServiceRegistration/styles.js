@@ -78,10 +78,17 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     marginBottom: 10,
   },
+  checkboxContainer:{
+    flexDirection: 'row',
+    marginBottom: 10,
+  },
+  checkboxLabel:{
+    marginLeft: 10,
+  },
   input: {
     height: 50,
     borderColor: COLORS.black,
-    borderRadius: 10,
+    borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 20,
     borderBottomWidth: 1,

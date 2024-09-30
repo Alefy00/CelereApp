@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   filterContainer: {
     paddingVertical: 10,
     paddingHorizontal: 0, // Removendo qualquer padding extra para alinhar o carrossel
-    alignItems: 'center', // Centraliza os itens verticalmente
+    alignItems: 'center', // Centraliza os itens verticalmente,
   },
   filterButton: {
     paddingHorizontal: 15,
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   },
   fixedButton2: {
     flexDirection: 'row',
-    width: 200,
+    width: 180,
     height: 45,
     backgroundColor: '#FFD700',
     borderRadius: 30,
@@ -165,11 +165,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 5,
-    marginLeft:40,
+    marginLeft:60,
   },
   textAdd:{
     color:COLORS.black,
-    marginLeft:15,
+    marginLeft:10,
     fontSize: 14,
   }
 });

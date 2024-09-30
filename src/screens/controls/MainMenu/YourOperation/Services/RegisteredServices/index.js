@@ -1,28 +1,68 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, Image, Modal, ScrollView } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, Image, Modal, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import BarTop3 from '../../../../../../components/BarTop3';
 import { COLORS } from '../../../../../../constants';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Constantes da API
+const BASE_API_URL = 'https://api.celereapp.com.br';
+const REGISTERED_SERVICES_API = `${BASE_API_URL}/cad/servicos/`;
 
 const RegisteredServices = ({ navigation }) => {
 
-    // Estado para os filtros
-    const [filterModalVisible, setFilterModalVisible] = useState(false);
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-    const [value, setValue] = useState('');
-    const [nome, setNome] = useState('');
+  // Estado para os filtros
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [value, setValue] = useState('');
+  const [nome, setNome] = useState('');
+  const [services, setServices] = useState([]); // Serviços listados da API
+  const [loading, setLoading] = useState(true); // Estado de carregamento
 
+  // Função para buscar o ID da empresa logada
+  const getEmpresaId = async () => {
+    try {
+      const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+      if (storedEmpresaId) {
+        return Number(storedEmpresaId); // Converte para número se estiver como string
+      } else {
+        Alert.alert('Erro', 'ID da empresa não encontrado.');
+        return null;
+      }
+    } catch (error) {
+      console.error('Erro ao buscar o ID da empresa:', error);
+      return null;
+    }
+  };
 
-  // Dados fictícios dos serviços
-  const services = [
-    { id: '1', name: 'Troca de Tela', price: 300, image: require('../../../../../../assets/images/png/trocacelular.png'), type: 'Serviço livre' },
-    { id: '2', name: 'Formatação de aparelho', price: 120, image: require('../../../../../../assets/images/png/formaçaoaparelho.png'), type: 'Serviço livre' },
-  ];
+  // Função para buscar os serviços da API, usando useCallback para memoizar a função
+  const fetchServices = useCallback(async () => {
+    try {
+      const empresaId = await getEmpresaId();
+      if (empresaId) {
+        const response = await axios.get(`${REGISTERED_SERVICES_API}?empresa_id=${empresaId}`);
+        if (response.data && response.data.status === 200) {
+          setServices(response.data.data); // Popula a lista de serviços
+        } else {
+          Alert.alert('Erro', 'Falha ao recuperar os serviços.');
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar serviços:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao buscar os serviços.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
+  useEffect(() => {
+    fetchServices(); // Chama a função ao carregar a tela
+  }, [fetchServices]); // Incluímos fetchServices nas dependências
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -36,6 +76,7 @@ const RegisteredServices = ({ navigation }) => {
     setSelectedDate(date);
     hideDatePicker();
   };
+
   const openFilterModal = () => {
     setFilterModalVisible(true);
   };
@@ -65,6 +106,8 @@ const RegisteredServices = ({ navigation }) => {
           <TextInput
             style={styles.searchInput}
             placeholder="Pesquise um serviço..."
+            value={nome}
+            onChangeText={setNome} // Atualiza o estado de pesquisa
           />
           <Icon name="search" size={20} color={COLORS.gray} />
           <TouchableOpacity style={styles.filterButton} onPress={openFilterModal}>
@@ -76,15 +119,18 @@ const RegisteredServices = ({ navigation }) => {
         {/* Lista de Serviços */}
         <FlatList
           data={services}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <View style={styles.serviceCard}>
-              <Image source={item.image} style={styles.serviceImage} />
+              <Image
+                source={item.image_url ? { uri: item.image_url } : require('../../../../../../assets/images/png/placeholder.png')} // Imagem padrão se não houver
+                style={styles.serviceImage}
+              />
               <View style={styles.serviceInfo}>
-                <Text style={styles.serviceName}>{item.name}</Text>
-                <Text style={styles.serviceType}>{item.type}</Text>
+                <Text style={styles.serviceName}>{item.nome}</Text>
+                <Text style={styles.serviceType}>{item.tipo_servico || 'Serviço livre'}</Text>
               </View>
-              <Text style={styles.servicePrice}>R${item.price.toFixed(2)}</Text>
+              <Text style={styles.servicePrice}>R${parseFloat(item.preco_venda).toFixed(2)}</Text>
             </View>
           )}
           style={styles.serviceList}
@@ -95,7 +141,6 @@ const RegisteredServices = ({ navigation }) => {
           <Icon name="add" size={25} color={COLORS.black} />
           <Text style={styles.addButtonText}>Cadastrar novo serviço</Text>
         </TouchableOpacity>
-
 
         {/* Modal de filtro */}
         <Modal
@@ -131,15 +176,8 @@ const RegisteredServices = ({ navigation }) => {
                 onConfirm={handleConfirm}
                 onCancel={hideDatePicker}
               />
-                <View style={styles.inputContainer3}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Nome"
-                  value={nome}
-                  onChangeText={setNome}
-                />
-              </View>
-               {/* Campo de Valor */}
+
+              {/* Campo de Valor */}
               <View style={styles.inputContainer2}>
                 <TextInput
                   style={styles.input}

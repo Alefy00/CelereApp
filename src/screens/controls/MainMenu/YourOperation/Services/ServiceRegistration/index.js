@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, Alert, Image } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import BarTop2 from '../../../../../../components/BarTop2';
 import { COLORS } from '../../../../../../constants';
@@ -10,25 +11,37 @@ import styles from './styles';
 
 const BASE_API_URL = 'https://api.celereapp.com.br';
 const UNIT_MEASURE_API_ENDPOINT = `${BASE_API_URL}/api/und_medida_servico/?page=1&page_size=100`;
-const ISS_RATE_API_ENDPOINT = `${BASE_API_URL}/api/aliquota_iss_servico/?page=1&page_size=100`;
 const REGISTER_SERVICE_API_ENDPOINT = `${BASE_API_URL}/cad/servicos/`;
 
 const AddService = ({ navigation }) => {
   const [barcode, setBarcode] = useState('');
   const [name, setName] = useState('');
   const [unitMeasure, setUnitMeasure] = useState('');
-  const [unitValue, setUnitValue] = useState('');
   const [price, setPrice] = useState('');
-  const [issRate, setIssRate] = useState('');
   const [description, setDescription] = useState('');
-  const [showPicker, setShowPicker] = useState(false);
-  const [pickerType, setPickerType] = useState('');
   const [empresaId, setEmpresaId] = useState(null);
-  const [unitsOfMeasure, setUnitsOfMeasure] = useState([]); // Unidades de medida
-  const [issRates, setIssRates] = useState([]); // Alíquotas ISS
+  const [unitsOfMeasure, setUnitsOfMeasure] = useState([]);
   const [isUnitMeasureDropdownVisible, setIsUnitMeasureDropdownVisible] = useState(false);
-  const [isIssRateDropdownVisible, setIsIssRateDropdownVisible] = useState(false);
+  const [isPriceDisabled, setIsPriceDisabled] = useState(false); // Estado para controlar o checkbox
+  const [imageUri, setImageUri] = useState(null); // Para controlar a imagem do serviço
   const [modalVisible, setModalVisible] = useState(false); // Estado para controlar o modal de sucesso
+  const defaultImageUrl = require('../../../../../../assets/images/png/placeholder.png'); // URL da imagem padrão
+
+  // Função para formatar como moeda brasileira
+  const formatCurrency = (value) => {
+    const formatted = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+    return formatted;
+  };
+
+  const handlePriceChange = (text) => {
+    // Remove caracteres não numéricos e converte para o formato correto
+    const numericValue = text.replace(/[^0-9]/g, ''); // Remove tudo que não for número
+    const formattedValue = (numericValue / 100).toFixed(2); // Formata como centavos
+    setPrice(formatCurrency(formattedValue)); // Atualiza o estado do preço com a formatação
+  };
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
@@ -60,27 +73,12 @@ const AddService = ({ navigation }) => {
     }
   };
 
-  const fetchIssRates = async (empresa_id) => {
-    try {
-      const response = await fetch(`${ISS_RATE_API_ENDPOINT}&empresa_id=${empresa_id}`);
-      const result = await response.json();
-      if (response.ok && result.status === 'success') {
-        setIssRates(result.data);
-      } else {
-        Alert.alert('Erro', 'Não foi possível carregar as alíquotas ISS.');
-      }
-    } catch (error) {
-      Alert.alert('Erro', 'Ocorreu um erro ao buscar as alíquotas ISS.');
-    }
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       const empresaData = await getEmpresaId();
       if (empresaData) {
         setEmpresaId(empresaData);
         await fetchUnitsOfMeasure(empresaData);
-        await fetchIssRates(empresaData);
       } else {
         Alert.alert('Erro', 'Não foi possível carregar os dados da empresa. Tente novamente mais tarde.');
       }
@@ -89,7 +87,7 @@ const AddService = ({ navigation }) => {
   }, []);
 
   const handleSave = async () => {
-    if (!name || !price || !unitMeasure ) {
+    if (!name || (!price && !isPriceDisabled) || !unitMeasure) {
       Alert.alert('Erro', 'Todos os campos obrigatórios devem ser preenchidos.');
       return;
     }
@@ -99,17 +97,18 @@ const AddService = ({ navigation }) => {
       return;
     }
 
-    const currentDate = new Date().toISOString().split('T')[0]; 
+    const currentDate = new Date().toISOString().split('T')[0];
 
     const serviceData = {
       empresa_id: empresaId,
       dt_servico: currentDate,
       nome: name,
       descricao: description,
-      preco_venda: parseFloat(price),
+      preco_venda: isPriceDisabled ? 0 : parseFloat(price.replace(/[^\d,.-]/g, '').replace(',', '.')), // numérico correto
       status: 'ativo',
       unidade_medida: unitMeasure,
-
+      ean: barcode || null, // Define como null se o código de barras não for preenchido
+      image_url: imageUri || defaultImageUrl, // Se não houver imagem, envia a imagem padrão
     };
 
     try {
@@ -130,8 +129,9 @@ const AddService = ({ navigation }) => {
         setName('');
         setUnitMeasure('');
         setPrice('');
-        setIssRate('');
         setDescription('');
+        setIsPriceDisabled(false); // Restaura o estado do checkbox
+        setImageUri(null); // Limpa a imagem
       } else {
         Alert.alert('Erro', result.message || 'Ocorreu um erro ao registrar o serviço.');
       }
@@ -145,23 +145,21 @@ const AddService = ({ navigation }) => {
     setIsUnitMeasureDropdownVisible(!isUnitMeasureDropdownVisible);
   };
 
-  const toggleIssRateDropdown = () => {
-    setIsIssRateDropdownVisible(!isIssRateDropdownVisible);
-  };
-
   const selectUnitMeasure = (unit) => {
     setUnitMeasure(unit);
     setIsUnitMeasureDropdownVisible(false);
   };
 
-  const selectIssRate = (rate) => {
-    setIssRate(rate);
-    setIsIssRateDropdownVisible(false);
-  };
-
   const handleCloseModal = () => {
     setModalVisible(false); // Fecha o modal
     navigation.navigate('RegisteredServices'); // Redireciona para a próxima tela
+  };
+
+  const handlePriceCheckboxChange = () => {
+    setIsPriceDisabled(!isPriceDisabled);
+    if (!isPriceDisabled) {
+      setPrice(''); // Limpa o campo de preço quando desativado
+    }
   };
 
   return (
@@ -184,13 +182,13 @@ const AddService = ({ navigation }) => {
             </View>
             <TextInput
               style={styles.barcodeInput}
-              placeholder="Código"
+              placeholder="Código (opcional)"
               value={barcode}
               onChangeText={setBarcode}
               keyboardType="numeric"
             />
           </View>
-          <Text style={styles.imageLabel}>  Imagem{'\n'}do serviço</Text>
+          <Text style={styles.imageLabel}>Imagem{'\n'}do serviço</Text>
         </View>
 
         <View style={styles.section}>
@@ -212,11 +210,22 @@ const AddService = ({ navigation }) => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Valores do Serviço</Text>
+
+          {/* Checkbox para desativar o campo de preço */}
+          <View style={styles.checkboxContainer}>
+            <TouchableOpacity onPress={handlePriceCheckboxChange} style={styles.checkbox}>
+              <Icon name={isPriceDisabled ? 'checkbox' : 'square-outline'} size={24} color={COLORS.black} />
+            </TouchableOpacity>
+            <Text style={styles.checkboxLabel}>Não inserir preço neste momento</Text>
+          </View>
+
+          {/* Input de preço que é desativado quando o checkbox está marcado */}
           <TextInput
-            style={styles.input}
+            style={[styles.input, isPriceDisabled && { backgroundColor: COLORS.lightGray }]}
             placeholder="Preço de Venda (R$)"
             value={price}
-            onChangeText={setPrice}
+            onChangeText={handlePriceChange}
+            editable={!isPriceDisabled} // Desabilita o campo se o checkbox estiver marcado
             keyboardType="numeric"
           />
 
@@ -237,7 +246,6 @@ const AddService = ({ navigation }) => {
               </ScrollView>
             </View>
           )}
-
         </View>
 
         <TouchableOpacity style={styles.button} onPress={handleSave}>

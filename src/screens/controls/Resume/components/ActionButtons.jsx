@@ -158,18 +158,18 @@ const ActionButtons = ({navigation}) => {
     navigation.navigate('NewBudgets');
   };
 
-
-
+  const handleSingleSale = () => {
+    navigation.navigate("SingleSale");
+  };
 
   return (
     <View style={styles.container}>
       
         {/* Botão de código de barras com animação de pulsar */}
-        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
           <TouchableOpacity style={styles.button}>
             <Ionicons name="barcode-outline" size={30} color={COLORS.black} />
           </TouchableOpacity>
-        </Animated.View>
+
 
         {/* Botão de adicionar com animação de pulsar */}
         <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
@@ -279,7 +279,7 @@ const ActionButtons = ({navigation}) => {
               <Text style={styles.thirdModalText}>Produto ou serviço cadastrado</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.thirdModalButton}>
+            <TouchableOpacity style={styles.thirdModalButton} onPress={handleSingleSale}>
               <View style={styles.containerAvulsa}>
                 <Ionicons name="alert" size={25} color={COLORS.black} />
                 <Text style={styles.thirdModalText}>Venda Avulsa</Text>

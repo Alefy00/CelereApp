@@ -1,15 +1,43 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Modal, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import BarTop3 from '../../../../../../components/BarTop3';
 import { COLORS } from '../../../../../../constants';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Função para buscar o ID da empresa logada
+const getEmpresaId = async () => {
+  try {
+    const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+    if (storedEmpresaId) {
+      return Number(storedEmpresaId); // Converte para número se estiver como string
+    } else {
+      Alert.alert('Erro', 'ID da empresa não encontrado.');
+      return null;
+    }
+  } catch (error) {
+    console.error('Erro ao buscar o ID da empresa:', error);
+    return null;
+  }
+};
 
 const IncludeCategoryProducts = ({ navigation }) => {
   const [categoryName, setCategoryName] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false); // Estado do modal
+  const [empresaId, setEmpresaId] = useState(null); // Estado para armazenar o ID da empresa
+
+  // Busca o ID da empresa quando a tela é carregada
+  useEffect(() => {
+    const fetchEmpresaId = async () => {
+      const id = await getEmpresaId();
+      setEmpresaId(id); // Armazena o ID da empresa no estado
+    };
+
+    fetchEmpresaId();
+  }, []);
 
   const handleConfirm = async () => {
     if (!categoryName) {
@@ -17,12 +45,17 @@ const IncludeCategoryProducts = ({ navigation }) => {
       return;
     }
 
+    if (!empresaId) {
+      Alert.alert("Erro", "Não foi possível obter o ID da empresa.");
+      return;
+    }
+
     const categoryData = {
       status: true,
       nome: categoryName,
       descricao: null, // Descrição enviada como null
-      empresa: 1, // Ajustar conforme necessário
-      usuario: 1, // Ajustar conforme necessário
+      empresa: empresaId, // Usa o ID da empresa logada
+      usuario: 1, // Ajuste conforme necessário
     };
 
     try {
@@ -45,7 +78,7 @@ const IncludeCategoryProducts = ({ navigation }) => {
 
   const closeModal = () => {
     setIsModalVisible(false); // Fechar o modal
-    navigation.navigate('AddProductScreen');
+    navigation.navigate('AddProductScreen'); // Retorna à tela de produtos
   };
 
   return (
