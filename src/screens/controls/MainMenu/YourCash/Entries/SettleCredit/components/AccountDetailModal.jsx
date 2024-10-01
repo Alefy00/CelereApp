@@ -139,12 +139,12 @@ const AccountDetailModal = ({ visible, onClose }) => {
               <Text style={styles.buttonText}>Liquidar</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.reminderButton} onPress={handleReminder}>
+            <TouchableOpacity style={styles.reminderButton} onPress={handleReminder} disabled={true}>
               <Icon name="share-social-outline" size={24} color="black" />
               <Text style={styles.buttonText}>Lembrete de cobrança</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.postponeButton} onPress={handlePostpone}>
+            <TouchableOpacity style={styles.postponeButton} onPress={handlePostpone} disabled={true}>
               <Icon name="calendar-outline" size={24} color="black" />
               <Text style={styles.buttonText}>Adiar</Text>
             </TouchableOpacity>

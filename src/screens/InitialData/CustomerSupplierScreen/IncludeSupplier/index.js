@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,11 +9,16 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import BarTop3 from '../../../../components/BarTop3';
 import { COLORS } from '../../../../constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const BASE_API_URL = 'https://api.celereapp.com.br';
+const REGISTER_SUPPLIER_API_ENDPOINT = `${BASE_API_URL}/cad/fornecedor/`;
 
 const IncludeSupplier = ({ navigation }) => {
   const [supplierName, setSupplierName] = useState('');
@@ -21,6 +26,24 @@ const IncludeSupplier = ({ navigation }) => {
   const [additionalInfo, setAdditionalInfo] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [isButtonVisible, setIsButtonVisible] = useState(true);
+  const [empresaId, setEmpresaId] = useState(null);
+
+  useEffect(() => {
+    const getEmpresaId = async () => {
+      try {
+        const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+        if (storedEmpresaId) {
+          setEmpresaId(Number(storedEmpresaId));
+        } else {
+          Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
+        }
+      } catch (error) {
+        Alert.alert('Erro', 'Não foi possível carregar o ID da empresa.');
+        console.error('Erro ao carregar empresaId:', error);
+      }
+    };
+    getEmpresaId();
+  }, []);
 
   const resetFields = () => {
     setSupplierName('');
@@ -28,16 +51,53 @@ const IncludeSupplier = ({ navigation }) => {
     setAdditionalInfo('');
   };
 
-  const handleAddSupplier = () => {
-    setModalVisible(true);
+  const handleAddSupplier = async () => {
+    if (!supplierName) {
+      Alert.alert('Erro', 'O nome do fornecedor é obrigatório.');
+      return;
+    }
+
+    if (!empresaId) {
+      Alert.alert('Erro', 'ID da empresa não disponível.');
+      return;
+    }
+
+    const supplierData = {
+      empresa_id: empresaId,
+      nome: supplierName,
+      categoria_fornecedor_id: 1, // Categoria fictícia, ajuste conforme necessário
+    };
+
+    try {
+      const response = await fetch(REGISTER_SUPPLIER_API_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(supplierData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setModalVisible(true); // Exibe o modal de sucesso
+        resetFields(); // Limpa os campos
+      } else {
+        Alert.alert('Erro', result.message || 'Ocorreu um erro ao registrar o fornecedor.');
+      }
+    } catch (error) {
+      console.error('Erro ao registrar o fornecedor:', error);
+      Alert.alert('Erro', 'Não foi possível registrar o fornecedor. Verifique sua conexão.');
+    }
   };
 
   const handleAddNew = () => {
-    resetFields();
     setModalVisible(false);
+    resetFields();
   };
 
   const handleMenu = () => {
+    setModalVisible(false);
     navigation.goBack();
   };
 

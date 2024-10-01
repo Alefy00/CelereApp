@@ -25,6 +25,7 @@ import SucessModal from './components/SucessModal';
 import RecurrenceField from './components/RecurrenceField';
 import SupplierDropdown from './components/SupplierDropdown';
 import styles from './styles';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 
@@ -123,12 +124,22 @@ const NewExpense = ({ navigation }) => {
   
   
 
- // Função para buscar fornecedores da API
- const fetchSuppliers = useCallback(async () => {
+// Função para buscar fornecedores da API usando o ID da empresa logada
+const fetchSuppliers = useCallback(async () => {
   setLoading(true);
   try {
-    const response = await axios.get(SUPPLIERS_API);
+    const empresaId = await getEmpresaId(); // Obtém o ID da empresa logada do AsyncStorage
+    if (!empresaId) {
+      Alert.alert('Erro', 'ID da empresa não encontrado. Por favor, verifique as configurações de login.');
+      setLoading(false);
+      return;
+    }
+
+    // Endpoint dinâmico usando o ID da empresa
+    const suppliersApiUrl = `https://api.celereapp.com.br/cad/fornecedor/?empresa_id=${empresaId}&page=1&page_size=50`;
+    const response = await axios.get(suppliersApiUrl);
     const data = response.data;
+
     if (data.results && data.results.data) {
       const fetchedSuppliers = data.results.data.map((item) => ({
         label: item.nome,
@@ -154,6 +165,13 @@ useEffect(() => {
 const handleSelectSupplier = (supplier) => {
   setSelectedSupplier(supplier);  // Define o fornecedor selecionado
 };
+
+// Dentro do componente NewExpense
+useFocusEffect(
+  useCallback(() => {
+    fetchSuppliers(); // Atualiza a lista de fornecedores quando a tela ganha o foco
+  }, [fetchSuppliers])
+);
 
   const fetchMonths = useCallback(async () => {
     setLoadingMonths(true);

@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContainer: {
-    width: '80%',
+    width: '100%',
     backgroundColor: COLORS.white,
     borderRadius: 10,
     padding: 20,
@@ -135,6 +135,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.black,
     marginLeft: 10,
+  },
+  contactItemNome:{
+    color: COLORS.black,
+    fontSize: 16,
+  },
+  contactItem:{
+    marginTop: 20,
+    borderWidth: 1,
+    padding: 15,
+    borderRadius: 5,
   },
 });
 

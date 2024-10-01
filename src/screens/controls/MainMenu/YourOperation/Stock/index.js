@@ -7,7 +7,6 @@ import { COLORS } from '../../../../../constants';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { useFocusEffect } from '@react-navigation/native'; // Adicionando useFocusEffect
 
 const SLIDER_WIDTH = Dimensions.get('window').width;
 
@@ -107,13 +106,10 @@ const StockInfo = ({ navigation }) => {
     }
   }, []);
 
-  // ** Atualiza a lista sempre que a tela é focada **
-  useFocusEffect(
-    useCallback(() => {
-      fetchProducts();
-      fetchCategories(); // Atualiza produtos e categorias quando a tela é focada
-    }, [fetchProducts, fetchCategories])
-  );
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories(); // Faz a requisição para as categorias também
+  }, [fetchProducts, fetchCategories]);
 
   // Função para aplicar o filtro de categoria e de busca nos produtos
   const applyFilters = useCallback(() => {
@@ -188,8 +184,8 @@ const StockInfo = ({ navigation }) => {
         />
       </View>
 
+      {/* Cabeçalho e dados de resumo */}
       <View style={styles.scrollViewContainer}>
-        {/* Não aplicamos flex aqui para preservar o design original */}
         <View style={styles.contentContainer}>
           <Text style={styles.title}>Seu estoque</Text>
           <View style={styles.gridContainer}>
@@ -215,38 +211,39 @@ const StockInfo = ({ navigation }) => {
 
         {/* FlatList para Filtros Horizontal */}
         <FlatList
-    data={categories} // Adiciona opção "Todos os produtos"
-    renderItem={renderFilterItem}
-    keyExtractor={(item) => item.id}
-    horizontal
-    showsHorizontalScrollIndicator={false}
-    contentContainerStyle={styles.filterContainer}
-    snapToAlignment="start"
-    decelerationRate="fast"
-  />
-
-<View style={styles.searchContainer}>
-    <TextInput
-      style={styles.searchInput}
-      placeholder="Pesquise um produto..."
-      placeholderTextColor="#AAAAAA"
-      value={searchTerm}
-      onChangeText={setSearchTerm} // Atualiza o estado de busca
-    />
-    <TouchableOpacity style={styles.searchIcon}>
-      <Icon name="search" size={20} color="#ccc" />
-    </TouchableOpacity>
-  </View>
-
-        {/* Lista de Produtos */}
-        <FlatList
-          data={filteredProducts} // Exibimos os produtos filtrados
-          renderItem={renderProductItem}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.productList}
-          showsVerticalScrollIndicator={true} // Garante que o scroll funcione para listas longas
+          data={categories} // Adiciona opção "Todos os produtos"
+          renderItem={renderFilterItem}
+          keyExtractor={(item) => item.id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterContainer}
+          snapToAlignment="start"
+          decelerationRate="fast"
         />
       </View>
+
+      {/* Campo de Busca */}
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Pesquise um produto..."
+          placeholderTextColor="#AAAAAA"
+          value={searchTerm}
+          onChangeText={setSearchTerm} // Atualiza o estado de busca
+        />
+        <TouchableOpacity style={styles.searchIcon}>
+          <Icon name="search" size={20} color="#ccc" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Lista de Produtos (com scroll) */}
+      <FlatList
+        data={filteredProducts} // Exibimos os produtos filtrados
+        renderItem={renderProductItem}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.productList}
+        showsVerticalScrollIndicator={true} // Ativa o scroll vertical
+      />
 
       {/* Botões Fixos de Ação */}
       <View style={styles.fixedButtonsContainer}>

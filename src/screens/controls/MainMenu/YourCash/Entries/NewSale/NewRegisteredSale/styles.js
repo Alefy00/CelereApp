@@ -63,6 +63,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
+  containerProduct:{
+    
+  },
   productImage: {
     width: 100,
     height: 100,
@@ -73,6 +76,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'justify',
     color: 'black',
+    alignItems: 'flex-start',
+  },
+  productPrice:{
+    color: COLORS.black,
+    fontWeight: '600',
   },
   inStock: {
     color: 'green',
@@ -87,9 +95,10 @@ const styles = StyleSheet.create({
   },
   productActionButton: {
     backgroundColor: COLORS.primary,
-    paddingHorizontal: 5,
     borderRadius: 5,
     marginHorizontal: 25,
+    padding: 5,
+  
   },
   productActionButtonText: {
     fontSize: 22,
@@ -146,7 +155,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   categoryButton: {
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 15,
     backgroundColor: COLORS.white,
     borderRadius: 5,
@@ -156,7 +165,6 @@ const styles = StyleSheet.create({
   categoryButtonActive: {
     backgroundColor: COLORS.primary,
     borderWidth: 0,
-
   },
   categoryText: {
     color: COLORS.black,
@@ -203,6 +211,22 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 5,
         backgroundColor: '#fff',
+        alignItems: 'center',
+        marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        paddingVertical: 30,
+      },
+      fourthModalButton2: {
+        width: '100%',
+        padding: 15,
+        borderRadius: 5,
+        backgroundColor: COLORS.primary,
         alignItems: 'center',
         marginBottom: 10,
         shadowColor: '#000',

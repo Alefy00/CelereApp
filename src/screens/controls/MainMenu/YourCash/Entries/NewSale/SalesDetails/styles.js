@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     color: COLORS.black,
   },
   cartContainer: {
-    marginBottom: 10,
+    marginBottom:8,
 
   },
   sectionTitle: {
@@ -139,6 +139,9 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     fontWeight:'bold',
   },
+  productPrice:{
+    color: COLORS.black,
+  },
   productAmount: {
     fontSize: 14,
     color: COLORS.green,
@@ -147,6 +150,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: COLORS.black,
+  },
+  addMoreButton:{
+    flexDirection: 'row',
+    backgroundColor: COLORS.primary,
+    paddingVertical: 15,
+    alignItems: "center",
+    justifyContent: 'center',
+    borderRadius: 5,
+  },
+  addMoreButtonText:{
+    marginLeft: 10,
+    color: COLORS.black,
+    fontSize:15,
   },
   discountContainer: {
     flexDirection: 'row',
@@ -307,7 +323,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
     // ...existing styles
-
+    //estilo celerepay
     paymentSelectionContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -410,6 +426,7 @@ const styles = StyleSheet.create({
       padding: 25,
       borderRadius: 5,
       alignItems: 'center',
+      backgroundColor: COLORS.lightGray2,
 
   },
   invoiceOptionTextNotaFiscal: {
@@ -421,6 +438,59 @@ const styles = StyleSheet.create({
       top: 10,
       right: 10,
   },
+  //dropdown pacelamento
+  parcelamentoSection: {
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  parcelamentoContainer: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  parcelamentoButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  activeParcelamentoButton: {
+    backgroundColor: COLORS.primary,
+
+  },
+  parcelamentoText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.gray,
+  },
+  activeParcelamentoText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.black,
+  },
+  parcelamentoValue: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.black,
+    marginLeft: 10,
+  },
+    // Estilos gerais do botão desabilitado
+    paymentOptionButtonDisabled: {
+      backgroundColor: COLORS.lightGray, // Cor de fundo cinza para indicar desabilitado
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderRadius: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    // Texto do botão desabilitado
+    paymentOptionTextDisabled: {
+      color: COLORS.darkGray, // Cor do texto para indicar desabilitado
+      fontSize: 14,
+
+    },
 });
 
 export default styles;

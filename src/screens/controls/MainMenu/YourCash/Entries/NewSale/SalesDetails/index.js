@@ -1,34 +1,79 @@
 /* eslint-disable prettier/prettier */
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import BarTop2 from "../../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../../constants";
-import { KeyboardAvoidingView, Platform, View, TouchableOpacity, Text } from "react-native";
-import LiquidateNow from './components/LiquidateNow'; // Importando o novo componente
+import { KeyboardAvoidingView, Platform, View, TouchableOpacity, Text, Alert, ScrollView } from "react-native";
+import LiquidateNow from './components/LiquidateNow'; // Importando o componente para liquidar
 import styles from "./styles";
 import ReceivableDetails from "./components/ReceivableDetails";
+import axios from "axios";  // Biblioteca para requisição HTTP
+import AsyncStorage from "@react-native-async-storage/async-storage";  // Para acessar o ID da empresa
+import { useFocusEffect } from '@react-navigation/native';  // Para recarregar a lista quando a tela ganha foco
 
+const API_URL = 'https://api.celereapp.com.br/cad/cliente/';  // URL da API
 
 const SaleDetails = ({ navigation, route }) => {
-  const { products, totalPrice } = route.params;
+  const { products, totalPrice, clearCart } = route.params;
   const [viewMode, setViewMode] = useState('Liquidar agora');
-  // Dados fictícios de clientes
-  const clients = [
-    { id: 1, name: "João Silva" },
-    { id: 2, name: "Maria Oliveira" },
-    { id: 3, name: "Pedro Souza" },
-    { id: 4, name: "Ana Santos" },
-    { id: 5, name: "Lucas Martins" },
-    { id: 6, name: "Carla Figueiredo" },
-    { id: 7, name: "Gabriel Alves" },
-    { id: 8, name: "Luiza Ferreira" },
-    { id: 9, name: "Ricardo Lima" },
-  ];
+  const [clients, setClients] = useState([]);  // Estado para armazenar os clientes
+  const [loading, setLoading] = useState(false);
+  const [productsInCart, setProducts] = useState(products);
 
+  // Função para buscar o ID da empresa logada
+  const getEmpresaId = async () => {
+    try {
+      const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+      if (storedEmpresaId) {
+        return Number(storedEmpresaId); // Converte para número se estiver como string
+      } else {
+        Alert.alert('Erro', 'ID da empresa não encontrado.');
+        return null;
+      }
+    } catch (error) {
+      console.error('Erro ao buscar o ID da empresa:', error);
+      return null;
+    }
+  };
+
+  // Função para buscar a lista de clientes da API
+  const fetchClients = useCallback(async () => {
+    setLoading(true);  // Exibe o carregamento
+    try {
+      const empresaId = await getEmpresaId();
+      if (empresaId) {
+        const response = await axios.get(`${API_URL}?empresa=${empresaId}`);
+        if (response.data && response.data.results && response.data.results.data) {
+          setClients(response.data.results.data);  // Armazena a lista de clientes no estado
+        } else {
+          Alert.alert("Erro", "Erro ao recuperar clientes. Tente novamente.");
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao buscar clientes: ", error);
+      Alert.alert("Erro", "Erro ao conectar à API.");
+    } finally {
+      setLoading(false);  // Oculta o carregamento
+    }
+  }, []);
+
+
+  // Chamada sempre que a tela ganha foco
+  useFocusEffect(
+    useCallback(() => {
+      fetchClients();  // Faz a requisição de clientes ao ganhar foco
+    }, [fetchClients])
+  );
 
   const toggleViewMode = useCallback((mode) => {
     setViewMode(mode);
   }, []);
 
+  useEffect(() => {
+    // Defina a função clearCart nas opções de navegação
+    navigation.setOptions({
+      clearCart: clearCart, // Defina clearCart nas opções
+    });
+  }, [navigation, clearCart]);
 
 
   return (
@@ -36,7 +81,7 @@ const SaleDetails = ({ navigation, route }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <View style={{ flex: 1 }}>
+      <ScrollView style={{ flex: 1 }}>
         {/* Barra superior */}
         <View style={{ height: 55 }}>
           <BarTop2
@@ -73,8 +118,10 @@ const SaleDetails = ({ navigation, route }) => {
           <LiquidateNow
             products={products}
             totalPrice={totalPrice}
-            clients={clients}
+            clients={clients}  // Passa os clientes reais
             navigation={navigation}
+            loading={loading}  // Passa o estado de carregamento
+            clearCart={clearCart}  // Passe clearCart aqui
           />
         )}
 
@@ -82,12 +129,14 @@ const SaleDetails = ({ navigation, route }) => {
           <ReceivableDetails
             products={products}
             totalPrice={totalPrice}
-            clients={clients}
+            clients={clients}  // Passa os clientes reais
             navigation={navigation}
+            loading={loading}  // Passa o estado de carregamento
+            clearCart={clearCart}  // Passe clearCart aqui
           />
         )}
 
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };

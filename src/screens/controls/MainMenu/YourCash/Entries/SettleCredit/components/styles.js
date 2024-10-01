@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   reminderButton: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.lightGray3,
     padding: 12,
     borderRadius: 5,
     alignItems: 'center',
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   postponeButton: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.lightGray3,
     padding: 12,
     borderRadius: 5,
     alignItems: 'center',

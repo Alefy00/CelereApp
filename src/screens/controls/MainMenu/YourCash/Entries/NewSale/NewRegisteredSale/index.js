@@ -2,77 +2,152 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, TextInput, FlatList, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert, ScrollView, Modal } from "react-native";
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import BarTop2 from "../../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../../constants";
-import RenderProduct from './components/RenderProduct.jsx'; // Importa o componente RenderProduct
+import RenderProduct from './components/RenderProduct.jsx'; // Componente para exibir produtos/serviços
 import styles from "./styles";
+import { useFocusEffect } from "@react-navigation/native";
 
-const API_URL = 'https://api.celereapp.com.br/cad/produtos/listaprodutovenda/?page_size=100&empresa_id=1&search=';
+const API_BASE_URL = 'https://api.celereapp.com.br';
+const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
+const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
 
-// Adicionar serviços fictícios ao estado
+// Serviços fictícios para teste
 const fakeServices = [
-  { id: 's1', nome: 'Consultoria', categoria: 'Serviços', preco_venda: 1500, imagem: 'https://via.placeholder.com/150' },
-  { id: 's2', nome: 'Manutenção de Software', categoria: 'Serviços', preco_venda: 800, imagem: 'https://via.placeholder.com/150' },
-  { id: 's3', nome: 'Design de Logo', categoria: 'Serviços', preco_venda: 1200, imagem: 'https://via.placeholder.com/150' }
+  { id: 's1', nome: 'Consultoria', categoria: 'Serviços', preco_venda: 1500, qtd_estoque: 10, imagem: 'https://via.placeholder.com/150' },
+  { id: 's2', nome: 'Manutenção de Software', categoria: 'Serviços', preco_venda: 800, qtd_estoque: 5, imagem: 'https://via.placeholder.com/150' },
+  { id: 's3', nome: 'Design de Logo', categoria: 'Serviços', preco_venda: 1200, qtd_estoque: 3, imagem: 'https://via.placeholder.com/150' }
 ];
-
-const showAlert = (title, message) => {
-  Alert.alert(title, message);
-};
 
 const NewRegisteredSale = ({ navigation, route }) => {
   const [search, setSearch] = useState('');
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [categories] = useState(['Todos', 'Serviços', 'Diversos', 'Celulares']);
-  const [selectedCategory, setSelectedCategory] = useState('Todos');
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [generalFilter, setGeneralFilter] = useState('Todos'); // Filtro geral (Todos, Produtos, Serviços)
   const [quantities, setQuantities] = useState({});
   const [totalPrice, setTotalPrice] = useState(0);
   const [loading, setLoading] = useState(false);
   const [fourthModalVisible, setFourthModalVisible] = useState(false);
 
-  useEffect(() => {
-    if (route.params?.selectedProducts) {
-      const prevProducts = route.params.selectedProducts;
-      const newQuantities = {};
-      prevProducts.forEach((product) => {
-        newQuantities[product.id.toString()] = product.amount;
-      });
-      setQuantities(newQuantities);
-    }
-    if (route.params?.resetCart) {
-      resetCart();
-    }
-  }, [route.params?.selectedProducts, route.params?.resetCart]);
-
-  const resetCart = () => {
-    setQuantities({});
-    setTotalPrice(0);
+  // Função para mostrar alertas
+  const showAlert = (title, message) => {
+    Alert.alert(title, message);
   };
 
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
+  // Função para buscar o ID da empresa logada
+  const getEmpresaId = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_URL}${search.toLowerCase()}`);
-      if (response.status === 200 && response.data.status === 200) {
+      const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+      if (storedEmpresaId) {
+        return Number(storedEmpresaId); // Converte para número se estiver como string
+      } else {
+        showAlert('Erro', 'ID da empresa não encontrado.');
+        return null;
+      }
+    } catch (error) {
+      console.error('Erro ao buscar o ID da empresa:', error);
+      return null;
+    }
+  }, []);
+
+ // Função para buscar os produtos da API
+ const fetchProducts = useCallback(async () => {
+  setLoading(true);
+  try {
+    const empresaId = await getEmpresaId();
+    if (empresaId) {
+      const response = await axios.get(`${PRODUCTS_API}?page_size=100&empresa_id=${empresaId}`);
+      if (response.data && response.data.status === 200) {
         const produtos = response.data.data;
-        setProducts([...produtos, ...fakeServices]);
+        setProducts([...produtos, ...fakeServices]); // Adiciona os serviços fictícios
         setFilteredProducts([...produtos, ...fakeServices]);
       } else {
         showAlert("Erro", "Não foi possível carregar os produtos.");
       }
-    } catch (error) {
-      showAlert("Erro", "Erro ao conectar à API.");
-    } finally {
-      setLoading(false);
     }
-  }, [search]);
+  } catch (error) {
+    showAlert("Erro", "Erro ao conectar à API.");
+  } finally {
+    setLoading(false);
+  }
+}, [getEmpresaId]); // Adicionamos `getEmpresaId` como dependência do useCallback
+
+// Recarregar produtos ao voltar para a tela
+useFocusEffect(
+  useCallback(() => {
+    fetchProducts(); // Recarrega a lista de produtos e serviços sempre que a tela ganha foco
+  }, [fetchProducts])
+);
+// Recarregar produtos ao voltar para a tela;
+
+  // Função para buscar as categorias da API e remover duplicatas
+  const fetchCategories = useCallback(async () => {
+    try {
+      const empresaId = await getEmpresaId();
+      if (empresaId) {
+        const response = await axios.get(`${CATEGORIES_API}?empresa_id=${empresaId}`);
+        if (response.data && response.data.data) {
+          const apiCategories = response.data.data
+            .filter(cat => cat.empresa.id === empresaId)  // Filtrar categorias da empresa
+            .map((cat) => ({
+              id: cat.id.toString(),
+              label: cat.nome,
+            }));
+
+          // Remover duplicatas
+          const uniqueCategories = Array.from(new Set(apiCategories.map(a => a.id)))
+            .map(id => {
+              return apiCategories.find(a => a.id === id);
+            });
+
+          setCategories([{ id: 'all', label: 'Todos os produtos' }, ...uniqueCategories]); // Exibe as categorias filtradas e únicas
+        } else {
+          showAlert('Erro', 'Falha ao recuperar categorias.');
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar categorias:', error);
+      showAlert('Erro', 'Ocorreu um erro ao buscar as categorias.');
+    }
+  }, [getEmpresaId]);
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    fetchCategories(); // Faz a requisição para as categorias também
+  }, [fetchProducts, fetchCategories]);
 
+  // Função para aplicar os filtros
+  const applyFilters = useCallback(() => {
+    let filtered = products;
+
+    // Aplicar filtro geral (Todos, Produtos, Serviços)
+    if (generalFilter === 'Produtos') {
+      filtered = filtered.filter(product => product.categoria !== 'Serviços');
+    } else if (generalFilter === 'Serviços') {
+      filtered = filtered.filter(product => product.categoria === 'Serviços');
+    }
+
+    // Aplicar filtro secundário de categorias
+    if (selectedCategory !== 'all' && generalFilter === 'Produtos') {
+      filtered = filtered.filter(product => product.categoria.id.toString() === selectedCategory);
+    }
+
+    if (search) {
+      filtered = filtered.filter(product => product.nome.toLowerCase().includes(search.toLowerCase()));
+    }
+
+    setFilteredProducts(filtered); // Atualiza a lista de produtos filtrados
+  }, [generalFilter, selectedCategory, search, products]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
+
+  // Atualiza o preço total sempre que as quantidades mudam
   useEffect(() => {
     const total = Object.keys(quantities).reduce((sum, key) => {
       const product = products.find(p => p.id.toString() === key);
@@ -81,22 +156,53 @@ const NewRegisteredSale = ({ navigation, route }) => {
     setTotalPrice(total);
   }, [quantities, products]);
 
-  const handleSearch = (text) => {
-    setSearch(text);
-    filterProducts(text, selectedCategory);
-  };
-
-  const filterProducts = (text, category) => {
-    const filtered = products.filter(product => 
-      product.nome.toLowerCase().includes(text.toLowerCase()) && 
-      (category === 'Todos' || product.categoria === category)
-    );
-    setFilteredProducts(filtered);
-  };
-
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
-    filterProducts(search, category);
+    applyFilters(); // Aplicar filtros quando uma nova categoria for selecionada
+  };
+
+  const handleGeneralFilterChange = (filter) => {
+    setGeneralFilter(filter);
+    setSelectedCategory('all'); // Redefinir o filtro de categoria ao mudar o filtro geral
+    applyFilters();
+  };
+   // Função para limpar o carrinho
+ const clearCart = () => {
+  setProducts([]); // Limpa os produtos
+  setQuantities({}); // Reseta as quantidades
+};
+useFocusEffect(
+  useCallback(() => {
+    // Verifique se precisa limpar o carrinho
+    if (route.params?.clearCart) {
+      clearCart();
+    }
+
+    fetchProducts();  // Recarrega a lista de produtos e serviços sempre que a tela ganha foco
+  }, [route.params?.clearCart, fetchProducts])
+);
+
+
+  // Função para atualizar a quantidade dos produtos/serviços
+  const handleQuantityChange = (id, delta) => {
+    const product = products.find(p => p.id.toString() === id);
+    setQuantities(prevQuantities => {
+      const newQuantities = { ...prevQuantities, [id]: (prevQuantities[id] || 0) + delta };
+      if (newQuantities[id] === 0) delete newQuantities[id]; // Remove a quantidade se for zero
+      return newQuantities;
+    });
+  };
+
+  const navigateToNextScreen = (services, nonServices, allSelectedItems, totalPrice) => {
+    if (services.length > 0 && nonServices.length > 0) {
+      navigation.navigate('ServiceDetails', { services: allSelectedItems, totalPrice });
+    } else if (services.length > 0) {
+      navigation.navigate('ServiceDetails', { services, totalPrice });
+    } else if (nonServices.length > 0) {
+      navigation.navigate('SaleDetails', { products: nonServices, totalPrice, });
+    } else {
+      showAlert('Erro', 'Nenhum produto ou serviço foi selecionado.');
+    }
   };
 
   const handleNext = () => {
@@ -106,7 +212,7 @@ const NewRegisteredSale = ({ navigation, route }) => {
         ...product,
         amount: quantities[key],
         total: quantities[key] * (parseFloat(product.preco_venda) || 0),
-        imagem: product.imagem ? `https://api.celereapp.com.br${product.imagem}` : null,
+        imagem: product.imagem ? product.imagem : 'https://via.placeholder.com/150',
       };
     }).filter(item => item !== null);
 
@@ -131,28 +237,8 @@ const NewRegisteredSale = ({ navigation, route }) => {
     navigateToNextScreen(services, nonServices, allSelectedItems, totalPrice);
   };
 
-  const navigateToNextScreen = (services, nonServices, allSelectedItems, totalPrice) => {
-    if (services.length > 0 && nonServices.length > 0) {
-      navigation.navigate('ServiceDetails', { services: allSelectedItems, totalPrice });
-    } else if (services.length > 0) {
-      navigation.navigate('ServiceDetails', { services, totalPrice });
-    } else if (nonServices.length > 0) {
-      navigation.navigate('SaleDetails', { products: nonServices, totalPrice });
-    } else {
-      showAlert('Erro', 'Nenhum produto ou serviço foi selecionado.');
-    }
-  };
 
-  const handleQuantityChange = (id, delta) => {
-    const product = products.find(p => p.id.toString() === id);
-    const isService = product && product.categoria === 'Serviços';
 
-    setQuantities(prevQuantities => {
-      const newQuantities = { ...prevQuantities, [id]: isService ? (delta > 0 ? 1 : 0) : (prevQuantities[id] || 0) + delta };
-      if (newQuantities[id] === 0) delete newQuantities[id];
-      return newQuantities;
-    });
-  };
 
   const renderFooter = () => (
     <>
@@ -172,13 +258,22 @@ const NewRegisteredSale = ({ navigation, route }) => {
   );
 
   const toggleFourthModal = () => setFourthModalVisible(!fourthModalVisible);
-  
+    // Certifique-se de que o modal é fechado corretamente
+    const closeModalOnNavigate = () => {
+      setFourthModalVisible(false); // Fecha o modal ao navegar
+      navigation.navigate('AddProductScreen');
+    };
+    const closeModalOnNavigateService = () => {
+      setFourthModalVisible(false); // Fecha o modal ao navegar
+      navigation.navigate('AddService');
+    };
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
           <View style={{height: 55}} >
-          <BarTop2 titulo="Voltar" backColor={COLORS.primary} foreColor={COLORS.black}/>
+            <BarTop2 titulo="Voltar" backColor={COLORS.primary} foreColor={COLORS.black}/>
           </View>
           <View style={styles.header}>
             <TouchableOpacity style={styles.registerButton} onPress={toggleFourthModal}>
@@ -187,20 +282,42 @@ const NewRegisteredSale = ({ navigation, route }) => {
             </TouchableOpacity>
             <Text style={styles.title}>Nova Venda</Text>
             <View style={styles.searchContainer}>
-              <TextInput style={styles.searchInput} placeholder="Pesquise por um produto..." value={search} onChangeText={handleSearch} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Pesquise por um produto..."
+                value={search}
+                onChangeText={setSearch}
+              />
               <Icon name="search" size={20} color={COLORS.grey} />
             </View>
+
+            {/* Filtros Gerais */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
-              {categories.map(category => (
+              {['Todos', 'Produtos', 'Serviços'].map(filter => (
                 <TouchableOpacity
-                  key={category}
-                  style={[styles.categoryButton, selectedCategory === category && styles.categoryButtonActive]}
-                  onPress={() => handleCategoryChange(category)}
+                  key={filter}
+                  style={[styles.categoryButton, generalFilter === filter && styles.categoryButtonActive]}
+                  onPress={() => handleGeneralFilterChange(filter)}
                 >
-                  <Text style={[styles.categoryText, selectedCategory === category && styles.categoryTextActive]}>{category}</Text>
+                  <Text style={[styles.categoryText, generalFilter === filter && styles.categoryTextActive]}>{filter}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
+
+            {/* Filtros de Categorias (apenas quando Produtos é selecionado) */}
+            {generalFilter === 'Produtos' && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={true} style={styles.categoriesContainer}>
+                {categories.map(category => (
+                  <TouchableOpacity
+                    key={category.id}
+                    style={[styles.categoryButton, selectedCategory === category.id && styles.categoryButtonActive]}
+                    onPress={() => handleCategoryChange(category.id)}
+                  >
+                    <Text style={[styles.categoryText, selectedCategory === category.id && styles.categoryTextActive]}>{category.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
           </View>
 
           {loading ? (
@@ -216,6 +333,7 @@ const NewRegisteredSale = ({ navigation, route }) => {
             />
           )}
 
+          {/* Modal para cadastrar produto ou serviço */}
           <Modal visible={fourthModalVisible} animationType="slide" transparent onRequestClose={toggleFourthModal}>
             <View style={styles.fourthModalOverlay}>
               <View style={styles.fourthModalContent}>
@@ -225,10 +343,10 @@ const NewRegisteredSale = ({ navigation, route }) => {
                     <Icon name="close" size={25} color={COLORS.black} />
                   </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.fourthModalButton} onPress={() => navigation.navigate('AddProductScreen')}>
+                <TouchableOpacity style={styles.fourthModalButton2} onPress={closeModalOnNavigate}>
                   <Text style={styles.fourthModalText}>Produtos</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.fourthModalButton} onPress={() => navigation.navigate('AddService')}>
+                <TouchableOpacity style={styles.fourthModalButton} onPress={closeModalOnNavigateService}>
                   <Text style={styles.fourthModalText}>Serviços</Text>
                 </TouchableOpacity>
               </View>
