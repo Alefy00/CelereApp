@@ -75,6 +75,7 @@ import AddCategoryService from '../screens/controls/MainMenu/YourOperation/Servi
 
 
 import TeamScreen from '../screens/controls/MainMenu/YourControls/Users';
+import ReceiptScreen from '../screens/controls/MainMenu/YourCash/Entries/SettleCredit/components/ReceiptScreen';
 
 const Stack = createStackNavigator();
 
@@ -156,6 +157,8 @@ export default () => (
     <Stack.Screen name="ExpenseDetails" component={ExpenseDetails} />
     <Stack.Screen name="AddService" component={AddService} />
     <Stack.Screen name="TeamScreen" component={TeamScreen} />
+    <Stack.Screen name="ReceiptScreen" component={ReceiptScreen} />
+
 
   </Stack.Navigator>
 );

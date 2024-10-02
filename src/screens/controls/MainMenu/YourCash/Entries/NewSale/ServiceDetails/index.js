@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
@@ -7,19 +7,78 @@ import BarTop3 from '../../../../../../../components/BarTop3';
 import { COLORS } from '../../../../../../../constants';
 import LiquidateNow from './components/LiquidateNow';
 import AccountsReceivable from './components/AccountsReceivable';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { useFocusEffect } from '@react-navigation/native';
 
-const ServiceDetails = ({ navigation, route }) => {
+const API_URL = 'https://api.celereapp.com.br/cad/cliente/';  // URL da API
+
+const ServiceDetails = ({ navigation, route}) => {
   const { services, products = [] } = route.params; // Recebe serviços e produtos via rota
+  const clearCart = route.params.clearCart;
   const [activeTab, setActiveTab] = useState('liquidar');
+  const [clients, setClients] = useState([]);  // Estado para armazenar os clientes
+  const [loading, setLoading] = useState(false);
 
+    // Função para buscar o ID da empresa logada
+    const getEmpresaId = async () => {
+      try {
+        const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+        if (storedEmpresaId) {
+          return Number(storedEmpresaId); // Converte para número se estiver como string
+        } else {
+          Alert.alert('Erro', 'ID da empresa não encontrado.');
+          return null;
+        }
+      } catch (error) {
+        console.error('Erro ao buscar o ID da empresa:', error);
+        return null;
+      }
+    };
+  
+// Função para buscar a lista de clientes da API
+const fetchClients = useCallback(async () => {
+  setLoading(true);  // Exibe o carregamento
+  try {
+    const empresaId = await getEmpresaId();
+    if (empresaId) {
+      const response = await axios.get(`${API_URL}?empresa=${empresaId}`);
+      if (response.data && response.data.results && response.data.results.data) {
+        setClients(response.data.results.data);  // Armazena a lista de clientes no estado
+      } else {
+        Alert.alert("Erro", "Erro ao recuperar clientes. Tente novamente.");
+      }
+    }
+  } catch (error) {
+    console.error("Erro ao buscar clientes: ", error);
+    Alert.alert("Erro", "Erro ao conectar à API.");
+  } finally {
+    setLoading(false);  // Oculta o carregamento
+  }
+}, []);
+
+  
+    // Chamada sempre que a tela ganha foco
+    useFocusEffect(
+      useCallback(() => {
+        fetchClients();  // Faz a requisição de clientes ao ganhar foco
+      }, [fetchClients])
+    );  
+  
+  useEffect(() => {
+    // Defina a função clearCart nas opções de navegação
+    navigation.setOptions({
+      clearCart: clearCart, // Defina clearCart nas opções
+    });
+  }, [navigation, clearCart]);
+  
+  const service = services[0]; // Acessa o primeiro serviço da lista
+  
   // Verifica se há serviços disponíveis
   if (!services || services.length === 0) {
     Alert.alert('Erro', 'Nenhum serviço encontrado.');
     return null; // Não renderiza a tela caso não haja serviços
   }
-
-  const service = services[0]; // Acessa o primeiro serviço da lista
-
   return (
     <View style={styles.containerBase}>
       <View style={styles.containerBartop}>
@@ -51,16 +110,22 @@ const ServiceDetails = ({ navigation, route }) => {
       {/* Renderiza o componente correspondente */}
       {activeTab === 'liquidar' ? (
         <LiquidateNow 
-          service={service} 
-          products={products}  // Passa os produtos para o LiquidateNow
-          navigation={navigation} 
-          route={route} 
-        />
+            service={service}
+            products={products}  
+            navigation={navigation}
+            route={route}
+            clients={clients}  // Passa a lista de clientes
+            clearCart={clearCart}
+          />
+
       ) : (
-        <AccountsReceivable 
-          service={service} 
+        <AccountsReceivable
+          service={service}
+          products={products}
           navigation={navigation}
-          route={route} 
+          route={route}
+          clients={clients}
+          clearCart={clearCart}
         />
       )}
     </View>

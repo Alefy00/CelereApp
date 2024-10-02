@@ -13,13 +13,8 @@ import { useFocusEffect } from "@react-navigation/native";
 const API_BASE_URL = 'https://api.celereapp.com.br';
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
+const SERVICES_API = `${API_BASE_URL}/cad/servicos/`;
 
-// Serviços fictícios para teste
-const fakeServices = [
-  { id: 's1', nome: 'Consultoria', categoria: 'Serviços', preco_venda: 1500, qtd_estoque: 10, imagem: 'https://via.placeholder.com/150' },
-  { id: 's2', nome: 'Manutenção de Software', categoria: 'Serviços', preco_venda: 800, qtd_estoque: 5, imagem: 'https://via.placeholder.com/150' },
-  { id: 's3', nome: 'Design de Logo', categoria: 'Serviços', preco_venda: 1200, qtd_estoque: 3, imagem: 'https://via.placeholder.com/150' }
-];
 
 const NewRegisteredSale = ({ navigation, route }) => {
   const [search, setSearch] = useState('');
@@ -54,34 +49,49 @@ const NewRegisteredSale = ({ navigation, route }) => {
     }
   }, []);
 
- // Função para buscar os produtos da API
- const fetchProducts = useCallback(async () => {
+ // Função para buscar produtos e serviços da API
+ const fetchProductsAndServices = useCallback(async () => {
   setLoading(true);
   try {
     const empresaId = await getEmpresaId();
     if (empresaId) {
-      const response = await axios.get(`${PRODUCTS_API}?page_size=100&empresa_id=${empresaId}`);
-      if (response.data && response.data.status === 200) {
-        const produtos = response.data.data;
-        setProducts([...produtos, ...fakeServices]); // Adiciona os serviços fictícios
-        setFilteredProducts([...produtos, ...fakeServices]);
-      } else {
-        showAlert("Erro", "Não foi possível carregar os produtos.");
-      }
+      // Busca produtos
+      const productResponse = await axios.get(`${PRODUCTS_API}?page_size=100&empresa_id=${empresaId}`);
+      const fetchedProducts = productResponse.data.data;
+
+      // Busca serviços
+      const serviceResponse = await axios.get(`${SERVICES_API}?page_size=100&empresa_id=${empresaId}`);
+      const fetchedServices = serviceResponse.data.results.data;
+
+      // Filtrar apenas os serviços que pertencem à empresa logada
+      const filteredServices = fetchedServices.filter(service => service.empresa.id === empresaId);
+
+      // Adicionar propriedade `categoria` aos serviços
+      const servicesWithCategory = filteredServices.map(service => ({
+        ...service,
+        categoria: 'Serviços',
+        qtd_estoque: null, // Define `qtd_estoque` como null ou zero
+      }));
+
+      // Combina produtos e serviços
+      setProducts([...fetchedProducts, ...servicesWithCategory]);
+      setFilteredProducts([...fetchedProducts, ...servicesWithCategory]);
     }
   } catch (error) {
     showAlert("Erro", "Erro ao conectar à API.");
   } finally {
     setLoading(false);
   }
-}, [getEmpresaId]); // Adicionamos `getEmpresaId` como dependência do useCallback
+}, [getEmpresaId]);
 
-// Recarregar produtos ao voltar para a tela
-useFocusEffect(
-  useCallback(() => {
-    fetchProducts(); // Recarrega a lista de produtos e serviços sempre que a tela ganha foco
-  }, [fetchProducts])
-);
+
+
+  // Recarregar produtos e serviços ao voltar para a tela
+  useFocusEffect(
+    useCallback(() => {
+      fetchProductsAndServices(); // Recarrega a lista de produtos e serviços sempre que a tela ganha foco
+    }, [fetchProductsAndServices])
+  );
 // Recarregar produtos ao voltar para a tela;
 
   // Função para buscar as categorias da API e remover duplicatas
@@ -116,9 +126,9 @@ useFocusEffect(
   }, [getEmpresaId]);
 
   useEffect(() => {
-    fetchProducts();
+    fetchProductsAndServices();
     fetchCategories(); // Faz a requisição para as categorias também
-  }, [fetchProducts, fetchCategories]);
+  }, [fetchProductsAndServices, fetchCategories]);
 
   // Função para aplicar os filtros
   const applyFilters = useCallback(() => {
@@ -178,8 +188,8 @@ useFocusEffect(
       clearCart();
     }
 
-    fetchProducts();  // Recarrega a lista de produtos e serviços sempre que a tela ganha foco
-  }, [route.params?.clearCart, fetchProducts])
+    fetchProductsAndServices();  // Recarrega a lista de produtos e serviços sempre que a tela ganha foco
+  }, [route.params?.clearCart, fetchProductsAndServices])
 );
 
 
@@ -325,12 +335,19 @@ useFocusEffect(
           ) : (
             <FlatList
               data={filteredProducts}
-              renderItem={({ item }) => <RenderProduct item={item} handleQuantityChange={handleQuantityChange} quantities={quantities} />}
+              renderItem={({ item }) => (
+                <RenderProduct
+                  item={item}
+                  handleQuantityChange={handleQuantityChange}
+                  quantities={quantities}
+                />
+              )}
               keyExtractor={item => item.id.toString()}
               contentContainerStyle={styles.productsList}
               numColumns={2}
               ListFooterComponent={renderFooter}
             />
+
           )}
 
           {/* Modal para cadastrar produto ou serviço */}

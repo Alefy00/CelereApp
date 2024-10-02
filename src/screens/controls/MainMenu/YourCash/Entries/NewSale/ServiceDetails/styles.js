@@ -110,26 +110,31 @@ Container: {
         alignItems: 'center',
       },
       containerServiço:{
-        flexDirection: 'row',
         justifyContent:'space-between',
       },
       productImage: {
         width: 50,
         height: 50,
+        marginLeft: 20,
+        marginRight: 10,
 
       },
       cartItemTitle: {
         fontSize: 16,
         fontWeight: 'bold',
         color: COLORS.black,
-        width: '30%',
+        width: '35%',
       },
       cartItemSubtitle: {
         fontSize: 14,
         color: COLORS.black,
-        marginLeft: 100,
-        fontWeight: '700',
-        marginRight: -20
+      },
+      cartItemSubtitleMedida: {
+        fontSize: 14,
+        color: COLORS.green,
+      },
+      cartItemPrice:{
+        color: COLORS.black,
       },
       quantitySection: {
         flexDirection: 'row',
@@ -162,6 +167,11 @@ Container: {
         borderBottomWidth: 1,
         textAlign: 'right',
         width: 140,
+      },
+      cartItemTotal:{
+        marginLeft: 90,
+        color: COLORS.black,
+        fontWeight:'bold',
       },
       additionalCostsInput: {
         marginHorizontal: 20,
@@ -229,6 +239,40 @@ Container: {
         marginHorizontal: 20,
 
       },
+      //fiado
+      paymentToggleContainer: {
+        flexDirection: 'row',
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: COLORS.black,
+        borderRadius: 5,
+      },
+      paymentButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 10,
+        
+      },
+      paymentButtonforma:{
+        paddingVertical: 10,
+        paddingHorizontal: 10,
+        borderRadius: 5,
+        marginRight: 10,
+        marginLeft:10,
+        flexDirection:'row',
+        backgroundColor: '#efebc4',
+      },
+      selectedPaymentButton: {
+        backgroundColor: COLORS.primary,
+      },
+      paymentButtonText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: COLORS.black,
+        marginLeft: 10,
+      },
       paymentSection2: {
         flexDirection: 'row',
         marginHorizontal: 20,
@@ -237,31 +281,45 @@ Container: {
         overflow: 'hidden',
         marginVertical: 10,
       },
-      paymentButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
-        backgroundColor: '#efebc4',
-        borderRadius: 5,
-        marginRight: 10,
-      },
-      paymentButton2: {
+      paymentButton2:{
         flex: 1,
-        paddingVertical: 10,
-        justifyContent: 'center',
         alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 10,
       },
-      paymentButtonSelected: {
+      paymentButtonSelected:{
         backgroundColor: COLORS.primary,
-      },
-      paymentButtonText: {
-        marginLeft: 5,
-        fontWeight: 'bold',
-        color: COLORS.black,
       },
       paymentButtonText2: {
         color: COLORS.black,
         fontWeight: 'bold',
+      },
+      //pagamento stylo total
+      totalContainer: {
+        marginBottom: 0,
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent:'space-between',
+        marginTop: 80,
+        marginHorizontal: 20,
+      },
+      totalContainer2: {
+        marginBottom: -10,
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent:'space-between',
+        marginHorizontal: 20,
+      },
+      totalLabel: {
+        fontSize: 16,
+        color: COLORS.black,
+        marginBottom: 5,
+        fontWeight:'bold',
+      },
+      totalValue: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: COLORS.green,
       },
       footer: {
         marginTop: 10,
@@ -373,7 +431,21 @@ Container: {
         fontSize: 16,
         marginLeft: 10,
       },
-      
+      // Estilos gerais do botão desabilitado
+    paymentOptionButtonDisabled: {
+      backgroundColor: COLORS.lightGray, // Cor de fundo cinza para indicar desabilitado
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderRadius: 5,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    // Texto do botão desabilitado
+    paymentOptionTextDisabled: {
+      color: COLORS.darkGray, // Cor do texto para indicar desabilitado
+      fontSize: 14,
+    },
+
     paymentSelectionContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -518,6 +590,7 @@ Container: {
       padding: 25,
       borderRadius: 5,
       alignItems: 'center',
+      backgroundColor: COLORS.lightGray3
 
   },
   invoiceOptionTextNotaFiscal: {
@@ -528,6 +601,45 @@ Container: {
       position: 'absolute',
       top: 10,
       right: 10,
+  },
+  //pagamento percelado
+  //dropdown pacelamento
+  parcelamentoSection: {
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  parcelamentoContainer: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  parcelamentoButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  activeParcelamentoButton: {
+    backgroundColor: COLORS.primary,
+
+  },
+  parcelamentoText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.gray,
+  },
+  activeParcelamentoText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.black,
+  },
+  parcelamentoValue: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.black,
+    marginLeft: 10,
   },
 
   });

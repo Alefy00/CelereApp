@@ -13,6 +13,8 @@ import axios from "axios";
 
 const API_VENDAS = 'https://api.celereapp.com.br/cad/vendas/';
 const API_CLIENTES = 'https://api.celereapp.com.br/cad/cliente/';
+const API_SERVICOS = 'https://api.celereapp.com.br/cad/servicos/';
+
 
 const SettleCredit = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('open'); // Aba atual: "open" para liquidadas, "settled" para contas a receber
@@ -25,80 +27,117 @@ const SettleCredit = ({ navigation }) => {
   const [contas2, setContas2] = useState([]); // Lista de contas a receber
   const [loading, setLoading] = useState(false);
   const [clientes, setClientes] = useState({});
+  const [servicoNomes, setServicoNomes] = useState({});
 
 
       // Função para mostrar alertas
-      const showAlert = (title, message) => Alert.alert(title, message);
+  // Função para mostrar alertas
+  const showAlert = (title, message) => Alert.alert(title, message);
 
-      const getEmpresaId = useCallback(async () => {
-        try {
-          const storedEmpresaId = await AsyncStorage.getItem('empresaId');
-          if (storedEmpresaId) return Number(storedEmpresaId);
-          showAlert('Erro', 'ID da empresa não encontrado.');
-          return null;
-        } catch (error) {
-          console.error('Erro ao buscar o ID da empresa:', error);
-          return null;
-        }
-      }, []);
+  const getEmpresaId = useCallback(async () => {
+    try {
+      const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+      if (storedEmpresaId) return Number(storedEmpresaId);
+      showAlert('Erro', 'ID da empresa não encontrado.');
+      return null;
+    } catch (error) {
+      console.error('Erro ao buscar o ID da empresa:', error);
+      return null;
+    }
+  }, []);
 
-      const fetchClientes = useCallback(async (empresaId) => {
-        try {
-          const response = await axios.get(`${API_CLIENTES}?empresa=${empresaId}`);
-          const clientesData = response.data.results.data;
-    
-          if (clientesData && Array.isArray(clientesData)) {
-            // Cria um mapa de clientes com id como chave e nome como valor
-            const clientesMap = {};
-            clientesData.forEach(cliente => {
-              clientesMap[cliente.id] = cliente.nome;
-            });
-            setClientes(clientesMap);
-          } else {
-            showAlert("Erro", "A resposta da API de clientes não contém os dados esperados.");
-          }
-        } catch (error) {
-          console.error("Erro ao buscar clientes:", error);
-          showAlert("Erro", "Não foi possível carregar os clientes.");
+  const fetchClientes = useCallback(async (empresaId) => {
+    try {
+      const response = await axios.get(`${API_CLIENTES}?empresa=${empresaId}`);
+      const clientesData = response.data.results.data;
+
+      if (clientesData && Array.isArray(clientesData)) {
+        const clientesMap = {};
+        clientesData.forEach(cliente => {
+          clientesMap[cliente.id] = cliente.nome;
+        });
+        setClientes(clientesMap);
+      } else {
+        showAlert("Erro", "A resposta da API de clientes não contém os dados esperados.");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar clientes:", error);
+      showAlert("Erro", "Não foi possível carregar os clientes.");
+    }
+  }, []);
+
+  const fetchServicoById = async (id) => {
+    try {
+      const response = await axios.get(`${API_SERVICOS}${id}/`);
+      return response.data.nome;
+    } catch (error) {
+      console.error(`Erro ao buscar o serviço com ID ${id}:`, error);
+      return 'Nome do serviço indisponível'; // Caso o nome não seja encontrado
+    }
+  };
+
+  const fetchVendas = useCallback(async () => {
+    try {
+      setLoading(true);
+      const empresaId = await getEmpresaId();
+      if (!empresaId) {
+        setLoading(false);
+        return;
+      }
+
+      await fetchClientes(empresaId); // Busca os clientes da empresa
+
+      const fetchAllVendas = async (url, vendasAcumuladas = []) => {
+        const response = await axios.get(url);
+        const vendasPagina = response.data.results.data;
+
+        const vendasFiltradas = vendasPagina.filter(venda => venda.empresa === empresaId);
+        const novasVendas = [...vendasAcumuladas, ...vendasFiltradas];
+
+        if (response.data.next) {
+          return fetchAllVendas(response.data.next, novasVendas);
         }
-      }, []);
-    
-      const fetchVendas = useCallback(async () => {
-        try {
-          setLoading(true);
-          const empresaId = await getEmpresaId();
-          if (!empresaId) {
-            setLoading(false);
-            return;
+
+        return novasVendas;
+      };
+
+      const vendas = await fetchAllVendas(`${API_VENDAS}?empresa_id=${empresaId}`);
+
+      if (vendas && Array.isArray(vendas)) {
+        const liquidadas = vendas.filter(venda => venda.status === 'finalizada');
+        const contasReceber = vendas.filter(venda => venda.status === 'pendente');
+
+        // Buscar os nomes dos serviços para as vendas liquidadas
+        const novosNomesServicos = {};
+        for (const venda of liquidadas) {
+          for (const item of venda.itens) {
+            if (item.servico) {
+              const nomeServico = await fetchServicoById(item.servico);
+              novosNomesServicos[item.servico] = nomeServico;
+            }
           }
-    
-          await fetchClientes(empresaId); // Busca os clientes da empresa antes de buscar as vendas
-    
-          const response = await axios.get(`${API_VENDAS}?empresa_id=${empresaId}`);
-          const vendas = response.data.results.data;
-    
-          if (vendas && Array.isArray(vendas)) {
-            const vendasEmpresa = vendas.filter(venda => venda.empresa === empresaId);
-            const liquidadas = vendasEmpresa.filter(venda => venda.status === 'finalizada');
-            const contasReceber = vendasEmpresa.filter(venda => venda.status === 'pendente');
-    
-            setContas(liquidadas);
-            setContas2(contasReceber);
-          } else {
-            showAlert("Erro", "A resposta da API de vendas não contém os dados esperados.");
-          }
-    
-          setLoading(false);
-        } catch (error) {
-          console.error("Erro ao buscar vendas:", error);
-          showAlert("Erro", "Não foi possível carregar as vendas.");
-          setLoading(false);
         }
-      }, [getEmpresaId, fetchClientes]);
+        setServicoNomes(novosNomesServicos);
+
+        setContas(liquidadas);
+        setContas2(contasReceber);
+      } else {
+        showAlert("Erro", "A resposta da API de vendas não contém os dados esperados.");
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Erro ao buscar vendas:", error);
+      showAlert("Erro", "Não foi possível carregar as vendas.");
+      setLoading(false);
+    }
+  }, [getEmpresaId, fetchClientes]);
+
+  useEffect(() => {
+    fetchVendas();
+  }, [fetchVendas]);
+
       
-      useEffect(() => {
-        fetchVendas();
-      }, [fetchVendas]);
 
   // Função para abrir o modal de contas a receber (AccountDetailModal)
   const openAccountDetailModal = (account) => {
@@ -132,61 +171,81 @@ const SettleCredit = ({ navigation }) => {
   // Função para fechar o modal de filtro
   const closeFilterModal = () => {
     setFilterModalVisible(false);
-  };
+  }; 
 
   // Função para alternar entre "Liquidadas" e "Contas a Receber"
   const toggleTab = (tab) => {
     setSelectedTab(tab);
   };
 
+  const handleSaleCanceled = () => {
+    fetchVendas(); // Recarregar as vendas após o cancelamento
+};
   // Função para formatar a data para exibir apenas dia, mês e ano
 const formatarData = (data) => {
   const date = new Date(data);
   return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 };
 
+useEffect(() => {
+  const unsubscribe = navigation.addListener('focus', () => {
+    fetchVendas();
+  });
 
-const renderItem = ({ item }) => (
-  <TouchableOpacity onPress={() => openAccountDetailModal(item)}>
-    <View style={styles.contaItem}>
-      <View style={styles.contaInfo}>
-        <Icon name="person-circle-outline" size={40} color="black" />
-        <View style={styles.contaTextContainer}>
-          {/* Nome do Cliente baseado no ID */}
-          <Text style={styles.contaNome}>
-            {clientes[item.cliente] || 'Cliente não encontrado'}
-          </Text>
-          
-          {/* Data da Venda formatada */}
-          <Text style={styles.contaData}>
-            Data: {formatarData(item.data_venda)}
-          </Text>
-          
-          {/* Data de Vencimento correta */}
-          <Text style={styles.contaVencimento}>
-            Vencimento: {formatarData(item.dt_prevista_pagamento)}
-          </Text>
-          
-          {/* Quantidade de Produtos */}
-          <Text style={styles.contaProdutos}>
-            Produtos: {item.itens.length} itens
-          </Text>
-          
-          {/* Situação da Venda */}
-          <Text style={styles.contaSituacao(item.status)}>
-            Situação: {item.status}
-          </Text>
+  return unsubscribe;
+}, [navigation, fetchVendas]);
+
+
+
+const renderItem = ({ item }) => {
+  const quantidadeProdutos = item.itens.filter(i => i.produto !== null).length; // Quantidade de produtos
+  const quantidadeServicos = item.itens.filter(i => i.servico !== null).length; // Quantidade de serviços
+  
+  return (
+    <TouchableOpacity onPress={() => openAccountDetailModal(item)}>
+      <View style={styles.contaItem}>
+        <View style={styles.contaInfo}>
+          <Icon name="person-circle-outline" size={40} color="black" />
+          <View style={styles.contaTextContainer}>
+            <Text style={styles.contaNome}>
+              {clientes[item.cliente] || 'Cliente não encontrado'}
+            </Text>
+            <Text style={styles.contaData}>
+              Data: {formatarData(item.data_venda)}
+            </Text>
+            <Text style={styles.contaVencimento}>
+              Vencimento: {formatarData(item.dt_prevista_pagamento)}
+            </Text>
+
+            {/* Exibir a quantidade de produtos ou serviços */}
+            {quantidadeProdutos > 0 && (
+              <Text style={styles.contaProdutos}>
+                Produtos: {quantidadeProdutos}
+              </Text>
+            )}
+            {quantidadeServicos > 0 && (
+              <Text style={styles.contaProdutos}>
+                Serviços: {quantidadeServicos}
+              </Text>
+            )}
+
+            <Text style={styles.contaSituacao(item.status)}>
+              Situação: {item.status}
+            </Text>
+          </View>
+          <Text style={styles.contaValor}>R${item.valor_total_venda}</Text>
         </View>
-        
-        {/* Valor total da venda */}
-        <Text style={styles.contaValor}>R${item.valor_total_venda}</Text>
       </View>
-    </View>
-  </TouchableOpacity>
-);
+    </TouchableOpacity>
+  );
+};
 
 
-  const renderLiquidatedItem = ({ item }) => (
+const renderLiquidatedItem = ({ item }) => {
+  const quantidadeProdutos = item.itens.filter(i => i.produto !== null).length;
+  const quantidadeServicos = item.itens.filter(i => i.servico !== null).length;
+
+  return (
     <TouchableOpacity onPress={() => openLiquidatedDetailModal(item)}>
       <View style={styles.contaItem}>
         <View style={styles.contaInfo}>
@@ -196,9 +255,22 @@ const renderItem = ({ item }) => (
               {clientes[item.cliente] || 'Cliente não encontrado'}
             </Text>
             <Text style={styles.contaData2}>Data: {formatarData(item.data_venda)}</Text>
-            <Text style={styles.contaProdutos2}>
-               {item.itens.length} Produtos
-            </Text>
+
+            {/* Exibir a quantidade de produtos ou serviços */}
+            {quantidadeProdutos > 0 && (
+              <Text style={styles.contaProdutos2}>
+                {quantidadeProdutos} Produtos
+              </Text>
+            )}
+            {quantidadeServicos > 0 && (
+              <View>
+                <Text style={styles.contaProdutos2}>
+                  {quantidadeServicos} Serviços
+                </Text>
+                
+              </View>
+            )}
+
             <Text style={styles.contaSituacaoLiquidada2}>
               Situação: {item.status}
             </Text>
@@ -208,7 +280,7 @@ const renderItem = ({ item }) => (
       </View>
     </TouchableOpacity>
   );
-
+};
   return (
     <View style={styles.container}>
       <View style={styles.containerBartop}>
@@ -279,6 +351,7 @@ const renderItem = ({ item }) => (
           visible={modalVisible}
           onClose={closeAccountDetailModal}
           account={selectedAccount}
+          servicoNomes={servicoNomes}
         />
       )}
       {selectedAccount && selectedTab === 'open' && (
@@ -286,6 +359,9 @@ const renderItem = ({ item }) => (
           visible={liquidatedModalVisible}
           onClose={closeLiquidatedDetailModal}
           account={selectedAccount}
+          servicoNomes={servicoNomes}
+          onSaleCanceled={handleSaleCanceled}
+          navigation={navigation}
         />
       )}
     </View>

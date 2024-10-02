@@ -101,6 +101,16 @@ const styles = StyleSheet.create({
     color: COLORS.black
 
   },
+  productImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 5,
+    marginRight: 10, // Espaço entre a imagem e as informações do produto
+},
+
+  productQuantidade:{
+    color: COLORS.black,
+  },
   totalContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',

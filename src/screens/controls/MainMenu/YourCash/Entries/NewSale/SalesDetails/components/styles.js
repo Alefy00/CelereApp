@@ -175,6 +175,22 @@ const styles = StyleSheet.create({
   inactiveDiscountButtonText: {
     color: COLORS.black,
   },
+
+  //more button
+
+  addMoreButton:{
+    flexDirection: 'row',
+    backgroundColor: COLORS.primary,
+    paddingVertical: 15,
+    alignItems: "center",
+    justifyContent: 'center',
+    borderRadius: 5,
+  },
+  addMoreButtonText:{
+    marginLeft: 10,
+    color: COLORS.black,
+    fontSize:15,
+  },
   discountInput: {
     flex: 1,
     fontSize: 16,

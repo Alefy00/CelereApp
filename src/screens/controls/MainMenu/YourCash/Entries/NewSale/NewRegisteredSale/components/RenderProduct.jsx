@@ -38,13 +38,16 @@ const RenderProduct = memo(({ item, handleQuantityChange, quantities }) => {
       {/* Nome do produto ou serviço */}
       <Text style={styles.productName}>{item.nome}</Text>
 
-      <View style={styles.containerProduct}>
-      <Text style={styles.productPrice}>R$ {parseFloat(item.preco_venda).toFixed(2)}</Text>
-      {!isService && (
-        <Text style={item.qtd_estoque > 0 ? styles.inStock : styles.outOfStock}>
-          {item.qtd_estoque > 0 ? `Estoque: ${item.qtd_estoque}` : 'Sem estoque'}
-        </Text>
-      )}
+        <View style={styles.containerProduct}>
+        <Text style={styles.productPrice}>R$ {parseFloat(item.preco_venda).toFixed(2)}</Text>
+        {!isService && (
+          <Text style={item.qtd_estoque > 0 ? styles.inStock : styles.outOfStock}>
+            {item.qtd_estoque > 0 ? `Estoque: ${item.qtd_estoque}` : 'Sem estoque'}
+          </Text>
+        )}
+        {isService && (
+          <Text style={styles.inStock}>Serviço disponível</Text> // Nova linha para serviços
+        )}
       </View>
 
       {/* Exibe botões de controle de quantidade para produtos e serviços */}

@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, Image, Modal, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, Image, Modal, Alert, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import BarTop3 from '../../../../../../components/BarTop3';
@@ -14,8 +14,6 @@ const BASE_API_URL = 'https://api.celereapp.com.br';
 const REGISTERED_SERVICES_API = `${BASE_API_URL}/cad/servicos/`;
 
 const RegisteredServices = ({ navigation }) => {
-
-  // Estado para os filtros
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -40,14 +38,25 @@ const RegisteredServices = ({ navigation }) => {
     }
   };
 
-  // Função para buscar os serviços da API, usando useCallback para memoizar a função
+  // Função para buscar os serviços da API
   const fetchServices = useCallback(async () => {
     try {
+      setLoading(true); // Inicia o loading
       const empresaId = await getEmpresaId();
       if (empresaId) {
-        const response = await axios.get(`${REGISTERED_SERVICES_API}?empresa_id=${empresaId}`);
-        if (response.data && response.data.status === 200) {
-          setServices(response.data.data); // Popula a lista de serviços
+        let query = `?page=1&page_size=100`;
+
+        // Filtro por nome de serviço
+        if (nome) {
+          query += `&search=${nome}`;
+        }
+
+        const response = await axios.get(`${REGISTERED_SERVICES_API}${query}`);
+
+        if (response.data && response.data.results && response.data.results.data) {
+          // Filtramos os serviços apenas da empresa logada
+          const filteredServices = response.data.results.data.filter(service => service.empresa.id === empresaId);
+          setServices(filteredServices); // Popula a lista de serviços filtrada
         } else {
           Alert.alert('Erro', 'Falha ao recuperar os serviços.');
         }
@@ -56,13 +65,13 @@ const RegisteredServices = ({ navigation }) => {
       console.error('Erro ao buscar serviços:', error);
       Alert.alert('Erro', 'Ocorreu um erro ao buscar os serviços.');
     } finally {
-      setLoading(false);
+      setLoading(false); // Finaliza o loading
     }
-  }, []);
+  }, [nome]);
 
   useEffect(() => {
     fetchServices(); // Chama a função ao carregar a tela
-  }, [fetchServices]); // Incluímos fetchServices nas dependências
+  }, [fetchServices]);
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -117,24 +126,29 @@ const RegisteredServices = ({ navigation }) => {
         </View>
 
         {/* Lista de Serviços */}
-        <FlatList
-          data={services}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.serviceCard}>
-              <Image
-                source={item.image_url ? { uri: item.image_url } : require('../../../../../../assets/images/png/placeholder.png')} // Imagem padrão se não houver
-                style={styles.serviceImage}
-              />
-              <View style={styles.serviceInfo}>
-                <Text style={styles.serviceName}>{item.nome}</Text>
-                <Text style={styles.serviceType}>{item.tipo_servico || 'Serviço livre'}</Text>
+        {loading ? (
+          <ActivityIndicator size="large" color={COLORS.black} />
+        ) : (
+          <FlatList
+            data={services}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <View style={styles.serviceCard}>
+                <Image
+                  source={item.image_url ? { uri: item.image_url } : require('../../../../../../assets/images/png/placeholder.png')} // Imagem padrão se não houver
+                  style={styles.serviceImage}
+                />
+                <View style={styles.serviceInfo}>
+                  <Text style={styles.serviceName}>{item.nome}</Text>
+                  {/* Mudança para exibir unidade_medida */}
+                  <Text style={styles.serviceType}>Unidade de Medida: {item.unidade_medida || 'Serviço livre'}</Text>
+                </View>
+                <Text style={styles.servicePrice}>R${parseFloat(item.preco_venda).toFixed(2)}</Text>
               </View>
-              <Text style={styles.servicePrice}>R${parseFloat(item.preco_venda).toFixed(2)}</Text>
-            </View>
-          )}
-          style={styles.serviceList}
-        />
+            )}
+            style={styles.serviceList}
+          />
+        )}
 
         {/* Botão Cadastrar Novo Serviço */}
         <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddService')}>
@@ -176,6 +190,14 @@ const RegisteredServices = ({ navigation }) => {
                 onConfirm={handleConfirm}
                 onCancel={hideDatePicker}
               />
+              <View style={styles.inputContainer2}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nome"
+                  value={nome}
+                  onChangeText={setNome}
+                />
+              </View>
 
               {/* Campo de Valor */}
               <View style={styles.inputContainer2}>
@@ -189,7 +211,7 @@ const RegisteredServices = ({ navigation }) => {
               </View>
 
               {/* Botão Filtrar */}
-              <TouchableOpacity style={styles.modalFilterButton} onPress={closeFilterModal}>
+              <TouchableOpacity style={styles.modalFilterButton} onPress={fetchServices}>
                 <Icon name="filter" size={20} color={COLORS.black} />
                 <Text style={styles.modalFilterButtonText}>Filtrar</Text>
               </TouchableOpacity>

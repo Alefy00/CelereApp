@@ -25,28 +25,26 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
   const [liquidValue, setLiquidValue] = useState(totalPrice);  // Estado para armazenar o valor líquido após desconto
   const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
 
-     // Função para mostrar alertas
-     const showAlert = (title, message) => {
-      Alert.alert(title, message);
-    };
+  // Função para mostrar alertas
+  const showAlert = (title, message) => {
+    Alert.alert(title, message);
+  };
 
-    // Função para buscar o ID da empresa logada
-    const getEmpresaId = useCallback(async () => {
-      try {
-        const storedEmpresaId = await AsyncStorage.getItem('empresaId');
-        if (storedEmpresaId) {
-          return Number(storedEmpresaId); // Converte para número se estiver como string
-        } else {
-          showAlert('Erro', 'ID da empresa não encontrado.');
-          return null;
-        }
-      } catch (error) {
-        console.error('Erro ao buscar o ID da empresa:', error);
+  // Função para buscar o ID da empresa logada
+  const getEmpresaId = useCallback(async () => {
+    try {
+      const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+      if (storedEmpresaId) {
+        return Number(storedEmpresaId); // Converte para número se estiver como string
+      } else {
+        showAlert('Erro', 'ID da empresa não encontrado.');
         return null;
       }
-    }, []);
-
-
+    } catch (error) {
+      console.error('Erro ao buscar o ID da empresa:', error);
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
     const date = new Date();
@@ -79,12 +77,12 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
     setIsInvoiceModalVisible(false);
   };
 
-
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || paymentDate;
     setShowDatePicker(Platform.OS === 'ios');
     setPaymentDate(currentDate);
   };
+
   const handleConfirm = () => {
     setIsModalVisible(true);
   };
@@ -92,6 +90,7 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
   const handleOpenInvoiceModal = () => {
     setIsInvoiceModalVisible(true);
   };
+
 // Função de registrar venda e itens
 const handleRegisterSale = async () => {
   try {
@@ -99,42 +98,44 @@ const handleRegisterSale = async () => {
     if (!empresaId) return;
 
     const paymentMethodId = paymentMethod === 'Boleto' ? 1 : null; // 1 para Boleto, null para Fiado
-    const formattedDueDate = paymentDate.toISOString().split('T')[0]; // Formata a data de vencimento
+    const formattedDueDate = paymentDate.toISOString().split('T')[0]; // Data de vencimento selecionada pelo usuário (prevista)
     const totalValue = liquidValue; // Valor bruto a receber após desconto
+    const totalCostValue = totalPrice; // Valor total do custo, que pode ser ajustado conforme necessário
 
-    // Registra a venda primeiro
+    // Monta o objeto de venda com os dados preenchidos pelo usuário
     const vendaData = {
       empresa: empresaId,
       cliente_id: selectedClient ? selectedClient.id : null, // Cliente selecionado
-      dt_pagamento: null, // Venda fiada não tem data de pagamento no momento
-      dt_prevista_pagamento: formattedDueDate, // Data de vencimento escolhida pelo usuário
-      percentual_desconto: parseFloat(discountValue) || 0, // Percentual de desconto
-      tipo_pagamento_venda: paymentMethodId, // ID do tipo de pagamento (1 para Boleto, null para Fiado)
-      valor_total_venda: totalValue // Valor bruto a receber
+      dt_pagamento: null, // Pagamento futuro (conta a receber)
+      dt_prevista_pagamento: formattedDueDate, // Data de vencimento inserida pelo usuário
+      valor_total_custo_venda: totalCostValue, // Valor de custo da venda
+      valor_total_venda: totalValue, // Valor total a receber
+      percentual_desconto: parseFloat(discountValue) || 0, // Percentual de desconto inserido
+      tipo_pagamento_venda: paymentMethodId, // Tipo de pagamento (Boleto ou Fiado)
     };
 
+    // Envia os dados da venda para a API
     const vendaResponse = await axios.post(API_VENDAS, vendaData);
-    const vendaId = vendaResponse.data.data.id;
+    const vendaId = vendaResponse.data.data.id; // Pega o ID da venda registrada
     console.log('Venda registrada:', vendaResponse.data);
 
-    // Agora registra os itens da venda
+    // Registra os itens da venda
     const saleItems = products.map(product => ({
       empresa_id: empresaId,
-      venda_id: vendaId, // ID da venda registrada
+      venda_id: vendaId, // ID da venda
       produto_id: product.id,
       quantidade: product.amount,
       percentual_desconto: parseFloat(discountValue) || 0,
-      valor_desconto: discountType === 'R$' ? parseFloat(discountValue) : 0
+      valor_desconto: discountType === 'R$' ? parseFloat(discountValue) : 0,
     }));
 
-    const responsePromises = saleItems.map(item => 
+    // Faz a requisição para registrar os itens da venda
+    const responsePromises = saleItems.map(item =>
       axios.post(API_ITENS_VENDA, item)
     );
-
     await Promise.all(responsePromises);
 
-
-    // Navegar ou limpar o carrinho após isso
+    // Navega ou limpa o carrinho após o registro
     navigation.navigate('NewRegisteredSale', { clearCart: true });
 
   } catch (error) {
@@ -143,12 +144,14 @@ const handleRegisterSale = async () => {
   }
 };
 
+  
   const handleEmitReceipt = () => {
     // Lógica para emissão de NF-e ou recibo
   };
+
   const calculateLiquidValue = useCallback(() => {
     let discount = 0;
-  
+
     if (discountType === '%') {
       // Calcula o desconto em porcentagem
       discount = (totalPrice * (parseFloat(discountValue) / 100)) || 0;
@@ -156,16 +159,17 @@ const handleRegisterSale = async () => {
       // Calcula o desconto em valor fixo
       discount = parseFloat(discountValue) || 0;
     }
-  
+
     const totalWithDiscount = totalPrice - discount; // Aplica o desconto
     const finalLiquidValue = totalWithDiscount > 0 ? totalWithDiscount : 0; // Evita valores negativos
     setLiquidValue(finalLiquidValue); // Atualiza o valor líquido
   }, [totalPrice, discountValue, discountType]);
-  
+
   useEffect(() => {
     calculateLiquidValue();
   }, [totalPrice, discountValue, discountType, calculateLiquidValue]);
-  
+
+
 
   return (
     <View style={styles.container}>
@@ -191,36 +195,36 @@ const handleRegisterSale = async () => {
             />
           )}
         </View>
-            {/* Campo de associar cliente */}
-            <View style={styles.clientContainer}>
-              <TouchableOpacity style={styles.clientPicker} onPress={toggleDropdown}>
-                <Text style={styles.clientText}>
-                  {selectedClient ? selectedClient.nome : "Associar a um cliente..."}  
-                </Text>
-                <Icon name={isDropdownVisible ? "arrow-up" : "arrow-down"} size={24} color={COLORS.black} />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.addClientButton} onPress={navigateToAddClient}>
-                <Icon name="add" size={30} color={COLORS.black} />
-              </TouchableOpacity>
-            </View>
 
-            {/* Dropdown para exibir a lista de clientes */}
-            {isDropdownVisible && (
-              <View style={[styles.dropdownContainer, { maxHeight: 150 }]}>
-                <ScrollView nestedScrollEnabled={true}>
-                  {clients.map((client) => (
-                    <TouchableOpacity
-                      key={client.id}
-                      style={styles.dropdownItem}
-                      onPress={() => selectClient(client)}
-                    >
-                      <Text style={styles.dropdownItemText}>{client.nome}</Text> 
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
+        {/* Campo de associar cliente */}
+        <View style={styles.clientContainer}>
+          <TouchableOpacity style={styles.clientPicker} onPress={toggleDropdown}>
+            <Text style={styles.clientText}>
+              {selectedClient ? selectedClient.nome : "Associar a um cliente..."}  
+            </Text>
+            <Icon name={isDropdownVisible ? "arrow-up" : "arrow-down"} size={24} color={COLORS.black} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.addClientButton} onPress={navigateToAddClient}>
+            <Icon name="add" size={30} color={COLORS.black} />
+          </TouchableOpacity>
+        </View>
 
+        {/* Dropdown para exibir a lista de clientes */}
+        {isDropdownVisible && (
+          <View style={[styles.dropdownContainer, { maxHeight: 150 }]}>
+            <ScrollView nestedScrollEnabled={true}>
+              {clients.map((client) => (
+                <TouchableOpacity
+                  key={client.id}
+                  style={styles.dropdownItem}
+                  onPress={() => selectClient(client)}
+                >
+                  <Text style={styles.dropdownItemText}>{client.nome}</Text> 
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         {/* Carrinho de produtos */}
         <View style={styles.cartContainer}>
@@ -236,6 +240,11 @@ const handleRegisterSale = async () => {
             </View>
           ))}
         </View>
+
+        <TouchableOpacity style={styles.addMoreButton} onPress={() => navigation.navigate('NewRegisteredSale')}>
+        <Icon name="add" size={25} color={COLORS.black} />
+        <Text style={styles.addMoreButtonText}>Adicionar mais produtos ou serviços</Text>
+      </TouchableOpacity>
 
         {/* Seção de descontos */}
         <Text style={styles.sectionTitle}>Descontos</Text>
@@ -286,7 +295,6 @@ const handleRegisterSale = async () => {
             </Text>
           </TouchableOpacity>
         </View>
-
 
         {/* Total e valor líquido a receber */}
         <View style={styles.totalContainer}>
