@@ -37,6 +37,7 @@ const LiquidateNow = ({ navigation, route, clients }) => {
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
   const [installmentValue, setInstallmentValue] = useState(0);
+  const [saleId, setSaleId] = useState(null);
 
       // Função para mostrar alertas
       const showAlert = (title, message) => {
@@ -150,6 +151,9 @@ const handleRegisterSale = async () => {
     const vendaResponse = await axios.post(REGISTER_SALE_API, vendaData);
     const vendaId = vendaResponse.data.data.id;
 
+      // Armazene o ID da venda
+      setSaleId(vendaId);
+
     // Agora registra os serviços da venda
     const serviceItems = services.map(service => ({
       empresa_id: empresaId,
@@ -184,8 +188,9 @@ const handleRegisterSale = async () => {
     await Promise.all([...servicePromises, ...productPromises]);
 
     // Exibe mensagem de sucesso e navega
-    Alert.alert('Sucesso', 'Venda e itens registrados com sucesso!');
-    navigation.navigate('NewRegisteredSale', { clearCart: true });
+    setIsModalVisible(true);
+
+ 
 
   } catch (error) {
     console.error('Erro ao registrar venda:', error.response ? error.response.data : error);
@@ -246,26 +251,14 @@ useEffect(() => {
 
 
   const handleConfirm = () => {
-    setIsModalVisible(true);
-    handleRegisterSale(); // Chama a função para registrar a venda
+    navigation.navigate('NewRegisteredSale', { clearCart: true });
   };
 
   const handleCloseModal = () => {
       setIsModalVisible(false);
   };
 
-  const handleNewRegistered = () => {
-    // Reseta o carrinho, produtos, serviços, etc.
-    resetCart();  // Método que limpa o estado do carrinho
-    setIsModalVisible(false);
-    navigation.navigate('NewRegisteredSale');
-  };
   
-  // Adiciona uma função que reseta o carrinho
-const resetCart = () => {
-setProducts([]);
-setServices([]);
-};
 
   const handleAddProduct = () => {
       navigation.navigate('NewRegisteredSale');
@@ -504,7 +497,7 @@ const handleCloseInvoiceModal = () => {
 
       {/* Botão de Concluir Venda */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.concludeButton} onPress={handleConfirm}>
+        <TouchableOpacity style={styles.concludeButton} onPress={handleRegisterSale}>
           <Icon name="checkmark-circle" size={24} color="black" />
           <Text style={styles.concludeButtonText}>Concluir esta venda</Text>
         </TouchableOpacity>
@@ -517,7 +510,7 @@ const handleCloseInvoiceModal = () => {
                     <View style={styles.modalContent}>
                         <Icon name="checkmark-circle" size={100} color={COLORS.green} />
                         <Text style={styles.modalText}>Sua venda foi concluída</Text>
-                        <TouchableOpacity style={styles.modalPrimaryButton} onPress={handleNewRegistered}>
+                        <TouchableOpacity style={styles.modalPrimaryButton} onPress={handleConfirm}>
                             <Icon name="cart" size={20} color={COLORS.black} />
                             <Text style={styles.modalPrimaryButtonText}>Registrar outra venda</Text>
                         </TouchableOpacity>
@@ -533,7 +526,9 @@ const handleCloseInvoiceModal = () => {
                 <View style={styles.invoiceModalContainer}>
                     <View style={styles.invoiceModalContent}>
                         <Text style={styles.invoiceModalTitle}>Escolha uma opção:</Text>
-                        <TouchableOpacity style={styles.invoiceOptionButtonRecibo} onPress={() => console.log("Emitir Recibo")}>
+                        <TouchableOpacity style={styles.invoiceOptionButtonRecibo} onPress={() => {
+                            navigation.navigate('ReceiptScreen', { saleId: saleId });
+                        }}>
                             <Text style={styles.invoiceOptionTextRecibo}>Recibo</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.invoiceOptionButtonNotaFiscal} onPress={() => console.log("Emitir Nota Fiscal")} disabled={true}>

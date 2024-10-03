@@ -55,21 +55,6 @@ const SingleSale = ({ navigation }) => {
   
           {activeTab === 'Liquidar agora' ? (
             <LiquidarAgora
-              cartItems={cartItems}
-              setCartItems={setCartItems}
-              discountValue={discountValue}
-              setDiscountValue={setDiscountValue}
-              discountType={discountType}
-              setDiscountType={setDiscountType}
-              paymentMethod={paymentMethod}
-              setPaymentMethod={setPaymentMethod}
-              paymentMethod2={paymentMethod2}
-              setPaymentMethod2={setPaymentMethod2}
-              totalBruto={totalBruto}
-              setTotalBruto={setTotalBruto}
-              totalLiquido={totalLiquido}
-              setTotalLiquido={setTotalLiquido}
-              taxaCartao={taxaCartao}
               navigation={navigation}
             />
           ) : (

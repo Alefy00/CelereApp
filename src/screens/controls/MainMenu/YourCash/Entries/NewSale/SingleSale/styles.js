@@ -158,6 +158,58 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         backgroundColor: COLORS.background,
       },
+       //dropdown pacelamento
+  parcelamentoSection: {
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  parcelamentoContainer: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  parcelamentoButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  activeParcelamentoButton: {
+    backgroundColor: COLORS.primary,
+
+  },
+  parcelamentoText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.gray,
+  },
+  activeParcelamentoText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.black,
+  },
+  parcelamentoValue: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.black,
+    marginLeft: 10,
+  },
+          // Estilos gerais do botão desabilitado
+    paymentOptionButtonDisabled: {
+      backgroundColor: COLORS.lightGray, // Cor de fundo cinza para indicar desabilitado
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderRadius: 5,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    // Texto do botão desabilitado
+    paymentOptionTextDisabled: {
+      color: COLORS.darkGray, // Cor do texto para indicar desabilitado
+      fontSize: 14,
+    },
       //pagamento metodo
       paymentSelectionContainer: {
         flexDirection: 'row',

@@ -29,8 +29,6 @@ const SettleCredit = ({ navigation }) => {
   const [clientes, setClientes] = useState({});
   const [servicoNomes, setServicoNomes] = useState({});
 
-
-      // Função para mostrar alertas
   // Função para mostrar alertas
   const showAlert = (title, message) => Alert.alert(title, message);
 
@@ -352,6 +350,8 @@ const renderLiquidatedItem = ({ item }) => {
           onClose={closeAccountDetailModal}
           account={selectedAccount}
           servicoNomes={servicoNomes}
+          onSaleCanceled={handleSaleCanceled}
+          navigation={navigation}
         />
       )}
       {selectedAccount && selectedTab === 'open' && (

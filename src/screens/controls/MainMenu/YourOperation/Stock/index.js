@@ -136,6 +136,11 @@ const StockInfo = ({ navigation }) => {
     setActiveFilter(categoryId);
   };
 
+    // ** Nova função para navegar para a AddProductScreen com o produto selecionado **
+    const handleProductSelect = (product) => {
+      navigation.navigate('AddProductScreen', { product }); // Passa o produto selecionado para a tela de edição
+    };
+  
   // Renderização dos botões de filtro de categorias
   const renderFilterItem = ({ item }) => (
     <TouchableOpacity

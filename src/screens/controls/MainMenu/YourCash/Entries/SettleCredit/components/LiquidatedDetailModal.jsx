@@ -10,7 +10,7 @@ import ConfirmCancelModal from "./ConfirmCancelModal";
 const LiquidatedDetailModal = ({ visible, onClose, account,  servicoNomes, onSaleCanceled, navigation }) => {
     const [isFirstModalVisible, setFirstModalVisible] = useState(visible);
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
-    const [isReceiptModalVisible, setReceiptModalVisible] = useState(false);
+
 
     // Sincronizar o estado local do modal com a prop 'visible'
     useEffect(() => {
@@ -26,15 +26,7 @@ const LiquidatedDetailModal = ({ visible, onClose, account,  servicoNomes, onSal
         const openConfirmModal = () => {
           setConfirmModalVisible(true);
       };
-        // Função para abrir o modal de recibo
-      const openReceiptModal = () => {
-          setReceiptModalVisible(true);
-      };
-  
-      // Função para fechar o modal de recibo
-      const closeReceiptModal = () => {
-          setReceiptModalVisible(false);
-      };
+
   
     const renderItem = ({ item }) => {
       const isProduct = item.produto !== null;

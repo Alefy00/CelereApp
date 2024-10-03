@@ -1,155 +1,195 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from "react";
-import { View, Text, Modal, TextInput, TouchableOpacity, FlatList } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { View, Text, Modal, TouchableOpacity, FlatList, Image } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import styles from './styles';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { COLORS } from "../../../../../../../constants";
+import ConfirmCancelModal from "./ConfirmCancelModal";
+import LiquidationFlowModal from "./LiquidationFlowModal";
+import PartialLiquidationModal from "./PartialLiquidationModal ";
+import axios from "axios";
 
-const AccountDetailModal = ({ visible, onClose }) => {
-  const [partialValue, setPartialValue] = useState('');
-  const [newDueDate, setNewDueDate] = useState(null);
-  const [isSecondModalVisible, setSecondModalVisible] = useState(false);
-  const [isThirdModalVisible, setThirdModalVisible] = useState(false);
+const API_SERVICOS = 'https://api.celereapp.com.br/cad/servicos/';
+
+const AccountDetailModal = ({ visible, onClose,  account, onSaleCanceled }) => {
   const [isFirstModalVisible, setFirstModalVisible] = useState(visible);
-  const [isFourthModalVisible, setFourthModalVisible] = useState(false); 
-  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [isLiquidationModalVisible, setLiquidationModalVisible] = useState(false);
+  const [isPartialModalVisible, setPartialModalVisible] = useState(false); 
+  const [servicoNomes, setServicoNomes] = useState({});
 
-  // Dados fictícios da lista de compras
-  const products = [
-    { id: '1', nome: 'Cabo tipo-C Preto', valor: 'R$18,00' },
-    { id: '2', nome: 'Cabo tipo-C Preto', valor: 'R$18,00' },
-    { id: '3', nome: 'Cabo Lightning para tipo-C Branco', valor: 'R$24,00' },
-    { id: '4', nome: 'Cabo Lightning para tipo-C Branco', valor: 'R$24,00' },
-    { id: '5', nome: 'Cabo Lightning para tipo-C Branco', valor: 'R$24,00' },
-  ];
+    // Função para buscar o nome de um serviço pelo seu ID
+    const fetchServicoById = async (id) => {
+      try {
+        const response = await axios.get(`${API_SERVICOS}${id}/`);
+        return response.data.nome; // Supondo que o nome do serviço está na chave 'nome'
+      } catch (error) {
+        console.error(`Erro ao buscar o serviço com ID ${id}:`, error);
+        return null;
+      }
+    };
+  
+    // Função para buscar todos os nomes dos serviços da lista de itens
+    const fetchServicosNomes = useCallback(async () => {
+      const novosServicos = {};
+      try {
+        // Percorrer todos os itens que tenham um serviço e buscar o nome
+        for (const item of account.itens) {
+          if (item.servico) {
+            const nomeServico = await fetchServicoById(item.servico);
+            novosServicos[item.servico] = nomeServico || 'Serviço não identificado';
+          }
+        }
+        setServicoNomes(novosServicos);
+      } catch (error) {
+        console.error("Erro ao buscar os nomes dos serviços:", error);
+      }
+    }, [account]);
+  
+    useEffect(() => {
+      if (visible) {
+        setFirstModalVisible(true);
+        fetchServicosNomes(); // Buscar os nomes dos serviços quando o modal for exibido
+      }
+    }, [visible, fetchServicosNomes]);
 
-  const totalValue = 'R$84,00';  // Valor fictício
 
-
-  const handleReminder = () => {
-    console.log('Lembrete ativado');
+  const handleCancelSale = () => {
+    setConfirmModalVisible(true); // Abre o modal de confirmação de cancelamento
+    
   };
 
-  const handlePostpone = () => {
-    console.log('Conta adiada para:', newDueDate);
+    // Função para lidar com a confirmação da liquidação parcial
+    const handleConfirmPartialLiquidation = (data) => {
+      console.log(`Liquidação parcial confirmada com os dados:`, data);
+      // Aqui você pode adicionar a lógica para lidar com a liquidação parcial,
+      // como atualizar a lista de vendas ou enviar uma requisição para o servidor
+      onSaleCanceled(); // Atualiza a lista de vendas no componente pai
+      setPartialModalVisible(false); // Fecha o modal de liquidação parcial
+      onClose(); // Fecha o modal principal
+    };
+
+      // Função para abrir o modal de liquidação
+  const openLiquidationModal = () => {
+    setFirstModalVisible(false); // Fecha o modal principal
+    setLiquidationModalVisible(true); // Abre o modal de liquidação
   };
 
-  const handleDelete = () => {
-    console.log('Conta excluída');
+  // Função para abrir o modal de liquidação parcial
+  const openPartialLiquidationModal = () => {
+    setFirstModalVisible(false); // Fecha o modal principal
+    setPartialModalVisible(true); // Abre o modal de liquidação parcial
   };
 
-  const handlePartialLiquidation = () => {
-    console.log('Liquidar parcialmente:', partialValue);
+  const closePartialModal = () => {
+    setPartialModalVisible(false); // Fecha o modal de liquidação parcial
+    setFirstModalVisible(true); // Reabre o modal principal
   };
 
-  const handleTotalLiquidation = () => {
-    // Fecha o primeiro modal e abre o segundo modal
-    setFirstModalVisible(false);
-    setSecondModalVisible(true);
+
+  // Função para fechar o modal de liquidação
+  const closeLiquidationModal = () => {
+    setLiquidationModalVisible(false);
+    setFirstModalVisible(true); // Reabre o modal principal após a liquidação
   };
 
+  // Fechar e reabrir o modal principal corretamente
   const closeFirstModal = () => {
-    // Fecha apenas o primeiro modal
     setFirstModalVisible(false);
-    onClose(); // Opcional: fechar o fluxo todo se o primeiro modal fechar tudo
+    onClose(); // Fechar o modal principal
   };
 
-  const closeSecondModal = () => {
-    // Fecha o segundo modal e abre o terceiro modal
-    setSecondModalVisible(false);
-    setThirdModalVisible(true);
+  const closeConfirmModal = () => {
+    setConfirmModalVisible(false); // Fecha o modal de confirmação sem fechar o principal
   };
 
-  const closeThirdModal = () => {
-    // Fecha o terceiro modal e abre o quarto modal de confirmação de sucesso
-    setThirdModalVisible(false);
-    setFourthModalVisible(true);
-  };
-
-  const closeFourthModal = () => {
-    // Fecha o quarto modal e retorna ao fluxo principal
-    setFourthModalVisible(false);
-    onClose(); // Voltar à tela principal ou ao fluxo anterior
-  };
-
-  const showDatePicker = () => {
-    setDatePickerVisible(true);
-  };
-
-  const hideDatePicker = () => {
-    setDatePickerVisible(false);
-  };
-
-  const handleConfirmDate = (date) => {
-    setNewDueDate(date);  // Salva a data selecionada
-    hideDatePicker();
+  const handleSaleCanceled = () => {
+    onSaleCanceled(); // Atualiza a lista de vendas no componente pai
+    closeFirstModal(); // Fecha o modal automaticamente
   };
 
 
+   // Função para format ara exibição do produto ou serviço
+   const renderItem = ({ item }) => {
+    const isProduct = item.produto !== null;
+    const isService = item.servico !== null;
+    // Verificar se o produto ou serviço tem uma imagem
+    const imagem = isProduct ? item.produto.imagem : isService ? item.servico?.imagem : null;
+
+    return (
+      <View style={styles.productItem}>
+
+        {imagem ? (
+          <Image source={{ uri: imagem }} style={styles.productImage} /> // Imagem do produto/serviço
+        ) : (
+          <Icon name="pricetag-outline" size={24} color="gray" /> // Ícone de fallback
+        )}
+        <View style={styles.productInfo}>
+
+          <Text style={styles.productNome}>
+            {isProduct ? item.produto.nome : isService ? servicoNomes[item.servico] || 'Serviço não identificado' : 'Item não identificado'}
+          </Text>
+
+          <Text style={{ color: COLORS.black }}>R${item.valor_total_venda}</Text>
+
+          <Text style={styles.productQuantidade}>
+            Qtd: {item.quantidade}
+          </Text>
+        </View>
+      </View>
+    );
+  };
   return (
     <>
-      {/* Primeiro Modal */}
-      <Modal visible={isFirstModalVisible} transparent={true} animationType="slide">
+        <Modal visible={isFirstModalVisible} transparent={true} animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-            <Text style={styles.sectionTitle}>Detalhes da venda</Text>
+              <Text style={styles.sectionTitle}>Detalhes da venda</Text>
               <TouchableOpacity onPress={closeFirstModal}>
                 <Text style={styles.modalClose}>✕</Text>
               </TouchableOpacity>
             </View>
+
             <View style={styles.containerTitle}>
               <Text style={styles.sectionTitle}>Situação:</Text>
               <Text style={styles.sectionTitleRed}> Contas a pagar</Text>
             </View>
 
-            {/* Lista de compras com scroll */}
             <Text style={styles.sectionTitle}>Lista de Compras</Text>
             <FlatList
-              data={products}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <View style={styles.productItem}>
-                  <Icon name="pricetag-outline" size={24} color="gray" />
-                  <View style={styles.productInfo}>
-                    <Text style={styles.productNome}>{item.nome}</Text>
-                    <Text style={{color: COLORS.black}}>{item.valor}</Text>
-                  </View>
-                </View>
-              )}
+              data={account?.itens}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderItem}
               contentContainerStyle={styles.productList}
-              style={{ maxHeight: 150 }} // Limitar a altura do FlatList para não ocupar a tela toda
+              style={{ maxHeight: 150 }}
             />
 
-            {/* Valor total */}
             <View style={styles.totalContainer}>
               <Text style={styles.totalLabel}>Valor total:</Text>
-              <Text style={styles.totalValue}>{totalValue}</Text>
+              <Text style={styles.totalValue}>R${account?.valor_total_venda}</Text>
             </View>
 
-
-            {/* Botões */}
-            <TouchableOpacity style={styles.partialButton} onPress={handlePartialLiquidation}>
+            <TouchableOpacity style={styles.partialButton} onPress={openPartialLiquidationModal}>
               <Text style={styles.buttonText}>Liquidar Parcialmente</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.totalButton} onPress={handleTotalLiquidation}>
+            <TouchableOpacity style={styles.totalButton} onPress={openLiquidationModal}>
               <Icon name="checkmark-circle" size={24} color="black" />
               <Text style={styles.buttonText}>Liquidar</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.reminderButton} onPress={handleReminder} disabled={true}>
+            <TouchableOpacity style={styles.reminderButton}  disabled={true}>
               <Icon name="share-social-outline" size={24} color="black" />
               <Text style={styles.buttonText}>Lembrete de cobrança</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.postponeButton} onPress={handlePostpone} disabled={true}>
+            <TouchableOpacity style={styles.postponeButton} disabled={true}>
               <Icon name="calendar-outline" size={24} color="black" />
               <Text style={styles.buttonText}>Adiar</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+            <TouchableOpacity style={styles.deleteButton} onPress={handleCancelSale}>
               <Icon name="close-circle-outline" size={24} color="black" />
               <Text style={styles.buttonText}>Excluir conta</Text>
             </TouchableOpacity>
@@ -157,80 +197,31 @@ const AccountDetailModal = ({ visible, onClose }) => {
         </View>
       </Modal>
 
-      {/* Segundo Modal para escolher a data de liquidação */}
-      <Modal visible={isSecondModalVisible} transparent={true} animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent2}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Liquidação total</Text>
-              <TouchableOpacity onPress={() => setSecondModalVisible(false)}>
-                <Text style={styles.modalClose}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Campo para selecionar a data */}
-            <TouchableOpacity onPress={showDatePicker} style={styles.datePickerContainer}>
-              <Text style={styles.dateLabel}>
-                {newDueDate ? newDueDate.toLocaleDateString() : 'Escolha a data'}
-              </Text>
-              <Icon name="calendar-outline" size={24} color="gray" />
-            </TouchableOpacity>
-
-            <DateTimePickerModal
-              isVisible={isDatePickerVisible}
-              mode="date"
-              onConfirm={handleConfirmDate}
-              onCancel={hideDatePicker}
-            />
-
-            {/* Botão de confirmação */}
-            <TouchableOpacity style={styles.confirmButton} onPress={closeSecondModal}>
-              <Icon name="checkmark-circle" size={24} color="black" />
-              <Text style={styles.buttonText}>Liquidar Conta</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Terceiro Modal para confirmação final */}
-      <Modal visible={isThirdModalVisible} transparent={true} animationType="slide">
-        <View style={styles.modalContainer3}>
-          <View style={styles.modalContent3}>
-            <Text style={styles.modalTitle3}>Tem certeza disso?</Text>
-            <Text style={styles.modalSubtitle3}>Liquidar esta conta removerá ela da lista.</Text>
-
-            <View style={styles.confirmationButtonsContainer}>
-              <TouchableOpacity style={styles.cancelButton} onPress={() => setThirdModalVisible(false)}>
-                <Text style={styles.buttonText}>Cancelar</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.confirmButton3} onPress={closeThirdModal}>
-                <Icon name="checkmark-circle" size={24} color="black" />
-                <Text style={styles.buttonText3}>Liquidar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Quarto Modal - Confirmação de Sucesso */}
-      <Modal visible={isFourthModalVisible} transparent={true} animationType="slide">
-        <View style={styles.modalContainer4}>
-          <View style={styles.modalContent4}>
-            {/* Ícone de Sucesso */}
-            <Icon name="checkmark-circle" size={100} color={COLORS.green} />
-
-            {/* Texto de Sucesso */}
-            <Text style={styles.successText}>Conta liquidada com sucesso</Text>
-
-            {/* Botão Voltar */}
-            <TouchableOpacity style={styles.successButton} onPress={closeFourthModal}>
-              <Icon name="arrow-back-outline" size={24} color="black" />
-              <Text style={styles.buttonText4}>Voltar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        <ConfirmCancelModal
+        visible={confirmModalVisible}
+        onClose={closeConfirmModal}
+        saleId={account.id}
+        onSaleCanceled={handleSaleCanceled}
+      />
+        {/* Modal de liquidação */}
+        <LiquidationFlowModal
+        visible={isLiquidationModalVisible}
+        onClose={closeLiquidationModal}
+        onConfirmLiquidation={(newDueDate) => {
+          console.log(`Conta liquidada na data: ${newDueDate}`);  // Confirme se a data está sendo passada
+          onSaleCanceled(); // Atualiza a lista de vendas no componente pai
+          closeLiquidationModal(); // Fecha o modal de liquidação
+          closeFirstModal(); 
+        }}
+        saleId={account.id}
+      />
+      <PartialLiquidationModal
+        visible={isPartialModalVisible}
+        onClose={closePartialModal}
+        onConfirmPartialLiquidation={handleConfirmPartialLiquidation} // Função de confirmação
+        saleId={account.id}
+        totalSaleAmount={account.valor_total_venda}
+      />
     </>
   );
 };

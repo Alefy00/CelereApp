@@ -183,7 +183,7 @@ const handleRegisterSale = async () => {
       resetCart(); // Limpa o carrinho após registrar a venda
   
       // Navega para a tela de nova venda ou resumo
-      navigation.navigate('NewRegisteredSale', { clearCart: true });
+      setIsModalVisible(true);
   
     } catch (error) {
       console.error('Erro ao registrar venda:', error.response ? error.response.data : error);
@@ -199,7 +199,7 @@ const resetCart = () => {
 };
     
     const handleConfirm = () => {
-        setIsModalVisible(true);
+        navigation.navigate('NewRegisteredSale', { clearCart: true });
     };
     const handleOpenInvoiceModal = () => {
         setIsInvoiceModalVisible(true);
@@ -437,7 +437,7 @@ const resetCart = () => {
 
             {/* Botão de Concluir Venda */}
             <View style={styles.footer}>
-                <TouchableOpacity style={styles.concludeButton} onPress={handleConfirm}>
+                <TouchableOpacity style={styles.concludeButton} onPress={handleRegisterSale}>
                     <Icon name="checkmark-circle" size={24} color="black" />
                     <Text style={styles.concludeButtonText}>Concluir esta venda</Text>
                 </TouchableOpacity>
@@ -449,13 +449,9 @@ const resetCart = () => {
                     <View style={styles.modalContent}>
                         <Icon name="checkmark-circle" size={100} color={COLORS.green} />
                         <Text style={styles.modalText}>Sua venda foi concluída</Text>
-                        <TouchableOpacity style={styles.modalPrimaryButton} onPress={handleRegisterSale}>
+                        <TouchableOpacity style={styles.modalPrimaryButton} onPress={handleConfirm}>
                             <Icon name="cart" size={20} color={COLORS.black} />
                             <Text style={styles.modalPrimaryButtonText}>Registrar outra venda</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.modalPrimaryButton2} onPress={handleOpenInvoiceModal}>
-                            <Icon name="cart" size={20} color={COLORS.black} />
-                            <Text style={styles.modalPrimaryButtonText}>Emitir NF-e ou Recibo</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
