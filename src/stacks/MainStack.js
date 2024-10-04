@@ -72,10 +72,12 @@ import Receipts from '../screens/controls/MainMenu/YourOperation/ReceiptsBudgets
 import NewBudgets from '../screens/controls/MainMenu/YourOperation/ReceiptsBudgets/Newbudgets';
 import DetailsBudgets from '../screens/controls/MainMenu/YourOperation/ReceiptsBudgets/DetailsBudgets';
 import AddCategoryService from '../screens/controls/MainMenu/YourOperation/Services/Category';
+import IncludeCategoriesExpense from '../screens/controls/MainMenu/YourCash/Exits/IncludeCategoriesExpense';
 
 
 import TeamScreen from '../screens/controls/MainMenu/YourControls/Users';
 import ReceiptScreen from '../screens/controls/MainMenu/YourCash/Entries/SettleCredit/components/ReceiptScreen';
+import BudgetsScreen from '../screens/controls/MainMenu/YourOperation/ReceiptsBudgets/components/BudgetsScreen';
 
 const Stack = createStackNavigator();
 
@@ -113,6 +115,7 @@ export default () => (
     <Stack.Screen name="IncludeClient" component={IncludeClient} />
     <Stack.Screen name="ConsultClient" component={ConsultClient} />
     <Stack.Screen name="ConsultSupplier" component={ConsultSupplier} />
+    <Stack.Screen name="IncludeCategoriesExpense" component={IncludeCategoriesExpense} />
 
     <Stack.Screen name="CancelSale" component={CancelSale} />
     <Stack.Screen name="SettleCredit" component={SettleCredit} />
@@ -158,6 +161,7 @@ export default () => (
     <Stack.Screen name="AddService" component={AddService} />
     <Stack.Screen name="TeamScreen" component={TeamScreen} />
     <Stack.Screen name="ReceiptScreen" component={ReceiptScreen} />
+    <Stack.Screen name="BudgetsScreen" component={BudgetsScreen} />
 
 
   </Stack.Navigator>

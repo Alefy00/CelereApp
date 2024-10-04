@@ -1,10 +1,18 @@
 /* eslint-disable prettier/prettier */
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, Modal } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, Modal, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import BarTop3 from '../../../../../../components/BarTop3';
 import { COLORS } from '../../../../../../constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { useFocusEffect } from '@react-navigation/native';
+
+const API_URL = 'https://api.celereapp.com.br/cad/cliente/'; 
+const API_ORCAMENTO_URL = 'https://api.celereapp.com.br/cad/orcamento/';
+const API_ITENS_VENDA_ORCAMENTO_URL = 'https://api.celereapp.com.br/cad/itens_venda_orcamento/';
+
 
 const DetailsBudgets = ({ navigation, route }) => {
   const [date, setDate] = useState('');
@@ -17,64 +25,225 @@ const DetailsBudgets = ({ navigation, route }) => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false); // Visibilidade do dropdown
   const [discountedTotal, setDiscountedTotal] = useState(total); // Total com desconto aplicado
   const [isModalVisible, setIsModalVisible] = useState(false); // Estado do modal
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [orcamentoId, setOrcamentoId] = useState(null);
+  const services = selectedItems.filter(item => item.categoria === 'Serviços');
+  const products = selectedItems.filter(item => item.categoria !== 'Serviços');
 
-  // Lista fictícia de clientes
-    const clients = [
-        { id: '1', name: 'Cliente 1' },
-        { id: '2', name: 'Cliente 2' },
-        { id: '3', name: 'Cliente 3' },
-        { id: '4', name: 'Cliente 4' },
-    ];
-    
+
+   // Função para buscar o ID da empresa logada
+   const getEmpresaId = async () => {
+    try {
+      const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+      if (storedEmpresaId) {
+        return Number(storedEmpresaId);
+      } else {
+        Alert.alert('Erro', 'ID da empresa não encontrado.');
+        return null;
+      }
+    } catch (error) {
+      console.error('Erro ao buscar o ID da empresa:', error);
+      return null;
+    }
+  };
+
+  // Função para gerar o orçamento e registrar itens
+  const handleGenerateBudget = async () => {
+    const empresaId = await getEmpresaId();
+    if (!empresaId) return;
+
+    if (!selectedClient) {
+      Alert.alert('Erro', 'Selecione um cliente antes de gerar o orçamento.');
+      return;
+    }
+
+    // Criar o orçamento
+    console.log('Iniciando criação do orçamento com os dados: ', {
+      empresa_id: empresaId,
+      cliente_id: selectedClient ? selectedClient.id : null,
+      informacoes_adicionais: additionalInfo,
+    });
+    const orcamentoId = await createOrcamento(empresaId);
+    if (!orcamentoId) return;
+
+    // Registrar itens de venda (produtos) no orçamento
+    console.log('Iniciando registro de itens de venda: ', products);
+    await registerItemsVendaOrcamento(empresaId, orcamentoId, products);
+
+    // Registrar serviços no orçamento
+    console.log('Iniciando registro de serviços: ', services);
+    await registerServicesOrcamento(empresaId, orcamentoId, services);
+
+    // Exibir modal de confirmação
+    setOrcamentoId(orcamentoId);
+    setIsModalVisible(true);
+  };
+
+  // Função para registrar o orçamento
+  const createOrcamento = async (empresaId) => {
+    try {
+      const data = {
+        empresa_id: empresaId,
+        cliente_id: selectedClient ? selectedClient.id : null,
+        informacoes_adicionais: additionalInfo,
+      };
+      console.log('Dados enviados para criar orçamento: ', data);
+
+      const response = await axios.post(API_ORCAMENTO_URL, data);
+
+      const id = response.data.data.id;
+      setOrcamentoId(id);
+      console.log('Orçamento criado com sucesso, ID: ', id);
+      return id;
+    } catch (error) {
+      console.error('Erro ao criar orçamento:', error.response ? error.response.data : error.message);
+      Alert.alert('Erro', 'Falha ao criar o orçamento.');
+      return null;
+    }
+  };
+
+// Função para registrar itens de venda (produtos)
+const registerItemsVendaOrcamento = async (empresaId, orcamentoId, items) => {
+  try {
+    const requests = items.map(async (item) => {
+      const valorTotalVenda = (item.preco_venda * item.amount).toFixed(2);
+
+      // Garantindo que o desconto seja um número válido
+      const percentualDesconto = discountType === '%' ? parseFloat(discount) || 0 : 0;
+      const valorDesconto = discountType === 'R$' ? parseFloat(discount) || 0 : 0;
+
+      const data = {
+        empresa_id: empresaId,
+        orcamento_id: orcamentoId,
+        produto_id: item.id,
+        quantidade: item.amount,
+        percentual_desconto: percentualDesconto,
+        valor_desconto: valorDesconto,
+        valor_total_venda: valorTotalVenda,
+      };
+      console.log('Dados enviados para registrar item de venda: ', data);
+
+      return axios.post(API_ITENS_VENDA_ORCAMENTO_URL, data);
+    });
+
+    await Promise.allSettled(requests);
+    console.log('Itens de venda registrados com sucesso.');
+  } catch (error) {
+    console.error('Erro ao registrar os itens:', error.response ? error.response.data : error.message);
+    Alert.alert('Erro', 'Falha ao registrar os itens do orçamento.');
+  }
+};
+
+// Função para registrar serviços no orçamento
+const registerServicesOrcamento = async (empresaId, orcamentoId, services) => {
+  try {
+    const requests = services.map(async (service) => {
+      const valorTotalVenda = (service.preco_venda * service.amount).toFixed(2);
+
+      // Garantindo que o desconto seja um número válido
+      const percentualDesconto = discountType === '%' ? parseFloat(discount) || 0 : 0;
+      const valorDesconto = discountType === 'R$' ? parseFloat(discount) || 0 : 0;
+
+      const data = {
+        empresa_id: empresaId,
+        orcamento_id: orcamentoId,
+        servico_id: service.id,
+        quantidade: service.amount,
+        percentual_desconto: percentualDesconto,
+        valor_desconto: valorDesconto,
+        valor_total_venda: valorTotalVenda,
+      };
+      console.log('Dados enviados para registrar serviço: ', data);
+
+      return axios.post(API_ITENS_VENDA_ORCAMENTO_URL, data);
+    });
+
+    await Promise.allSettled(requests);
+    console.log('Serviços registrados com sucesso.');
+  } catch (error) {
+    console.error('Erro ao registrar os serviços:', error.response ? error.response.data : error.message);
+    Alert.alert('Erro', 'Falha ao registrar os serviços do orçamento.');
+  }
+};
+
+
+  // Função para compartilhar o orçamento
+  const shareOrcamento = () => {
+    setIsModalVisible(false);
+    navigation.navigate('BudgetsScreen', { saleId: orcamentoId });
+  };
+
+  // Função para voltar para a tela anterior
+  const handleBack = () => {
+    setIsModalVisible(false);
+    navigation.navigate('Budget');
+  };
+
+  // Função para alternar a visibilidade do dropdown
+  const toggleDropdown = () => {
+    setIsDropdownVisible(!isDropdownVisible);
+  };
+
+  // Função para selecionar um cliente e fechar o dropdown
+  const selectClient = (client) => {
+    setSelectedClient(client);
+    setIsDropdownVisible(false);
+  };
 
   // Função para pegar a data atual
   useEffect(() => {
-    const currentDate = new Date().toLocaleDateString();
+    const date = new Date();
+    const currentDate = `Hoje, ${date.toLocaleDateString('pt-BR')}`;
     setDate(currentDate);
   }, []);
 
   // Função para alternar entre % e R$
   const toggleDiscountType = (type) => {
     setDiscountType(type);
-    setDiscount(''); // Limpa o valor do desconto quando o tipo é alterado
+    setDiscount(''); // Limpa o valor do desconto ao alternar o tipo
   };
-    // Alterna a visibilidade do dropdown
-    const toggleDropdown = () => {
-        setIsDropdownVisible(!isDropdownVisible);
-      };
-    
-      // Seleciona um cliente e fecha o dropdown
-      const selectClient = (client) => {
-        setSelectedClient(client);
-        setIsDropdownVisible(false);
-      };
-    
-      // Navegar para a tela de adicionar cliente (comportamento futuro)
-      const navigateToAddClient = () => {
-        navigation.navigate('IncludeClient');
-      };
-    
-      // Calcula o desconto e o total atualizado
+
+  // Calcular o total com desconto
   useEffect(() => {
     let discountValue = parseFloat(discount) || 0;
 
     if (discountType === '%') {
-      // Se o desconto for em porcentagem
       discountValue = (discountValue / 100) * total;
     }
 
-    // Se o desconto for em valor, apenas subtrai do total
     const newTotal = total - discountValue;
-
-    // Não permitir que o valor total fique negativo
     setDiscountedTotal(newTotal > 0 ? newTotal : 0);
   }, [discount, discountType, total]);
 
-  const handleGenerateBudget = () => {
-    setIsModalVisible(true);
-  };
+  // Buscar lista de clientes da API
+  const fetchClients = useCallback(async () => {
+    setLoading(true);
+    try {
+      const empresaId = await getEmpresaId();
+      if (empresaId) {
+        const response = await axios.get(`${API_URL}?empresa=${empresaId}`);
+        if (response.data && response.data.results && response.data.results.data) {
+          setClients(response.data.results.data);
+        } else {
+          Alert.alert("Erro", "Erro ao recuperar clientes. Tente novamente.");
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao buscar clientes: ", error);
+      Alert.alert("Erro", "Erro ao conectar à API.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  // Fechar o modal
+  useFocusEffect(
+    useCallback(() => {
+      fetchClients();
+    }, [fetchClients])
+  );
+
+  // Função para fechar o modal
   const closeModal = () => {
     setIsModalVisible(false);
   };
@@ -93,23 +262,22 @@ const DetailsBudgets = ({ navigation, route }) => {
 
       <ScrollView style={styles.container}>
         {/* Data do Orçamento */}
-        <Text style={styles.sectionTitle}>Detalhes do orçamento</Text>
-        <Text style={styles.dateText}>Data: Hoje, {date}</Text>
+        <Text style={styles.sectionTitle3}>Detalhes do orçamento</Text>
+        <Text style={styles.dateText}>Data: {date}</Text>
 
         {/* Campo para associar cliente */}
         <View style={styles.clientContainer}>
           <TouchableOpacity style={styles.clientPicker} onPress={toggleDropdown}>
             <Text style={styles.clientText}>
-              {selectedClient ? selectedClient.name : "Associar a um cliente..."}
+              {selectedClient ? selectedClient.nome : "Associar a um cliente..."}
             </Text>
             <Icon name={isDropdownVisible ? "arrow-up" : "arrow-down"} size={24} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.addClientButton} onPress={navigateToAddClient}>
+          <TouchableOpacity style={styles.addClientButton} onPress={() => navigation.navigate('IncludeClient')}>
             <Icon name="add" size={30} color="black" />
           </TouchableOpacity>
         </View>
 
-        {/* Lista de opções que aparece logo abaixo do campo com scroll interno */}
         {isDropdownVisible && (
           <View style={[styles.dropdownContainer, { maxHeight: 150 }]}>
             <ScrollView nestedScrollEnabled={true}>
@@ -119,38 +287,82 @@ const DetailsBudgets = ({ navigation, route }) => {
                   style={styles.dropdownItem}
                   onPress={() => selectClient(client)}
                 >
-                  <Text style={styles.dropdownItemText}>{client.name}</Text>
+                  <Text style={styles.dropdownItemText}>{client.nome}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
           </View>
         )}
 
-        {/* Carrinho - Exibindo produtos ou serviços selecionados */}
-        <View style={styles.cartContainer}>
-        <Text style={styles.Carrinho}>Carrinho</Text>
-          {selectedItems.map((item, index) => (
-            <View key={index} style={styles.cartItemContainer}>
-              {/* Exibição da imagem do produto */}
-              {item.imagem ? (
-                <Image
-                  source={{ uri: item.imagem }} // Verifica se há imagem, se sim, exibe
-                  style={styles.productImage}
-                  resizeMode="contain"
-                />
-              ) : (
-                <View style={styles.imagePlaceholder}>
-                  <Text style={styles.imagePlaceholderText}>Sem imagem</Text>
+         {/* Exibe os serviços separadamente */}
+         {services.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Serviços</Text>
+            <View style={styles.cartSection}>
+              {services.map((service, index) => (
+                <View key={index} style={styles.cartItem}>
+                  <Image source={{ uri: service.imagem }} style={styles.productImage} />
+                  <View style={styles.containerServiço}>
+                    <Text style={styles.cartItemTitle}>{service.nome}</Text>
+                    <Text style={styles.cartItemSubtitle}>
+                      Unid. de medida: {service.unidade_medida || 'Por manutenção'}
+                    </Text>
+                    <Text style={styles.cartItemPrice}>
+                      Preço unitário: R$ {service.preco_venda ? parseFloat(service.preco_venda).toFixed(2) : 'Defina o preço'}
+                    </Text>
+                    <Text style={styles.cartItemSubtitleMedida}>
+                      Quantidade: {service.amount}
+                    </Text>
+                  </View>
+                  <Text style={styles.cartItemTotal}>
+                    R$ {(service.preco_venda * service.amount).toFixed(2)}
+                  </Text>
+
+                  {/* Caso o preço não esteja definido, permitir a entrada do valor */}
+                  {!service.preco_venda || parseFloat(service.preco_venda) === 0 ? (
+                    <TextInput
+                      style={styles.priceInput}
+                      keyboardType="numeric"
+                      value={service.preco_venda ? parseFloat(service.preco_venda).toFixed(2) : ''}
+                      onChangeText={text => {
+                        // Atualiza o preço na lista de serviços
+                        const updatedServices = services.map(s => s.id === service.id ? { ...s, preco_venda: parseFloat(text) } : s);
+                        setSelectedItems([...products, ...updatedServices]); // Atualiza a lista de itens
+                      }}
+                      placeholder="Preço de venda (R$)"
+                    />
+                  ) : null}
                 </View>
-              )}
-              <View style={styles.productDetails}>
-                <Text style={styles.cartItem}>{item.nome}</Text>
-                <Text style={styles.cartQuantity}>Quantidade: {item.amount}</Text>
-              </View>
-                <Text style={styles.cartPrice}>R$ {item.total.toFixed(2)}</Text>
+              ))}
             </View>
-          ))}
-        </View>
+          </>
+        )}
+
+        {/* Exibe os produtos separadamente */}
+        {products.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Produtos</Text>
+            <View style={styles.cartSection}>
+              {products.map((product, index) => (
+                <View key={index} style={styles.cartItem}>
+                  <Image source={{ uri: product.imagem }} style={styles.productImage} />
+                  <View style={styles.containerServiço}>
+                    <Text style={styles.cartItemTitle}>{product.nome}</Text>
+                    <Text style={styles.cartItemPrice}>
+                      Preço unitário: R$ {product.preco_venda ? parseFloat(product.preco_venda).toFixed(2) : 'Defina o preço'}
+                    </Text>
+                    <Text style={styles.cartItemSubtitleMedida}>
+                      Quantidade: {product.amount}
+                    </Text>
+                  </View>
+                  <Text style={styles.cartItemTotal}>
+                    R$ {(product.preco_venda * product.amount).toFixed(2)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
 
         {/* Descontos */}
         <View style={styles.discountContainer}>
@@ -233,13 +445,13 @@ const DetailsBudgets = ({ navigation, route }) => {
               <Text style={styles.modalText}>Orçamento gerado com sucesso.</Text>
 
               {/* Botão Compartilhar Orçamento */}
-              <TouchableOpacity style={styles.shareButton} onPress={closeModal}>
+              <TouchableOpacity style={styles.shareButton} onPress={shareOrcamento}>
                 <Text style={styles.shareButtonText}>Compartilhar orçamento</Text>
               </TouchableOpacity>
 
               {/* Botão Visualizar Orçamento */}
-              <TouchableOpacity style={styles.viewButton}>
-                <Text style={styles.viewButtonText}>Visualizar orçamento</Text>
+              <TouchableOpacity style={styles.viewButton} >
+                <Text style={styles.viewButtonText}>Retornar</Text>
               </TouchableOpacity>
             </View>
           </View>

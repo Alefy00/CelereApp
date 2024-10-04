@@ -31,7 +31,6 @@ import { useFocusEffect } from '@react-navigation/native';
 
 // Constantes para os endpoints da API
 const CATEGORIES_API = 'https://api.celereapp.com.br/mnt/categoriasdespesa/?page=1&page_size=30';
-const SUPPLIERS_API = 'https://api.celereapp.com.br/cad/fornecedor/?empresa_id=1&page=1&page_size=50';
 const MONTHS_API = 'https://api.celereapp.com.br/api/despesas_recorrencias/';
 const SAVE_EXPENSE_API = 'https://api.celereapp.com.br/cad/despesa/';
 
@@ -49,7 +48,7 @@ const categoryIcons = {
   11: IconOutros, // Outros
 };
 
-const NewExpense = ({ navigation }) => {
+const NewExpense = ({ navigation  }) => {
   const [categoria, setCategoria] = useState('');
   const [categories, setCategories] = useState([]);
   const [valor, setValor] = useState('');
@@ -57,12 +56,10 @@ const NewExpense = ({ navigation }) => {
   const [parceiro, setParceiro] = useState('');
   const [suppliers, setSuppliers] = useState([]);
   const [repeats, setRepeats] = useState(false);
-  const [quantosMeses, setQuantosMeses] = useState('');
   const [months, setMonths] = useState([]);
   const [date, setDate] = useState(new Date());
   const [dueDate, setDueDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showDueDatePicker, setShowDueDatePicker] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -72,6 +69,10 @@ const NewExpense = ({ navigation }) => {
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSupplier, setSelectedSupplier] = useState(null);
+  const [selectedFrequencyId, setSelectedFrequencyId] = useState(null); // ID da frequência selecionada
+  const [repeatCount, setRepeatCount] = useState(0); // Quantidade de repetições
+  const [isIndeterminate, setIsIndeterminate] = useState(false); // Tempo indeterminado
+  const [recorrenciaText, setRecorrenciaText] = useState('Pagamento único'); // Estado para a recorrência
 
 
   // Função para buscar o ID da empresa logada
@@ -79,7 +80,6 @@ const NewExpense = ({ navigation }) => {
     try {
       const storedEmpresaId = await AsyncStorage.getItem('empresaId');
       if (storedEmpresaId) {
-        console.log('ID da empresa recuperado:', storedEmpresaId); // Verifica se o ID foi recuperado corretamente
         return Number(storedEmpresaId);
       } else {
         console.log('ID da empresa não encontrado no AsyncStorage.');
@@ -161,9 +161,10 @@ useEffect(() => {
   fetchSuppliers();
 }, [fetchSuppliers]);
 
-// Função para definir o fornecedor selecionado
 const handleSelectSupplier = (supplier) => {
+  console.log('Fornecedor selecionado:', supplier);  // Verifica o valor selecionado
   setSelectedSupplier(supplier);  // Define o fornecedor selecionado
+  setParceiro(supplier.value);    // Define o ID do parceiro corretamente
 };
 
 // Dentro do componente NewExpense
@@ -226,61 +227,105 @@ useFocusEffect(
     }
   };
 
+    // Função para determinar o texto da recorrência
+    const determineRecurrenceText = () => {
+      let text = 'Sem recorrência';
+      if (selectedFrequencyId) {
+        switch (selectedFrequencyId) {
+          case 1:
+            text = 'Semanal';
+            break;
+          case 2:
+            text = 'Quinzenal';
+            break;
+          case 3:
+            text = 'Mensal';
+            break;
+          case 4:
+            text = 'Anual';
+            break;
+          default:
+            text = 'Recorrência indefinida';
+        }
+      }
+      if (isIndeterminate) {
+        text += ' (tempo indeterminado)';
+      }
+      return text;
+    };
+
 
   const handleSave = () => {
-    if (!categoria || !valor || !parceiro) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
+    console.log('Categoria:', categoria);
+    console.log('Valor:', valor);
+    console.log('Parceiro:', parceiro);
+  
+    if (!categoria) {
+      Alert.alert('Erro', 'Por favor, selecione uma categoria.');
       return;
     }
+  
+    if (!valor || isNaN(parseFloat(valor)) || parseFloat(valor) <= 0) {
+      Alert.alert('Erro', 'Por favor, insira um valor válido.');
+      return;
+    }
+  
+    // Verifica se o parceiro foi selecionado (fornecedor obrigatório)
+    if (!parceiro) {
+      Alert.alert('Erro', 'Por favor, selecione um fornecedor.');
+      return;
+    }
+  
+       // Define o texto da recorrência antes de abrir o modal
+       const recurrenceText = determineRecurrenceText();
+       setRecorrenciaText(recurrenceText);  // Define o texto da recorrência
+    // Se tudo estiver preenchido corretamente, abre o modal de confirmação
     setModalVisible(true);
   };
+  
 
   const handleConfirm = async () => {
     setModalVisible(false);
     setLoading(true);
+
     const empresa_id = await getEmpresaId();
-  
     if (!empresa_id) {
       Alert.alert('Erro', 'ID da empresa não encontrado. Por favor, verifique as configurações de login.');
       setLoading(false);
       return;
     }
-  
-    // Validação e formatação do valor da despesa
-    const formattedValue = parseFloat(valor);
-    if (isNaN(formattedValue) || formattedValue <= 0) {
-      Alert.alert('Erro', 'Por favor, insira um valor de despesa válido.');
-      setLoading(false);
-      return;
-    }
+
     const expenseData = {
-      empresa_id: Number(empresa_id), // Convertendo para número
-      item: item || '', // Usando string vazia se `item` estiver indefinido
-      valor: formattedValue, // Valor deve ser float
-      dt_pagamento: format(date, 'yyyy-MM-dd'), // Data no formato 'YYYY-MM-DD'
-      dt_vencimento: format(dueDate, 'yyyy-MM-dd'), // Novo campo para data de vencimento
-      status: 'pendente', // Novo campo de status padrão
-      recorrencia: repeats ? parseInt(quantosMeses, 10) : 1, // Recorrência como número inteiro
-      fornecedor_id: Number(parceiro), // Convertendo para número
-      categoria_despesa_id: Number(categoria), // Convertendo para número
+      empresa_id: Number(empresa_id),
+      item: item || '',
+      valor: parseFloat(valor),
+      dt_vencimento: format(dueDate, 'yyyy-MM-dd'),
+      dt_pagamento: date ? format(date, 'yyyy-MM-dd') : null,
+      fornecedor_id: Number(parceiro),
+      categoria_despesa_id: Number(categoria),
+      classificacao_lancamento: 4,
+      recorrencia: selectedFrequencyId || null, // Se não houver frequência selecionada, a recorrência será null
+      is_recorrencia_tempo_indeterminado: !!isIndeterminate,
+      quantidade_repeticoes: !isIndeterminate && repeatCount > 0 ? repeatCount : null,
     };
-  
+    console.log('Dados enviados para a API:', expenseData);
     try {
       const response = await axios.post(SAVE_EXPENSE_API, expenseData, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-  
+      console.log('Resposta da API:', response.data);
       if (response.status === 201 || response.data.status === 'success') {
-        // Despesa criada com sucesso
+        const despesaId = response.data.data[0].id; // Captura o id da primeira despesa criada
+        console.log('ID da despesa cadastrada:', despesaId); // Log do id da despesa
         setSuccessModalVisible(true);
+        handleRegisterNew(); // Limpa todos os campos após o envio bem-sucedido
       } else {
-        console.error('Erro ao salvar a despesa:', response.data);
         Alert.alert('Erro', `Ocorreu um erro ao salvar a despesa: ${response.data.message || 'Erro desconhecido'}`);
       }
     } catch (error) {
-      console.error('Erro na requisição:', error);
+      console.error('Erro ao salvar a despesa:', error);
       Alert.alert('Erro', 'Ocorreu um erro ao salvar a despesa. Verifique sua conexão com a internet e tente novamente.');
     } finally {
       setLoading(false);
@@ -288,17 +333,21 @@ useFocusEffect(
   };
   
   const handleRegisterNew = () => {
-    setSuccessModalVisible(false);
-    setCategoria(''); // Resetando o campo de categoria
-    setSelectedCategory(''); // Garantindo que a categoria selecionada seja removida
+    setCategoria('');
+    setSelectedCategory('');
     setValor('');
     setItem('');
     setParceiro('');
-    setRepeats(false);
-    setQuantosMeses('');
+    setSelectedSupplier(null);
+    setRepeatCount(0);
+    setIsIndeterminate(false);
+    setSelectedFrequencyId(null);
+    setRecorrenciaText('Pagamento único'); // Volta ao padrão
     setDate(new Date());
     setDueDate(new Date());
     setBarcode('');
+    setIsLiquidateNow(true);
+    setSuccessModalVisible(false);
   };
 
 
@@ -311,7 +360,7 @@ useFocusEffect(
   };
 
   const handleCategoriesScreen = () => {
-    navigation.navigate('CategoriesScreen');
+    navigation.navigate('IncludeCategoriesExpense');
   };
 
 
@@ -400,7 +449,7 @@ useFocusEffect(
                 </Text>
                   <Icon name="arrow-down" size={22} color={COLORS.gray} />
               </TouchableOpacity>
-                  <TouchableOpacity style={styles.addButton} onPress={handleCategoriesScreen}>
+                  <TouchableOpacity style={styles.addButton} onPress={handleCategoriesScreen} disabled={true}>
                     <Icon name="add" size={30} color={COLORS.black} />
                   </TouchableOpacity>
               </View>
@@ -465,7 +514,7 @@ useFocusEffect(
               {/* Campo de Descrição */}
               <TextInput
                 style={styles.input}
-                placeholder="Descrição (opcional)"
+                placeholder="Item"
                 value={item}
                 onChangeText={setItem}
               />
@@ -473,7 +522,7 @@ useFocusEffect(
 
             {/* Fornecedor com novo Dropdown */}
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>Fornecedor (Opcional)</Text>
+              <Text style={styles.cardTitle}>Fornecedor</Text>
               {loading ? (
                 <ActivityIndicator size="small" color="#000" />
               ) : (
@@ -487,7 +536,11 @@ useFocusEffect(
             </View>
 
            {/* Recorrencia */}
-            <RecurrenceField />
+           <RecurrenceField
+              setSelectedFrequencyId={setSelectedFrequencyId} // Passa função para definir a frequência
+              setRepeatCount={setRepeatCount} // Passa função para definir o número de repetições
+              setIsIndeterminate={setIsIndeterminate} // Passa função para definir se é indeterminado
+            />
 
             {/* Botão de Salvar Despesa */}
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -502,10 +555,10 @@ useFocusEffect(
         onClose={() => setModalVisible(false)}
         onConfirm={handleConfirm}
         valor={valor}
-        parceiro={getSupplierNameById(parceiro)}
+        parceiro={parceiro}
         dataPagamento={date.toLocaleDateString()}
         dataVencimento={dueDate.toLocaleDateString()}
-        recorrencia={repeats ? `Pagamento se repete todo dia ${date.getDate()}` : 'Pagamento único'}
+        recorrencia={recorrenciaText}
       />
       <SucessModal
         visible={successModalVisible}

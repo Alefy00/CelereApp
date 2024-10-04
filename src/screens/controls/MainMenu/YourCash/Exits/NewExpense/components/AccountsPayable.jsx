@@ -12,7 +12,6 @@ import IconOutros from '../../../../../../../assets/images/svg/NewExpense/IconOu
 import IconPagamento from '../../../../../../../assets/images/svg/NewExpense/IconPagamento.svg';
 import IconProLabore from '../../../../../../../assets/images/svg/NewExpense/IconProLabore.svg';
 import Icontaxas from '../../../../../../../assets/images/svg/NewExpense/IconTaxas.svg';
-import CheckBox from '@react-native-community/checkbox';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -24,13 +23,11 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import ConfirmModal from '../components/ConfirmModal';
 import SucessModal from '../components/SucessModal';
 import styles from '../styles';
-import { Picker } from '@react-native-picker/picker';
 import RecurrenceField from './RecurrenceField';
 import SupplierDropdown from './SupplierDropdown';
 
 // Constantes para os endpoints da API
 const CATEGORIES_API = 'https://api.celereapp.com.br/mnt/categoriasdespesa/?page=1&page_size=30';
-const SUPPLIERS_API = 'https://api.celereapp.com.br/cad/fornecedor/?empresa_id=1&page=1&page_size=50';
 const MONTHS_API = 'https://api.celereapp.com.br/api/despesas_recorrencias/';
 const SAVE_EXPENSE_API = 'https://api.celereapp.com.br/cad/despesa/';
 
@@ -55,12 +52,9 @@ const AccountsPayable = ({ navigation }) => {
   const [item, setItem] = useState('');
   const [parceiro, setParceiro] = useState('');
   const [suppliers, setSuppliers] = useState([]);
-  const [repeats, setRepeats] = useState(false);
-  const [quantosMeses, setQuantosMeses] = useState('');
   const [months, setMonths] = useState([]);
   const [date, setDate] = useState(new Date());
   const [dueDate, setDueDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [showDueDatePicker, setShowDueDatePicker] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
@@ -71,18 +65,19 @@ const AccountsPayable = ({ navigation }) => {
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSupplier, setSelectedSupplier] = useState(null);
-
+  const [selectedFrequencyId, setSelectedFrequencyId] = useState(null); // ID da frequência selecionada
+  const [repeatCount, setRepeatCount] = useState(0); // Quantidade de repetições
+  const [isIndeterminate, setIsIndeterminate] = useState(false); // Tempo indeterminado
+  const [recorrenciaText, setRecorrenciaText] = useState('Pagamento único'); // Estado para a recorrência
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
     try {
-      const empresaData = await AsyncStorage.getItem('empresaData');
-      if (empresaData !== null) {
-        const parsedData = JSON.parse(empresaData);
-        console.log('ID da Empresa Obtido:', parsedData); // Confirmando que o ID é obtido corretamente
-        return parsedData; // Retorna o ID da empresa
+      const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+      if (storedEmpresaId) {
+        return Number(storedEmpresaId);
       } else {
-        console.log('Nenhum dado de empresa encontrado no AsyncStorage.');
+        console.log('ID da empresa não encontrado no AsyncStorage.');
       }
     } catch (error) {
       console.error('Erro ao obter o ID da empresa do AsyncStorage:', error);
@@ -122,17 +117,29 @@ const AccountsPayable = ({ navigation }) => {
   
   
 
- // Função para buscar fornecedores da API
- const fetchSuppliers = useCallback(async () => {
+// Função para buscar fornecedores da API usando o ID da empresa logada
+const fetchSuppliers = useCallback(async () => {
   setLoading(true);
   try {
-    const response = await axios.get(SUPPLIERS_API);
+    const empresa_id = await getEmpresaId(); // Obtém o ID da empresa logada do AsyncStorage
+    if (!empresa_id) {
+      Alert.alert('Erro', 'ID da empresa não encontrado. Por favor, verifique as configurações de login.');
+      setLoading(false);
+      return;
+    }
+
+    // Endpoint dinâmico usando o ID da empresa
+    const suppliersApiUrl = `https://api.celereapp.com.br/cad/fornecedor/?empresa_id=${empresa_id}&page=1&page_size=50`;
+
+    const response = await axios.get(suppliersApiUrl);
     const data = response.data;
+
     if (data.results && data.results.data) {
       const fetchedSuppliers = data.results.data.map((item) => ({
         label: item.nome,
         value: item.id, // ID do fornecedor
       }));
+
       setSuppliers([{ label: 'Selecione um Fornecedor', value: '' }, ...fetchedSuppliers]);
     } else {
       console.error('Erro ao buscar fornecedores:', data.message || 'Formato de resposta inesperado');
@@ -144,6 +151,7 @@ const AccountsPayable = ({ navigation }) => {
   }
   setLoading(false);
 }, []);
+
 
 useEffect(() => {
   fetchSuppliers();
@@ -190,17 +198,7 @@ useEffect(() => {
     fetchMonths();
   }, [fetchCategories, fetchSuppliers, fetchMonths]);
 
-  const onChangeDate = (event, selectedDate) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    const currentDate = selectedDate || date;
-    const localDate = new Date(currentDate.getTime() - (currentDate.getTimezoneOffset() * 60000));
 
-    if (localDate <= new Date()) {
-      setDate(localDate);
-    } else {
-      Alert.alert('Erro', 'Por favor, selecione uma data que não seja no futuro.');
-    }
-  };
 
   const onChangeDueDate = (event, selectedDate) => {
     setShowDueDatePicker(Platform.OS === 'ios');
@@ -214,91 +212,145 @@ useEffect(() => {
     }
   };
 
+  const determineRecurrenceText = () => {
+    let text = 'Pagamento único';  // Define como pagamento único por padrão
+    if (selectedFrequencyId) {
+      switch (selectedFrequencyId) {
+        case 1:
+          text = 'Semanal';
+          break;
+        case 2:
+          text = 'Quinzenal';
+          break;
+        case 3:
+          text = 'Mensal';
+          break;
+        case 4:
+          text = 'Anual';
+          break;
+        default:
+          text = 'Recorrência indefinida';
+      }
+    }
+    if (isIndeterminate) {
+      text += ' (tempo indeterminado)';
+    }
+    return text;
+  };
+  
   const handleSave = () => {
-    if (!categoria || !valor || !parceiro) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
+    console.log('Categoria:', categoria);
+    console.log('Valor:', valor);
+    console.log('Parceiro:', parceiro);
+  
+    if (!categoria) {
+      Alert.alert('Erro', 'Por favor, selecione uma categoria.');
       return;
     }
+  
+    if (!valor || isNaN(parseFloat(valor)) || parseFloat(valor) <= 0) {
+      Alert.alert('Erro', 'Por favor, insira um valor válido.');
+      return;
+    }
+  
+    // Verifica se o parceiro foi selecionado (fornecedor obrigatório)
+    if (!parceiro) {
+      Alert.alert('Erro', 'Por favor, selecione um fornecedor.');
+      return;
+    }
+  
+       // Define o texto da recorrência antes de abrir o modal
+       const recurrenceText = determineRecurrenceText();
+       setRecorrenciaText(recurrenceText);  // Define o texto da recorrência
+    // Se tudo estiver preenchido corretamente, abre o modal de confirmação
     setModalVisible(true);
   };
-
-  const handleConfirm = async () => {
+  
+   const handleConfirm = async () => {
     setModalVisible(false);
     setLoading(true);
+
     const empresa_id = await getEmpresaId();
-  
     if (!empresa_id) {
       Alert.alert('Erro', 'ID da empresa não encontrado. Por favor, verifique as configurações de login.');
       setLoading(false);
       return;
     }
-  
-    // Validação e formatação do valor da despesa
-    const formattedValue = parseFloat(valor);
-    if (isNaN(formattedValue) || formattedValue <= 0) {
-      Alert.alert('Erro', 'Por favor, insira um valor de despesa válido.');
-      setLoading(false);
-      return;
-    }
+
     const expenseData = {
-      empresa_id: Number(empresa_id), // Convertendo para número
-      item: item || '', // Usando string vazia se `item` estiver indefinido
-      valor: formattedValue, // Valor deve ser float
-      dt_pagamento: format(date, 'yyyy-MM-dd'), // Data no formato 'YYYY-MM-DD'
-      dt_vencimento: format(dueDate, 'yyyy-MM-dd'), // Novo campo para data de vencimento
-      status: 'pendente', // Novo campo de status padrão
-      recorrencia: repeats ? parseInt(quantosMeses, 10) : 1, // Recorrência como número inteiro
-      fornecedor_id: Number(parceiro), // Convertendo para número
-      categoria_despesa_id: Number(categoria), // Convertendo para número
+      empresa_id: Number(empresa_id),
+      item: item || '',
+      valor: parseFloat(valor),
+      dt_vencimento: format(dueDate, 'yyyy-MM-dd'), // Data de vencimento
+      dt_pagamento: null, // Data de pagamento será null para "Contas a pagar"
+      fornecedor_id: Number(parceiro),
+      categoria_despesa_id: Number(categoria),
+      classificacao_lancamento: 4,
+      recorrencia: selectedFrequencyId || null, // Se não houver frequência selecionada, a recorrência será null
+      is_recorrencia_tempo_indeterminado: !!isIndeterminate,
+      quantidade_repeticoes: !isIndeterminate && repeatCount > 0 ? repeatCount : null,
+      status: 'pendente', // Status será "pendente" para contas a pagar
     };
-  
+
+    console.log('Dados enviados para a API:', expenseData);
+
     try {
       const response = await axios.post(SAVE_EXPENSE_API, expenseData, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-  
+      console.log('Resposta da API:', response.data);
       if (response.status === 201 || response.data.status === 'success') {
-        // Despesa criada com sucesso
+        const despesaId = response.data.data[0].id; // Captura o id da primeira despesa criada
+        console.log('ID da despesa cadastrada:', despesaId); // Log do id da despesa
         setSuccessModalVisible(true);
+        handleRegisterNew(); // Limpa todos os campos após o envio bem-sucedido
       } else {
-        console.error('Erro ao salvar a despesa:', response.data);
         Alert.alert('Erro', `Ocorreu um erro ao salvar a despesa: ${response.data.message || 'Erro desconhecido'}`);
       }
     } catch (error) {
-      console.error('Erro na requisição:', error);
+      console.error('Erro ao salvar a despesa:', error);
       Alert.alert('Erro', 'Ocorreu um erro ao salvar a despesa. Verifique sua conexão com a internet e tente novamente.');
     } finally {
       setLoading(false);
     }
   };
-  
+
   const handleRegisterNew = () => {
-    setSuccessModalVisible(false);
     setCategoria('');
+    setSelectedCategory('');
     setValor('');
     setItem('');
     setParceiro('');
-    setRepeats(false);
-    setQuantosMeses('');
+    setSelectedSupplier(null);
+    setRepeatCount(0);  // Limpa a quantidade de repetições
+    setIsIndeterminate(false);  // Reseta a recorrência indeterminada
+    setSelectedFrequencyId(null);  // Reseta a frequência
+    setRecorrenciaText('Pagamento único');  // Volta ao padrão de recorrência
     setDate(new Date());
     setDueDate(new Date());
     setBarcode('');
+    setIsLiquidateNow(true);
+    setSuccessModalVisible(false);
   };
-
+  
+  
   const toggleExpenseType = () => {
     setIsLiquidateNow(isLiquidateNow);
   };
 
   const handleAcconunts = () => {
-    navigation.navigate('NewExpense');
-  }
+    navigation.navigate('AccountsPayable');
+  };
 
   // Função para definir o fornecedor selecionado
-const handleSelectSupplier = (supplier) => {
-  setSelectedSupplier(supplier);  // Define o fornecedor selecionado
-};
+  const handleSelectSupplier = (supplier) => {
+    console.log('Fornecedor selecionado:', supplier);  // Verifica o valor selecionado
+    setSelectedSupplier(supplier);  // Define o fornecedor selecionado
+    setParceiro(supplier.value);    // Define o ID do parceiro corretamente
+  };
+  
   return (
     <ScrollView style={styles.container}>
       <BarTop2
@@ -378,7 +430,7 @@ const handleSelectSupplier = (supplier) => {
                 </Text>
                   <Icon name="arrow-down" size={22} color={COLORS.gray} />
               </TouchableOpacity>
-                  <TouchableOpacity style={styles.addButton}>
+                  <TouchableOpacity style={styles.addButton} disabled={true}>
                     <Icon name="add" size={30} color={COLORS.black} />
                   </TouchableOpacity>
               </View>
@@ -443,15 +495,15 @@ const handleSelectSupplier = (supplier) => {
               {/* Campo de Descrição */}
               <TextInput
                 style={styles.input}
-                placeholder="Descrição (opcional)"
+                placeholder="Item"
                 value={item}
                 onChangeText={setItem}
               />
             </View>
 
-           {/* Fornecedor com novo Dropdown */}
-           <View style={styles.card}>
-              <Text style={styles.cardTitle}>Fornecedor (Opcional)</Text>
+            {/* Fornecedor com novo Dropdown */}
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Fornecedor</Text>
               {loading ? (
                 <ActivityIndicator size="small" color="#000" />
               ) : (
@@ -465,7 +517,11 @@ const handleSelectSupplier = (supplier) => {
             </View>
 
             {/* Cartão de Recorrência */}
-            <RecurrenceField />
+            <RecurrenceField
+              setSelectedFrequencyId={setSelectedFrequencyId} // Passa função para definir a frequência
+              setRepeatCount={setRepeatCount} // Passa função para definir o número de repetições
+              setIsIndeterminate={setIsIndeterminate} // Passa função para definir se é indeterminado
+            />
 
             {/* Botão de Salvar Despesa */}
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -480,14 +536,15 @@ const handleSelectSupplier = (supplier) => {
         onConfirm={handleConfirm}
         valor={valor}
         parceiro={getSupplierNameById(parceiro)}
-        dataPagamento={date.toLocaleDateString()}
         dataVencimento={dueDate.toLocaleDateString()}
-        recorrencia={repeats ? `Pagamento se repete todo dia ${date.getDate()}` : 'Pagamento único'}
+        recorrencia={recorrenciaText}
       />
+
       <SucessModal
         visible={successModalVisible}
-        onClose={() => navigation.navigate('Exits')}
+        onClose={() => navigation.navigate('MainTab')}
         onRegisterNew={handleRegisterNew}
+        onConfirm={handleConfirm}
       />
     </ScrollView>
   );

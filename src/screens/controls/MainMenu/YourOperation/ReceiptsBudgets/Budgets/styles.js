@@ -97,6 +97,70 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: COLORS.black,
       },
+      //modal excluir
+      modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo escuro semitransparente
+      },
+      modalcontainerSegund:{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+      },
+      modalContent: {
+        width: '90%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 5,
+      },
+      modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        color: COLORS.black,
+      },
+      modalText: {
+        fontSize: 16,
+        marginBottom: 10,
+        color: COLORS.black,
+        
+      },
+      deleteButton: {
+        width: '100%',
+        backgroundColor: COLORS.primary, // Amarelo para o botão de excluir
+        paddingVertical: 25,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginBottom: 10,
+        flexDirection: 'row',
+        justifyContent: 'center',
+      },
+      deleteButtonText: {
+        color: 'black',
+        fontSize: 16,
+        marginLeft: 5,
+      },
+      cancelButton: {
+        width: '100%',
+        paddingVertical: 25,
+        borderRadius: 5,
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+      },
+      cancelButtonText: {
+        color: 'black',
+        fontSize: 16,
+        marginLeft: 5,
+      },
   });
 
 export default styles;

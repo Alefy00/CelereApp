@@ -336,7 +336,7 @@ const ActionButtons = ({navigation}) => {
               <Text style={styles.fourthModalText}>Orçamentos</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.fourthModalButton} onPress={handleAddService}>
+            <TouchableOpacity style={styles.fourthModalButton} disabled={true}>
               <Text style={styles.fourthModalText}>PMOC</Text>
             </TouchableOpacity>
           </View>

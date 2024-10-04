@@ -58,18 +58,8 @@ const SingleSale = ({ navigation }) => {
               navigation={navigation}
             />
           ) : (
-                <AccountsPayable 
-                cartItems={cartItems} 
-                setCartItems={setCartItems} 
-                discountValue={discountValue} 
-                setDiscountValue={setDiscountValue} 
-                discountType={discountType} 
-                setDiscountType={setDiscountType} 
-                totalBruto={totalBruto} 
-                setTotalBruto={setTotalBruto} 
-                totalLiquido={totalLiquido} 
-                setTotalLiquido={setTotalLiquido} 
-                navigation={navigation} 
+                <AccountsPayable
+                navigation={navigation}
                 />
           )}
         </View>

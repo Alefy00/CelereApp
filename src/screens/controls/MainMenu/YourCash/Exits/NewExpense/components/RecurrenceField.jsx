@@ -1,18 +1,39 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../../../../constants';
+import axios from 'axios';
+const FREQUENCY_API = 'https://api.celereapp.com.br/api/frequenciarecorrencia/';
 
-const RecurrenceField = () => {
+
+const RecurrenceField = ({ setSelectedFrequencyId, setIsIndeterminate, setRepeatCount }) => {
   const [isRecurring, setIsRecurring] = useState(false);
   const [frequency, setFrequency] = useState('');
+  const [frequencies, setFrequencies] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [repeatCount, setRepeatCount] = useState(0);
-  const [isIndeterminate, setIsIndeterminate] = useState(false);
+  const [localRepeatCount, setLocalRepeatCount] = useState(0); // Local repeatCount para manuseio dentro do componente
+  const [isIndeterminate, setLocalIsIndeterminate] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const frequencies = ['Semanal', 'Quinzenal', 'Mensal', 'Anual'];
+  // Função para buscar as frequências da API
+  useEffect(() => {
+    fetchFrequencies();
+  }, []);
+
+  const fetchFrequencies = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(FREQUENCY_API);
+      const data = response.data.data;
+      setFrequencies(data);
+    } catch (error) {
+      console.error('Erro ao buscar frequências:', error);
+      Alert.alert('Erro', 'Não foi possível carregar as frequências de recorrência. Tente novamente.');
+    }
+    setLoading(false);
+  };
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -20,23 +41,43 @@ const RecurrenceField = () => {
 
   const handleIncrease = () => {
     if (!isIndeterminate) {
-      setRepeatCount(repeatCount + 1);
+      const newRepeatCount = localRepeatCount + 1;
+      setLocalRepeatCount(newRepeatCount);
+      setRepeatCount(newRepeatCount); // Atualiza o repeatCount no NewExpense
     }
   };
 
   const handleDecrease = () => {
-    if (repeatCount > 0 && !isIndeterminate) {
-      setRepeatCount(repeatCount - 1);
+    if (localRepeatCount > 0 && !isIndeterminate) {
+      const newRepeatCount = localRepeatCount - 1;
+      setLocalRepeatCount(newRepeatCount);
+      setRepeatCount(newRepeatCount); // Atualiza o repeatCount no NewExpense
+    }
+  };
+
+  const handleSelectFrequency = (freqId, freqName) => {
+    setFrequency(freqName); // Exibe o nome da frequência no dropdown
+    setSelectedFrequencyId(freqId); // Envia o ID da frequência para o NewExpense
+    setDropdownOpen(false);
+  };
+
+  const handleIndeterminateChange = (value) => {
+    setLocalIsIndeterminate(value);
+    setIsIndeterminate(value); // Atualiza o estado de indeterminado no NewExpense
+    if (value) {
+      setLocalRepeatCount(0); // Reseta o contador local se for indeterminado
+      setRepeatCount(0); // Reseta o repeatCount no NewExpense
     }
   };
 
   return (
     <View style={styles.container}>
-     <View style={{flexDirection: 'row', alignItems: 'center' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Text style={styles.cardTitle}>Recorrência</Text>
         <Text style={styles.checkboxLabelSmall}>(repetição da despesa)</Text>
-     </View>   
-      {/* Campo de recorrência */}
+      </View>
+
+      {/* Checkbox para definir se é uma despesa recorrente */}
       <View style={styles.checkboxContainer}>
         <CheckBox
           value={isRecurring}
@@ -46,52 +87,50 @@ const RecurrenceField = () => {
         <Text style={styles.checkboxLabel}>É uma despesa recorrente</Text>
       </View>
 
-      {/* Exibição condicional */}
+      {/* Exibição condicional se a despesa for recorrente */}
       {isRecurring && (
         <View style={styles.recurrenceContainer}>
           {/* Dropdown de frequência */}
           <TouchableOpacity style={styles.dropdownButton} onPress={toggleDropdown}>
-            <Text style={styles.dropdownText}>{frequency || 'Frequência...'}</Text>
+            <Text style={styles.dropdownText}>{frequency || 'Selecione a frequência...'}</Text>
             <Icon name={dropdownOpen ? 'arrow-up' : 'arrow-down'} size={22} color={COLORS.gray} />
           </TouchableOpacity>
 
           {dropdownOpen && (
             <View style={styles.dropdownContainer}>
-              {frequencies.map((freq, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.dropdownItem}
-                  onPress={() => {
-                    setFrequency(freq);
-                    setDropdownOpen(false);
-                  }}
-                >
-                  <Text style={styles.dropdownItemText}>{freq}</Text>
-                </TouchableOpacity>
-              ))}
+              {loading ? (
+                <ActivityIndicator size="small" color={COLORS.primary} />
+              ) : (
+                frequencies.map((freq) => (
+                  <TouchableOpacity
+                    key={freq.id}
+                    style={styles.dropdownItem}
+                    onPress={() => handleSelectFrequency(freq.id, freq.nome)}
+                  >
+                    <Text style={styles.dropdownItemText}>{freq.nome}</Text>
+                  </TouchableOpacity>
+                ))
+              )}
             </View>
           )}
 
-          {/* Contador de quantidade de vezes que se repete */}
+          {/* Contador de quantidade de repetições */}
           <Text style={styles.label}>Quantidade de vezes que se repete</Text>
           <View style={styles.counterContainer}>
             <TouchableOpacity onPress={handleDecrease} style={styles.counterButton}>
-                 <Icon name="remove" size={24} color={COLORS.black} />
+              <Icon name="remove" size={24} color={COLORS.black} />
             </TouchableOpacity>
-            <Text style={styles.counterText}>{repeatCount}</Text>
+            <Text style={styles.counterText}>{localRepeatCount}</Text>
             <TouchableOpacity onPress={handleIncrease} style={styles.counterButton}>
-                 <Icon name="add" size={24} color={COLORS.black} />
+              <Icon name="add" size={24} color={COLORS.black} />
             </TouchableOpacity>
           </View>
 
-          {/* Checkbox para quantidade indeterminada */}
+          {/* Checkbox para recorrência por tempo indeterminado */}
           <View style={styles.checkboxContainer}>
             <CheckBox
               value={isIndeterminate}
-              onValueChange={(value) => {
-                setIsIndeterminate(value);
-                if (value) setRepeatCount(0); // Resetar contador se indeterminado
-              }}
+              onValueChange={handleIndeterminateChange}
               tintColors={{ true: COLORS.black, false: COLORS.black }}
             />
             <Text style={styles.checkboxLabel}>Quantidade indeterminada</Text>
@@ -101,6 +140,9 @@ const RecurrenceField = () => {
     </View>
   );
 };
+
+
+
 
 const styles = StyleSheet.create({
   container: {

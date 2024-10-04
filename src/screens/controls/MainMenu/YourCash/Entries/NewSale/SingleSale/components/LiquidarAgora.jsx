@@ -30,7 +30,8 @@ const LiquidarAgora = ({ navigation }) => {
   const [discountValue, setDiscountValue] = useState('');
   const [totalBruto, setTotalBruto] = useState(0);
   const [totalLiquido, setTotalLiquido] = useState(0);
-  const [cartItems, setCartItems] = useState([{ id: 1, name: '', priceVenda: '', priceCusto: '', quantity: 1 }]); // Carrinho com item inicial
+  const [cartItems, setCartItems] = useState([{ id: 1, name: '', priceVenda: '', priceCusto: '', quantity: 1 }]);
+  
   // Função para buscar o ID da empresa logada
   const getEmpresaId = useCallback(async () => {
     try {
@@ -357,7 +358,6 @@ const togglePaymentDropdown = () => {
   setIsPaymentDropdownVisible(!isPaymentDropdownVisible);
 };
   // Função principal para registrar venda e itens
- // Função para concluir a venda e os itens
  const handleConfirm = async () => {
   await registerSale();
 };

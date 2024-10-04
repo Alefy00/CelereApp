@@ -14,11 +14,47 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
+  //card produto e serviço:
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '900',
+    fontSize: 18,
+    fontWeight: 'bold',
     color: COLORS.black,
-    marginTop: 20,
+    marginBottom: 10,
+    marginTop: 10,
+  },
+  sectionTitle3: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.black,
+    marginBottom: 10,
+    marginTop: 10,
+  },
+  productDetail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  productInfo: {
+    flex: 1,
+  },
+  productText: {
+    fontSize: 16,
+    color: COLORS.black,
+    marginBottom: 5,
+    fontWeight:'bold',
+  },
+  productAmount: {
+    fontSize: 14,
+    color: COLORS.green,
+  },
+  productTotal: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.black,
+    marginRight: 50
   },
   sectionTitle2: {
     fontSize: 20,
@@ -26,17 +62,12 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     marginTop: 20,
   },
-  Carrinho: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: COLORS.black,
-    marginBottom: 15,
-    marginTop: -5,
-  },
+
   dateText: {
     fontSize: 16,
     color: COLORS.black,
     marginTop: 10,
+    fontWeight: 'bold',
   },
   // ... Estilos anteriores
   clientContainer: {
@@ -90,11 +121,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  productImage: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-  },
   imagePlaceholder: {
     width: 50,
     height: 50,
@@ -109,11 +135,6 @@ const styles = StyleSheet.create({
   },
   productDetails: {
     flex: 1,
-  },
-  cartItem: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: COLORS.black,
   },
   cartQuantity: {
     fontSize: 14,
@@ -243,6 +264,63 @@ const styles = StyleSheet.create({
   viewButtonText: {
     color: COLORS.black,
     fontSize: 16,
+  },// card produto e orçemento
+  cartSection: {
+    marginTop: 10,
+    marginLeft: -20,
+  },
+  Carrinho:{
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.black,
+  },
+  cartItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  containerServiço:{
+    justifyContent:'space-between',
+  },
+  productImage: {
+    width: 50,
+    height: 50,
+    marginLeft: 20,
+    marginRight: 10,
+  },
+  cartItemTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.black,
+    width: '50%',
+  },
+  cartItemSubtitle: {
+    fontSize: 14,
+    color: COLORS.black,
+  },
+  cartItemSubtitleMedida: {
+    fontSize: 14,
+    color: COLORS.green,
+  },
+  cartItemPrice:{
+    color: COLORS.black,
+  },
+  quantitySection: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginVertical: 20,
+    marginRight: 80,
+  },
+  quantityLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.black,
+  },
+  cartItemTotal:{
+    marginLeft: 70,
+    color: COLORS.black,
+    fontWeight:'bold',
   },
 });
 

@@ -25,18 +25,21 @@ const ConsultExpense = ({ navigation }) => {
 
   const getEmpresaId = async () => {
     try {
-      const empresaData = await AsyncStorage.getItem('empresaData');
-      if (empresaData !== null) {
-        const parsedData = JSON.parse(empresaData);
-        setEmpresaId(parsedData); // Definindo o ID da empresa dinamicamente
-        return parsedData;
-      } else {
-        console.log('Nenhum dado de empresa encontrado no AsyncStorage.');
+      const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+      if (!storedEmpresaId) {
+        throw new Error('ID da empresa não encontrado.');
       }
+      const empresaId = Number(storedEmpresaId);
+      if (isNaN(empresaId)) {
+        throw new Error('ID da empresa inválido.');
+      }
+      console.log('Empresa ID:', empresaId); // Log para verificar o ID da empresa
+      return empresaId;
     } catch (error) {
-      console.error('Erro ao obter o ID da empresa do AsyncStorage:', error);
+      console.error('Erro ao buscar o ID da empresa:', error);
+      Alert.alert('Erro', error.message);
+      return null;
     }
-    return null;
   };
 
   const fetchExpenses = useCallback(async (empresa_id) => {
