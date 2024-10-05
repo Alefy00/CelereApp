@@ -1,23 +1,164 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Alert, Platform } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import SvgPixIcon from '../../../../assets/images/svg/initial/IconPix.svg'; 
+import SvgPixIcon from '../../../../assets/images/svg/initial/IconPix.svg';
 import { COLORS } from '../../../../constants';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import styles from './stylesFilterListCard'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import styles from './stylesFilterListCard';
 
-// Dados fictícios
-const salesData = [
-  { id: 1, description: 'Cabo Tipo C Xiaomi', method: 'Pix', date: '07/02/2024, 15:23', amount: 31.90 },
-  { id: 2, description: 'Capa antiqueda Iphone 8', method: 'Dinheiro', date: '07/02/2024, 15:04', amount: 18.00 },
-  { id: 3, description: 'Protetor de tela', method: 'Cartão de Credito', date: '07/02/2024, 14:11', amount: 40.00 },
-];
+const API_URL_VENDAS = 'https://api.celereapp.com.br/cad/vendas/';
+const API_ITENS_VENDA = 'https://api.celereapp.com.br/cad/itens_venda/';
+const API_URL_DESPESAS = 'https://api.celereapp.com.br/cad/despesa/';
 
-const expenseData = [
-  { id: 1, description: 'Despesa A', method: 'Pix', date: '07/02/2024, 12:00', amount: 50.00 },
-  { id: 2, description: 'Despesa B', method: 'Dinheiro', date: '07/02/2024, 13:00', amount: 25.00 },
-];
+// Função para buscar o ID da empresa logada
+const getEmpresaId = async () => {
+  try {
+    const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+    if (!storedEmpresaId) {
+      throw new Error('ID da empresa não encontrado.');
+    }
+    const empresaId = Number(storedEmpresaId);
+    if (isNaN(empresaId)) {
+      throw new Error('ID da empresa inválido.');
+    }
+    return empresaId;
+  } catch (error) {
+    console.error('Erro ao buscar o ID da empresa:', error);
+    Alert.alert('Erro', error.message);
+    return null;
+  }
+};
+
+// Função utilitária para formatar valores como moeda Real Brasileiro (BRL)
+const formatToBRL = (value) => {
+  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+};
+
+// Função para buscar os detalhes do item (produto ou serviço) pelo ID
+const fetchItemById = async (id) => {
+  try {
+    const response = await axios.get(`${API_ITENS_VENDA}${id}/`);
+    const itemData = response.data;
+    return itemData.produto ? itemData.produto.nome : (itemData.servico ? itemData.servico.nome : 'Nome do item indisponível');
+  } catch (error) {
+    console.error(`Erro ao buscar o item com ID ${id}:`, error);
+    return 'Nome do item indisponível';
+  }
+};
+
+// Função para processar as vendas e buscar o nome dos itens de venda
+const processarVendas = async (vendas) => {
+  const vendasProcessadas = await Promise.all(
+    vendas.map(async (venda) => {
+      const itensComNome = await Promise.all(
+        venda.itens.map(async (item) => {
+          const nomeItem = await fetchItemById(item.id); // Buscar o nome de cada item (produto ou serviço)
+          return {
+            ...item,
+            nome: nomeItem || 'Nome do item indisponível',
+          };
+        })
+      );
+      return {
+        ...venda,
+        itens: itensComNome,
+      };
+    })
+  );
+  return vendasProcessadas;
+};
+
+// Função para buscar todas as despesas finalizadas da empresa logada
+const fetchAllDespesas = async (empresaId) => {
+  try {
+    const response = await axios.get(`${API_URL_DESPESAS}?empresa_id=${empresaId}`);
+    const despesas = response.data.data.filter(despesa => despesa.status === 'finalizada');
+    return despesas;
+  } catch (error) {
+    console.error('Erro ao buscar despesas:', error.message);
+    return [];
+  }
+};
+
+// Função para mapear os dados das despesas
+const mapExpenseData = (expenses) => {
+  return expenses.map((expense) => ({
+    id: expense.id,
+    description: expense.item || 'Despesa sem nome',
+    date: formatDate(expense.dt_pagamento), // Formata a data do pagamento
+    amount: parseFloat(expense.valor),
+  }));
+};
+
+
+// Função para buscar todas as vendas finalizadas com paginação e filtragem correta
+const fetchAllVendas = async (empresaId) => {
+  const fetchVendasPaginadas = async (url, vendasAcumuladas = []) => {
+    try {
+      const response = await axios.get(url);
+      const vendasPagina = response.data.results.data;
+
+      // Filtramos as vendas pela empresa logada
+      const vendasFiltradas = vendasPagina.filter(venda => venda.empresa === empresaId);
+      const novasVendas = [...vendasAcumuladas, ...vendasFiltradas];
+
+      // Se houver uma próxima página, fazemos a requisição novamente
+      if (response.data.next) {
+        return fetchVendasPaginadas(response.data.next, novasVendas);
+      }
+
+      return novasVendas;
+    } catch (error) {
+      console.error("Erro ao buscar vendas:", error.message);
+      return vendasAcumuladas; // Em caso de erro, retorna o acumulado até agora
+    }
+  };
+
+  // Inicia a busca pela primeira página
+  return await fetchVendasPaginadas(`${API_URL_VENDAS}?empresa_id=${empresaId}`);
+};
+
+// Função para mapear os dados das vendas
+const mapSalesData = (sales) => {
+  return sales.map((sale) => {
+    const firstItem = sale.itens && sale.itens[0] ? sale.itens[0] : {}; // Pegamos o primeiro item da venda
+
+    const itemName = firstItem.nome || 'Produto sem nome'; // Nome do item (produto ou serviço)
+
+    return {
+      id: sale.id,
+      description: itemName, // Usamos o nome do primeiro item
+      method: getPaymentMethodName(sale.tipo_pagamento_venda), // Chama a função que traduz o ID do pagamento
+      date: formatDate(sale.data_venda), // Formata a data da venda
+      amount: parseFloat(sale.valor_total_venda),
+    };
+  });
+};
+
+// Função para traduzir o método de pagamento
+const getPaymentMethodName = (paymentTypeId) => {
+  switch (paymentTypeId) {
+    case 1:
+      return 'Cartão de Crédito';
+      case 2:
+        return 'Cartão de Dédito';
+    case 3:
+      return 'Dinheiro';
+    case 4:
+      return 'Pix';
+    default:
+      return 'Documento'; // Valor padrão para métodos desconhecidos
+  }
+};
+
+// Função para formatar a data da venda
+const formatDate = (date) => {
+  const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+  return new Date(date).toLocaleDateString('pt-BR', options);
+};
 
 // Função para escolher o ícone com base no método de pagamento
 const getPaymentIcon = (method) => {
@@ -26,16 +167,42 @@ const getPaymentIcon = (method) => {
       return <SvgPixIcon width={20} height={20} style={styles.pixIcon} />;
     case 'Dinheiro':
       return <Ionicons name="cash" size={20} color={COLORS.green} />;
-    case 'Cartão de Credito':
+    case 'Cartão de Crédito':
       return <Ionicons name="card" size={20} color={COLORS.green} />;
+      case 'Cartão de Dédito':
+        return <Ionicons name="card" size={20} color={COLORS.green} />;
     default:
-      return <Ionicons name="help-circle-outline" size={20} color={COLORS.green} />;
+      return <Ionicons name="document-outline" size={20} color={COLORS.green} />; // Ícone de documento para métodos desconhecidos
   }
 };
 
 const FilteredListCard = () => {
-  const [selectedTab, setSelectedTab] = useState('sales'); // 'sales' or 'expenses'
+  const [selectedTab, setSelectedTab] = useState('sales'); // 'sales' ou 'expenses'
   const [searchQuery, setSearchQuery] = useState('');
+  const [salesData, setSalesData] = useState([]);
+  const [salesTotal, setSalesTotal] = useState(0);
+  const expenseData = [
+    { id: 1, description: 'Despesa A', method: 'Pix', date: '07/02/2024, 12:00', amount: 50.00 },
+    { id: 2, description: 'Despesa B', method: 'Dinheiro', date: '07/02/2024, 13:00', amount: 25.00 },
+  ];
+
+
+  useEffect(() => {
+    const loadSalesData = async () => {
+      const empresaId = await getEmpresaId();
+      if (empresaId) {
+        const sales = await fetchAllVendas(empresaId);
+        const vendasProcessadas = await processarVendas(sales);
+        const mappedSales = mapSalesData(vendasProcessadas);
+        setSalesData(mappedSales);
+
+        // Soma o valor total das vendas finalizadas
+        const total = mappedSales.reduce((sum, sale) => sum + sale.amount, 0);
+        setSalesTotal(total);
+      }
+    };
+    loadSalesData();
+  }, []);
 
   const dataToShow = selectedTab === 'sales' ? salesData : expenseData;
 
@@ -48,8 +215,8 @@ const FilteredListCard = () => {
       resetScrollToCoords={{ x: 0, y: 0 }}
       contentContainerStyle={styles.scrollContainer}
       scrollEnabled={true}
-      extraHeight={Platform.select({ ios: 100, android: 120 })} 
-      keyboardShouldPersistTaps="handled" // Adicionado para manter o foco no campo de entrada
+      extraHeight={Platform.select({ ios: 100, android: 120 })}
+      keyboardShouldPersistTaps="handled" 
     >
       <View style={styles.card}>
         {/* Botões de Toggle */}
@@ -61,7 +228,9 @@ const FilteredListCard = () => {
             <Text style={[styles.toggleText, selectedTab === 'sales' && styles.activeText3]}>Vendas Pagas</Text>
             <View style={styles.containerArrow}>
               <Ionicons name="arrow-up-outline" size={20} color={COLORS.green} />
-              <Text style={[styles.toggleValue2, selectedTab === 'sales' && styles.activeText2]}>R$210</Text>
+              <Text style={[styles.toggleValue2, selectedTab === 'sales' && styles.activeText2]}>
+                {formatToBRL(salesTotal)}
+              </Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity
@@ -81,7 +250,7 @@ const FilteredListCard = () => {
           <Text style={styles.balanceText}>
             Saldo <Text style={styles.balanceSubText}>(Vendas - Despesas Pagas)</Text>
           </Text>
-          <Text style={styles.balanceValue}>R$110</Text>
+          <Text style={styles.balanceValue}>{formatToBRL(salesTotal)}</Text> 
         </View>
 
         {/* Campo de Busca */}
@@ -105,7 +274,7 @@ const FilteredListCard = () => {
                 <Text style={styles.itemDescription}>{item.description}</Text>
                 <Text style={styles.itemDetails}>{item.method} - {item.date}</Text>
               </View>
-              <Text style={styles.itemAmount}>R${item.amount.toFixed(2)}</Text>
+              <Text style={styles.itemAmount}>{formatToBRL(item.amount)}</Text>
             </View>
           ))}
         </View>
@@ -114,5 +283,5 @@ const FilteredListCard = () => {
   );
 };
 
-export default FilteredListCard;
 
+export default FilteredListCard;

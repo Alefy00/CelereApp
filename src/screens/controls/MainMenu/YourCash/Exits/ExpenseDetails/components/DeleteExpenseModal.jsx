@@ -73,7 +73,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    marginLeft:80,
+
+    width: '100%'
   },
   cancelButton: {
     flex: 1,
@@ -82,6 +83,7 @@ const styles = StyleSheet.create({
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 50,
 
   },
   cancelButtonText: {

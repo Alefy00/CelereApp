@@ -24,20 +24,33 @@ const formatDateToBrazilian = (dateString) => {
   return date.toLocaleDateString('pt-BR');
 };
 
-// Função para obter o ID da empresa do AsyncStorage
+const getMonthReference = (dateString) => {
+  const expenseDate = new Date(dateString);  // Converte string em data
+  const previousMonth = new Date(expenseDate.setMonth(expenseDate.getMonth() - 1));  // Subtrai um mês
+  return previousMonth.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });  // Retorna o nome do mês e ano
+};
+
 const getEmpresaId = async () => {
   try {
-    const empresaData = await AsyncStorage.getItem('empresaData');
-    return empresaData ? Number(empresaData) : null; // Converte para número
+    const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+    if (!storedEmpresaId) {
+      throw new Error('ID da empresa não encontrado.');
+    }
+    const empresaId = Number(storedEmpresaId);
+    if (isNaN(empresaId)) {
+      throw new Error('ID da empresa inválido.');
+    }
+    return empresaId;
   } catch (error) {
-    console.error('Erro ao obter o ID da empresa do AsyncStorage:', error);
+    console.error('Erro ao buscar o ID da empresa:', error);
+    Alert.alert('Erro', error.message);
     return null;
   }
 };
 
 
 const ExpenseDetails = ({ route, navigation }) => {
-  const { expense, categories, fornecedores, onUpdate } = route.params;
+  const { expense, categories } = route.params;
   const [isDateModalVisible, setIsDateModalVisible] = useState(false);
   const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
   const [isPartialModalVisible, setIsPartialModalVisible] = useState(false);
@@ -63,18 +76,10 @@ const ExpenseDetails = ({ route, navigation }) => {
     fetchEmpresaId();
   }, []);
 
-  // Função para obter o nome da categoria pelo id
   const getCategoryNameById = (id) => {
-    const category = categories.find((cat) => cat.id === id);
-    return category ? category.descricao : 'Categoria não encontrada';
+    return categories[id] || 'Categoria não encontrada';
   };
 
-    // Função para obter o nome do fornecedor pelo id
-    const getSupplierNameById = (id) => {
-      const supplier = fornecedores.find((sup) => sup.id === id);
-      return supplier ? supplier.nome : 'Fornecedor não encontrado';
-    };
-  
      // Abrir o modal de data
   const handleOpenDateModal = () => {
     setIsDateModalVisible(true);
@@ -142,32 +147,32 @@ const ExpenseDetails = ({ route, navigation }) => {
       Alert.alert('Erro', 'Selecione uma data para liquidação.');
       return;
     }
-
+  
     if (!empresaId) {
       Alert.alert('Erro', 'ID da empresa não encontrado.');
       return;
     }
-
+  
+    // Formatar a data no formato ISO (YYYY-MM-DD)
     const formattedDate = formatDateToISO(selectedDate);
-
+  
     try {
+      // Fazer a requisição PATCH para liquidar a despesa
       const response = await axios.patch(
-        `${API_URL}/${expense.id}/baixardespesa/`,
+        `${API_URL}/${expense.id}/baixardespesa/`,  // URL correta para o PATCH
         {
-          empresa_id: empresaId,
-          dt_pagamento: formattedDate,
+          empresa_id: empresaId,  // ID da empresa logada
+          dt_pagamento: formattedDate,  // Data de pagamento
         }
       );
-
-      if (response.data.status === 200) {
-        setIsConfirmationModalVisible(false);
-
-        // Chama a função onUpdate para atualizar a lista de despesas
-        if (onUpdate) {
-          onUpdate();
-        }
-
-        navigation.goBack(); // Volta para a tela anterior (LiquidateExpense)
+  
+      // Verifica o status da resposta
+      if (response.status === 200) {
+        Alert.alert('Sucesso', 'Despesa baixada com sucesso!');
+        setIsConfirmationModalVisible(false); // Fecha o modal de confirmação
+  
+        // Redireciona de volta para a tela de consulta
+        navigation.goBack();
       } else {
         Alert.alert('Erro', 'Ocorreu um problema ao liquidar a despesa.');
       }
@@ -176,6 +181,7 @@ const ExpenseDetails = ({ route, navigation }) => {
       Alert.alert('Erro', 'Erro ao conectar-se à API. Tente novamente mais tarde.');
     }
   };
+  
 
   // Confirmar o adiamento e exibir uma mensagem de sucesso
   const handleConfirmPostponement = (selectedDate) => {
@@ -226,15 +232,17 @@ const ExpenseDetails = ({ route, navigation }) => {
         <Text style={styles.title}>Detalhes da despesa</Text>
 
         {/* Card de detalhes da despesa */}
+        {/* Exibindo os detalhes da despesa */}
         <View style={styles.detailsCard}>
           <View style={styles.detailsInfo}>
             <Text style={styles.expenseTitle}>{expense.item}</Text>
-            <Text style={styles.expenseCategory}>{getCategoryNameById(expense.categoria_despesa)}</Text>
-            <Text style={styles.expenseSubtitle}>Fornecedor: {getSupplierNameById(expense.fornecedor)}</Text>
-            <Text style={styles.expenseSubtitle}>Data da inclusão: {'\n'}{formatDateToBrazilian(expense.criado)}</Text>
-            <Text style={styles.expenseSubtitleBold}>Data de vencimento: {'\n'}{formatDateToBrazilian(expense.dt_vencimento)}</Text>
+            <Text style={styles.expenseCategory}>Categoria: {getCategoryNameById(expense.categoria_despesa)}</Text>
+            <Text style={styles.expenseReference}>Referência: {getMonthReference(expense.dt_vencimento)}</Text>
+            <Text style={styles.expenseCreatedDate}>Data de inclusão:{'\n'}{formatDateToBrazilian(expense.criado)}</Text>
+            <Text style={styles.expenseDueDate}>Data de vencimento:{'\n'}{formatDateToBrazilian(expense.dt_vencimento)}</Text>
+            <Text style={styles.expenseStatus}>Situação: {expense.situacao}</Text>
           </View>
-          <Text style={styles.expenseValue}>R${parseFloat(expense.valor).toFixed(2)}</Text>
+          <Text style={styles.expenseValue}>R${parseFloat(expense.total).toFixed(2)}</Text>
         </View>
 
         {/* Botões de ações */}
@@ -248,7 +256,7 @@ const ExpenseDetails = ({ route, navigation }) => {
           <Text style={styles.actionButtonText}>Liquidar parcialmente</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton} onPress={handleOpenPostponeModal}>
+        <TouchableOpacity style={styles.actionButton} disabled={true}>
           <Icon name="calendar" size={20} color={COLORS.black} />
           <Text style={styles.actionButtonText}>Adiar</Text>
         </TouchableOpacity>

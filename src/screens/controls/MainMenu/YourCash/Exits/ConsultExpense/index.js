@@ -6,7 +6,6 @@ import { COLORS } from "../../../../../../constants";
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import axios from 'axios';
-import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Importando AsyncStorage
 
 // Constantes para URLs de API
@@ -21,7 +20,8 @@ const ConsultExpense = ({ navigation }) => {
   const [categories, setCategories] = useState({});
   const [isSearching, setIsSearching] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [empresaId, setEmpresaId] = useState(null);
+  const [toggleState, setToggleState] = useState('pendente'); // Definindo como 'liquidada' por padrão
+
 
   const getEmpresaId = async () => {
     try {
@@ -42,9 +42,9 @@ const ConsultExpense = ({ navigation }) => {
     }
   };
 
-  const fetchExpenses = useCallback(async (empresa_id) => {
+  const fetchExpenses = useCallback(async (empresa_id, status = 'liquidada') => {  
     if (!empresa_id) return;
-
+  
     setLoading(true);
     try {
       const response = await axios.get(API_EXPENSES_URL, {
@@ -52,31 +52,38 @@ const ConsultExpense = ({ navigation }) => {
           page: 1,
           page_size: 100,
           empresa_id: empresa_id,
-          data_inicial: '2023-01-01',  // Você pode ajustar essas datas conforme necessário
+          data_inicial: '2023-01-01',  // Ampliando a data inicial para garantir que todas as despesas sejam capturadas
           data_final: '4030-09-23',
-          status: 'pendente'
+          status: status === 'liquidada' ? 'finalizada' : 'pendente'  // Usar 'finalizada' ao alternar para 'liquidada'
         }
       });
+      
       const despesasData = response.data.data;
-
+  
+      // Agrupando as despesas
       const groupedExpenses = despesasData.reduce((acc, curr) => {
-        const { despesa_pai, item, valor, categoria_despesa } = curr;
-        const key = despesa_pai || curr.id;  // Usar o próprio ID se "despesa_pai" for nulo
-
+        const { id, despesa_pai, item, valor, categoria_despesa, dt_vencimento, criado } = curr;
+        const key = despesa_pai || curr.id;
+  
         if (!acc[key]) {
           acc[key] = {
+            id,
             despesa_pai: key,
             item,
             categoria_despesa,
+            valor,
+            dt_vencimento,
+            criado,
+            situacao: status === 'pendente' ? 'Contas a pagar' : 'Liquidadas',  // Definindo o status corretamente
             total: 0,
           };
         }
-
+  
         acc[key].total += parseFloat(valor);
-
+  
         return acc;
       }, {});
-
+  
       setExpenses(Object.values(groupedExpenses));
       setFilteredExpenses(Object.values(groupedExpenses));
     } catch (error) {
@@ -85,6 +92,7 @@ const ConsultExpense = ({ navigation }) => {
       setLoading(false);
     }
   }, []);
+  
 
   const fetchCategories = async () => {
     try {
@@ -105,27 +113,18 @@ const ConsultExpense = ({ navigation }) => {
     const fetchData = async () => {
       const id = await getEmpresaId();
       if (id) {
-        fetchExpenses(id);
+        fetchExpenses(id, toggleState);  // Chama a API com base no estado selecionado
       }
       await fetchCategories();
       setLoading(false);
     };
 
     fetchData();
-  }, [fetchExpenses]);
+  }, [fetchExpenses, toggleState]);  // Atualiza ao mudar o estado de toggle
 
-  useFocusEffect(
-    useCallback(() => {
-      const refreshExpenses = async () => {
-        const id = await getEmpresaId();
-        if (id) {
-          fetchExpenses(id);
-        }
-      };
-
-      refreshExpenses();
-    }, [fetchExpenses])
-  );
+  const handleToggleChange = (newState) => {
+    setToggleState(newState);  // Atualiza o estado ao clicar no toggle
+  };
 
   const handleSearch = (text) => {
     setSearchText(text);
@@ -147,6 +146,24 @@ const ConsultExpense = ({ navigation }) => {
     setIsSearching(false);
   };
 
+  const getMonthReference = (dateString) => {
+    const expenseDate = new Date(dateString);  // Converte string em data
+    const previousMonth = new Date(expenseDate.setMonth(expenseDate.getMonth() - 1));  // Subtrai um mês
+    return previousMonth.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });  // Retorna o nome do mês e ano
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);  // Converte string em data
+    return date.toLocaleDateString('pt-BR');  // Formata para dia/mês/ano em português
+  };
+
+  const goToExpenseDetails = (expense) => {
+    navigation.navigate('ExpenseDetails', {
+      expense,
+      categories,  // Passando as categorias para a tela de detalhes
+    });
+  };
+  
   if (loading) {
     return <ActivityIndicator size="large" color={COLORS.primary} />;
   }
@@ -168,6 +185,7 @@ const ConsultExpense = ({ navigation }) => {
         <Text style={styles.headerSubtitle}>Veja e cadastre suas despesas.</Text>
       </View>
 
+      {/* Campo de busca */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputWrapper}>
           <TextInput
@@ -188,15 +206,41 @@ const ConsultExpense = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
+      {/* Toggle para alternar entre despesas pendentes e liquidadas */}
+      <View style={styles.toggleContainer}>
+        <TouchableOpacity
+          style={[styles.toggleButton, toggleState === 'pendente' && styles.toggleButtonActive]}
+          onPress={() => handleToggleChange('pendente')}
+        >
+          <Icon name="arrow-forward" size={16} color={toggleState === 'pendente' ? COLORS.black : COLORS.black} />
+          <Text style={[styles.toggleText, toggleState === 'pendente' && styles.toggleTextActive]}>Contas a pagar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.toggleButton, toggleState === 'liquidada' && styles.toggleButtonActive]}
+          onPress={() => handleToggleChange('liquidada')}
+        >
+          <Icon name="arrow-forward" size={16} color={toggleState === 'liquidada' ? COLORS.black : COLORS.black} />
+          <Text style={[styles.toggleText, toggleState === 'liquidada' && styles.toggleTextActive]}>Pagas</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Lista de despesas */}
       <ScrollView style={styles.expensesListContainer}>
         {filteredExpenses.map(expenseGroup => (
-          <View key={expenseGroup.despesa_pai} style={styles.expenseContainer}>
+          <TouchableOpacity
+            key={expenseGroup.despesa_pai}
+            style={styles.expenseContainer}
+            onPress={() => goToExpenseDetails(expenseGroup)}
+          >
             <View style={styles.expenseInfo}>
               <Text style={styles.expenseName}>{expenseGroup.item}</Text>
               <Text style={styles.expenseType}>{categories[expenseGroup.categoria_despesa] || 'Categoria desconhecida'}</Text>
+              <Text style={styles.expenseReference}>Referência: {getMonthReference(expenseGroup.dt_vencimento)}</Text>
+              <Text style={styles.expenseDueDate}>Data de vencimento:{'\n'}{formatDate(expenseGroup.dt_vencimento)}</Text>
+              <Text style={styles.expenseStatus}>Situação: <Text style={expenseGroup.situacao === 'Contas a pagar' ? styles.expenseStatusPending : styles.expenseStatusPaid}>{expenseGroup.situacao}</Text></Text>
             </View>
-            <Text style={styles.expenseAmount}>Total: R${expenseGroup.total.toFixed(2)}</Text>
-          </View>
+            <Text style={styles.expenseAmount}>R${expenseGroup.total.toFixed(2)}</Text>
+          </TouchableOpacity>
         ))}
       </ScrollView>
 

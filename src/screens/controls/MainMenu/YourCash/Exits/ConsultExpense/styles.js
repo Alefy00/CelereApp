@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '900',
     color: COLORS.black,
-    marginBottom: 5,
+    marginTop: -10,
   },
   headerSubtitle: {
     fontSize: 16,
@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingBottom: 15,
+    marginTop: -10,
   },
   searchInputWrapper: {
     flexDirection: 'row',
@@ -73,10 +74,10 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 15,
+    paddingVertical: 25,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
+    borderRadius: 8,
     marginHorizontal:20,
     marginVertical:20,
     flexDirection: 'row',
@@ -88,21 +89,23 @@ const styles = StyleSheet.create({
     marginLeft:10,
   },
   expenseContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     padding: 15,
     backgroundColor: COLORS.white,
     borderRadius: 10,
-    marginBottom: 10,
+    marginVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
     elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   },
   expenseInfo: {
-    flex: 1,
+    flexDirection: 'column',
   },
   expenseName: {
     fontSize: 16,
@@ -112,12 +115,67 @@ const styles = StyleSheet.create({
   expenseType: {
     fontSize: 14,
     color: COLORS.gray,
+    marginTop: 2,
+  },
+  expenseReference: {
+    fontSize: 14,
+    marginTop: 5,
+    color: COLORS.black,
+  },
+  expenseDueDate: {
+    fontSize: 14,
+    marginTop: 5,
+    color: COLORS.black,
+  },
+  expenseStatus: {
+    fontSize: 14,
+    marginTop: 5,
+    color: COLORS.black,
+  },
+  expenseStatusPending: {
+    color: COLORS.red,
+  },
+  expenseStatusPaid: {
+    color: COLORS.green,
   },
   expenseAmount: {
     fontSize: 16,
     fontWeight: 'bold',
+    alignSelf: 'center',
     color: COLORS.black,
-    marginBottom:20
+    marginTop: -95,
+  },
+  //toggle botão
+  toggleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    borderColor: COLORS.black,
+    borderWidth: 1,
+    borderRadius: 5,
+    backgroundColor: COLORS.white,
+    marginHorizontal: 20,
+    marginBottom: 10,
+  },
+  toggleButton: {
+    flex: 1,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+
+  },
+  toggleButtonActive: {
+    backgroundColor: COLORS.primary,
+  },
+  toggleText: {
+    marginLeft: 5,
+    fontSize: 16,
+    color: COLORS.black,
+  },
+  toggleTextActive: {
+    color: COLORS.black,
+    fontWeight: 'bold',
   },
 });
 
