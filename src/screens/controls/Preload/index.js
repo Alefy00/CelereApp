@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+
 import React, {useEffect, useState} from 'react';
 import {StatusBar} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
