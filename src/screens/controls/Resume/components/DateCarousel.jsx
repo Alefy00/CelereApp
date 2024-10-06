@@ -11,6 +11,13 @@ const DateCarousel = ({ onDateSelected }) => {
   const [filterVisible, setFilterVisible] = useState(false); // Controle de visibilidade do filtro dropdown
   const flatListRef = useRef(null);
 
+  // Função para ajustar o fuso horário da data (para o fuso de Brasília, GMT-3)
+  const adjustDateToBrasiliaTimezone = (date) => {
+    const adjustedDate = new Date(date);
+    adjustedDate.setUTCHours(date.getUTCHours() - 3); // Ajuste para o horário de Brasília (GMT-3)
+    return adjustedDate;
+  };
+
   // Lista de dias passados até o dia atual
   const generatePastDates = () => {
     const today = new Date();
@@ -18,7 +25,8 @@ const DateCarousel = ({ onDateSelected }) => {
     for (let i = 0; i < 30; i++) {  // Exibir os últimos 30 dias
       const date = new Date();
       date.setDate(today.getDate() - i);
-      datesArray.push(date);
+      const adjustedDate = adjustDateToBrasiliaTimezone(date); // Ajustar o fuso horário para Brasília
+      datesArray.push(adjustedDate);
     }
     return datesArray;
   };
@@ -63,7 +71,7 @@ const DateCarousel = ({ onDateSelected }) => {
           ref={flatListRef}
           data={dates}
           renderItem={renderItem}
-          keyExtractor={(item) => item.toISOString()}
+          keyExtractor={(item) => item.getTime().toString()} // Usando getTime() que é sempre válido para datas
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.flatListContent}
@@ -80,10 +88,7 @@ const DateCarousel = ({ onDateSelected }) => {
 
         {/* Ícone de filtro com fundo amarelo quando ativo */}
         <TouchableOpacity 
-          style={[
-            styles.filterIconContainer, 
-            filterVisible && styles.filterIconActive
-          ]} 
+          style={[styles.filterIconContainer, filterVisible && styles.filterIconActive]} 
           onPress={toggleFilterVisibility}
         >
           <Icon name="filter-outline" size={24} color={filterVisible ? COLORS.black : COLORS.grey} />
@@ -95,7 +100,7 @@ const DateCarousel = ({ onDateSelected }) => {
         <View style={styles.dropdownMenu}>
           <Text style={styles.dropdownTextPeriodo}>Período de tempo:</Text>
 
-            <View style={styles.containerTitle}>
+          <View style={styles.containerTitle}>
             <TouchableOpacity style={styles.dropdownItem}>
               <Text style={styles.dropdownTextActive}>Diário</Text>
             </TouchableOpacity>
@@ -108,13 +113,14 @@ const DateCarousel = ({ onDateSelected }) => {
             <TouchableOpacity style={styles.dropdownItemDisabled} disabled={true}>
               <Text style={styles.dropdownTextDisabled}>Anual</Text>
             </TouchableOpacity>
-            </View>
+          </View>
 
         </View>
       )}
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   carouselContainer: {

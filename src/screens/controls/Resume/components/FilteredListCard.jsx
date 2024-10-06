@@ -88,11 +88,11 @@ const mapExpenseData = (expenses) => {
   return expenses.map((expense) => ({
     id: expense.id,
     description: expense.item || 'Despesa sem nome',
+    method: 'Despesa', // Placeholder, já que não há método de pagamento explícito
     date: formatDate(expense.dt_pagamento), // Formata a data do pagamento
     amount: parseFloat(expense.valor),
   }));
 };
-
 
 // Função para buscar todas as vendas finalizadas com paginação e filtragem correta
 const fetchAllVendas = async (empresaId) => {
@@ -125,9 +125,7 @@ const fetchAllVendas = async (empresaId) => {
 const mapSalesData = (sales) => {
   return sales.map((sale) => {
     const firstItem = sale.itens && sale.itens[0] ? sale.itens[0] : {}; // Pegamos o primeiro item da venda
-
     const itemName = firstItem.nome || 'Produto sem nome'; // Nome do item (produto ou serviço)
-
     return {
       id: sale.id,
       description: itemName, // Usamos o nome do primeiro item
@@ -143,8 +141,8 @@ const getPaymentMethodName = (paymentTypeId) => {
   switch (paymentTypeId) {
     case 1:
       return 'Cartão de Crédito';
-      case 2:
-        return 'Cartão de Dédito';
+    case 2:
+      return 'Cartão de Débito';
     case 3:
       return 'Dinheiro';
     case 4:
@@ -168,9 +166,8 @@ const getPaymentIcon = (method) => {
     case 'Dinheiro':
       return <Ionicons name="cash" size={20} color={COLORS.green} />;
     case 'Cartão de Crédito':
+    case 'Cartão de Débito':
       return <Ionicons name="card" size={20} color={COLORS.green} />;
-      case 'Cartão de Dédito':
-        return <Ionicons name="card" size={20} color={COLORS.green} />;
     default:
       return <Ionicons name="document-outline" size={20} color={COLORS.green} />; // Ícone de documento para métodos desconhecidos
   }
@@ -181,12 +178,9 @@ const FilteredListCard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [salesData, setSalesData] = useState([]);
   const [salesTotal, setSalesTotal] = useState(0);
-  const expenseData = [
-    { id: 1, description: 'Despesa A', method: 'Pix', date: '07/02/2024, 12:00', amount: 50.00 },
-    { id: 2, description: 'Despesa B', method: 'Dinheiro', date: '07/02/2024, 13:00', amount: 25.00 },
-  ];
+  const [expenseData, setExpenseData] = useState([]);
 
-
+  // Carregar dados de vendas
   useEffect(() => {
     const loadSalesData = async () => {
       const empresaId = await getEmpresaId();
@@ -204,6 +198,19 @@ const FilteredListCard = () => {
     loadSalesData();
   }, []);
 
+  // Carregar dados de despesas
+  useEffect(() => {
+    const loadExpenseData = async () => {
+      const empresaId = await getEmpresaId();
+      if (empresaId) {
+        const despesas = await fetchAllDespesas(empresaId);
+        const mappedExpenses = mapExpenseData(despesas);
+        setExpenseData(mappedExpenses);
+      }
+    };
+    loadExpenseData();
+  }, []);
+
   const dataToShow = selectedTab === 'sales' ? salesData : expenseData;
 
   const filteredData = dataToShow.filter(item =>
@@ -216,7 +223,7 @@ const FilteredListCard = () => {
       contentContainerStyle={styles.scrollContainer}
       scrollEnabled={true}
       extraHeight={Platform.select({ ios: 100, android: 120 })}
-      keyboardShouldPersistTaps="handled" 
+      keyboardShouldPersistTaps="handled"
     >
       <View style={styles.card}>
         {/* Botões de Toggle */}
@@ -240,7 +247,9 @@ const FilteredListCard = () => {
             <Text style={[styles.toggleText, selectedTab === 'expenses' && styles.activeText3]}>Despesas Pagas</Text>
             <View style={styles.containerArrow}>
               <Ionicons name="arrow-down-outline" size={20} color={COLORS.red} />
-              <Text style={[styles.toggleValue, selectedTab === 'expenses' && styles.activeText]}>R$100</Text>
+              <Text style={[styles.toggleValue, selectedTab === 'expenses' && styles.activeText]}>
+                {formatToBRL(expenseData.reduce((sum, expense) => sum + expense.amount, 0))}
+              </Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -250,14 +259,14 @@ const FilteredListCard = () => {
           <Text style={styles.balanceText}>
             Saldo <Text style={styles.balanceSubText}>(Vendas - Despesas Pagas)</Text>
           </Text>
-          <Text style={styles.balanceValue}>{formatToBRL(salesTotal)}</Text> 
+          <Text style={styles.balanceValue}>{formatToBRL(salesTotal - expenseData.reduce((sum, expense) => sum + expense.amount, 0))}</Text>
         </View>
 
         {/* Campo de Busca */}
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Pesquise uma venda recente..."
+            placeholder="Pesquise uma venda ou despesa recente..."
             placeholderTextColor={COLORS.lightGray}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -282,6 +291,5 @@ const FilteredListCard = () => {
     </KeyboardAwareScrollView>
   );
 };
-
 
 export default FilteredListCard;

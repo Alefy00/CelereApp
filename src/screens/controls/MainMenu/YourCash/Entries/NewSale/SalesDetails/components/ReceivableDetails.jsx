@@ -7,6 +7,7 @@ import styles from "./styles";
 import { COLORS } from "../../../../../../../../constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import CustomCalendar from "../../../../../../../../components/CustomCalendar";
 
 // Constantes com as URLs das APIs
 const API_VENDAS = 'https://api.celereapp.com.br/cad/vendas/';
@@ -145,10 +146,6 @@ const handleRegisterSale = async () => {
 };
 
   
-  const handleEmitReceipt = () => {
-    // Lógica para emissão de NF-e ou recibo
-  };
-
   const calculateLiquidValue = useCallback(() => {
     let discount = 0;
 
