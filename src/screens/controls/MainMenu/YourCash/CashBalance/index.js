@@ -28,16 +28,27 @@ const CashBalance = ({ navigation }) => {
         {item.isStarred ? (
           <Icon name="star" size={20} color="#FFF200" style={styles.starIcon} />
         ) : (
-          <Text style={[
-            styles.percentage,
-            item.percentage.startsWith('+') ? styles.positive : styles.negative
-          ]}>{item.percentage}</Text>
+          <View style={styles.valueContainer}>
+            <Icon
+              name={item.percentage.startsWith('+') ? 'arrow-up-outline' : 'arrow-down-outline'}
+              size={16}
+              color={item.percentage.startsWith('+') ? COLORS.green : COLORS.red}
+              style={styles.arrowIcon}
+            />
+            <Text
+              style={[
+                styles.percentage,
+                item.percentage.startsWith('+') ? styles.positive : styles.negative,
+              ]}
+            >
+              {item.percentage}
+            </Text>
+          </View>
         )}
         <Text style={[styles.value, item.isToday && styles.todayText]}>{item.value}</Text>
       </View>
     </View>
   );
-
   return (
     <SafeAreaView style={styles.container}>
       <BarTop2
@@ -46,8 +57,8 @@ const CashBalance = ({ navigation }) => {
         foreColor={COLORS.black}
         onPress={() => navigation.goBack()}
       />
-      <Text style={styles.textSaldo}>Saldo de Caixa</Text>
-      <Text style={styles.textModo}>Periodo de tempo:</Text>
+      <Text style={styles.textSaldo}>Previsão de Caixa</Text>
+      <Text style={styles.textModo}>Modo:</Text>
       <View style={styles.modeSelector}>
         {['Diário', 'Semanal', 'Mensal', 'Anual'].map((mode) => (
           <TouchableOpacity
@@ -72,7 +83,10 @@ const CashBalance = ({ navigation }) => {
         contentContainerStyle={styles.listContent}
       />
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Meta de saldo de caixa</Text>
+        <View style={{flexDirection: 'row', marginBottom: 40}}>
+          <Text style={styles.footerText}>Meta de saldo de caixa</Text>
+          <Icon name="alert-circle" size={20}  style={{ marginLeft: 10 }} />
+        </View>
         <Text style={styles.footerValue}>R$ 1.100,00</Text>
       </View>
     </SafeAreaView>

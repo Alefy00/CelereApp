@@ -4,52 +4,68 @@ import { COLORS } from '../../../../../constants';
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  headerContainer: {
+    padding: 20,
+    backgroundColor: COLORS.background,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.black,
+    marginTop:-10,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: COLORS.gray,
+    marginBottom: -20,
   },
   menuContainer: {
-    padding: 10,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    padding: 20,
   },
   menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    marginVertical: 8,
+    width: '48%',
     backgroundColor: COLORS.white,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.gray,
-    justifyContent: 'space-between', // Adiciona espaço entre o texto e a seta
+    borderRadius: 10,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    marginBottom: 15,
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   menuItemDisabled: {
-    backgroundColor: COLORS.lightGray,
-   
-  },
-  menuIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
+    backgroundColor: COLORS.lightGray2,
+    opacity: 0.6,
   },
   menuIcon: {
-    width: 30,
-    height: 30,
+    width: 50,
+    height: 50,
+    marginBottom: 10,
     resizeMode: 'contain',
   },
   menuText: {
-    flex: 1,
     fontSize: 16,
     fontWeight: 'bold',
     color: COLORS.black,
+    textAlign: 'center',
+    marginBottom: 5,
   },
   menuTextDisabled: {
     color: COLORS.gray,
+  },
+  menuDescription: {
+    fontSize: 14,
+    color: COLORS.gray,
+    textAlign: 'center',
   },
 });
 

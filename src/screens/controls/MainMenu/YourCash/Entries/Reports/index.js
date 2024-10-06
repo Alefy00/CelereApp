@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from "react";
-import { ScrollView, TouchableOpacity, View, Text } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import { ScrollView, TouchableOpacity, View, Text, Alert, Button} from "react-native";
 import Icon from 'react-native-vector-icons/Ionicons';
 import BarTop2 from "../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../constants";
@@ -9,11 +8,19 @@ import RoundedBarsChart from './components/RoundedBarsChart';
 import DonutChartWithLegend from './components/DonutChartWithLegend';
 import BottomRoundedBarsChart from './components/BottomRoundedBarsCharts';
 import styles from './styles';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Report = ({ navigation }) => {
   // Estados para armazenar o mês selecionado e o intervalo de tempo selecionado
   const [selectedMonth, setSelectedMonth] = useState('Fevereiro');
   const [selectedTimeframe, setSelectedTimeframe] = useState('Mensal');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+  const handleSelect = (month) => {
+    setSelectedMonth(month);
+    setShowDropdown(false);
+  };
 
   // Dados fictícios para o gráfico de barras arredondadas
   const dataBarChart = [
@@ -35,10 +42,23 @@ const Report = ({ navigation }) => {
     { value: 80, amount: 21900, label: "Capital de Giro mínimo recomendado" },
   ];
 
+  const clearAsyncStorage = async () => {
+    try {
+      await AsyncStorage.clear();
+      console.log('AsyncStorage limpo com sucesso!');
+      Alert.alert('Sucesso', 'O armazenamento foi limpo. Você pode testar um novo número.');
+    } catch (error) {
+      console.error('Erro ao limpar AsyncStorage:', error);
+      Alert.alert('Erro', 'Não foi possível limpar o armazenamento.');
+    }
+  };
+
+
   return (
     <ScrollView style={styles.container}>
       <BarTop2
-        titulo="Relatório Mensal"
+
+      titulo={('Voltar')}
         backColor={COLORS.primary}
         foreColor={COLORS.black}
         routeMailer=""
@@ -60,18 +80,24 @@ const Report = ({ navigation }) => {
       </View>
       {/* Picker para selecionar o mês */}
       <View style={styles.pickeralign}>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={selectedMonth}
-            style={styles.picker}
-            onValueChange={(itemValue) => setSelectedMonth(itemValue)}
-          >
-            {["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"].map((month) => (
-              <Picker.Item key={month} label={month} value={month} />
-            ))}
-          </Picker>
+      <TouchableOpacity 
+        style={styles.pickerContainer} 
+        onPress={() => setShowDropdown(!showDropdown)}
+      >
+        <Text style={styles.pickerText}>{selectedMonth}</Text>
+        <Icon name="arrow-down" size={20} color="#000" style={styles.pickerIcon} />
+      </TouchableOpacity>
+
+      {showDropdown && (
+        <View style={styles.dropdown}>
+          {months.map((month) => (
+            <TouchableOpacity key={month} style={styles.dropdownItem} onPress={() => handleSelect(month)}>
+              <Text style={styles.dropdownText}>{month}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
-      </View>
+      )}
+    </View>
       {/* Container de saldo de caixa */}
       <View style={styles.balanceContainer}>
         {/* Linha de saldo de caixa inicial e final */}
@@ -94,20 +120,23 @@ const Report = ({ navigation }) => {
         {/* Barra de saldo */}
         <View style={styles.balanceBarContainer}>
           <View style={styles.balanceBarGreen} />
-          <View style={styles.balanceBarRed} />
+          <View style={styles.balanceBarOrange} />
         </View>
         {/* Linha de menor saldo e saldo médio diário */}
         <View style={styles.balanceRow2}>
           <View style={styles.balanceBox2}>
-            <Text style={[styles.balanceText, styles.balancenumber]}>Menor Saldo - Dia 5</Text>
-            <Text style={[styles.balanceAmount, styles.balenceValue]}>R$4.380</Text>
+            <Text style={[styles.balanceText, styles.balancenumber]}>Saldo Médio Diário</Text>
+            <Text style={[styles.balanceAmount, styles.balenceValue]}>R$4.560</Text>
           </View>
           <View style={styles.balanceBox3}>
-            <Text style={[styles.balanceText, styles.balancenumber2]}>Saldo Médio Diário</Text>
-            <Text style={[styles.balanceAmount, styles.balenceValue2]}>R$4.560</Text>
+            <Text style={[styles.balanceText, styles.balancenumber2]}>Menor Saldo - Dia 5</Text>
+            <Text style={[styles.balanceAmount, styles.balenceValue2]}>R$4.380</Text>
           </View>
         </View>
-        <Text style={styles.balanceRecommended}>Saldo mínimo recomendado</Text>
+        <View style={styles.containerInfo}>
+          <Text style={styles.balanceRecommended}>Saldo mínimo recomendado</Text>
+          <Icon name="alert-circle" size={20} color={COLORS.lightGray} style={{marginTop: 10}}/>
+        </View>
         <Text style={styles.balanceRecommendedValue}>R$4.200</Text>
       </View>
       {/* Container de gráficos */}
@@ -117,9 +146,18 @@ const Report = ({ navigation }) => {
       {/* Container de informações */}
       <View style={styles.informationContainer}>
         <View style={styles.containerTextInfo}>
-          <Text style={styles.informationText}>Resultado</Text>
-          <Text style={styles.informationText}>Margem de lucro</Text>
-          <Text style={styles.informationText}>Ponto de equilíbrio</Text>
+          <View style={styles.containerInfoIcon}>
+            <Text style={styles.informationText}>Resultado</Text>
+            <Icon name="alert-circle" size={20} color={COLORS.lightGray}/>
+          </View>
+          <View style={styles.containerInfoIcon}>
+            <Text style={styles.informationText}>Margem de lucro</Text>
+            <Icon name="alert-circle" size={20} color={COLORS.lightGray}/>
+          </View>
+          <View style={styles.containerInfoIcon}>
+            <Text style={styles.informationText}>Ponto de equilíbrio</Text>
+            <Icon name="alert-circle" size={20} color={COLORS.lightGray}/>
+          </View>
         </View>
         <View style={styles.containerTextValue}>
           <Text style={styles.informationValue}>R$4.400</Text>
@@ -127,10 +165,10 @@ const Report = ({ navigation }) => {
           <Text style={styles.informationValue}>R$11.704,41</Text>
         </View>
       </View>
-      <View style={styles.chartContainer}>
+      <View style={styles.chartContainer3}>
         <DonutChartWithLegend data={dataPieChart} />
       </View>
-      <View style={styles.chartContainer}>
+      <View style={styles.chartContainer2}>
         <BottomRoundedBarsChart 
           data={dataBottomBarChart} 
           barColor="#8A2BE2" 
@@ -138,6 +176,7 @@ const Report = ({ navigation }) => {
           valueStyle={{ color: "#000", fontSize: "14", fontWeight: "bold" }}
         />
       </View>
+      <Button title="Limpar Armazenamento" onPress={clearAsyncStorage} color="#FF0000" />
     </ScrollView>
   );
 };

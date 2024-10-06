@@ -1,32 +1,29 @@
 /* eslint-disable prettier/prettier */
-import React, {useEffect, useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
-  Text,
-  TouchableOpacity,
+  Platform,
+
   View,
-  Platform
+  StyleSheet,
+
 } from 'react-native';
-import {Container, Scroller} from './styles';
-import {useNavigation} from '@react-navigation/native';
-import {COLORS, FONTS, SIZES, icons, images} from '../../../constants';
-
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import {Container} from './styles';
+import {COLORS, FONTS} from '../../../constants';
 import BarTop2 from '../../../components/BarTop2';
-// import SubTitle from '../../../components/SubTitle';
-
 import '../../../translation';
 import {useTranslation} from 'react-i18next';
-
 import Card from './components/Card';
 import styled from 'styled-components/native';
 
 export const Title = styled.Text`
-  margin-top: 15px;
+  margin-top: 10px;
   margin-left: 15px;
   font-size: 27px;
-  font-weight: bold;
+  font-weight: 900;
   color: #000000;
   font-family: ${FONTS.fregular};
 `;
@@ -35,6 +32,7 @@ export const SubTitle = styled.Text`
   margin-left: 15px;
   margin-right: 15px;
   font-size: 15px;
+  margin-bottom: 15px;
   font-family: ${FONTS.fregular};
   font-weight: normal;
   color: #000000;
@@ -43,10 +41,26 @@ export const SubTitle = styled.Text`
 
 const Start = ({navigation}) => {
   const {t} = useTranslation();
+  const [hasInitialBalance, setHasInitialBalance] = useState(false);
 
-  const handleSave = ()=>{
-    navigation.navigate('MainTab');
+  useEffect(() => {
+    // Carrega o estado do AsyncStorage para verificar se o saldo inicial foi adicionado
+    const loadInitialBalanceState = async () => {
+      const saved = await AsyncStorage.getItem('initialBalanceAdded');
+      if (saved === 'true') {
+        setHasInitialBalance(true); // Atualiza o estado se o saldo inicial já foi adicionado
+      }
+    };
+    loadInitialBalanceState();
+  }, []);
+
+  const handleInitialBalance = async () => {
+    // Quando o usuário clicar para adicionar o saldo, vamos salvar a informação no AsyncStorage
+    await AsyncStorage.setItem('initialBalanceAdded', 'true');
+    setHasInitialBalance(true); // Atualiza o estado para refletir a mudança
+    navigation.navigate('OpeningBalance'); // Navega para a página de saldo inicial
   };
+
   return (
     <Container
       backColor={COLORS.background}
@@ -56,69 +70,90 @@ const Start = ({navigation}) => {
         <KeyboardAvoidingView behavior="position" enabled>
           <>
             <BarTop2
-              titulo={t('return')}
+              titulo={t('Voltar')}
               backColor={COLORS.primary}
               foreColor={COLORS.black}
               routeMailer={''}
               routeCalculator={''}
             />
 
-            <Scroller>
-              <Title>{t('start')}</Title>
-              <SubTitle>{t('desc_start')}</SubTitle>
+            <View>
+              <Title>{t('Primeiros Passos')}</Title>
+              <SubTitle>{t('São passos essenciais para te ajudarmos a gerir seu fluxo de caixa com eficácia.')}</SubTitle>
 
               <Card
                 number="1"
                 title={t('item1')}
-                buttontitle={t('start')}
+                buttontitle={hasInitialBalance ? t('Alterar saldo') : t('Começar')}
                 pageScreen="OpeningBalance"
+                onPress={handleInitialBalance} // Função para salvar o saldo inicial
+                buttonStyle={hasInitialBalance ? styles.updateButton : styles.startButton} // Estilo condicional baseado no estado
               />
+
 
               <Card
                 number="2"
-                title={t('item2')}
-                buttontitle={t('start')}
-                pageScreen="InitialSupplier"
+                title={t('Vamos juntos projetar suas vendas')}
+                buttontitle={t('Começar')}
+                pageScreen="MonthlySalesForecast"
               />
 
               <Card
                 number="3"
-                title={t('item3')}
-                buttontitle={t('start')}
-                pageScreen="ExpensePage"
+                title={t('Adicione seu regime tributário')}
+                buttontitle={t('Começar')}
+                pageScreen="TaxRegime"
               />
 
               <Card
                 number="4"
-                title={t('item4')}
-                buttontitle={t('start')}
-                pageScreen="SalesReceive"
+                title={t('CélerePay - Seu celular vira maquininha e você tem mais controle')}
+                buttontitle={t('Começar')}
+                pageScreen="CelerePay"
               />
-
-              <Card
-                number="5"
-                title={t('item5')}
-                buttontitle={t('start')}
-                pageScreen="MonthlySalesForecast"
-              />
-              <Card
-                number="6"
-                title={t('Previsão de Compras')}
-                buttontitle={t('start')}
-                pageScreen="BuyPrevision"
-              />
-              <View style={{justifyContent: 'center',alignItems: 'center', padding: 25}}>
-                <TouchableOpacity style={{ height: 70, backgroundColor: COLORS.primary, justifyContent: 'center',alignItems: 'center', borderRadius: 4, paddingHorizontal: 46, marginTop: 16}} onPress={handleSave}>
-
-                      <Text style={{fontSize: 16,color: COLORS.white,fontWeight: 'bold'}}>Salvar</Text>
-                </TouchableOpacity>
-              </View>
-            </Scroller>
+            </View>
           </>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
     </Container>
   );
 };
+const styles = StyleSheet.create({
+
+  // Novo estilo para o botão de "Alterar saldo"
+  updateButton: {
+    backgroundColor: COLORS.secondary, // Cor diferente para indicar a alteração
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  updateButtonText: {
+    color: COLORS.white, // Cor do texto diferente
+    fontWeight: 'bold',
+    fontSize: 16, // Texto um pouco maior
+    marginRight: 10,
+  },
+
+  // Estilo para o botão de "Começar"
+  startButton: {
+    backgroundColor: COLORS.secondary, // Cor principal para o botão de começar
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  startButtonText: {
+    color: '#FFFFFF', // Texto branco para "Começar"
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginRight: 10,
+  },
+});
+
 
 export default Start;

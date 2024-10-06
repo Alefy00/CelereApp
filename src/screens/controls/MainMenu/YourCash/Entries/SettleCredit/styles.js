@@ -2,145 +2,187 @@
 import { StyleSheet } from "react-native";
 import { COLORS } from "../../../../../../constants";
 
-
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-      },
-      inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        margin: 16,
-      },
-      input: {
-        flex: 1,
-        height: 40,
-        borderColor: 'gray',
-        borderWidth: 1,
-        marginRight: 8,
-        paddingHorizontal: 8,
-        borderRadius: 8,
-      },
-      searchButton: {
-        backgroundColor: COLORS.primary,
-        padding: 10,
-        borderRadius: 8,
-      },
-      searchButtonText: {
-        color: 'black',
-      },
-      listTitle: {
-        marginTop: 16,
-        marginBottom: 8,
-        fontWeight: 'bold',
-        textAlign: 'center',
-      },
-      vendaItem: {
-        flexDirection: 'column',
-        padding: 16,
-        borderWidth: 1,
-        borderColor: 'gray',
-        borderRadius: 8,
-        marginHorizontal: 16,
-        marginBottom: 12,
-      },
-      vendaInfo: {
-        marginBottom: 12,
-        justifyContent: 'space-around',
-        flexDirection: 'row'
-      },
-      buttonsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-      },
-      abaterButton: {
-        flex: 1,
-        backgroundColor: 'orange',
-        padding: 10,
-        marginRight: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 8,
-      },
-      baixarButton: {
-        flex: 1,
-        backgroundColor: 'green',
-        padding: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 8,
-      },
-      buttonText: {
-        color: 'white',
-        textAlign: 'center',
-      },
-      modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
-      modalView: {
-        margin: 20,
-        backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 35,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-        width: '80%',
-      },
-      modalTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 15,
-        color: COLORS.black
-      },
-      modalInput: {
-        height: 40,
-        borderColor: 'gray',
-        borderWidth: 1,
-        marginVertical: 8,
-        paddingHorizontal: 8,
-        width: '100%',
-        borderRadius: 8,
-      },
-      confirmButton: {
-        backgroundColor: 'green',
-        padding: 10,
-        borderRadius: 5,
-        marginTop: 10,
-        width: '100%',
-        alignItems: 'center',
-      },
-      confirmButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-      },
-      cancelButton: {
-        backgroundColor: 'red',
-        padding: 10,
-        borderRadius: 5,
-        marginTop: 10,
-        width: '100%',
-        alignItems: 'center',
-      },
-      cancelButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-      },
-      textLiquida:{
-        color: '#000',
-        fontSize: 22,
-        fontWeight: 'bold',
-        textAlign: "center",
-        marginTop: 15
-      }
-  });
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+
+  },
+  containerBartop:{
+    marginBottom:30,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.black,
+    marginTop: 40,
+    paddingHorizontal:15,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: COLORS.black,
+    marginVertical: 10,
+    paddingHorizontal:15,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingHorizontal:15,
+  },
+  searchInput: {
+    flex: 1,
+    borderRadius: 8,
+    paddingHorizontal:15,
+    height: 40,
+    borderBottomWidth:1
+  },
+  filterButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    marginLeft: 10,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  filterButtonText: {
+    marginLeft: 5,
+    color: COLORS.black,
+    fontWeight: 'bold',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: 'gray',
+    marginHorizontal:15,
+    borderRadius:5,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  tabButtonActive: {
+    backgroundColor: COLORS.primary,
+  },
+  tabButtonText: {
+    color: COLORS.black,
+  },
+  tabButtonTextActive: {
+    color: 'black',
+    fontWeight: 'bold',
+  },
+  listContainer: {
+    paddingBottom: 20,
+  },
+  contaItem: {
+    backgroundColor: 'white',
+    borderRadius: 5,
+    padding: 15,
+    marginVertical: 5,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    marginHorizontal: 15,
+  },
+  contaInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   
+  },
+  contaTextContainer: {
+    marginLeft: 10,
+  },
+  contaNome: {
+    fontSize: 16,
+    color: 'black',
+  },
+  contaData: {
+    fontSize: 14,
+    color: COLORS.black,
+  },
+  contaProdutos: {
+    fontSize: 12,
+    color: COLORS.gray,
+  },
+  contaSituacao: (status) => ({
+    fontSize: 14,
+    color: status === 'Liquidada' ? COLORS.green : COLORS.red,
+  }),
+  contaValor: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'black',
+    marginLeft: 70,
+    marginTop: -75
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: COLORS.bl,
+    fontSize: 16,
+  },
+
+  //estilo molde contas a receber
+  contaItem2: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 15,
+    marginVertical: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  contaInfo2: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  contaTextContainer2: {
+    marginLeft: 10,
+  },
+  contaNome2: {
+    fontSize: 16,
+    color: 'black',
+  },
+  contaData2: {
+    fontSize: 14,
+    color: COLORS.black,
+  },
+  contaVencimento: {
+    fontSize: 14,
+    color: COLORS.black,
+  },
+  contaProdutos2: {
+    fontSize: 12,
+    color: COLORS.gray,
+  },
+  contaSituacaoLiquidada2: {
+    fontSize: 14,
+    color: COLORS.green,
+  },
+  contaValor2: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'black',
+    marginLeft: 110,
+    marginTop: -70,
+  },
+});
+
 export default styles;

@@ -1,80 +1,74 @@
 /* eslint-disable prettier/prettier */
-
 import { StyleSheet } from "react-native";
+import { COLORS } from "../../../constants";
 
-export default styles = StyleSheet.create({
-    container: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-      },
-      label: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginVertical: 10,
-      },
-      description: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 10,
-      },
-      input: {
-        width: '100%',
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
-        borderRadius: 5,
-        marginBottom: 20,
-        backgroundColor: '#f9f9f9',
-      },
-      option: {
-        width: '100%',
-        padding: 15,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        marginVertical: 5,
-      },
-      optionSelected: {
-        backgroundColor: '#d1e7dd',
-      },
-      optionText: {
-        fontSize: 16,
-      },
-      customInputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 10,
-      },
-      customInput: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
-        borderRadius: 5,
-      },
-      addButton: {
-        backgroundColor: '#007bff',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 5,
-        marginLeft: 10,
-      },
-      addButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-      },
-      nextButton: {
-        backgroundColor: '#fadc00',
-        paddingVertical: 15,
-        paddingHorizontal: 40,
-        borderRadius: 5,
-        marginTop: 20,
-      },
-      nextButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
-      },
-})
+export default StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
+  },
+  barTopContainer: {
+    width: '100%',
+    height: 50,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  progressBarContainer: {
+    width: '100%',
+    backgroundColor: COLORS.primary,
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '900',
+    marginBottom: 20,
+    color: '#000',
+    textAlign: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+
+    width: '100%',
+  },
+  option: {
+    width: '45%',
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    marginVertical: 10,
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  optionDisabled: {
+    backgroundColor: '#f0f0f0',
+    opacity: 0.6,
+  },
+  optionSelected: {
+    borderColor: COLORS.primary,
+    borderWidth: 2,
+  },
+  optionText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+    marginTop: 10,
+  },
+  optionSubText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  activityIndicator: {
+    marginTop: 20,
+  },
+});

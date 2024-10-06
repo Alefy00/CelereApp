@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React from 'react';
 import styled from 'styled-components/native';
 import {useNavigation} from '@react-navigation/native';
@@ -5,6 +6,7 @@ import {Platform} from 'react-native';
 
 import CalculatorIcon from '../assets/images/svg/iconCalculator.svg';
 import MailerIcon from '../assets/images/svg/iconMailer.svg';
+import RobotIcon from '../assets/images/svg/iconRobot.svg';
 
 export const HeaderArea = styled.View`
   flex: 1;
@@ -101,28 +103,31 @@ export default ({
   routeCalculator,
 }) => {
   const navigation = useNavigation();
+
+  const handleMenu = () => {
+    navigation.navigate("MainTab");
+  }
   return (
     <HeaderArea backColor={backColor}>
       <ToggleLeft>
-        <UserAvatar source={{uri: uriAvatar}} />
+        <UserAvatar source={{uri: uriAvatar}}  onPress={handleMenu}/>
       </ToggleLeft>
 
       <ToggleText>
-        <HeaderTitle backColor={backColor} foreColor={foreColor}>
+        <HeaderTitle backColor={backColor} foreColor={foreColor} onPress={handleMenu}>
           {titulo}
         </HeaderTitle>
-        <HeaderSubTitle>{subtitulo}</HeaderSubTitle>
+        <HeaderSubTitle onPress={handleMenu}>{subtitulo}</HeaderSubTitle>
       </ToggleText>
 
       <ToggleRight>
-        <Btn onPress={null}>
-          <MailerIcon width="26" height="26" fill={foreColor} />
-          <ItemMailer>2</ItemMailer>
+        <Btn onPress={handleMenu}>
+          <RobotIcon width="26" height="26" fill={foreColor} />
         </Btn>
       </ToggleRight>
 
       <ToggleRight style={{marginLeft: 10}}>
-        <Btn onPress={null}>
+        <Btn onPress={handleMenu}>
           <CalculatorIcon width="26" height="26" fill={foreColor} />
         </Btn>
       </ToggleRight>

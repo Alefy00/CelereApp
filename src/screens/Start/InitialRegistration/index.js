@@ -1,179 +1,260 @@
 /* eslint-disable prettier/prettier */
-import React, { useState, useCallback, useMemo } from 'react';
-import { Button, Text, View, TextInput, Alert, Modal } from 'react-native';
-import CountryFlag from 'react-native-country-flag';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Button, Text, View, TextInput, Modal, ActivityIndicator, TouchableOpacity } from 'react-native';
+import BarTop3 from '../../../components/BarTop3';
+import { COLORS } from '../../../constants';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CountryFlag from 'react-native-country-flag';
+import Icon from 'react-native-vector-icons/Ionicons';
+import LogoApp from '../../../assets/images/logo.svg';
+import ProgressBar from '../components/ProgressBar';
 import styles from './styles';
 
-// Definindo constantes para strings usadas repetidamente
 const API_URL = 'https://api.celereapp.com.br/config/empreendedor/';
-const SUCCESS_MESSAGE = 'Número registrado com sucesso!';
-const ERROR_MESSAGE = 'Erro ao registrar o número. Tente novamente.';
-const DUPLICATE_NUMBER_MESSAGE = 'Este número já foi registrado. Redirecionando para o menu...';
-const CONNECTION_ERROR_MESSAGE = 'Não foi possível conectar à API. Verifique sua conexão e tente novamente.';
+const VERIFY_USER_URL = 'https://api.celereapp.com.br/config/empreendedor/';
 
 const InitialRegistration = ({ navigation }) => {
-  const [ddi, setDdi] = useState('55');
-  const [isoCode, setIsoCode] = useState('BR');
-  const [ddd, setDdd] = useState('');
-  const [number, setNumber] = useState('');
+  const [phoneData, setPhoneData] = useState({
+    ddi: '55',
+    isoCode: 'BR',
+    ddd: '',
+    number: '',
+  });
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  
+  // Adiciona uma ref para o campo de número de telefone
+  const numberInputRef = useRef(null);
 
-  // Mapeamento de DDI para código ISO
-  const ddiToIso = useMemo(() => ({
-    '1': 'US',
-    '55': 'BR',
-    '44': 'GB',
-    '91': 'IN',
-  }), []);
+  useEffect(() => {
+    const checkStoredData = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem('userPhone');
+        if (storedData) {
+          navigation.navigate('MainTab');
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Erro ao verificar os dados armazenados:', error);
+        setLoading(false);
+      }
+    };
 
-  // Função para lidar com mudanças no campo DDI
+    checkStoredData();
+  }, [navigation]);
+
   const handleDdiChange = useCallback((text) => {
-    setDdi(text);
-    const trimmedDdi = text.replace(/\D/g, ''); // Remove caracteres não numéricos
-    if (ddiToIso[trimmedDdi]) {
-      setIsoCode(ddiToIso[trimmedDdi]);
-    } else {
-      setIsoCode('');
-    }
-  }, [ddiToIso]);
+    const trimmedDdi = text.replace(/\D/g, '').slice(0, 2);
+    const isoCodes = { '1': 'US', '55': 'BR', '44': 'GB', '91': 'IN' };
+    setPhoneData(prevState => ({
+      ...prevState,
+      ddi: trimmedDdi,
+      isoCode: isoCodes[trimmedDdi] || '',
+    }));
+  }, []);
 
-  // Função para validar os campos
+  const handleInputChange = useCallback((name, value) => {
+    let maxLength = 0;
+    if (name === 'ddd') {
+      maxLength = 2;
+    } else if (name === 'number') {
+      maxLength = 9;
+    }
+    const trimmedValue = value.replace(/\D/g, '').slice(0, maxLength);
+    setPhoneData(prevState => ({ ...prevState, [name]: trimmedValue }));
+
+    // Foca no campo de número se o DDD estiver completo
+    if (name === 'ddd' && trimmedValue.length === maxLength) {
+      numberInputRef.current.focus();
+    }
+  }, []);
+
+  const showModal = useCallback((message) => {
+    setModalMessage(message);
+    setModalVisible(true);
+  }, []);
+
   const validateFields = useCallback(() => {
+    const { ddi, ddd, number } = phoneData;
     if (!ddi || !ddd || !number) {
-      setModalMessage('Todos os campos devem ser preenchidos.');
-      setModalVisible(true);
+      showModal('Todos os campos devem ser preenchidos.');
       return false;
     }
     if (!/^\d+$/.test(ddi) || !/^\d+$/.test(ddd) || !/^\d+$/.test(number)) {
-      setModalMessage('DDI, DDD e Número de Celular devem conter apenas números.');
-      setModalVisible(true);
+      showModal('DDI, DDD e Número de Celular devem conter apenas números.');
       return false;
     }
     return true;
-  }, [ddi, ddd, number]);
+  }, [phoneData, showModal]);
 
-  // Função para lidar com a resposta da API
-  const handleApiResponse = useCallback(async (response) => {
-    console.log('Resposta da API no handleApiResponse:', response);
-    const { message, code_message } = response.data;
-    if (response.status === 201 && code_message === 'success') {
-      await AsyncStorage.setItem('userPhone', JSON.stringify({ ddi, ddd, number }));
-      Alert.alert('Sucesso', SUCCESS_MESSAGE, [
-        { text: 'OK', onPress: () => navigation.navigate('InitialCode') }
-      ]);
-    } else {
-      setModalMessage(message || ERROR_MESSAGE);
-      setModalVisible(true);
-    }
-  }, [ddi, ddd, number, navigation]);
-
-  // Função para verificar se o número de telefone já está cadastrado no banco de dados
-  const checkPhoneNumberExists = useCallback(async () => {
+  const checkUserExists = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_URL}?ddi=${ddi}&ddd=${ddd}&celular=${number}`);
-      console.log('Resposta da verificação:', response);
+      const response = await axios.get(VERIFY_USER_URL, {
+        params: {
+          ddi: phoneData.ddi,
+          ddd: phoneData.ddd,
+          celular: phoneData.number,
+        },
+      });
 
-      if (response.status === 200 && response.data.code_message === 200 && response.data.message === 'success' && response.data.data.length > 0) {
-        await AsyncStorage.setItem('userPhone', JSON.stringify({ ddi, ddd, number }));
-        Alert.alert('Aviso', DUPLICATE_NUMBER_MESSAGE, [
-          { text: 'OK', onPress: () => navigation.navigate('MainTab') }
-        ]);
+      if (response.data.status === 'success' && response.data.data.length > 0) {
+        const userData = response.data.data[0];
+        const newUserData = {
+          id: userData.id,
+          ...phoneData,
+          isValidated: true,
+          codigo_ativacao: userData.codigo_ativacao,
+        };
+
+        await AsyncStorage.setItem('userPhone', JSON.stringify(newUserData));
+
+        if (userData.empresa) {
+          // Armazena o ID da empresa
+          await AsyncStorage.setItem('empresaId', userData.empresa.toString());
+          console.log('ID da empresa armazenado:', userData.empresa);
+
+          // Verifica imediatamente após armazenar
+          const empresaData = await AsyncStorage.getItem('empresaId');
+          console.log('ID da empresa recuperado do AsyncStorage:', empresaData);
+        }
+        
+        navigation.navigate('MainTab');
         return true;
       }
+      return false;
     } catch (error) {
-      if (error.response) {
-        console.log('Erro na resposta da verificação:', error.response.data);
-        setModalMessage(`Erro na verificação: ${error.response.data.message || error.response.data}`);
-      } else {
-        console.log('Erro ao verificar o número de telefone:', error.message);
-        setModalMessage('Erro ao verificar o número de telefone.');
-      }
-      setModalVisible(true);
+      console.error('Erro ao verificar usuário:', error.message);
+      showModal('Erro ao verificar o usuário. Tente novamente.');
+      return false;
     }
-    return false;
-  }, [ddi, ddd, number, navigation]);
+  }, [phoneData, showModal, navigation]);
 
-  // Função para enviar os dados para a API
   const handleSend = useCallback(async () => {
     if (!validateFields()) return;
 
-    const exists = await checkPhoneNumberExists();
-    if (exists) return;
+    const userExists = await checkUserExists();
+    if (userExists) return;
 
     try {
-      console.log('Enviando dados para a API:', { ddi, ddd, celular: number });
-
       const response = await axios.post(API_URL, {
-        ddi,
-        ddd,
-        celular: number,
+        ddi: phoneData.ddi,
+        ddd: phoneData.ddd,
+        celular: phoneData.number,
+        usuario: 1,
       });
 
-      console.log('Resposta da API no handleSend:', response);
-      if (response.status === 201) {
-        await AsyncStorage.setItem('userPhone', JSON.stringify({ ddi, ddd, number }));
-        navigation.navigate('InitialCode');
-      } else {
-        await handleApiResponse(response);
-      }
+      if (response.status === 201 && response.data.status === 'success') {
+        const { id, codigo_ativacao, empresa } = response.data.data;
+        const newUserData = {
+          id,
+          ...phoneData,
+          isValidated: false,
+          codigo_ativacao,
+        };
 
-    } catch (error) {
-      if (error.response) {
-        console.log('Erro na resposta da API:', error.response.data);
-        setModalMessage(`Erro na API: ${error.response.data.message || error.response.data}`);
+        // Armazena os dados do usuário
+        await AsyncStorage.setItem('userPhone', JSON.stringify(newUserData));
+
+        if (empresa) {
+          // Armazena o ID da empresa
+          await AsyncStorage.setItem('empresaId', empresa.toString());
+          console.log('ID da empresa armazenado:', empresa);
+
+          // Verifica imediatamente após o armazenamento
+          const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+          console.log('ID da empresa armazenado no AsyncStorage:', storedEmpresaId);
+
+          // Navegação somente se o ID for armazenado corretamente
+          if (storedEmpresaId) {
+            navigation.navigate('InitialCode');
+          } else {
+            console.error('Erro ao armazenar o ID da empresa.');
+          }
+        }
       } else {
-        console.log('Erro ao conectar à API no handleSend:', error.message);
-        setModalMessage(CONNECTION_ERROR_MESSAGE);
+        showModal(response.data.message || 'Erro ao registrar. Tente novamente.');
       }
-      setModalVisible(true);
+    } catch (error) {
+      console.error('Erro ao conectar à API:', error.message);
+      showModal('Não foi possível conectar à API. Verifique sua conexão e tente novamente.');
     }
-  }, [validateFields, checkPhoneNumberExists, handleApiResponse, ddi, ddd, number]);
+  }, [phoneData, validateFields, checkUserExists, showModal, navigation]);
+
+  const handleModalClose = () => {
+    setModalVisible(false);
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <LogoApp width="100%" height="110" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Informe o seu Telefone: </Text>
-      <View style={styles.inputContainer}>
-        {isoCode ? <CountryFlag isoCode={isoCode} size={25} /> : null}
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          placeholder="DDI"
-          value={ddi}
-          onChangeText={handleDdiChange}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder='DDD'
-          value={ddd}
-          onChangeText={setDdd}
-        />
-        <TextInput
-          style={styles.inputNumber}
-          placeholder='0 0000-0000'
-          value={number}
-          onChangeText={setNumber}
+      <View style={styles.barTopContainer}>
+        <BarTop3
+          titulo={'Voltar'}
+          backColor={COLORS.primary}
+          foreColor={COLORS.black}
+          routeMailer={''}
+          routeCalculator={''}
         />
       </View>
-      <Button title="Enviar" onPress={handleSend} />
-
+      <ProgressBar currentStep={1} totalSteps={4} />
+      <View style={styles.contentContainer}>
+        <Text style={styles.title}>Informe seu telefone</Text>
+        <View style={styles.cardContainer}>
+          <View style={styles.inputWrapper}>
+            <View style={styles.ddiContainer}>
+              <CountryFlag isoCode={phoneData.isoCode} size={25} />
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                placeholder="+55"
+                value={phoneData.ddi}
+                onChangeText={(text) => handleDdiChange(text)}
+              />
+            </View>
+            <TextInput
+              style={styles.inputDDD}
+              placeholder='(XX)'
+              keyboardType="numeric"
+              value={phoneData.ddd}
+              onChangeText={(text) => handleInputChange('ddd', text)}
+            />
+            <TextInput
+              ref={numberInputRef}
+              style={styles.inputNumber}
+              placeholder='XXXXX-XXXX'
+              keyboardType="numeric"
+              value={phoneData.number}
+              onChangeText={(text) => handleInputChange('number', text)}
+            />
+          </View>
+          <TouchableOpacity style={styles.button} onPress={handleSend}>
+            <Icon name="arrow-forward" size={20} color="#000" />
+            <Text style={styles.buttonText}>Enviar Código</Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.infoText}>Um código será enviado para o seu WhatsApp.</Text>
+      </View>
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
+        onRequestClose={handleModalClose}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>{modalMessage}</Text>
-            <Button
-              title="OK"
-              onPress={() => setModalVisible(!modalVisible)}
-            />
+            <Button title="OK" onPress={handleModalClose} />
           </View>
         </View>
       </Modal>

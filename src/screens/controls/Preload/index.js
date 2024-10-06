@@ -1,6 +1,5 @@
 /* eslint-disable prettier/prettier */
 
-
 import React, {useEffect, useState} from 'react';
 import {StatusBar} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -12,8 +11,8 @@ const Preload = props => {
 
   useEffect(() => {
     setTimeout(() => {
-      navigation.navigate('InitialRegistration');
-    }, 1000);
+      navigation.navigate('LoginScreen');
+    }, 0);
   }, [navigation]);
 
   return (

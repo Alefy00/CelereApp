@@ -1,11 +1,11 @@
 /* eslint-disable prettier/prettier */
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { COLORS } from "../../../../../../constants";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFCF5",
   },
   filterContainer: {
     flexDirection: "row",
@@ -15,7 +15,6 @@ const styles = StyleSheet.create({
   filterButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: COLORS.lightGray2,
     borderRadius: 10,
   },
   selectedFilterButton: {
@@ -25,23 +24,59 @@ const styles = StyleSheet.create({
     color: "#000",
     fontWeight: 'bold',
   },
-  pickerContainer: {
-    padding: 10,
-    borderBottomWidth: 1,
-    width: "90%",
-    justifyContent: 'center',
-  },
   pickeralign: {
-    alignItems: 'center'
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
   },
-  picker: {
-    height: 50,
-    width: '100%',
+  pickerContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    borderColor: '#000',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth:1,
+  },
+  pickerText: {
+    color: COLORS.gray,
+    fontSize: 16,
+  },
+  pickerIcon: {
+    marginLeft: 10,
+    color: COLORS.gray,
+  },
+  dropdown: {
+    backgroundColor: '#FFF',
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#DDD',
+    zIndex: 1000,
+  },
+  dropdownItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: '#000',
   },
   balanceContainer: {
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 20,
     margin: 10,
+    backgroundColor:'#fff',
+    elevation: 1,  // Sombra para Android
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },  // Sombra para iOS
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+
   },
   balanceRow: {
     flexDirection: "row",
@@ -87,10 +122,10 @@ const styles = StyleSheet.create({
     color: COLORS.red,
   },
   balancenumber2: {
-    color: COLORS.red,
+    color: COLORS.orange,
   },
   balenceValue2: {
-    color: COLORS.red,
+    color: COLORS.orange,
   },
   arrow: {
     flexDirection: "row",
@@ -115,9 +150,9 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 5,
     borderBottomLeftRadius: 5
   },
-  balanceBarRed: {
+  balanceBarOrange: {
     flex: 1,
-    backgroundColor: COLORS.red,
+    backgroundColor: COLORS.orange,
     borderTopRightRadius: 5,
     borderBottomRightRadius: 5,
   },
@@ -130,7 +165,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.black,
     textAlign: "center",
+    alignItems:'center',
     marginTop: 10,
+    marginRight:5
+  },
+  containerInfo:{
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+    textAlign:'center'
   },
   balanceRecommendedValue: {
     fontSize: 22,
@@ -139,7 +182,39 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   chartContainer: {
-    paddingHorizontal:30
+    paddingHorizontal:30,
+    marginHorizontal:10,
+    backgroundColor:'#fff',
+    elevation: 1,  // Sombra para Android
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },  // Sombra para iOS
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    borderTopRightRadius:20,
+    borderTopLeftRadius:20,
+  },
+  chartContainer3: {
+    paddingHorizontal:30,
+    marginHorizontal:10,
+    backgroundColor:'#fff',
+    elevation: 1,  // Sombra para Android
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },  // Sombra para iOS
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  chartContainer2: {
+    paddingHorizontal:30,
+    marginHorizontal:10,
+    marginBottom:15,
+    backgroundColor:'#fff',
+    elevation: 1,  // Sombra para Android
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },  // Sombra para iOS
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    borderBottomEndRadius:20,
+    borderBottomLeftRadius:20,
   },
   chartTitle: {
     textAlign: "center",
@@ -168,19 +243,27 @@ const styles = StyleSheet.create({
   },
   informationContainer: {
     paddingVertical:20,
+    marginHorizontal:10,
     flexDirection: 'row',
-    justifyContent:'space-around'
+    justifyContent:'space-around',
+    backgroundColor:'#fff',
+    elevation: 1,  // Sombra para Android
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },  // Sombra para iOS
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   informationText: {
     fontSize: 16,
     fontWeight: "bold",
     color:'#000',
     marginBottom: 5,
+    marginRight:5,
   },
   informationValue: {
     fontSize: 16,
     color: COLORS.green,
-    marginBottom: 5,
+    marginBottom: 10,
     fontWeight:'bold',
     justifyContent:'space-around',
   },
@@ -192,6 +275,12 @@ const styles = StyleSheet.create({
     textAlign:'right',
     alignItems:'flex-end',
     
+  },
+  containerInfoIcon:{
+    flexDirection:'row',
+    alignItems:'center',
+    textAlign:'center',
+    marginBottom:5,
   }
 });
 

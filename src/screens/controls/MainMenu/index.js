@@ -1,12 +1,8 @@
-import React, {useEffect, useState} from 'react';
-import {
-  Keyboard,
-  KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  Platform,
-} from 'react-native';
-import {COLORS, FONTS, SIZES, icons, images} from '../../../constants';
-import {Container, Scroller} from './styles';
+/* eslint-disable prettier/prettier */
+import React from 'react';
+import {Keyboard, KeyboardAvoidingView, TouchableWithoutFeedback, Platform, View, ScrollView} from 'react-native';
+import {COLORS} from '../../../constants';
+import {Container} from './styles';
 
 import BarTop from '../../../components/BarTop';
 import Title from '../../../components/Title';
@@ -17,6 +13,7 @@ import '../../../translation';
 import SeuDinheiro from './components/SeuDinheiro';
 import SuaOperacao from './components/SuaOperacao';
 import SeusControles from './components/SeusControles';
+import Outros from './components/Outros';
 
 const MainMenu = props => {
   const {t} = useTranslation();
@@ -40,18 +37,19 @@ const MainMenu = props => {
               routeCalculator={''}
             />
 
-            <Scroller style={{paddingTop: 10}}>
+            <ScrollView style={{paddingTop: 10}}>
               <Title title={t('your_cash')} />
               <SeuDinheiro />
-
+              <View style={{height:1.5, backgroundColor: "#ccc", marginHorizontal:15,marginVertical:5}}></View>
               <Title title={t('your_operation')} />
               <SuaOperacao />
-
+              <View style={{height:1.5, backgroundColor: "#ccc", marginHorizontal:15,marginVertical:5}}></View>
               <Title title={t('your_controls')} />
               <SeusControles />
-
-              <Title title={t('video_trainings')} />
-            </Scroller>
+              <View style={{height:1.5, backgroundColor: "#ccc", marginHorizontal:15, marginVertical:5}}></View>
+              <Title title={t('Outros')} />
+              <Outros/>
+            </ScrollView>
           </>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>

@@ -48,5 +48,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSContactsUsageDescription</key>
+	<string>Este app precisa acessar os seus contatos para cadastrar clientes.</string>
 </dict>
 </plist>
