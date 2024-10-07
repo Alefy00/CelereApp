@@ -19,12 +19,12 @@ import { ptBR } from 'date-fns/locale';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BarTop2 from '../../../../../../../components/BarTop2';
 import { COLORS } from '../../../../../../../constants';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import ConfirmModal from '../components/ConfirmModal';
 import SucessModal from '../components/SucessModal';
 import styles from '../styles';
 import RecurrenceField from './RecurrenceField';
 import SupplierDropdown from './SupplierDropdown';
+import CustomCalendar from '../../../../../../../components/CustomCalendar';
 
 // Constantes para os endpoints da API
 const CATEGORIES_API = 'https://api.celereapp.com.br/mnt/categoriasdespesa/?page=1&page_size=30';
@@ -55,7 +55,6 @@ const AccountsPayable = ({ navigation }) => {
   const [months, setMonths] = useState([]);
   const [date, setDate] = useState(new Date());
   const [dueDate, setDueDate] = useState(new Date());
-  const [showDueDatePicker, setShowDueDatePicker] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -69,6 +68,7 @@ const AccountsPayable = ({ navigation }) => {
   const [repeatCount, setRepeatCount] = useState(0); // Quantidade de repetições
   const [isIndeterminate, setIsIndeterminate] = useState(false); // Tempo indeterminado
   const [recorrenciaText, setRecorrenciaText] = useState('Pagamento único'); // Estado para a recorrência
+  const [showCalendar, setShowCalendar] = useState(false); 
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
@@ -84,7 +84,15 @@ const AccountsPayable = ({ navigation }) => {
     }
     return null;
   };
+  const handleShowCalendar = () => {
+    setShowCalendar(true);
+  };
 
+  const handleDayPress = (day) => {
+    const selectedDate = new Date(day.dateString);
+    setDueDate(selectedDate);
+    setShowCalendar(false);
+  };
   const getSupplierNameById = (id) => {
     const supplier = suppliers.find((s) => s.value === id);
     return supplier ? supplier.label : 'Parceiro não encontrado';
@@ -199,18 +207,6 @@ useEffect(() => {
   }, [fetchCategories, fetchSuppliers, fetchMonths]);
 
 
-
-  const onChangeDueDate = (event, selectedDate) => {
-    setShowDueDatePicker(Platform.OS === 'ios');
-    const currentDueDate = selectedDate || dueDate;
-    const localDueDate = new Date(currentDueDate.getTime() - (currentDueDate.getTimezoneOffset() * 60000));
-
-    if (localDueDate >= new Date()) {
-      setDueDate(localDueDate);
-    } else {
-      Alert.alert('Erro', 'Por favor, selecione uma data de vencimento futura.');
-    }
-  };
 
   const determineRecurrenceText = () => {
     let text = 'Pagamento único';  // Define como pagamento único por padrão
@@ -337,7 +333,7 @@ useEffect(() => {
   
   
   const toggleExpenseType = () => {
-    setIsLiquidateNow(isLiquidateNow);
+    navigation.navigate('NewExpense');
   };
 
   const handleAcconunts = () => {
@@ -369,13 +365,13 @@ useEffect(() => {
             <View style={styles.toggleContainer}>
               <TouchableOpacity
                 style={[styles.toggleButton, isLiquidateNow && styles.toggleButtonActive]}
-                onPress={handleAcconunts}
+                onPress={toggleExpenseType}
               >
                 <Text style={styles.toggleButtonText}>Liquidar agora</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.toggleButton, !isLiquidateNow && styles.toggleButtonActive]}
-                onPress={toggleExpenseType}
+                onPress={handleAcconunts}
               >
                 <Text style={styles.toggleButtonText}>Contas a pagar</Text>
               </TouchableOpacity>
@@ -383,28 +379,18 @@ useEffect(() => {
 
             {/* Date Picker para Data de Vencimento */}
             <View style={styles.datePickerContainer}>
-              <Text style={styles.dateLabel}>Data de vencimento</Text>
-              <View style={styles.datePickerRow}>
-                <TextInput
-                  style={styles.dateInput}
-                  value={format(dueDate, 'dd/MM/yyyy', { locale: ptBR })}
-                  editable={false}
-                />
-                <TouchableOpacity onPress={() => setShowDueDatePicker(true)}>
-                  <Icon name="calendar" size={20} color={COLORS.gray} />
-                </TouchableOpacity>
-                {showDueDatePicker && (
-                  <DateTimePicker
-                    value={dueDate}
-                    mode="date"
-                    display="default"
-                    onChange={onChangeDueDate}
-                    minimumDate={new Date()}
-                    locale="pt-BR"
-                  />
-                )}
-              </View>
+            <Text style={styles.dateLabel}>Data de vencimento</Text>
+            <View style={styles.datePickerRow}>
+              <TextInput
+                style={styles.dateInput}
+                value={format(dueDate, 'dd/MM/yyyy', { locale: ptBR })}
+                editable={false}
+              />
+              <TouchableOpacity onPress={handleShowCalendar}>
+                <Icon name="calendar" size={20} color={COLORS.gray} />
+              </TouchableOpacity>
             </View>
+          </View>
 
             {/* Campo de Código de Barras */}
             <View style={styles.inputContainer}>
@@ -530,6 +516,12 @@ useEffect(() => {
             </TouchableOpacity>
           </View>
       </ScrollView>
+
+      <CustomCalendar
+        visible={showCalendar}
+        onClose={() => setShowCalendar(false)}
+        onDayPress={handleDayPress}
+      />
       <ConfirmModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}

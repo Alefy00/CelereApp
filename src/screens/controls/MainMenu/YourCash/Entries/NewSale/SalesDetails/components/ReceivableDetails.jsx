@@ -1,8 +1,7 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, TouchableOpacity, ScrollView, FlatList, TextInput, Platform, Image, Modal, Alert } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, FlatList, TextInput, Image, Modal, Alert } from "react-native";
 import Icon from 'react-native-vector-icons/Ionicons';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import styles from "./styles";
 import { COLORS } from "../../../../../../../../constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -20,11 +19,11 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [paymentDate, setPaymentDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentDate, setCurrentDate] = useState('');
   const [liquidValue, setLiquidValue] = useState(totalPrice);  // Estado para armazenar o valor líquido após desconto
   const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
 
   // Função para mostrar alertas
   const showAlert = (title, message) => {
@@ -70,18 +69,8 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
     navigation.navigate("IncludeClient");
   };
 
-  const showDatePickerModal = () => {
-    setShowDatePicker(true);
-  };
-
   const handleCloseInvoiceModal = () => {
     setIsInvoiceModalVisible(false);
-  };
-
-  const handleDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || paymentDate;
-    setShowDatePicker(Platform.OS === 'ios');
-    setPaymentDate(currentDate);
   };
 
   const handleConfirm = () => {
@@ -90,6 +79,14 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
 
   const handleOpenInvoiceModal = () => {
     setIsInvoiceModalVisible(true);
+  };
+
+  const handleShowCalendar = () => {
+    setIsCalendarVisible(true);
+  };
+
+  const handleDayPress = (day) => {
+    setPaymentDate(new Date(day.dateString)); // Atualiza a data selecionada
   };
 
 // Função de registrar venda e itens
@@ -166,8 +163,6 @@ const handleRegisterSale = async () => {
     calculateLiquidValue();
   }, [totalPrice, discountValue, discountType, calculateLiquidValue]);
 
-
-
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -177,20 +172,18 @@ const handleRegisterSale = async () => {
 
         {/* Data do pagamento */}
         <View style={styles.dateContainer}>
-          <TouchableOpacity onPress={showDatePickerModal} style={styles.datePicker}>
-            <Text style={styles.dateText}>
-              {`Data do Vencimento: ${paymentDate.toLocaleDateString('pt-BR')}`}
-            </Text>
-            <Icon name="calendar" size={24} color={COLORS.lightGray} />
-          </TouchableOpacity>
-          {showDatePicker && (
-            <DateTimePicker
-              value={paymentDate}
-              mode="date"
-              display="default"
-              onChange={handleDateChange}
-            />
-          )}
+      <TouchableOpacity onPress={handleShowCalendar} style={styles.datePicker}>
+        <Text style={styles.dateText}>
+          {`Data do Vencimento: ${paymentDate.toLocaleDateString('pt-BR')}`}
+        </Text>
+        <Icon name="calendar" size={24} color={COLORS.lightGray} />
+      </TouchableOpacity>
+
+      <CustomCalendar
+        visible={isCalendarVisible}
+        onClose={() => setIsCalendarVisible(false)}
+        onDayPress={handleDayPress}
+      />
         </View>
 
         {/* Campo de associar cliente */}

@@ -19,13 +19,13 @@ import { ptBR } from 'date-fns/locale';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BarTop2 from "../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../constants";
-import DateTimePicker from '@react-native-community/datetimepicker';
 import ConfirmModal from './components/ConfirmModal';
 import SucessModal from './components/SucessModal';
 import RecurrenceField from './components/RecurrenceField';
 import SupplierDropdown from './components/SupplierDropdown';
 import styles from './styles';
 import { useFocusEffect } from '@react-navigation/native';
+import CustomCalendar from '../../../../../../components/CustomCalendar';
 
 
 
@@ -55,7 +55,6 @@ const NewExpense = ({ navigation  }) => {
   const [item, setItem] = useState('');
   const [parceiro, setParceiro] = useState('');
   const [suppliers, setSuppliers] = useState([]);
-  const [repeats, setRepeats] = useState(false);
   const [months, setMonths] = useState([]);
   const [date, setDate] = useState(new Date());
   const [dueDate, setDueDate] = useState(new Date());
@@ -73,6 +72,8 @@ const NewExpense = ({ navigation  }) => {
   const [repeatCount, setRepeatCount] = useState(0); // Quantidade de repetições
   const [isIndeterminate, setIsIndeterminate] = useState(false); // Tempo indeterminado
   const [recorrenciaText, setRecorrenciaText] = useState('Pagamento único'); // Estado para a recorrência
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false); // Controla a visibilidade do CustomCalendar
+
 
 
   // Função para buscar o ID da empresa logada
@@ -90,11 +91,16 @@ const NewExpense = ({ navigation  }) => {
     return null;
   };
 
-
-  const getSupplierNameById = (id) => {
-    const supplier = suppliers.find((s) => s.value === id);
-    return supplier ? supplier.label : 'Parceiro não encontrado';
+  const handleShowCalendar = () => {
+    setIsCalendarVisible(true); // Abre o calendário
   };
+  
+  const handleDayPress = (day) => {
+    const selectedDate = new Date(day.dateString); // Recebe a data selecionada no calendário
+    setDate(selectedDate); // Atualiza a data de pagamento diretamente
+    setIsCalendarVisible(false); // Fecha o calendário
+  };
+  
 
 
   const fetchCategories = useCallback(async () => {
@@ -214,18 +220,6 @@ useFocusEffect(
     fetchSuppliers();
     fetchMonths();
   }, [fetchCategories, fetchSuppliers, fetchMonths]);
-
-  const onChangeDate = (event, selectedDate) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    const currentDate = selectedDate || date;
-    const localDate = new Date(currentDate.getTime() - (currentDate.getTimezoneOffset() * 60000));
-
-    if (localDate <= new Date()) {
-      setDate(localDate);
-    } else {
-      Alert.alert('Erro', 'Por favor, selecione uma data que não seja no futuro.');
-    }
-  };
 
     // Função para determinar o texto da recorrência
     const determineRecurrenceText = () => {
@@ -401,25 +395,14 @@ useFocusEffect(
             <View style={styles.datePickerContainer}>
               <Text style={styles.dateLabel}>Data de pagamento</Text>
               <View style={styles.datePickerRow}>
-                <Text style={styles.hora}>Hoje,</Text>
                 <TextInput
                   style={styles.dateInput}
-                  value={format(date,'dd/MM/yyyy', { locale: ptBR })}
-                  editable={false}
+                  value={format(date, 'dd/MM/yyyy', { locale: ptBR })} // Formata a data de pagamento
+                  editable={false} // Campo não editável diretamente
                 />
-                <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                <TouchableOpacity onPress={handleShowCalendar}>
                   <Icon name="calendar" size={20} color={COLORS.gray} />
                 </TouchableOpacity>
-                {showDatePicker && (
-                  <DateTimePicker
-                    value={date}
-                    mode="date"
-                    display="default"
-                    onChange={onChangeDate}
-                    maximumDate={new Date()}
-                    locale="pt-BR"
-                  />
-                )}
               </View>
             </View>
 
@@ -550,6 +533,12 @@ useFocusEffect(
           </View>
         )}
       </ScrollView>
+
+      <CustomCalendar
+          visible={isCalendarVisible}
+          onClose={() => setIsCalendarVisible(false)}
+          onDayPress={handleDayPress}
+        />
       <ConfirmModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}

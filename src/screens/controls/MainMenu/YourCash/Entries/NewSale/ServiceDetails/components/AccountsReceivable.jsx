@@ -4,9 +4,9 @@ import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, Modal, Plat
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from '../styles';
 import { COLORS } from '../../../../../../../../constants';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CustomCalendar from '../../../../../../../../components/CustomCalendar';
 
 // Definindo as constantes de URLs das APIs
 const API_BASE_URL = 'https://api.celereapp.com.br';
@@ -28,12 +28,12 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
     const [selectedClient, setSelectedClient] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [paymentDate, setPaymentDate] = useState(new Date());
-    const [showDatePicker, setShowDatePicker] = useState(false);
     const [additionalCosts, setAdditionalCosts] = useState('');
     const [liquidValue, setLiquidValue] = useState(totalPrice);
     const [totalWithoutDiscount, setTotalWithoutDiscount] = useState(0);
     const [totalWithDiscount, setTotalWithDiscount] = useState(0);
     const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
+    const [isCalendarVisible, setIsCalendarVisible] = useState(false);
 
           // Função para mostrar alertas
           const showAlert = (title, message) => {
@@ -103,6 +103,14 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
 
     const handleCloseModal = () => {
         setIsModalVisible(false);
+    };
+
+    const handleShowCalendar = () => {
+      setIsCalendarVisible(true);
+    };
+  
+    const handleDayPress = (day) => {
+      setPaymentDate(new Date(day.dateString)); // Atualiza a data selecionada
     };
 
 // Função para registrar venda e itens (produtos e serviços)
@@ -208,17 +216,7 @@ const resetCart = () => {
     const handleCloseInvoiceModal = () => {
         setIsInvoiceModalVisible(false);
     };
-      
 
-    const showDatePickerModal = () => {
-        setShowDatePicker(true);
-    };
-
-    const handleDateChange = (event, selectedDate) => {
-        const currentDate = selectedDate || paymentDate;
-        setShowDatePicker(Platform.OS === 'ios');
-        setPaymentDate(currentDate);
-    };
     const handleAddProduct = () => {
       navigation.navigate('NewRegisteredSale'); // Substitua com a navegação ou função que desejar.
     };
@@ -258,20 +256,18 @@ const resetCart = () => {
 
             {/* Data do pagamento */}
             <View style={styles.dateContainer}>
-                <TouchableOpacity onPress={showDatePickerModal} style={styles.datePicker}>
-                    <Text style={styles.dateText}>
-                        {`Data do pagamento: ${paymentDate.toLocaleDateString('pt-BR')}`}
-                    </Text>
-                    <Icon name="calendar" size={24} color={COLORS.lightGray} />
-                </TouchableOpacity>
-                {showDatePicker && (
-                    <DateTimePicker
-                        value={paymentDate}
-                        mode="date"
-                        display="default"
-                        onChange={handleDateChange}
-                    />
-                )}
+            <TouchableOpacity onPress={handleShowCalendar} style={styles.datePicker}>
+                <Text style={styles.dateText}>
+                  {`Data do Vencimento: ${paymentDate.toLocaleDateString('pt-BR')}`}
+                </Text>
+                <Icon name="calendar" size={24} color={COLORS.lightGray} />
+              </TouchableOpacity>
+
+              <CustomCalendar
+                visible={isCalendarVisible}
+                onClose={() => setIsCalendarVisible(false)}
+                onDayPress={handleDayPress}
+              />
             </View>
 
            {/* Campo para associar cliente */}

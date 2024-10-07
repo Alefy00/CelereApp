@@ -4,12 +4,14 @@ import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'reac
 import DateTimePicker from '@react-native-community/datetimepicker'; // Biblioteca para o seletor de data
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../../../../constants';
+import CustomCalendar from '../../../../../../../components/CustomCalendar';
 
 const FilterModal = ({ visible, onClose, onFilter }) => {
   const [searchText, setSearchText] = useState('');
   const [valorPrestacao, setValorPrestacao] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false); // Estado para controlar o calendário
+  const [showCalendar, setShowCalendar] = useState(false);
 
   // Função para abrir o seletor de data
   const handleDateChange = (event, selectedDate) => {
@@ -23,6 +25,16 @@ const FilterModal = ({ visible, onClose, onFilter }) => {
     if (!date) return 'Data';
     const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
     return date.toLocaleDateString('pt-BR', options); // Formato brasileiro
+  };
+  const handleShowCalendar = () => {
+    setShowCalendar(true);
+  };
+
+  // Função para manipular a seleção de data no CustomCalendar
+  const handleDayPress = (day) => {
+    const selectedDate = new Date(day.dateString);
+    setSelectedDate(selectedDate);
+    setShowCalendar(false); // Fecha o calendário após a seleção
   };
 
   return (
@@ -59,21 +71,17 @@ const FilterModal = ({ visible, onClose, onFilter }) => {
           />
 
           {/* Campo de data que abre o seletor de data */}
-          <TouchableOpacity style={styles.input2} onPress={() => setShowDatePicker(true)}>
+          <TouchableOpacity style={styles.input2} onPress={handleShowCalendar}>
             <Text style={styles.dateText}>{formatDate(selectedDate)}</Text>
             <Icon name="calendar" size={24} color="gray" />
           </TouchableOpacity>
 
-          {/* Mostra o seletor de data quando necessário */}
-          {showDatePicker && (
-            <DateTimePicker
-              value={selectedDate || new Date()}
-              mode="date"
-              display="default"
-              onChange={handleDateChange}
-            />
-          )}
-
+          {/* Exibe o CustomCalendar quando necessário */}
+          <CustomCalendar
+            visible={showCalendar}
+            onClose={() => setShowCalendar(false)}
+            onDayPress={handleDayPress}
+          />
           {/* Botão de filtrar */}
           <TouchableOpacity style={styles.filterButton} onPress={onFilter}>
             <Icon name="filter-outline" size={24} color="black" />

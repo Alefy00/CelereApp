@@ -17,27 +17,19 @@ import TaxModal from './components/TaxModal';
 const API_URL_SALDO = 'https://api.celereapp.com.br/cad/saldo_caixa_inicial/';
 
 const MainMenu = ({ navigation }) => {
-  const [isModalVisible, setIsModalVisible] = useState(false); //visibilidade do OpeningBalanceModal
+  const [isModalVisible, setIsModalVisible] = useState(false); // Visibilidade do OpeningBalanceModal
   const [isTaxModalVisible, setIsTaxModalVisible] = useState(false); // Estado para controlar a visibilidade do TaxModal
   const [saldoCaixa, setSaldoCaixa] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [modalWasShown, setModalWasShown] = useState(false);
-
-  // Função para abrir o modal de impostos (TaxModal)
-  const openTaxModal = () => {
-    setIsTaxModalVisible(true);
-  };
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
     try {
       const storedEmpresaId = await AsyncStorage.getItem('empresaId');
       if (storedEmpresaId) {
-        console.log('ID da empresa recuperado:', storedEmpresaId); // Verifica se o ID foi recuperado corretamente
         return Number(storedEmpresaId);
       } else {
         Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
-        console.log('ID da empresa não encontrado no AsyncStorage.');
       }
     } catch (error) {
       console.error('Erro ao obter o ID da empresa do AsyncStorage:', error);
@@ -48,9 +40,7 @@ const MainMenu = ({ navigation }) => {
   // Função para recuperar o saldo de caixa com base no ID da empresa logada
   const fetchSaldoCaixa = useCallback(async () => {
     try {
-      const empresaId = await getEmpresaId(); // Usamos a função para pegar o ID da empresa
-      console.log('ID da empresa recuperado:', empresaId); // Log para verificar o ID da empresa
-
+      const empresaId = await getEmpresaId();
       if (empresaId !== null) {
         // Faz a requisição para buscar o saldo de caixa
         const response = await axios.get(`${API_URL_SALDO}?empresa_id=${empresaId}`);
@@ -62,12 +52,20 @@ const MainMenu = ({ navigation }) => {
           });
 
           const saldoTotal = parseFloat(saldoData.valor_especie) + parseFloat(saldoData.saldo_banco); // Soma valor_especie e saldo_banco
-          console.log('Saldo total calculado:', saldoTotal); // Log para verificar o saldo total
-          
           setSaldoCaixa(saldoTotal); // Armazena o saldo total
+
+          // Se há saldo, abre o TaxModal
+          const taxInfoAdded = await AsyncStorage.getItem('taxInfoAdded');
+          if (!taxInfoAdded) {
+            setIsTaxModalVisible(true);
+          }
         } else {
-          console.log('Nenhum saldo encontrado para a empresa'); // Log para caso não haja resultados
-          setSaldoCaixa(0); // Se não houver saldo, define como 0
+          // Se não há saldo, abre o OpeningBalanceModal
+          setSaldoCaixa(0);
+          const initialBalanceAdded = await AsyncStorage.getItem('initialBalanceAdded');
+          if (!initialBalanceAdded) {
+            setIsModalVisible(true);
+          }
         }
       }
     } catch (error) {
@@ -79,64 +77,21 @@ const MainMenu = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    const checkInitialBalanceAndTax = async () => {
-      const initialBalanceAdded = await AsyncStorage.getItem('initialBalanceAdded');
-      const modalShownBefore = await AsyncStorage.getItem('modalShownBefore'); // Verifica se o modal já foi mostrado antes
-      const taxInfoAdded = await AsyncStorage.getItem('taxInfoAdded');
-  
-      // Verifica se o saldo inicial foi adicionado e se o modal já foi mostrado
-      if (!initialBalanceAdded && !modalShownBefore) {
-        setIsModalVisible(true); // Exibe o OpeningBalanceModal na primeira vez
-        await AsyncStorage.setItem('modalShownBefore', 'true'); // Marca que o modal foi exibido
-      }
-  
-      // Verifica se o saldo foi adicionado mas os impostos não foram
-      if (initialBalanceAdded && !taxInfoAdded) {
-        setIsTaxModalVisible(true); // Exibe o TaxModal ao abrir o app, até que seja preenchido
-      }
-    };
-  
-    checkInitialBalanceAndTax();
-    fetchSaldoCaixa();
-  }, [fetchSaldoCaixa, modalWasShown]);
-  
-  // Função para abrir o modal de saldo inicial ao clicar em "Saldo Caixa"
-  const handleBalanceClick = async () => {
-    const initialBalanceAdded = await AsyncStorage.getItem('initialBalanceAdded');
-    if (!initialBalanceAdded) {
-      setIsModalVisible(true); // Se o saldo ainda não foi adicionado, exibe o OpeningBalanceModal
-    } else {
-      Alert.alert("Informação", "O saldo inicial já foi adicionado.");
-    }
-  };
+    fetchSaldoCaixa(); // Faz a requisição de saldo ao montar o componente
+  }, [fetchSaldoCaixa]);
 
-  // Função para fechar o OpeningBalanceModal e abrir o TaxModal apenas se o saldo inicial for preenchido
+  // Função para fechar o OpeningBalanceModal e atualizar o saldo
   const handleCloseModal = async () => {
-    const initialBalanceAdded = await AsyncStorage.getItem('initialBalanceAdded');
-
-    // Verifica se o saldo inicial foi adicionado corretamente
-    if (initialBalanceAdded) {
-      setIsModalVisible(false); // Fecha o OpeningBalanceModal
-      fetchSaldoCaixa(); // Atualiza o saldo de caixa
-      
-      const taxInfoAdded = await AsyncStorage.getItem('taxInfoAdded');
-      if (!taxInfoAdded) {
-        openTaxModal(); // Abre o modal de impostos se ainda não tiver sido preenchido
-      }
-    } else {
-      // Se o saldo não foi adicionado, não abre o TaxModal
-      setIsModalVisible(false); // Fecha o OpeningBalanceModal, mas não abre o TaxModal
-    }
+    setIsModalVisible(false);
+    await fetchSaldoCaixa(); // Atualiza o saldo de caixa após fechar o modal
   };
 
-  // Função atualizada para registrar no AsyncStorage apenas se o saldo foi preenchido
+  // Função para salvar o saldo inicial
   const handleBalanceSave = async (saldo) => {
     if (saldo > 0) {
       await AsyncStorage.setItem('initialBalanceAdded', 'true'); // Marca que o saldo foi adicionado
-      setIsModalVisible(false); // Fecha o modal
-      fetchSaldoCaixa(); // Atualiza o saldo
-      fetchSaldoCaixa(); // Atualiza o saldo
-      openTaxModal(); // Abre o TaxModal após salvar o saldo
+      setIsModalVisible(false); // Fecha o modal de saldo
+      await fetchSaldoCaixa(); // Atualiza o saldo
     } else {
       Alert.alert('Erro', 'Por favor, preencha o saldo inicial antes de continuar.');
     }
@@ -146,6 +101,16 @@ const MainMenu = ({ navigation }) => {
   const handleTaxModalSuccess = async () => {
     setIsTaxModalVisible(false); // Fecha o TaxModal
     await AsyncStorage.setItem('taxInfoAdded', 'true'); // Armazena que o TaxModal foi preenchido
+  };
+
+  // Função para abrir o modal de saldo ao clicar em "Saldo Caixa"
+  const handleBalanceClick = async () => {
+    const initialBalanceAdded = await AsyncStorage.getItem('initialBalanceAdded');
+    if (!initialBalanceAdded) {
+      setIsModalVisible(true); // Se o saldo ainda não foi adicionado, exibe o OpeningBalanceModal
+    } else {
+      Alert.alert("Informação", "O saldo inicial já foi adicionado.");
+    }
   };
 
   // Função para formatar os valores de moeda
