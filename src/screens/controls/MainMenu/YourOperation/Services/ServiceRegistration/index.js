@@ -1,12 +1,10 @@
 /* eslint-disable prettier/prettier */
-/* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, Alert, Image } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import BarTop2 from '../../../../../../components/BarTop2';
-import { COLORS } from '../../../../../../constants';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import BarTop2 from '../../../../../../components/BarTop2';
+import { COLORS } from '../../../../../../constants';
 import styles from './styles';
 
 const BASE_API_URL = 'https://api.celereapp.com.br';
@@ -27,20 +25,12 @@ const AddService = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false); // Estado para controlar o modal de sucesso
   const defaultImageUrl = require('../../../../../../assets/images/png/placeholder.png'); // URL da imagem padrão
 
-  // Função para formatar como moeda brasileira
-  const formatCurrency = (value) => {
-    const formatted = new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-    return formatted;
-  };
-
+  // Função para lidar com o campo de preço
   const handlePriceChange = (text) => {
-    // Remove caracteres não numéricos e converte para o formato correto
-    const numericValue = text.replace(/[^0-9]/g, ''); // Remove tudo que não for número
-    const formattedValue = (numericValue / 100).toFixed(2); // Formata como centavos
-    setPrice(formatCurrency(formattedValue)); // Atualiza o estado do preço com a formatação
+    const numericValue = text.replace(/[^0-9]/g, ''); // Remove caracteres não numéricos
+    const formattedValue = (numericValue / 100).toFixed(2); // Formata como valor monetário
+    setPrice(formattedValue); // Atualiza o estado com o valor numérico formatado
+    console.log("Valor de preço atualizado:", formattedValue); // Log do preço inserido
   };
 
   // Função para buscar o ID da empresa logada
@@ -48,6 +38,7 @@ const AddService = ({ navigation }) => {
     try {
       const storedEmpresaId = await AsyncStorage.getItem('empresaId');
       if (storedEmpresaId) {
+        console.log("ID da empresa encontrado:", storedEmpresaId); // Log do ID da empresa
         return Number(storedEmpresaId);
       } else {
         Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
@@ -65,6 +56,7 @@ const AddService = ({ navigation }) => {
       const result = await response.json();
       if (response.ok && result.status === 'success') {
         setUnitsOfMeasure(result.data);
+        console.log("Unidades de medida carregadas:", result.data); // Log das unidades de medida
       } else {
         Alert.alert('Erro', 'Não foi possível carregar as unidades de medida.');
       }
@@ -86,42 +78,65 @@ const AddService = ({ navigation }) => {
     fetchData();
   }, []);
 
+  // Função que lida com a requisição para salvar o serviço
   const handleSave = async () => {
     if (!name || (!price && !isPriceDisabled) || !unitMeasure) {
       Alert.alert('Erro', 'Todos os campos obrigatórios devem ser preenchidos.');
       return;
     }
-
+  
     if (!empresaId) {
       Alert.alert('Erro', 'ID da empresa não disponível. Tente novamente mais tarde.');
       return;
     }
-
+  
     const currentDate = new Date().toISOString().split('T')[0];
-
+  
+    // Definir o preço como 0 se o checkbox estiver marcado
+    const finalPrice = isPriceDisabled ? 0 : parseFloat(price);
+  
+    // Corrigir o valor de `image_url` para garantir que seja um URL válido ou imagem padrão
+    const imageUrl = imageUri ? imageUri : "https://via.placeholder.com/150"; // Defina aqui uma URL válida ou imagem padrão
+  
+    // Logs para garantir o que será enviado
+    console.log("Dados do serviço a serem enviados:");
+    console.log("Nome:", name);
+    console.log("Descrição:", description);
+    console.log("Preço:", finalPrice);
+    console.log("Unidade de Medida:", unitMeasure);
+    console.log("Código de Barras:", barcode);
+    console.log("ID da Empresa:", empresaId);
+  
     const serviceData = {
       empresa_id: empresaId,
       dt_servico: currentDate,
       nome: name,
-      descricao: description,
-      preco_venda: isPriceDisabled ? 0 : parseFloat(price.replace(/[^\d,.-]/g, '').replace(',', '.')), // numérico correto
+      descricao: description || null, // Enviar null se a descrição estiver vazia
+      preco_venda: finalPrice, // Garantir que este valor seja numérico
       status: 'ativo',
       unidade_medida: unitMeasure,
       ean: barcode || null, // Define como null se o código de barras não for preenchido
-      image_url: imageUri || defaultImageUrl, // Se não houver imagem, envia a imagem padrão
+      image_url: imageUrl, // Corrigir para enviar uma URL de imagem válida
     };
-
+  
+    // Log do corpo que será enviado
+    console.log("Corpo da requisição:", JSON.stringify(serviceData));
+  
     try {
       const response = await fetch(REGISTER_SERVICE_API_ENDPOINT, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json', // Garante que o Accept seja JSON
+          'Content-Type': 'application/json', // Garante que o Content-Type seja JSON
         },
-        body: JSON.stringify(serviceData),
+        body: JSON.stringify(serviceData), // Enviar o corpo da requisição como JSON
       });
-
+  
       const result = await response.json();
-
+  
+      // Log da resposta da API
+      console.log("Resposta da API:", result);
+  
       if (response.ok) {
         setModalVisible(true); // Exibe o modal de sucesso
         // Limpa os campos do formulário
@@ -140,6 +155,7 @@ const AddService = ({ navigation }) => {
       Alert.alert('Erro', 'Não foi possível registrar o serviço. Verifique sua conexão e tente novamente.');
     }
   };
+  
 
   const toggleUnitMeasureDropdown = () => {
     setIsUnitMeasureDropdownVisible(!isUnitMeasureDropdownVisible);
@@ -148,6 +164,7 @@ const AddService = ({ navigation }) => {
   const selectUnitMeasure = (unit) => {
     setUnitMeasure(unit);
     setIsUnitMeasureDropdownVisible(false);
+    console.log("Unidade de medida selecionada:", unit); // Log da unidade de medida selecionada
   };
 
   const handleCloseModal = () => {
@@ -155,11 +172,13 @@ const AddService = ({ navigation }) => {
     navigation.navigate('RegisteredServices'); // Redireciona para a próxima tela
   };
 
+  // Atualiza o valor do preço para 0 quando o checkbox é marcado
   const handlePriceCheckboxChange = () => {
     setIsPriceDisabled(!isPriceDisabled);
     if (!isPriceDisabled) {
-      setPrice(''); // Limpa o campo de preço quando desativado
+      setPrice('0.00'); // Define o preço como 0 ao marcar o checkbox
     }
+    console.log("Checkbox 'Não inserir preço' marcado:", isPriceDisabled); // Log do estado do checkbox
   };
 
   return (
@@ -271,7 +290,6 @@ const AddService = ({ navigation }) => {
           </View>
         </View>
       </Modal>
-
     </KeyboardAvoidingView>
   );
 };

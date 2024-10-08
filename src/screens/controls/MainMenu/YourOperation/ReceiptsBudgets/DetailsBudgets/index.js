@@ -450,7 +450,7 @@ const registerServicesOrcamento = async (empresaId, orcamentoId, services) => {
               </TouchableOpacity>
 
               {/* Botão Visualizar Orçamento */}
-              <TouchableOpacity style={styles.viewButton} >
+              <TouchableOpacity style={styles.viewButton} onPress={handleBack}>
                 <Text style={styles.viewButtonText}>Retornar</Text>
               </TouchableOpacity>
             </View>

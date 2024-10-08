@@ -218,17 +218,19 @@ useFocusEffect(
   const handleNext = () => {
     const selectedItems = Object.keys(quantities).map(key => {
       const product = products.find(p => p.id.toString() === key);
+      
+      // Verificar se o produto existe e adicionar ao carrinho, mesmo com preço 0
       return {
         ...product,
         amount: quantities[key],
-        total: quantities[key] * (parseFloat(product.preco_venda) || 0),
+        total: quantities[key] * (parseFloat(product.preco_venda) || 0), // Permitir preço 0
         imagem: product.imagem ? product.imagem : 'https://via.placeholder.com/150',
       };
-    }).filter(item => item !== null);
-
+    }).filter(item => item !== null); // Garantir que nenhum item nulo seja adicionado
+  
     const previousItems = route.params?.selectedProducts || [];
     const allSelectedItems = [...previousItems];
-
+  
     selectedItems.forEach((newItem) => {
       const existingItemIndex = allSelectedItems.findIndex(item => item.id === newItem.id);
       if (existingItemIndex >= 0) {
@@ -238,34 +240,39 @@ useFocusEffect(
         allSelectedItems.push(newItem);
       }
     });
-
+  
+    // Calcular o preço total, incluindo os serviços com preço 0
     const totalPrice = allSelectedItems.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
-
+  
     const services = allSelectedItems.filter(item => item.categoria === 'Serviços');
     const nonServices = allSelectedItems.filter(item => item.categoria !== 'Serviços');
-
+  
     navigateToNextScreen(services, nonServices, allSelectedItems, totalPrice);
   };
+  
 
 
-
-
-  const renderFooter = () => (
-    <>
-      {totalPrice > 0 && (
-        <View style={styles.confirmationCard}>
-          <Text style={styles.totalPrice}>Total: R${totalPrice.toFixed(2)}</Text>
-          <TouchableOpacity style={styles.confirmButton} onPress={handleNext}>
-            <Icon name="checkmark-circle" size={25} color={COLORS.black} />
-            <Text style={styles.confirmButtonText}>Confirmar essa venda</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      <TouchableOpacity style={styles.barcodeButton}>
-        <Icon name="barcode" size={30} color={COLORS.black} />
-      </TouchableOpacity>
-    </>
-  );
+  const renderFooter = () => {
+    const hasItemsInCart = Object.keys(quantities).length > 0; // Verifica se há itens no carrinho
+  
+    return (
+      <>
+        {hasItemsInCart && (
+          <View style={styles.confirmationCard}>
+            <Text style={styles.totalPrice}>Total: R${totalPrice.toFixed(2)}</Text>
+            <TouchableOpacity style={styles.confirmButton} onPress={handleNext}>
+              <Icon name="checkmark-circle" size={25} color={COLORS.black} />
+              <Text style={styles.confirmButtonText}>Confirmar essa venda</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        <TouchableOpacity style={styles.barcodeButton}>
+          <Icon name="barcode" size={30} color={COLORS.black} />
+        </TouchableOpacity>
+      </>
+    );
+  };
+  
 
   const toggleFourthModal = () => setFourthModalVisible(!fourthModalVisible);
     // Certifique-se de que o modal é fechado corretamente

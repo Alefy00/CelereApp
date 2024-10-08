@@ -179,7 +179,7 @@ const Budget = ({ navigation }) => {
               Data: {new Date(item.data_orcamento).toLocaleDateString('pt-BR')} {new Date(item.data_orcamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
             </Text>
             <Text style={styles.budgetProducts}>
-              Produtos: {item.produtos?.length || 0}
+              Produtos: {item.item_venda_orcamento?.length || 0}
             </Text>
           </View>
           <Text style={styles.budgetTotal}>
@@ -210,7 +210,7 @@ const Budget = ({ navigation }) => {
         <View style={styles.searchSection}>
           <TextInput style={styles.searchInput} placeholder="Pesquise seus orçamentos" value={search} onChangeText={setSearch} />
           <Icon name="search" size={20} color={COLORS.gray} />
-          <TouchableOpacity style={styles.filterButton} onPress={() => setModalVisibleFilter(true)} disabled={true}>
+          <TouchableOpacity style={styles.filterButton} onPress={() => setModalVisibleFilter(true)}>
             <Icon name="filter" size={20} color="black" />
             <Text style={styles.filterText}>Filtrar</Text>
           </TouchableOpacity>

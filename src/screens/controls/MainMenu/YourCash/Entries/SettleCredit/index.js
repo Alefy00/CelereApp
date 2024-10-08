@@ -166,10 +166,6 @@ const SettleCredit = ({ navigation }) => {
     setFilterModalVisible(true);
   };
 
-  // Função para fechar o modal de filtro
-  const closeFilterModal = () => {
-    setFilterModalVisible(false);
-  }; 
 
   // Função para alternar entre "Liquidadas" e "Contas a Receber"
   const toggleTab = (tab) => {
@@ -231,7 +227,7 @@ const renderItem = ({ item }) => {
               Situação: {item.status}
             </Text>
           </View>
-          <Text style={styles.contaValor}>R${item.valor_total_venda}</Text>
+          <Text style={styles.contaValor}>R${item.valor_total_venda - item.total_pagamentos}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -314,7 +310,7 @@ const renderLiquidatedItem = ({ item }) => {
           onPress={() => toggleTab('open')}
         >
           <Text style={selectedTab === 'open' ? styles.tabButtonTextActive : styles.tabButtonText}>
-            Liquidadas
+            Pagas
           </Text>
         </TouchableOpacity>
         <TouchableOpacity 

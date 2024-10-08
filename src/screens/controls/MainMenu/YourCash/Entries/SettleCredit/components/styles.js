@@ -119,6 +119,13 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: COLORS.lightGray,
   },
+  totalContainer2: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+
+    paddingVertical: 10,
+
+  },
   totalLabel: {
     fontSize: 16,
     color: COLORS.black,

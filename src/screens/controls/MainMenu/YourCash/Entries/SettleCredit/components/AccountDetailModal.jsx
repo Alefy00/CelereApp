@@ -139,6 +139,25 @@ const AccountDetailModal = ({ visible, onClose,  account, onSaleCanceled }) => {
       </View>
     );
   };
+
+  // Função para formatar valores como moeda
+const formatCurrency = (value) => {
+  if (!value) return 'R$ 0,00';
+  return parseFloat(value).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+};
+
+// Função para calcular o total dos gastos envolvidos somando os itens
+const calculateTotalGastosEnvolvidos = useCallback(() => {
+  if (!account?.itens || account.itens.length === 0) return 0;
+
+  // Somar todos os valores de gastos envolvidos dos itens
+  return account.itens.reduce((sum, item) => {
+    return sum + (parseFloat(item.gastos_envolvidos) || 0);
+  }, 0);
+}, [account]);
   return (
     <>
         <Modal visible={isFirstModalVisible} transparent={true} animationType="slide">
@@ -165,10 +184,16 @@ const AccountDetailModal = ({ visible, onClose,  account, onSaleCanceled }) => {
               style={{ maxHeight: 150 }}
             />
 
-            <View style={styles.totalContainer}>
-              <Text style={styles.totalLabel}>Valor total:</Text>
-              <Text style={styles.totalValue}>R${account?.valor_total_venda}</Text>
-            </View>
+          <View style={styles.totalContainer2}>
+            <Text style={styles.totalLabel}>Gastos envolvidos:</Text>
+            <Text style={styles.totalValue}>{formatCurrency(calculateTotalGastosEnvolvidos())}</Text>
+          </View>
+          <View style={styles.totalContainer}>
+            <Text style={styles.totalLabel}>Valor total:</Text>
+            <Text style={styles.totalValue}>
+              {formatCurrency(account?.valor_total_venda - account.total_pagamentos)}
+            </Text>
+          </View>
 
             <TouchableOpacity style={styles.partialButton} onPress={openPartialLiquidationModal}>
               <Text style={styles.buttonText}>Liquidar Parcialmente</Text>
@@ -221,6 +246,7 @@ const AccountDetailModal = ({ visible, onClose,  account, onSaleCanceled }) => {
         onConfirmPartialLiquidation={handleConfirmPartialLiquidation} // Função de confirmação
         saleId={account.id}
         totalSaleAmount={account.valor_total_venda}
+        totalPayments={account.total_pagamentos}
       />
     </>
   );

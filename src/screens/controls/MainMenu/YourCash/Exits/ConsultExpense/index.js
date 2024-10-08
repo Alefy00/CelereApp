@@ -7,6 +7,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Importando AsyncStorage
+import FilterModal from "../../Entries/SettleCredit/components/FilterModal";
 
 // Constantes para URLs de API
 const API_BASE_URL = "https://api.celereapp.com.br";
@@ -21,6 +22,24 @@ const ConsultExpense = ({ navigation }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [loading, setLoading] = useState(true);
   const [toggleState, setToggleState] = useState('pendente'); // Definindo como 'liquidada' por padrão
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+
+  const handleFilter = (filters) => {
+    const { searchText, valorPrestacao, selectedDate } = filters;
+    
+    // Filtra as despesas com base nos critérios fornecidos
+    const filtered = expenses.filter(expense => {
+      const matchesSearchText = searchText ? expense.item.toLowerCase().includes(searchText.toLowerCase()) : true;
+      const matchesValue = valorPrestacao ? expense.total <= parseFloat(valorPrestacao.replace(/[^\d]/g, '')) / 100 : true;
+      const matchesDate = selectedDate ? new Date(expense.dt_vencimento).toDateString() === selectedDate.toDateString() : true;
+  
+      return matchesSearchText && matchesValue && matchesDate;
+    });
+  
+    setFilteredExpenses(filtered); // Atualiza a lista filtrada
+    setIsFilterModalVisible(false); // Fecha o modal após aplicar o filtro
+  };
+
 
 
   const getEmpresaId = async () => {
@@ -200,10 +219,11 @@ const ConsultExpense = ({ navigation }) => {
           />
           <Icon name="search" size={20} color="gray" style={styles.searchIcon} />
         </View>
-        <TouchableOpacity style={styles.filterButton}>
+        <TouchableOpacity style={styles.filterButton} onPress={() => setIsFilterModalVisible(true)}>
           <Icon name="filter" size={24} color="black" />
           <Text style={styles.filterButtonText}>Filtrar</Text>
         </TouchableOpacity>
+
       </View>
 
       {/* Toggle para alternar entre despesas pendentes e liquidadas */}
@@ -253,6 +273,12 @@ const ConsultExpense = ({ navigation }) => {
           <Text style={styles.addButtonText}>Cadastrar nova despesa</Text>
         </TouchableOpacity>
       )}
+      <FilterModal
+        visible={isFilterModalVisible}
+        onClose={() => setIsFilterModalVisible(false)}
+        onFilter={handleFilter}
+      />
+
     </View>
   );
 };

@@ -1,49 +1,49 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker'; // Biblioteca para o seletor de data
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../../../../constants';
 import CustomCalendar from '../../../../../../../components/CustomCalendar';
+
+// Função utilitária para formatar valores em reais
+const formatCurrency = (value) => {
+  if (!value) return '';
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+};
+
+// Função utilitária para formatar a data
+const formatDate = (date) => {
+  if (!date) return 'Data';
+  const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+  return date.toLocaleDateString('pt-BR', options);
+};
 
 const FilterModal = ({ visible, onClose, onFilter }) => {
   const [searchText, setSearchText] = useState('');
   const [valorPrestacao, setValorPrestacao] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
-  const [showDatePicker, setShowDatePicker] = useState(false); // Estado para controlar o calendário
   const [showCalendar, setShowCalendar] = useState(false);
 
-  // Função para abrir o seletor de data
-  const handleDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || null;
-    setShowDatePicker(false); // Fecha o seletor de data após a escolha
-    setSelectedDate(currentDate); // Atualiza a data selecionada
+  // Função para manipular a alteração no valor e já formatar como moeda
+  const handleValorPrestacaoChange = (text) => {
+    const cleanValue = text.replace(/[^\d]/g, ''); // Remove tudo que não for número
+    setValorPrestacao(formatCurrency(cleanValue / 100)); // Divide por 100 para ajustar os centavos
   };
 
-  // Função para formatar a data selecionada
-  const formatDate = (date) => {
-    if (!date) return 'Data';
-    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-    return date.toLocaleDateString('pt-BR', options); // Formato brasileiro
-  };
-  const handleShowCalendar = () => {
-    setShowCalendar(true);
-  };
-
-  // Função para manipular a seleção de data no CustomCalendar
+  // Função para manipular a seleção de data
   const handleDayPress = (day) => {
     const selectedDate = new Date(day.dateString);
     setSelectedDate(selectedDate);
     setShowCalendar(false); // Fecha o calendário após a seleção
   };
 
+  // Função para aplicar o filtro
+  const applyFilter = () => {
+    onFilter({ searchText, valorPrestacao, selectedDate });
+  };
+
   return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -61,29 +61,30 @@ const FilterModal = ({ visible, onClose, onFilter }) => {
             <Icon name="search-outline" size={24} color="gray" />
           </View>
 
-          {/* Campo de valor da prestação */}
+          {/* Campo de valor da prestação formatado */}
           <TextInput
             style={styles.input}
             placeholder="Valor"
             value={valorPrestacao}
-            onChangeText={setValorPrestacao}
+            onChangeText={handleValorPrestacaoChange}
             keyboardType="numeric"
           />
 
-          {/* Campo de data que abre o seletor de data */}
-          <TouchableOpacity style={styles.input2} onPress={handleShowCalendar}>
+          {/* Campo de data */}
+          <TouchableOpacity style={styles.input2} onPress={() => setShowCalendar(true)}>
             <Text style={styles.dateText}>{formatDate(selectedDate)}</Text>
             <Icon name="calendar" size={24} color="gray" />
           </TouchableOpacity>
 
-          {/* Exibe o CustomCalendar quando necessário */}
+          {/* CustomCalendar para selecionar a data */}
           <CustomCalendar
             visible={showCalendar}
             onClose={() => setShowCalendar(false)}
             onDayPress={handleDayPress}
           />
+
           {/* Botão de filtrar */}
-          <TouchableOpacity style={styles.filterButton} onPress={onFilter}>
+          <TouchableOpacity style={styles.filterButton} onPress={applyFilter}>
             <Icon name="filter-outline" size={24} color="black" />
             <Text style={styles.filterButtonText}>Filtrar</Text>
           </TouchableOpacity>

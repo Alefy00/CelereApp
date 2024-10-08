@@ -123,7 +123,7 @@ Container: {
         fontSize: 16,
         fontWeight: 'bold',
         color: COLORS.black,
-        width: '45%',
+        width: '55%',
       },
       cartItemSubtitle: {
         fontSize: 14,
@@ -166,7 +166,8 @@ Container: {
       priceInput: {
         borderBottomWidth: 1,
         textAlign: 'right',
-        width: 140,
+        width: 90,
+        marginLeft: 20,
       },
       cartItemTotal:{
         marginLeft: 90,
