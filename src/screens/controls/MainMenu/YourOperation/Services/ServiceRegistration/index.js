@@ -25,13 +25,6 @@ const AddService = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false); // Estado para controlar o modal de sucesso
   const defaultImageUrl = require('../../../../../../assets/images/png/placeholder.png'); // URL da imagem padrão
 
-  // Função para lidar com o campo de preço
-  const handlePriceChange = (text) => {
-    const numericValue = text.replace(/[^0-9]/g, ''); // Remove caracteres não numéricos
-    const formattedValue = (numericValue / 100).toFixed(2); // Formata como valor monetário
-    setPrice(formattedValue); // Atualiza o estado com o valor numérico formatado
-    console.log("Valor de preço atualizado:", formattedValue); // Log do preço inserido
-  };
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
@@ -56,7 +49,6 @@ const AddService = ({ navigation }) => {
       const result = await response.json();
       if (response.ok && result.status === 'success') {
         setUnitsOfMeasure(result.data);
-        console.log("Unidades de medida carregadas:", result.data); // Log das unidades de medida
       } else {
         Alert.alert('Erro', 'Não foi possível carregar as unidades de medida.');
       }
@@ -93,49 +85,37 @@ const AddService = ({ navigation }) => {
     const currentDate = new Date().toISOString().split('T')[0];
   
     // Definir o preço como 0 se o checkbox estiver marcado
-    const finalPrice = isPriceDisabled ? 0 : parseFloat(price);
+    const finalPrice = isPriceDisabled ? 0 : removeCurrencyFormatting(price); // Remover formatação para garantir que seja numérico
   
     // Corrigir o valor de `image_url` para garantir que seja um URL válido ou imagem padrão
     const imageUrl = imageUri ? imageUri : "https://via.placeholder.com/150"; // Defina aqui uma URL válida ou imagem padrão
-  
-    // Logs para garantir o que será enviado
-    console.log("Dados do serviço a serem enviados:");
-    console.log("Nome:", name);
-    console.log("Descrição:", description);
-    console.log("Preço:", finalPrice);
-    console.log("Unidade de Medida:", unitMeasure);
-    console.log("Código de Barras:", barcode);
-    console.log("ID da Empresa:", empresaId);
   
     const serviceData = {
       empresa_id: empresaId,
       dt_servico: currentDate,
       nome: name,
-      descricao: description || null, // Enviar null se a descrição estiver vazia
-      preco_venda: finalPrice, // Garantir que este valor seja numérico
+      descricao: description || null,
+      preco_venda: finalPrice, // Agora garantindo que o valor seja numérico
       status: 'ativo',
       unidade_medida: unitMeasure,
-      ean: barcode || null, // Define como null se o código de barras não for preenchido
-      image_url: imageUrl, // Corrigir para enviar uma URL de imagem válida
+      ean: barcode || null,
+      image_url: imageUrl,
     };
   
-    // Log do corpo que será enviado
-    console.log("Corpo da requisição:", JSON.stringify(serviceData));
+    // Adicionando log do corpo da requisição
+    console.log('Corpo da requisição:', serviceData);
   
     try {
       const response = await fetch(REGISTER_SERVICE_API_ENDPOINT, {
         method: 'POST',
         headers: {
-          'Accept': 'application/json', // Garante que o Accept seja JSON
-          'Content-Type': 'application/json', // Garante que o Content-Type seja JSON
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(serviceData), // Enviar o corpo da requisição como JSON
+        body: JSON.stringify(serviceData),
       });
   
       const result = await response.json();
-  
-      // Log da resposta da API
-      console.log("Resposta da API:", result);
   
       if (response.ok) {
         setModalVisible(true); // Exibe o modal de sucesso
@@ -155,6 +135,7 @@ const AddService = ({ navigation }) => {
       Alert.alert('Erro', 'Não foi possível registrar o serviço. Verifique sua conexão e tente novamente.');
     }
   };
+ 
   
 
   const toggleUnitMeasureDropdown = () => {
@@ -162,11 +143,10 @@ const AddService = ({ navigation }) => {
   };
 
   const selectUnitMeasure = (unit) => {
-    setUnitMeasure(unit);
+    setUnitMeasure(unit.cod); // Armazenar o código da unidade de medida selecionada
     setIsUnitMeasureDropdownVisible(false);
-    console.log("Unidade de medida selecionada:", unit); // Log da unidade de medida selecionada
   };
-
+  
   const handleCloseModal = () => {
     setModalVisible(false); // Fecha o modal
     navigation.navigate('RegisteredServices'); // Redireciona para a próxima tela
@@ -177,9 +157,39 @@ const AddService = ({ navigation }) => {
     setIsPriceDisabled(!isPriceDisabled);
     if (!isPriceDisabled) {
       setPrice('0.00'); // Define o preço como 0 ao marcar o checkbox
+      setUnitMeasure('Unidade'); // Define a unidade como "Unidade" ao marcar o checkbox
+      setUnitsOfMeasure([{ id: 1, nome: 'Unidade' }]); // Define apenas "Unidade" como opção
+    } else {
+      setPrice(''); // Limpa o preço quando o checkbox é desmarcado
+      fetchUnitsOfMeasure(empresaId); // Recarrega as unidades de medida da API ao desmarcar o checkbox
     }
-    console.log("Checkbox 'Não inserir preço' marcado:", isPriceDisabled); // Log do estado do checkbox
   };
+
+  // Função para formatar o valor como moeda Real Brasileiro
+const formatPriceToBRL = (value) => {
+  const numericValue = parseFloat(value.replace(/[^0-9]/g, '')) / 100; // Remove caracteres não numéricos e divide por 100 para ajustar centavos
+  if (isNaN(numericValue)) return ''; // Caso o valor seja inválido, retorna uma string vazia
+
+  return numericValue.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+};
+
+const removeCurrencyFormatting = (formattedValue) => {
+  // Remove tudo que não seja número, ponto ou vírgula
+  const numericValue = formattedValue.replace(/[^\d,]/g, '').replace(',', '.');
+  return parseFloat(numericValue); // Converte a string para número float
+};
+
+
+// Função para lidar com a mudança no campo de preço
+const handlePriceChange = (text) => {
+  const formattedValue = formatPriceToBRL(text);
+  setPrice(formattedValue); // Atualiza o estado com o valor formatado
+};
+
+  
 
   return (
     <KeyboardAvoidingView
@@ -258,7 +268,7 @@ const AddService = ({ navigation }) => {
             <View style={[styles.dropdownContainer, { maxHeight: 150 }]}>
               <ScrollView nestedScrollEnabled={true}>
                 {unitsOfMeasure.map((unit) => (
-                  <TouchableOpacity key={unit.id} style={styles.dropdownItem} onPress={() => selectUnitMeasure(unit.nome)}>
+                  <TouchableOpacity key={unit.id} style={styles.dropdownItem} onPress={() => selectUnitMeasure(unit)}>
                     <Text style={styles.dropdownItemText}>{unit.nome}</Text>
                   </TouchableOpacity>
                 ))}

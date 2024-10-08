@@ -98,6 +98,7 @@ const LiquidatedDetailModal = ({ visible, onClose, account,  servicoNomes, onSal
 
                   <TouchableOpacity style={styles.reciboButton}  onPress={() => {
                             // Navegar para a tela ReceiptScreen com o saleId
+                            closeFirstModal();
                             navigation.navigate('ReceiptScreen', { saleId: account.id });
                         }}>
                       <Icon name="share-social-outline" size={24} color="black" />

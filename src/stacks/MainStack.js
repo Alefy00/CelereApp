@@ -78,6 +78,7 @@ import IncludeCategoriesExpense from '../screens/controls/MainMenu/YourCash/Exit
 import TeamScreen from '../screens/controls/MainMenu/YourControls/Users';
 import ReceiptScreen from '../screens/controls/MainMenu/YourCash/Entries/SettleCredit/components/ReceiptScreen';
 import BudgetsScreen from '../screens/controls/MainMenu/YourOperation/ReceiptsBudgets/components/BudgetsScreen';
+import LiquidateNow from '../screens/controls/MainMenu/YourCash/Entries/NewSale/SalesDetails/components/LiquidateNow';
 
 const Stack = createStackNavigator();
 

@@ -148,11 +148,19 @@ const handleRegisterSale = async () => {
       valor_total_venda: totalValue // Valor bruto a receber
     };
 
-    const vendaResponse = await axios.post(REGISTER_SALE_API, vendaData);
-    const vendaId = vendaResponse.data.data.id;
+    // Log do payload enviado
+    console.log('Payload da requisição:', vendaData);
 
-      // Armazene o ID da venda
-      setSaleId(vendaId);
+    const vendaResponse = await axios.post(REGISTER_SALE_API, vendaData);
+
+    // Log da resposta da requisição
+    console.log('Resposta da requisição:', vendaResponse.data);
+
+    const vendaId = vendaResponse.data.data.id;
+    console.log('Venda registrada com sucesso, ID da venda:', vendaId);
+
+    // Armazene o ID da venda
+    setSaleId(vendaId);
 
     // Agora registra os serviços da venda
     const serviceItems = services.map(service => ({
@@ -165,7 +173,6 @@ const handleRegisterSale = async () => {
       gastos_envolvidos: parseFloat(additionalCosts || 0) // Gastos adicionais
     }));
 
-    // Registra os produtos da venda (se houver)
     const productItems = products.map(product => ({
       empresa_id: empresaId,
       venda_id: vendaId, // ID da venda registrada
@@ -175,7 +182,6 @@ const handleRegisterSale = async () => {
       valor_desconto: !isNaN(parseFloat(discount)) ? (discountType === 'R$' ? parseFloat(discount) : 0) : 0 // Valor de desconto sempre como número válido
     }));
 
-    // Cria as promessas de registro para serviços e produtos
     const servicePromises = serviceItems.map(item =>
       axios.post(REGISTER_ITEM_SALE_API, item)
     );
@@ -184,15 +190,11 @@ const handleRegisterSale = async () => {
       axios.post(REGISTER_ITEM_SALE_API, item)
     );
 
-    // Executa todas as promessas de registro (serviços e produtos)
     await Promise.all([...servicePromises, ...productPromises]);
 
-    // Exibe mensagem de sucesso e navega
     setIsModalVisible(true);
-
- 
-
   } catch (error) {
+    // Log do erro caso a requisição falhe
     console.error('Erro ao registrar venda:', error.response ? error.response.data : error);
     Alert.alert('Erro', 'Ocorreu um erro ao registrar a venda e os itens.');
   }

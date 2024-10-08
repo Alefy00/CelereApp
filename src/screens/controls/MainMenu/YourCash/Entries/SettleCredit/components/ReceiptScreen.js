@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import BarTop2 from '../../../../../../../components/BarTop2';
 
 const ReceiptScreen = ({ navigation, route }) => {
-    const { saleId } = route.params;  // Parâmetro da venda
+    const { saleId, fromLiquidateNow } = route.params; 
     const [pdfUrl, setPdfUrl] = useState(null); // URL do PDF retornada pela API
     const [loading, setLoading] = useState(false); // Estado de carregamento
     const [error, setError] = useState(null); // Estado de erro
@@ -96,6 +96,16 @@ const ReceiptScreen = ({ navigation, route }) => {
             }
         }
     };
+        // Função para tratar o comportamento ao voltar
+        const handleBack = () => {
+            if (fromLiquidateNow) {
+                // Se veio de LiquidateNow, limpa o carrinho e navega para NewRegisteredSale
+                navigation.navigate('NewRegisteredSale', { clearCart: true });
+            } else {
+                // Volta para a tela anterior normalmente
+                navigation.goBack();
+            }
+        };
 
     return (
         <View style={styles.container}>
@@ -132,7 +142,7 @@ const ReceiptScreen = ({ navigation, route }) => {
                     <Text style={styles.buttonText}>Compartilhar</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
+                <TouchableOpacity style={styles.closeButton} onPress={handleBack}>
                     <Icon name="return-down-back-sharp" size={24} color="black" />
                     <Text style={styles.buttonText}>Fechar</Text>
                 </TouchableOpacity>

@@ -38,13 +38,20 @@ const formatToBRL = (value) => {
 };
 
 // Função para buscar os detalhes do item (produto ou serviço) pelo ID
-const fetchItemById = async (id) => {
+const fetchItemById = async (item) => {
   try {
-    const response = await axios.get(`${API_ITENS_VENDA}${id}/`);
+    // Se o item já tiver um campo "nome" preenchido, usamos diretamente
+    if (item.nome) {
+      return item.nome;
+    }
+
+    const response = await axios.get(`${API_ITENS_VENDA}${item.id}/`);
     const itemData = response.data;
+
+    // Verificamos se o nome está no campo "produto" ou "serviço"
     return itemData.produto ? itemData.produto.nome : (itemData.servico ? itemData.servico.nome : 'Nome do item indisponível');
   } catch (error) {
-    console.error(`Erro ao buscar o item com ID ${id}:`, error);
+    console.error(`Erro ao buscar o item com ID ${item.id}:`, error);
     return 'Nome do item indisponível';
   }
 };
@@ -55,7 +62,7 @@ const processarVendas = async (vendas) => {
     vendas.map(async (venda) => {
       const itensComNome = await Promise.all(
         venda.itens.map(async (item) => {
-          const nomeItem = await fetchItemById(item.id); // Buscar o nome de cada item (produto ou serviço)
+          const nomeItem = await fetchItemById(item); // Passar o item completo
           return {
             ...item,
             nome: nomeItem || 'Nome do item indisponível',
@@ -70,6 +77,7 @@ const processarVendas = async (vendas) => {
   );
   return vendasProcessadas;
 };
+
 
 // Função para buscar todas as despesas finalizadas da empresa logada
 const fetchAllDespesas = async (empresaId) => {
@@ -124,29 +132,33 @@ const fetchAllVendas = async (empresaId) => {
 // Função para mapear os dados das vendas
 const mapSalesData = (sales) => {
   return sales.map((sale) => {
+
     const firstItem = sale.itens && sale.itens[0] ? sale.itens[0] : {}; // Pegamos o primeiro item da venda
     const itemName = firstItem.nome || 'Produto sem nome'; // Nome do item (produto ou serviço)
+
+    // Verifique se 'sale.tipo_pagamento_venda' está correto
     return {
       id: sale.id,
       description: itemName, // Usamos o nome do primeiro item
-      method: getPaymentMethodName(sale.tipo_pagamento_venda), // Chama a função que traduz o ID do pagamento
+      method: getPaymentMethodName(sale.tipo_pagamento_venda), // Verifique se está correto
       date: formatDate(sale.data_venda), // Formata a data da venda
       amount: parseFloat(sale.valor_total_venda),
+      tipo_pagamento_venda: sale.tipo_pagamento_venda, // Adicione isso para garantir que o campo está presente
     };
   });
 };
 
-// Função para traduzir o método de pagamento
+// Função para traduzir o método de pagamento usando o ID
 const getPaymentMethodName = (paymentTypeId) => {
   switch (paymentTypeId) {
     case 1:
-      return 'Cartão de Crédito';
-    case 2:
-      return 'Cartão de Débito';
-    case 3:
-      return 'Dinheiro';
-    case 4:
       return 'Pix';
+    case 2:
+      return 'Dinheiro';  // Confirme que o ID 2 corresponde ao método correto
+    case 3:
+      return 'Cartão de Crédito';
+    case 4:
+      return 'Débito';
     default:
       return 'Documento'; // Valor padrão para métodos desconhecidos
   }
@@ -159,20 +171,20 @@ const formatDate = (date) => {
 };
 
 // Função para escolher o ícone com base no método de pagamento
-const getPaymentIcon = (method) => {
-  switch (method) {
-    case 'Pix':
+const getPaymentIconById = (paymentTypeId) => {
+  switch (paymentTypeId) {
+    case 1: // Pix
       return <SvgPixIcon width={20} height={20} style={styles.pixIcon} />;
-    case 'Dinheiro':
+    case 2: // Dinheiro
       return <Ionicons name="cash" size={20} color={COLORS.green} />;
-    case 'Cartão de Crédito':
-    case 'Cartão de Débito':
+    case 3: // Cartão de Credito
       return <Ionicons name="card" size={20} color={COLORS.green} />;
-    default:
-      return <Ionicons name="document-outline" size={20} color={COLORS.green} />; // Ícone de documento para métodos desconhecidos
+    case 4: // Cartão de Débito
+      return <Ionicons name="card" size={20} color={COLORS.green} />;
+    default: // Valor padrão para métodos desconhecidos
+      return <Ionicons name="document-outline" size={20} color={COLORS.green} />;
   }
 };
-
 const FilteredListCard = () => {
   const [selectedTab, setSelectedTab] = useState('sales'); // 'sales' ou 'expenses'
   const [searchQuery, setSearchQuery] = useState('');
@@ -275,17 +287,22 @@ const FilteredListCard = () => {
         </View>
 
         {/* Lista de Itens Filtrados */}
-        <View>
-          {filteredData.map(item => (
-            <View key={item.id} style={styles.listItem}>
-              {getPaymentIcon(item.method)}
-              <View style={styles.itemInfo}>
-                <Text style={styles.itemDescription}>{item.description}</Text>
-                <Text style={styles.itemDetails}>{item.method} - {item.date}</Text>
+        
+                <View>
+          {filteredData.map(item => {
+            console.log('ID do método de pagamento:', item.tipo_pagamento_venda); // Log para ver o ID
+
+            return (
+              <View key={item.id} style={styles.listItem}>
+                {getPaymentIconById(item.tipo_pagamento_venda)}
+                <View style={styles.itemInfo}>
+                  <Text style={styles.itemDescription}>{item.description}</Text>
+                  <Text style={styles.itemDetails}>{getPaymentMethodName(item.tipo_pagamento_venda)} - {item.date}</Text>
+                </View>
+                <Text style={styles.itemAmount}>{formatToBRL(item.amount)}</Text>
               </View>
-              <Text style={styles.itemAmount}>{formatToBRL(item.amount)}</Text>
-            </View>
-          ))}
+            );
+          })}
         </View>
       </View>
     </KeyboardAwareScrollView>

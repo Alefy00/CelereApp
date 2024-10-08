@@ -33,6 +33,9 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route }) => {
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
   const [installmentValue, setInstallmentValue] = useState(0);
+  const [saleId, setSaleId] = useState(null); // Estado para armazenar o ID da venda
+
+
 
     // Função para mostrar alertas
     const showAlert = (title, message) => {
@@ -79,14 +82,17 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route }) => {
         return <PixIcon width={20} height={20} />;
       case 'dinheiro':
         return <CashIcon width={20} height={20} />;
+      case 'cartão de crédito': // Corrigido para lidar com nomes diferentes
       case 'cartao de credito':
         return <CreditCardIcon width={20} height={20} />;
+      case 'débito':
       case 'debito':
         return <DebitCardIcon width={20} height={20} />;
       default:
         return <Icon name="card" size={20} color="black" />;
     }
   };
+  
 
   useEffect(() => {
     const date = new Date();
@@ -96,7 +102,9 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route }) => {
 
 
   const handleConfirm = () => {
-    setIsModalVisible(true);
+        // Navegar ou limpar o carrinho após isso
+        navigation.navigate('NewRegisteredSale', { clearCart: true });
+   
   };
 
   const paymentOptions = ['2x', '3x', '4x', '5x', '6x', '7x'];
@@ -120,6 +128,12 @@ const handleRegisterSale = async () => {
     const currentDate = new Date().toISOString().split('T')[0]; // Data atual do dispositivo
     const totalValue = liquidValue; // Valor bruto a receber após desconto
 
+    if (!selectedPaymentMethod) {
+      console.error('Nenhum método de pagamento selecionado!');
+      Alert.alert('Erro', 'Selecione um método de pagamento.');
+      return;
+    }
+
     // Registra a venda primeiro
     const vendaData = {
       empresa: empresaId,
@@ -130,7 +144,14 @@ const handleRegisterSale = async () => {
       valor_total_venda: totalValue // Valor bruto a receber
     };
 
+    // Log do payload da requisição
+    console.log('Payload da requisição:', vendaData);
+
     const vendaResponse = await axios.post(API_VENDAS, vendaData);
+
+    // Log da resposta da requisição
+    console.log('Resposta da requisição:', vendaResponse.data);
+
     const vendaId = vendaResponse.data.data.id;
 
     // Agora registra os itens da venda
@@ -143,17 +164,20 @@ const handleRegisterSale = async () => {
       valor_desconto: discountType === 'R$' ? parseFloat(discountValue) : 0
     }));
 
-    const responsePromises = saleItems.map(item => 
+    // Log dos itens da venda
+    console.log('Itens da venda:', saleItems);
+
+    const responsePromises = saleItems.map(item =>
       axios.post(API_ITENS_VENDA, item)
     );
 
     await Promise.all(responsePromises);
 
-    // Navegar ou limpar o carrinho após isso
-    navigation.navigate('NewRegisteredSale', { clearCart: true });
-
+    setSaleId(vendaId);
+    setIsModalVisible(true);
   } catch (error) {
-    console.error('Erro ao registrar venda:', error);
+    // Log do erro, se a requisição falhar
+    console.error('Erro ao registrar venda:', error.response ? error.response.data : error.message);
     Alert.alert('Erro', 'Ocorreu um erro ao registrar a venda.');
   }
 };
@@ -161,7 +185,6 @@ const handleRegisterSale = async () => {
   const toggleDropdown = () => {
     setDropdownVisible(!isDropdownVisible);
   };
-
   const selectClient = (client) => {
     setSelectedClient(client);
     setDropdownVisible(false);
@@ -210,6 +233,7 @@ const calculateValues = useCallback(() => {
 useEffect(() => {
   calculateValues(); // Recalcula os valores sempre que o desconto ou o parcelamento mudar
 }, [totalPrice, discountValue, discountType, installments, calculateValues]);
+// Adiciona verificação de segurança
 
 
   return (
@@ -384,7 +408,7 @@ useEffect(() => {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
+      <TouchableOpacity style={styles.confirmButton} onPress={handleRegisterSale}>
         <Icon name="checkmark-circle" size={25} color={COLORS.black} />
         <Text style={styles.confirmButtonText}>Concluir esta venda</Text>
       </TouchableOpacity>
@@ -399,7 +423,7 @@ useEffect(() => {
           <View style={styles.modalContent}>
             <Icon name="checkmark-circle" size={100} color={COLORS.green} />
             <Text style={styles.modalText}>Sua venda foi concluída</Text>
-            <TouchableOpacity style={styles.modalPrimaryButton} onPress={handleRegisterSale}>
+            <TouchableOpacity style={styles.modalPrimaryButton} onPress={handleConfirm}>
               <Icon name="cart" size={20} color={COLORS.black} />
               <Text style={styles.modalPrimaryButtonText}>Registrar outra venda</Text>
             </TouchableOpacity>
@@ -420,9 +444,17 @@ useEffect(() => {
         <View style={styles.invoiceModalContainer}>
           <View style={styles.invoiceModalContent}>
             <Text style={styles.invoiceModalTitle}>Escolha uma opção:</Text>
-            <TouchableOpacity style={styles.invoiceOptionButtonRecibo} onPress={() => console.log("Emitir Recibo")}>
-              <Text style={styles.invoiceOptionTextRecibo}>Recibo</Text>
-            </TouchableOpacity>
+            <TouchableOpacity 
+                style={styles.invoiceOptionButtonRecibo} 
+                onPress={() => {
+                  handleCloseInvoiceModal(); // Fecha o modal de Invoice
+                  navigation.navigate('ReceiptScreen', { saleId, fromLiquidateNow: true }); // Passa o saleId e a flag fromLiquidateNow
+                }}
+              >
+                <Text style={styles.invoiceOptionTextRecibo}>Recibo</Text>
+              </TouchableOpacity>
+
+
             <TouchableOpacity style={styles.invoiceOptionButtonNotaFiscal} onPress={() => console.log("Emitir Nota Fiscal")} disabled={true}>
               <Text style={styles.invoiceOptionTextNotaFiscal}>Nota Fiscal</Text>
             </TouchableOpacity>
