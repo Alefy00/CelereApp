@@ -5,8 +5,8 @@ import CheckBox from '@react-native-community/checkbox';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../../../../constants';
 import axios from 'axios';
-const FREQUENCY_API = 'https://api.celereapp.com.br/api/frequenciarecorrencia/';
 
+const FREQUENCY_API = 'https://api.celereapp.com.br/api/frequenciarecorrencia/';
 
 const RecurrenceField = ({ setSelectedFrequencyId, setIsIndeterminate, setRepeatCount }) => {
   const [isRecurring, setIsRecurring] = useState(false);

@@ -78,7 +78,6 @@ const processarVendas = async (vendas) => {
   return vendasProcessadas;
 };
 
-
 // Função para buscar todas as despesas finalizadas da empresa logada
 const fetchAllDespesas = async (empresaId) => {
   try {

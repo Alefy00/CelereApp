@@ -22,7 +22,6 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentDate, setCurrentDate] = useState('');
   const [liquidValue, setLiquidValue] = useState(totalPrice);  // Estado para armazenar o valor líquido após desconto
-  const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
 
   // Função para mostrar alertas
@@ -69,16 +68,8 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
     navigation.navigate("IncludeClient");
   };
 
-  const handleCloseInvoiceModal = () => {
-    setIsInvoiceModalVisible(false);
-  };
-
   const handleConfirm = () => {
     setIsModalVisible(true);
-  };
-
-  const handleOpenInvoiceModal = () => {
-    setIsInvoiceModalVisible(true);
   };
 
   const handleShowCalendar = () => {
@@ -311,32 +302,6 @@ const handleRegisterSale = async () => {
             <TouchableOpacity style={styles.modalPrimaryButton} onPress={handleRegisterSale}>
               <Icon name="cart" size={20} color={COLORS.black} />
               <Text style={styles.modalPrimaryButtonText}>Registrar outra venda</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalPrimaryButton2} onPress={handleOpenInvoiceModal}>
-              <Icon name="cart" size={20} color={COLORS.black} />
-              <Text style={styles.modalPrimaryButtonText}>Emitir NF-e ou Recibo</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal
-        transparent={true}
-        animationType="fade"
-        visible={isInvoiceModalVisible}
-        onRequestClose={handleCloseInvoiceModal}
-      >
-        <View style={styles.invoiceModalContainer}>
-          <View style={styles.invoiceModalContent}>
-            <Text style={styles.invoiceModalTitle}>Escolha uma opção:</Text>
-            <TouchableOpacity style={styles.invoiceOptionButtonRecibo} onPress={() => console.log("Emitir Recibo")}>
-              <Text style={styles.invoiceOptionTextRecibo}>Recibo</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.invoiceOptionButtonNotaFiscal} onPress={() => console.log("Emitir Nota Fiscal")} disabled={true}>
-              <Text style={styles.invoiceOptionTextNotaFiscal}>Nota Fiscal</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={handleCloseInvoiceModal}>
-              <Icon name="close" size={25} color={COLORS.black} />
             </TouchableOpacity>
           </View>
         </View>

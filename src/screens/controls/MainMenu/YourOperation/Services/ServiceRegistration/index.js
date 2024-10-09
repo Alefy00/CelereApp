@@ -157,13 +157,15 @@ const AddService = ({ navigation }) => {
     setIsPriceDisabled(!isPriceDisabled);
     if (!isPriceDisabled) {
       setPrice('0.00'); // Define o preço como 0 ao marcar o checkbox
-      setUnitMeasure('Unidade'); // Define a unidade como "Unidade" ao marcar o checkbox
-      setUnitsOfMeasure([{ id: 1, nome: 'Unidade' }]); // Define apenas "Unidade" como opção
+      setUnitMeasure('und'); // Define o código da unidade como "und" automaticamente
+      setUnitsOfMeasure([{ id: 1, cod: 'und', nome: 'Unidade' }]); // Define a unidade "und" com o código correto
     } else {
       setPrice(''); // Limpa o preço quando o checkbox é desmarcado
+      setUnitMeasure(''); // Limpa a unidade de medida quando o checkbox é desmarcado
       fetchUnitsOfMeasure(empresaId); // Recarrega as unidades de medida da API ao desmarcar o checkbox
     }
   };
+  
 
   // Função para formatar o valor como moeda Real Brasileiro
 const formatPriceToBRL = (value) => {
@@ -269,7 +271,7 @@ const handlePriceChange = (text) => {
               <ScrollView nestedScrollEnabled={true}>
                 {unitsOfMeasure.map((unit) => (
                   <TouchableOpacity key={unit.id} style={styles.dropdownItem} onPress={() => selectUnitMeasure(unit)}>
-                    <Text style={styles.dropdownItemText}>{unit.nome}</Text>
+                    <Text style={styles.dropdownItemText}>{unit.cod} - {unit.nome}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>

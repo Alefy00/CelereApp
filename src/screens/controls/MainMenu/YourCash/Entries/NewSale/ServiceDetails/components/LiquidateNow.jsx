@@ -19,9 +19,8 @@ const LiquidateNow = ({ navigation, route, clients }) => {
   const { services: receivedServices = [], products: receivedProducts = [], totalPrice: initialTotalPrice } = route.params;
 
   // Adicionando useState para controlar produtos e serviços
-  const [services, setServices] = useState([]); 
-  const [products, setProducts] = useState([]); 
-  const [price, setPrice] = useState(0);
+  const [services, setServices] = useState([]);
+  const [products, setProducts] = useState([]);
   const [discountType, setDiscountType] = useState('%');
   const [discount, setDiscount] = useState('');
   const [isDropdownVisible, setDropdownVisible] = useState(false);
@@ -38,6 +37,17 @@ const LiquidateNow = ({ navigation, route, clients }) => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
   const [installmentValue, setInstallmentValue] = useState(0);
   const [saleId, setSaleId] = useState(null);
+  const [servicePrices, setServicePrices] = useState({});
+
+  const handleServicePriceChange = (serviceId, text) => {
+    let numericValue = text.replace(/\D/g, ''); // Remove caracteres não numéricos
+    numericValue = (numericValue / 100).toFixed(2); // Formata para centavos
+    setServicePrices(prevPrices => ({
+      ...prevPrices,
+      [serviceId]: numericValue,
+    }));
+  };
+  
 
       // Função para mostrar alertas
       const showAlert = (title, message) => {
@@ -148,58 +158,71 @@ const handleRegisterSale = async () => {
       valor_total_venda: totalValue // Valor bruto a receber
     };
 
-    // Log do payload enviado
-    console.log('Payload da requisição:', vendaData);
+    // Log do payload de venda enviado
+    console.log('Payload da venda a ser enviada:', vendaData);
 
     const vendaResponse = await axios.post(REGISTER_SALE_API, vendaData);
 
-    // Log da resposta da requisição
-    console.log('Resposta da requisição:', vendaResponse.data);
+    // Log da resposta da requisição de venda
+    console.log('Resposta da API após registrar venda:', vendaResponse.data);
 
     const vendaId = vendaResponse.data.data.id;
     console.log('Venda registrada com sucesso, ID da venda:', vendaId);
 
-    // Armazene o ID da venda
     setSaleId(vendaId);
 
     // Agora registra os serviços da venda
-    const serviceItems = services.map(service => ({
-      empresa_id: empresaId,
-      venda_id: vendaId, // ID da venda registrada
-      servico_id: service.id, // ID do serviço
-      quantidade: service.amount || 1, // Quantidade sempre deve ser válida
-      percentual_desconto: !isNaN(parseFloat(discount)) ? (discountType === '%' ? parseFloat(discount) : 0) : 0, // Percentual de desconto sempre como número válido
-      valor_desconto: !isNaN(parseFloat(discount)) ? (discountType === 'R$' ? parseFloat(discount) : 0) : 0, // Valor de desconto sempre como número válido
-      gastos_envolvidos: parseFloat(additionalCosts || 0) // Gastos adicionais
-    }));
+    const serviceItems = services.map(service => {
+      const servicePrice = service.preco_venda && parseFloat(service.preco_venda) !== 0
+        ? parseFloat(service.preco_venda).toFixed(2)
+        : parseFloat(servicePrices[service.id]).toFixed(2); // Usa o valor inserido no input se o preço for 0
 
+        console.log('Valor unitário enviado:', servicePrice);
+
+      return {
+        empresa_id: empresaId,
+        venda_id: vendaId, // ID da venda registrada
+        servico_id: service.id, // ID do serviço
+        quantidade: service.amount || 1, // Quantidade
+        percentual_desconto: !isNaN(parseFloat(discount)) ? (discountType === '%' ? parseFloat(discount) : 0) : 0,
+        valor_desconto: !isNaN(parseFloat(discount)) ? (discountType === 'R$' ? parseFloat(discount) : 0) : 0,
+        valor_unitario: servicePrice, // Considera o preço do input se necessário
+        gastos_envolvidos: parseFloat(additionalCosts || 0).toFixed(2) // Custos adicionais
+      };
+    });
+    
+
+    // Log dos itens de serviços a serem enviados
+    console.log('Payload dos serviços a serem enviados:', serviceItems);
+
+    const servicePromises = serviceItems.map(item => axios.post(REGISTER_ITEM_SALE_API, item));
+
+    // Agora registra os produtos da venda
     const productItems = products.map(product => ({
       empresa_id: empresaId,
-      venda_id: vendaId, // ID da venda registrada
-      produto_id: product.id, // ID do produto
-      quantidade: product.amount || 1, // Quantidade sempre deve ser válida
-      percentual_desconto: !isNaN(parseFloat(discount)) ? (discountType === '%' ? parseFloat(discount) : 0) : 0, // Percentual de desconto sempre como número válido
-      valor_desconto: !isNaN(parseFloat(discount)) ? (discountType === 'R$' ? parseFloat(discount) : 0) : 0 // Valor de desconto sempre como número válido
+      venda_id: vendaId,
+      produto_id: product.id,
+      quantidade: product.amount || 1,
+      percentual_desconto: !isNaN(parseFloat(discount)) ? (discountType === '%' ? parseFloat(discount) : 0) : 0,
+      valor_desconto: !isNaN(parseFloat(discount)) ? (discountType === 'R$' ? parseFloat(discount) : 0) : 0,
+      valor_unitario: product.preco_venda,
     }));
 
-    const servicePromises = serviceItems.map(item =>
-      axios.post(REGISTER_ITEM_SALE_API, item)
-    );
+    // Log dos itens de produtos a serem enviados
+    console.log('Payload dos produtos a serem enviados:', productItems);
 
-    const productPromises = productItems.map(item =>
-      axios.post(REGISTER_ITEM_SALE_API, item)
-    );
+    const productPromises = productItems.map(item => axios.post(REGISTER_ITEM_SALE_API, item));
 
+    // Aguarda todas as requisições de serviços e produtos
     await Promise.all([...servicePromises, ...productPromises]);
 
     setIsModalVisible(true);
   } catch (error) {
-    // Log do erro caso a requisição falhe
+    // Log do erro da requisição
     console.error('Erro ao registrar venda:', error.response ? error.response.data : error);
     Alert.alert('Erro', 'Ocorreu um erro ao registrar a venda e os itens.');
   }
 };
-
 
   const toggleDropdown = () => {
       setDropdownVisible(!isDropdownVisible);
@@ -226,10 +249,23 @@ const handleRegisterSale = async () => {
 
 // Função para calcular o total dos produtos e serviços, com aplicação do desconto
 const calculateTotal = useCallback(() => {
-  const totalProductPrice = products.reduce((sum, product) => sum + ((product.preco_venda || 0) * (product.amount || 1)), 0);
-  const totalServicePrice = services.reduce((sum, service) => sum + ((service.preco_venda || 0) * (service.amount || 1)), 0);
+  // Calcular o total dos produtos
+  const totalProductPrice = products.reduce((sum, product) => 
+    sum + ((product.preco_venda || 0) * (product.amount || 1)), 0);
+
+  // Calcular o total dos serviços, considerando o valor inserido manualmente, se aplicável
+  const totalServicePrice = services.reduce((sum, service) => {
+    const servicePrice = service.preco_venda && parseFloat(service.preco_venda) !== 0
+      ? service.preco_venda
+      : servicePrices[service.id] || 0; // Usa o preço inserido no input se o preço for zero
+    return sum + ((parseFloat(servicePrice) || 0) * (service.amount || 1));
+  }, 0);
+  
+
+  // Calcular o total geral (produtos + serviços + custos adicionais)
   let total = totalProductPrice + totalServicePrice + parseFloat(additionalCosts || 0);
 
+  // Aplicar o desconto, se houver
   if (discountType === '%' && !isNaN(discount) && discount !== '') {
     total -= (total * (parseFloat(discount) / 100));
   } else if (discountType === 'R$' && !isNaN(discount) && discount !== '') {
@@ -238,17 +274,21 @@ const calculateTotal = useCallback(() => {
 
   setLiquidValue(total);
 
-  // Calcular o valor por parcela
+  // Calcular o valor por parcela, se aplicável
   if (installments > 1) {
     setInstallmentValue((total / installments).toFixed(2));
   } else {
-    setInstallmentValue(total.toFixed(2));  // Se for à vista, valor total é o próprio valor
+    setInstallmentValue(total.toFixed(2));  // Se for à vista, o valor total é o próprio valor
   }
-}, [products, services, discount, discountType, additionalCosts, installments]);
+}, [products, services, servicePrices, discount, discountType, additionalCosts, installments]);
+
+
+
 
 useEffect(() => {
   calculateTotal();
-}, [products, services, discount, calculateTotal]);
+}, [products, services, servicePrices, discount, calculateTotal]);
+
 
 
 
@@ -273,6 +313,15 @@ useEffect(() => {
 const handleCloseInvoiceModal = () => {
     setIsInvoiceModalVisible(false);
 };
+
+const formatCurrency = (value) => {
+  if (!value) return '';
+  return parseFloat(value).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+};
+
   
     return (
       <ScrollView style={styles.containerBase}>
@@ -312,42 +361,47 @@ const handleCloseInvoiceModal = () => {
 
       {/* Exibe os serviços separadamente */}
       {services.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>Serviços</Text>
-          <View style={styles.cartSection}>
-            {services.map((service, index) => (
-              <View key={index} style={styles.cartItem}>
-                <Image source={{ uri: service.imagem }} style={styles.productImage} />
-                <View style={styles.containerServiço}>
-                  <Text style={styles.cartItemTitle}>{service.nome}</Text>
-                  <Text style={styles.cartItemSubtitle}>
-                    Unid. de medida: {service.unidade_medida || 'Por manutenção'}
-                  </Text>
-                  <Text style={styles.cartItemPrice}>
-                    Preço unitário: R$ {service.preco_venda ? parseFloat(service.preco_venda).toFixed(2) : 'Defina o preço'}
-                  </Text>
-                  <Text style={styles.cartItemSubtitleMedida}>
-                    Quantidade: {service.amount}
-                  </Text>
-                </View>
-                  <Text style={styles.cartItemTotal}>
-                    R$ {(service.preco_venda * service.amount).toFixed(2)}
-                  </Text>
+  <>
+    <Text style={styles.sectionTitle}>Serviços</Text>
+    <View style={styles.cartSection}>
+    {services.map((service, index) => (
+  <View key={index} style={styles.cartItem}>
+    <Image source={{ uri: service.imagem }} style={styles.productImage} />
+    <View style={styles.containerServiço}>
+      <Text style={styles.cartItemTitle}>{service.nome}</Text>
+      <Text style={styles.cartItemSubtitle}>
+        Unid. de medida: {service.unidade_medida || 'Por manutenção'}
+      </Text>
+      <Text style={styles.cartItemPrice}>
+        Preço unitário: R$ {service.preco_venda ? parseFloat(service.preco_venda).toFixed(2) : 'Defina o preço'}
+      </Text>
+      <Text style={styles.cartItemSubtitleMedida}>
+        Quantidade: {service.amount}
+      </Text>
+    </View>
 
-                  {!service.preco_venda || parseFloat(service.preco_venda) === 0 ? (
-                    <TextInput
-                      style={styles.priceInput}
-                      keyboardType="numeric"
-                      value={price ? price.toFixed(2) : ''}
-                      onChangeText={text => setPrice(parseFloat(text) || 0)}
-                      placeholder="Preço de venda (R$)"
-                    />
-                  ) : null}
-              </View>
-            ))}
-          </View>
-        </>
-      )}
+    {/* Input de preço para serviços com valor 0 */}
+    {!service.preco_venda || parseFloat(service.preco_venda) === 0 ? (
+      <TextInput
+        style={styles.priceInput}
+        keyboardType="numeric"
+        value={servicePrices[service.id] ? formatCurrency(servicePrices[service.id]) : ''}
+        onChangeText={text => handleServicePriceChange(service.id, text)}
+        placeholder="Preço (R$)"
+      />
+    ) : (
+      <Text style={styles.cartItemTotal}>
+        R$ {(service.preco_venda * service.amount).toFixed(2)}
+      </Text>
+    )}
+  </View>
+))}
+
+    </View>
+  </>
+)}
+
+
 
 {products.length > 0 && (
         <>
@@ -483,8 +537,16 @@ const handleCloseInvoiceModal = () => {
         <View style={styles.valueItem}>
           <Text style={styles.valueLabel}>Valor Bruto</Text>
           <Text style={styles.valueAmount2}>
-            R$ {(products.reduce((sum, product) => sum + (product.preco_venda * product.amount), 0) + services.reduce((sum, service) => sum + (service.preco_venda * service.amount), 0) + parseFloat(additionalCosts || 0)).toFixed(2)}
-          </Text>
+      R$ {(
+        products.reduce((sum, product) => sum + (product.preco_venda * product.amount), 0) +
+        services.reduce((sum, service) => {
+          const servicePrice = service.preco_venda && parseFloat(service.preco_venda) !== 0
+            ? service.preco_venda
+            : servicePrices[service.id] || 0; // Verifica o valor inserido no input
+          return sum + (parseFloat(servicePrice) * (service.amount || 1));
+        }, 0) + parseFloat(additionalCosts || 0)
+      ).toFixed(2)}
+    </Text>
         </View>
         <View style={styles.valueItem}>
           <Text style={styles.valueLabel}>Taxa do cartão </Text>
