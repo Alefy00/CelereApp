@@ -31,42 +31,42 @@ const ReceiptScreen = ({ navigation, route }) => {
     }, []);
 
     // Função para obter a URL do recibo
-    const fetchReceipt = useCallback(async () => {
-        try {
-            console.log('Iniciando requisição para gerar recibo...');
-            setLoading(true);
-            const empresaId = await getEmpresaId();
+// Função para obter a URL do recibo
+const fetchReceipt = useCallback(async () => {
+    try {
+        console.log('Iniciando requisição para gerar recibo...');
+        setLoading(true);
+        const empresaId = await getEmpresaId();
 
-            if (!empresaId) {
-                setLoading(false);
-                return;
-            }
-
-            // Requisição para obter a URL do PDF com is_pdf_file=True
-            const response = await axios.get(`https://api.celereapp.com.br/cad/vendas/gerar_recibo_venda/`, {
-                params: {
-                    empresa_id: empresaId,
-                    venda_id: saleId,
-                    is_pdf_file: true // Garantir que a resposta seja a URL do PDF
-                }
-            });
-
-            console.log('Resposta da API:', response.data); // Log da resposta da API
-
-            // Verifique se a URL foi recebida corretamente
-            if (response.data?.url) {
-                setPdfUrl(response.data.url); // Definir a URL do PDF
-            } else {
-                setError('Erro ao gerar o recibo: URL não encontrada.');
-                console.error('Erro: URL do PDF não encontrada na resposta.');
-            }
-        } catch (error) {
-            setError('Erro ao gerar o recibo.');
-            console.error('Erro na requisição:', error);
-        } finally {
+        if (!empresaId) {
             setLoading(false);
+            return;
         }
-    }, [saleId, getEmpresaId]);
+
+        // Requisição para obter a URL do PDF com is_pdf_file=True
+        const response = await axios.get(`https://api.celereapp.com.br/cad/vendas/gerar_recibo_venda/`, {
+            params: {
+                empresa_id: empresaId,
+                venda_id: saleId,
+                is_pdf_file: 'True' // Garantir que está sendo enviado como string
+            }
+        });
+        console.log('Resposta da API:', response.data); // Log da resposta da API
+
+        // Verifique se a URL foi recebida corretamente
+        if (response.data?.url) {
+            setPdfUrl(response.data.url); // Definir a URL do PDF
+        } else {
+            setError('Erro ao gerar o recibo: URL não encontrada.');
+            console.error('Erro: URL do PDF não encontrada na resposta.');
+        }
+    } catch (error) {
+        setError('Erro ao gerar o recibo.');
+        console.error('Erro na requisição:', error);
+    } finally {
+        setLoading(false);
+    }
+}, [saleId, getEmpresaId]);
 
     useEffect(() => {
         fetchReceipt();
