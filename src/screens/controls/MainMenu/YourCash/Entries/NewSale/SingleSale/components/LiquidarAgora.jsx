@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, FlatList, Modal, Alert } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from '../styles';
 import PixIcon from "../../../../../../../../assets/images/svg/iconPix.svg";
@@ -30,7 +31,8 @@ const LiquidarAgora = ({ navigation }) => {
   const [discountValue, setDiscountValue] = useState('');
   const [totalBruto, setTotalBruto] = useState(0);
   const [totalLiquido, setTotalLiquido] = useState(0);
-  const [cartItems, setCartItems] = useState([{ id: 1, name: '', priceVenda: '', priceCusto: '', quantity: 1 }]);
+  const [cartItems, setCartItems] = useState([{ id: 1, name: '', priceVenda: 0, priceCusto: 0, quantity: 1 }]);
+  const [saleId, setSaleId] = useState(null); 
   
   // Função para buscar o ID da empresa logada
   const getEmpresaId = useCallback(async () => {
@@ -191,6 +193,8 @@ useEffect(() => {
 
       console.log('Dados da venda a serem enviados:', vendaData);
 
+      
+
       const response = await axios.post('https://api.celereapp.com.br/cad/vendas/', vendaData);
       if (response.data && response.data.status === 'success') {
         const vendaId = response.data.data.id;
@@ -198,7 +202,7 @@ useEffect(() => {
 
         // Agora, registrar os itens da venda
         await registerSaleItems(vendaId);
-
+        setSaleId(vendaId);
         setIsModalVisible(true);
       } else {
         showAlert('Erro', 'Falha ao registrar a venda. Verifique os dados e tente novamente.');
@@ -260,8 +264,7 @@ useEffect(() => {
       responses.forEach(response => {
         console.log('Resposta da API para item de venda:', response.data);
       });
-  
-      showAlert('Sucesso', 'Itens da venda registrados com sucesso!');
+
   
     } catch (error) {
       // Log detalhado do erro
@@ -301,45 +304,51 @@ const selectPaymentOption = (option) => {
 };
 
 const formatCurrency = (value) => {
-  return value > 0 ? `R$ ${value.toFixed(2)}` : 'R$ 0,00';
+  if (!value) return '';
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(value);
+};
+
+const removeFormatting = (value) => {
+  return parseFloat(value.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
 };
 
 
 const handleNewRegistered = () => {
-  resetFields();
   setIsModalVisible(false);
   navigation.navigate('SingleSale');
 };
 
 const handleOpenInvoiceModal = () => {
+  setIsModalVisible(false);
   setIsInvoiceModalVisible(true);
 };
 
-const handleCloseModal = () => {
-  setIsModalVisible(false);
-};
 
 const handleCloseInvoiceModal = () => {
   setIsInvoiceModalVisible(false);
 };
 
 const resetFields = () => {
-  setCartItems([{ id: 1, quantity: 0, priceVenda: 0, priceCusto: 0 }]);
+  setCartItems([{ id: 1, quantity: 1, priceVenda: 0, priceCusto: 0 }]); // Reseta os valores numéricos
   setDiscountValue('');
   setTotalBruto(0);
   setTotalLiquido(0);
   setSelectedClient(null);
+  setSelectedPaymentMethod(null); // Resetar método de pagamento selecionado
 };
 
+
 const updatePrice = (index, value, field) => {
-  if (cartItems[index]) {
-    const updatedItems = [...cartItems];
-    updatedItems[index][field] = parseFloat(value) || 0;
-    setCartItems(updatedItems);
-  } else {
-    console.error('Erro: Item não encontrado no índice', index);
-  }
+  const numericValue = parseFloat(value.replace(/[^\d]/g, '')) / 100; // Remove todos os caracteres não numéricos e divide por 100 para manter precisão
+  const updatedItems = [...cartItems];
+  updatedItems[index][field] = isNaN(numericValue) ? 0 : numericValue; // Atualiza o estado com o valor numérico
+  setCartItems(updatedItems);
 };
+
+
 
 const updateQuantity = (id, increment) => {
   const updatedItems = cartItems.map((item) => {
@@ -359,8 +368,10 @@ const togglePaymentDropdown = () => {
 };
   // Função principal para registrar venda e itens
  const handleConfirm = async () => {
-  await registerSale();
+   await registerSale();
+   resetFields();
 };
+
 
 return (
   <ScrollView>
@@ -410,7 +421,8 @@ return (
           placeholder="Preço de custo (R$)"
           style={styles.input}
           keyboardType="numeric"
-          onChangeText={(value) => updatePrice(index, value, 'priceCusto')}
+          value={item.priceCusto ? formatCurrency(item.priceCusto) : ''} // Exibir o valor formatado
+          onChangeText={(value) => updatePrice(index, value, 'priceCusto')} // Atualizar o estado com o valor numérico
         />
         <View style={styles.quantityRow}>
           <Text style={styles.quantityLabel}>Qtd.</Text>
@@ -428,12 +440,12 @@ return (
             <Icon name="add" size={20} color={COLORS.black} />
           </TouchableOpacity>
           <TextInput
-            placeholder="Preço de venda (R$)"
-            style={styles.input}
-            keyboardType="numeric"
-            value={item.priceVenda.toString()}
-            onChangeText={(value) => updatePrice(index, value, 'priceVenda')}
-          />
+              placeholder="Preço de venda (R$)"
+              style={styles.input}
+              keyboardType="numeric"
+              value={item.priceVenda ? formatCurrency(item.priceVenda) : ''} // Exibir o valor formatado
+              onChangeText={(value) => updatePrice(index, value, 'priceVenda')} // Atualizar o estado com o valor numérico
+            />
         </View>
       </View>
     ))}
@@ -561,10 +573,6 @@ return (
             <Icon name="cart" size={20} color={COLORS.black} />
             <Text style={styles.modalPrimaryButtonText}>Emitir NF-e ou Recibo</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.modalBackButton} onPress={handleCloseModal}>
-            <Icon name="arrow-back" size={20} color={COLORS.black} />
-            <Text style={styles.modalBackButtonText}>Voltar ao resumo</Text>
-          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -574,10 +582,13 @@ return (
       <View style={styles.invoiceModalContainer}>
         <View style={styles.invoiceModalContent}>
           <Text style={styles.invoiceModalTitle}>Escolha uma opção:</Text>
-          <TouchableOpacity style={styles.invoiceOptionButtonRecibo} onPress={() => console.log("Emitir Recibo")}>
+          <TouchableOpacity style={styles.invoiceOptionButtonRecibo} onPress={() => {
+                  handleCloseInvoiceModal(); // Fecha o modal de Invoice
+                  navigation.navigate('ReceiptScreen', { saleId, fromLiquidateAgora: true }); // Passa o saleId e a flag fromLiquidateNow
+                }}>
             <Text style={styles.invoiceOptionTextRecibo}>Recibo</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.invoiceOptionButtonNotaFiscal} onPress={() => console.log("Emitir Nota Fiscal")}>
+          <TouchableOpacity style={styles.invoiceOptionButtonNotaFiscal} onPress={() => console.log("Emitir Nota Fiscal")} disabled={true}>
             <Text style={styles.invoiceOptionTextNotaFiscal}>Nota Fiscal</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.closeButton} onPress={handleCloseInvoiceModal}>

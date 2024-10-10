@@ -155,7 +155,8 @@ const handleRegisterSale = async () => {
       dt_pagamento: currentDate, // Data de pagamento (data atual)
       percentual_desconto: parseFloat(discount) || 0, // Percentual de desconto sempre como número válido
       tipo_pagamento_venda: selectedPaymentMethod, // ID da forma de pagamento selecionada
-      valor_total_venda: totalValue // Valor bruto a receber
+      valor_total_venda: totalValue, // Valor bruto a receber
+      gastos_envolvidos: parseFloat(additionalCosts || 0).toFixed(2)// Custos adicionais
     };
 
     // Log do payload de venda enviado
@@ -187,7 +188,7 @@ const handleRegisterSale = async () => {
         percentual_desconto: !isNaN(parseFloat(discount)) ? (discountType === '%' ? parseFloat(discount) : 0) : 0,
         valor_desconto: !isNaN(parseFloat(discount)) ? (discountType === 'R$' ? parseFloat(discount) : 0) : 0,
         valor_unitario: servicePrice, // Considera o preço do input se necessário
-        gastos_envolvidos: parseFloat(additionalCosts || 0).toFixed(2) // Custos adicionais
+        
       };
     });
     

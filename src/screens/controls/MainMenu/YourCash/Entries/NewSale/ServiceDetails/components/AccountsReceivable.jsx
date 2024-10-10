@@ -118,7 +118,6 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
     };
 
 // Função para registrar venda e itens (produtos e serviços)
-// Função para registrar venda e itens (produtos e serviços)
 const handleRegisterSale = async () => {
   try {
       const empresaId = await getEmpresaId(); // Obtém o ID da empresa logada
@@ -146,6 +145,7 @@ const handleRegisterSale = async () => {
           valor_total_venda: totalValue, // Valor total com desconto
           percentual_desconto: parseFloat(discount) || 0, // Percentual de desconto (0 se não houver)
           tipo_pagamento_venda: paymentMethodId, // Null para tipo de pagamento
+          gastos_envolvidos: parseFloat(additionalCosts || 0), // Gastos adicionais (se houver)
       };
 
       console.log('Dados de venda enviados:', vendaData);
@@ -170,7 +170,7 @@ const handleRegisterSale = async () => {
               preco_unitario_venda: precoVenda, // Define o preço correto
               percentual_desconto: parseFloat(discount) || 0, // Percentual de desconto sempre como número válido
               valor_desconto: discountType === 'R$' ? parseFloat(discount) || 0 : 0, // Valor de desconto sempre como número válido
-              gastos_envolvidos: parseFloat(additionalCosts || 0), // Gastos adicionais (se houver)
+              
           };
       });
 
@@ -210,9 +210,6 @@ const handleRegisterSale = async () => {
       Alert.alert('Erro', 'Ocorreu um erro ao registrar a venda e os itens.');
   }
 };
-
-
-  
     
     // Adiciona uma função que reseta o carrinho
 const resetCart = () => {
@@ -264,15 +261,11 @@ const calculateTotalWithDiscount = useCallback(() => {
   setLiquidValue(total); // Atualiza o valor líquido a ser recebido
 }, [discount, discountType, totalWithoutDiscount]);
 
-
-
 // Calcular totais sempre que os valores de produtos, serviços, custos ou descontos mudarem
 useEffect(() => {
   calculateTotalWithoutDiscount();
   calculateTotalWithDiscount();
 }, [products, services, discount, discountType, additionalCosts, servicePrices, calculateTotalWithoutDiscount, calculateTotalWithDiscount]);
-
-  
 
 // Função para atualizar o valor do serviço manualmente inserido pelo usuário
 const handleServicePriceChange = (serviceId, value) => {
@@ -285,7 +278,6 @@ const handleServicePriceChange = (serviceId, value) => {
     [serviceId]: formattedValue,
   }));
 };
-
 
     // Função para formatar valor para moeda Real Brasileiro
 const formatCurrency = (value) => {

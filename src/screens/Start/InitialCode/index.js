@@ -99,7 +99,7 @@ const InitialCode = ({ navigation }) => {
       <ProgressBar currentStep={2} totalSteps={4} />
 
       <View style={styles.contentContainer}>
-        <Text style={styles.title}>Um código foi enviado para o seu número via WhatsApp</Text>
+        <Text style={styles.title}>Um código foi enviado para o seu número via SMS</Text>
         <View style={styles.cardContainer}>
           <View style={styles.codeInputContainer}>
             <TextInput

@@ -48,7 +48,7 @@ const fetchReceipt = useCallback(async () => {
             params: {
                 empresa_id: empresaId,
                 orcamento_id: saleId,  // Alterado para orcamento_id
-                is_pdf_file: true  // Garantir que a resposta seja a URL do PDF
+                is_pdf_file: 'True' // Garantir que a resposta seja a URL do PDF
             }
         });
 

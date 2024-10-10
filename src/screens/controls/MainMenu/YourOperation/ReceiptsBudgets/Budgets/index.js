@@ -8,6 +8,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
 import FilterModal from '../../../YourCash/Entries/SettleCredit/components/FilterModal';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 const API_URL_CLIENTES = 'https://api.celereapp.com.br/cad/cliente/';
@@ -94,9 +95,6 @@ const Budget = ({ navigation }) => {
     }
   }, [clientCache]);
   
-  
-  
-
   // Função para carregar orçamentos
   const loadBudgets = useCallback(async () => {
     setLoading(true);
@@ -147,6 +145,13 @@ const Budget = ({ navigation }) => {
         setLoading(false);
       }
     };
+
+  // Usar useFocusEffect para recarregar orçamentos toda vez que a tela ganhar foco
+  useFocusEffect(
+    useCallback(() => {
+      loadBudgets();
+    }, [loadBudgets])
+  );
   
     const handleSelectBudget = (budget) => {
       setSelectedBudget(budget);
@@ -188,7 +193,6 @@ const Budget = ({ navigation }) => {
         </View>
       </TouchableOpacity>
     );
-    
 
   const handleNewBudgets = () => {
     navigation.navigate('NewBudgets');

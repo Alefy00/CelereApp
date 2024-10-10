@@ -243,7 +243,7 @@ const InitialRegistration = ({ navigation }) => {
             <Text style={styles.buttonText}>Enviar Código</Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.infoText}>Um código será enviado para o seu WhatsApp.</Text>
+        <Text style={styles.infoText}>Um código será enviado para o seu celular.</Text>
       </View>
       <Modal
         animationType="slide"

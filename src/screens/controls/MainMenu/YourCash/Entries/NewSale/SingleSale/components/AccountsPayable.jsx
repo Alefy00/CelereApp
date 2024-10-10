@@ -3,10 +3,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, Modal, Platform, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from '../styles';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { COLORS } from '../../../../../../../../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import CustomCalendar from '../../../../../../../../components/CustomCalendar';
 
 // Função para mostrar alertas
 const showAlert = (title, message) => {
@@ -15,18 +15,17 @@ const showAlert = (title, message) => {
 
 const AccountsPayable = ({  navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [paymentDate, setPaymentDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [paymentOption, setPaymentOption] = useState('Fiado'); // Default
   const [clientes, setClientes] = useState([]);
   const [discountType, setDiscountType] = useState('%');
   const [discountValue, setDiscountValue] = useState('');
   const [totalBruto, setTotalBruto] = useState(0);
   const [totalLiquido, setTotalLiquido] = useState(0);
-  const [cartItems, setCartItems] = useState([{ id: 1, name: '', priceVenda: '', priceCusto: '', quantity: 1 }]);
+  const [cartItems, setCartItems] = useState([{ id: 1, name: '', priceVenda: 0, priceCusto: 0, quantity: 1 }]);
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
 
    
   // Função para buscar o ID da empresa logada
@@ -111,7 +110,6 @@ const calculateTotals = useCallback(() => {
   setTotalLiquido(totalLiquido);
 }, [cartItems, discountType, discountValue]);
 
-
 useEffect(() => {
   calculateTotals();
 }, [cartItems, discountValue, discountType, calculateTotals]);
@@ -130,9 +128,10 @@ const updateQuantity = (id, increment) => {
 };
 
 const updatePrice = (index, value, field) => {
+  const numericValue = parseFloat(value.replace(/[^\d]/g, '')) / 100; // Remove todos os caracteres não numéricos e divide por 100 para manter precisão
   const updatedItems = [...cartItems];
-  updatedItems[index][field] = parseFloat(value) || 0; // Atualiza o preço e garante que ele seja numérico
-  setCartItems(updatedItems); // Atualiza o estado do carrinho
+  updatedItems[index][field] = isNaN(numericValue) ? 0 : numericValue; // Atualiza o estado com o valor numérico
+  setCartItems(updatedItems);
 };
 
 const registerSale = async () => {
@@ -143,7 +142,6 @@ const registerSale = async () => {
       showAlert("Erro", "Selecione um cliente para registrar a venda.");
       return;
     }
-
 
     if (totalLiquido <= 0) {
       showAlert('Erro', 'O valor total da venda não pode ser zero ou negativo.');
@@ -184,7 +182,6 @@ const registerSale = async () => {
     showAlert('Erro', 'Ocorreu um erro ao registrar a venda. Verifique sua conexão e tente novamente.');
   }
 };
-
 
   const registerSaleItems = async (vendaId) => {
     try {
@@ -236,8 +233,6 @@ const registerSale = async () => {
         console.log('Resposta da API para item de venda:', response.data);
       });
   
-      showAlert('Sucesso', 'Itens da venda registrados com sucesso!');
-  
     } catch (error) {
       // Log detalhado do erro
       if (error.response) {
@@ -249,35 +244,30 @@ const registerSale = async () => {
     }
   };
 
-
   const formatCurrency = (value) => {
-    return value > 0 ? `R$ ${value.toFixed(2)}` : 'R$ 0,00';
+    if (!value) return '';
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
   };
+  
   const handleNewRegistered = () => {
     resetFields();  // Limpa os campos
     setIsModalVisible(false);  // Fecha o modal
     navigation.navigate('SingleSale');  // Navega para a tela de venda
   };
-  
-
-  const handleOpenInvoiceModal = () => {
-    setIsInvoiceModalVisible(true);
-};
-const handleCloseModal = () => {
-  setIsModalVisible(false);
-};
 
 const handleConfirm = () => {
   registerSale()
 };
 const resetFields = () => {
-  setCartItems([{ id: 1, quantity: 0, priceVenda: 0, priceCusto: 0 }]);
+  setCartItems([{ id: 1, quantity: 1, priceVenda: 0, priceCusto: 0 }]);
   setDiscountValue('');
   setTotalBruto(0);
   setTotalLiquido(0);
   setSelectedClient(null);
 };
-
 
 const toggleDropdown = () => {
     setDropdownVisible(!isDropdownVisible);
@@ -289,34 +279,30 @@ const selectClient = (client) => {
     setSelectedClient(client);
     setDropdownVisible(false);
 };
-const showDatePickerModal = () => {
-    setShowDatePicker(true);
-  };
-  const handleDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || paymentDate;
-    setShowDatePicker(Platform.OS === 'ios');
-    setPaymentDate(currentDate);
+
+  const handleDayPress = (day) => {
+    setPaymentDate(new Date(day.dateString)); // Atualiza a data selecionada
   };
 
+  const handleShowCalendar = () => {
+    setIsCalendarVisible(true);
+  };
 
   return (
     <ScrollView>
                 {/* Data do pagamento */}
           <View style={styles.dateContainer}>
-          <TouchableOpacity onPress={showDatePickerModal} style={styles.datePicker}>
+          <TouchableOpacity onPress={handleShowCalendar} style={styles.datePicker}>
             <Text style={styles.dateText}>
               {`Data do Vencimento: ${paymentDate.toLocaleDateString('pt-BR')}`}
             </Text>
             <Icon name="calendar" size={24} color={COLORS.lightGray} />
           </TouchableOpacity>
-          {showDatePicker && (
-            <DateTimePicker
-              value={paymentDate}
-              mode="date"
-              display="default"
-              onChange={handleDateChange}
+          <CustomCalendar
+            visible={isCalendarVisible}
+            onClose={() => setIsCalendarVisible(false)}
+            onDayPress={handleDayPress}
             />
-          )}
         </View>
           {/* Campo para associar cliente */}
           <View style={styles.clientContainer}>
@@ -363,7 +349,8 @@ const showDatePickerModal = () => {
           placeholder="Preço de custo (R$)"
           style={styles.input}
           keyboardType="numeric"
-          onChangeText={(value) => updatePrice(index, value, 'priceCusto')}
+          value={item.priceCusto ? formatCurrency(item.priceCusto) : ''} // Exibir o valor formatado
+          onChangeText={(value) => updatePrice(index, value, 'priceCusto')} // Atualizar o estado com o valor numérico
         />
         <View style={styles.quantityRow}>
           <Text style={styles.quantityLabel}>Qtd.</Text>
@@ -381,12 +368,12 @@ const showDatePickerModal = () => {
             <Icon name="add" size={20} color={COLORS.black} />
           </TouchableOpacity>
           <TextInput
-            placeholder="Preço de venda (R$)"
-            style={styles.input}
-            keyboardType="numeric"
-            value={item.priceVenda.toString()}
-            onChangeText={(value) => updatePrice(index, value, 'priceVenda')}
-          />
+              placeholder="Preço de venda (R$)"
+              style={styles.input}
+              keyboardType="numeric"
+              value={item.priceVenda ? formatCurrency(item.priceVenda) : ''} // Exibir o valor formatado
+              onChangeText={(value) => updatePrice(index, value, 'priceVenda')} // Atualizar o estado com o valor numérico
+            />
         </View>
       </View>
     ))}
@@ -470,14 +457,6 @@ const showDatePickerModal = () => {
             <TouchableOpacity style={styles.modalPrimaryButton} onPress={handleNewRegistered}>
               <Icon name="cart" size={20} color={COLORS.black} />
               <Text style={styles.modalPrimaryButtonText}>Registrar outra venda</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalPrimaryButton2} onPress={handleOpenInvoiceModal}>
-                            <Icon name="cart" size={20} color={COLORS.black} />
-                            <Text style={styles.modalPrimaryButtonText}>Emitir NF-e ou Recibo</Text>
-                        </TouchableOpacity>
-            <TouchableOpacity style={styles.modalBackButton} onPress={handleCloseModal}>
-              <Icon name="arrow-back" size={20} color={COLORS.black} />
-              <Text style={styles.modalBackButtonText}>Voltar ao resumo</Text>
             </TouchableOpacity>
           </View>
         </View>

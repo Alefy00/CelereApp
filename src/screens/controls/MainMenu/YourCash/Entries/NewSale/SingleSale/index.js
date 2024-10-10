@@ -9,13 +9,6 @@ import { COLORS } from '../../../../../../../constants';
 
 const SingleSale = ({ navigation }) => {
     const [activeTab, setActiveTab] = useState('Liquidar agora');
-    const [cartItems, setCartItems] = useState([{ id: 1, quantity: 0, priceVenda: 0, priceCusto: 0 }]);
-    const [discountValue, setDiscountValue] = useState('');
-    const [discountType, setDiscountType] = useState('%');
-    const [paymentMethod, setPaymentMethod] = useState('PIX');
-    const [paymentMethod2, setPaymentMethod2] = useState('CelerePay');
-    const [totalBruto, setTotalBruto] = useState(0);
-    const [totalLiquido, setTotalLiquido] = useState(0);
     const [taxaCartao] = useState(0.01); // Taxa de 1%
   
     // Para a data atual

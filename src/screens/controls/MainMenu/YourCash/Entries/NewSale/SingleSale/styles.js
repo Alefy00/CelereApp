@@ -304,6 +304,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 10,
+        marginVertical: 10,
       },
       totalLabel: {
         fontSize: 16,
@@ -503,6 +504,7 @@ const styles = StyleSheet.create({
         padding: 25,
         borderRadius: 5,
         alignItems: 'center',
+        backgroundColor: COLORS.lightGray2,
   
     },
     invoiceOptionTextNotaFiscal: {

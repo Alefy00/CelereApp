@@ -10,6 +10,7 @@ import AccountDetailModal from "./components/AccountDetailModal"; // Importando 
 import LiquidatedDetailModal from "./components/LiquidatedDetailModal"; // Importando o modal para liquidadas
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { useFocusEffect } from '@react-navigation/native';
 
 const API_VENDAS = 'https://api.celereapp.com.br/cad/vendas/';
 const API_CLIENTES = 'https://api.celereapp.com.br/cad/cliente/';
