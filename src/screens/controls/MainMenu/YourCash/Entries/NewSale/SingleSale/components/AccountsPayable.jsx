@@ -288,6 +288,11 @@ const selectClient = (client) => {
     setIsCalendarVisible(true);
   };
 
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    navigation.navigate('MainTab')
+  };
+
   return (
     <ScrollView>
                 {/* Data do pagamento */}
@@ -458,6 +463,10 @@ const selectClient = (client) => {
               <Icon name="cart" size={20} color={COLORS.black} />
               <Text style={styles.modalPrimaryButtonText}>Registrar outra venda</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.modalBackButton} onPress={handleCloseModal}>
+              <Icon name="arrow-back" size={20} color={COLORS.black} />
+              <Text style={styles.modalBackButtonText}>Voltar ao resumo</Text>
+          </TouchableOpacity>
           </View>
         </View>
       </Modal>

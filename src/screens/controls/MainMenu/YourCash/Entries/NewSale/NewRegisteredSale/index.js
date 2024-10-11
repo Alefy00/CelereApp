@@ -56,7 +56,7 @@ const NewRegisteredSale = ({ navigation, route }) => {
     const empresaId = await getEmpresaId();
     if (empresaId) {
       // Busca produtos
-      const productResponse = await axios.get(`${PRODUCTS_API}?page_size=100&empresa_id=${empresaId}`);
+      const productResponse = await axios.get(`${PRODUCTS_API}?page_size=100&empresa=${empresaId}`);
       const fetchedProducts = productResponse.data.data;
 
       // Busca serviços

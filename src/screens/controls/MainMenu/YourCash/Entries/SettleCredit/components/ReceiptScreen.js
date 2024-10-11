@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import BarTop2 from '../../../../../../../components/BarTop2';
 
 const ReceiptScreen = ({ navigation, route }) => {
-    const { saleId, fromLiquidateNow, fromLiquidateAgora } = route.params; 
+    const { saleId, fromLiquidateNow, fromLiquidateAgora, fromLiquidateNowService } = route.params; 
     const [pdfUrl, setPdfUrl] = useState(null); // URL do PDF retornada pela API
     const [loading, setLoading] = useState(false); // Estado de carregamento
     const [error, setError] = useState(null); // Estado de erro
@@ -103,7 +103,9 @@ const fetchReceipt = useCallback(async () => {
         } else if (fromLiquidateAgora) {
           // Se veio de LiquidateAgora, navega para SingleSale
           navigation.navigate('SingleSale');
-        } else {
+        } else if(fromLiquidateNowService){
+            navigation.navigate('NewRegisteredSale', { clearCart: true });
+        }else {
           // Volta para a tela anterior normalmente
           navigation.goBack();
         }

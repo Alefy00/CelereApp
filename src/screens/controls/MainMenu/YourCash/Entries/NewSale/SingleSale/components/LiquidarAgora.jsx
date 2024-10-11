@@ -165,10 +165,6 @@ useEffect(() => {
       const empresaId = await getEmpresaId();
       const currentDate = new Date().toISOString().split('T')[0];
 
-      if (!selectedClient || !selectedClient.id) {
-        showAlert("Erro", "Selecione um cliente para registrar a venda.");
-        return;
-      }
 
       if (!selectedPaymentMethod) {
         showAlert("Erro", "Selecione uma forma de pagamento.");
@@ -182,7 +178,7 @@ useEffect(() => {
 
       const vendaData = {
         empresa: empresaId,
-        cliente_id: selectedClient.id,
+        cliente_id: selectedClient ? selectedClient.id : null,
         dt_pagamento: currentDate,
         dt_previsao_pagamento: currentDate,
         valor_total_custo_venda: parseFloat(totalLiquido).toFixed(2),
@@ -208,7 +204,7 @@ useEffect(() => {
         showAlert('Erro', 'Falha ao registrar a venda. Verifique os dados e tente novamente.');
         console.error('Erro ao registrar venda:', response.data);
       }
-
+      resetFields();
     } catch (error) {
       console.error('Erro ao registrar venda:', error.response ? error.response.data : error.message);
       showAlert('Erro', 'Ocorreu um erro ao registrar a venda. Verifique sua conexão e tente novamente.');
@@ -311,10 +307,6 @@ const formatCurrency = (value) => {
   }).format(value);
 };
 
-const removeFormatting = (value) => {
-  return parseFloat(value.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
-};
-
 
 const handleNewRegistered = () => {
   setIsModalVisible(false);
@@ -339,6 +331,11 @@ const resetFields = () => {
   setSelectedClient(null);
   setSelectedPaymentMethod(null); // Resetar método de pagamento selecionado
 };
+const handleCloseModal = () => {
+  setIsModalVisible(false);
+  navigation.navigate('MainTab')
+};
+
 
 
 const updatePrice = (index, value, field) => {
@@ -369,7 +366,7 @@ const togglePaymentDropdown = () => {
   // Função principal para registrar venda e itens
  const handleConfirm = async () => {
    await registerSale();
-   resetFields();
+   
 };
 
 
@@ -572,6 +569,10 @@ return (
           <TouchableOpacity style={styles.modalPrimaryButton2} onPress={handleOpenInvoiceModal}>
             <Icon name="cart" size={20} color={COLORS.black} />
             <Text style={styles.modalPrimaryButtonText}>Emitir NF-e ou Recibo</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.modalBackButton} onPress={handleCloseModal}>
+              <Icon name="arrow-back" size={20} color={COLORS.black} />
+              <Text style={styles.modalBackButtonText}>Voltar ao resumo</Text>
           </TouchableOpacity>
         </View>
       </View>

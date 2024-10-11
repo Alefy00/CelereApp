@@ -27,8 +27,6 @@ import styles from './styles';
 import { useFocusEffect } from '@react-navigation/native';
 import CustomCalendar from '../../../../../../components/CustomCalendar';
 
-
-
 // Constantes para os endpoints da API
 const CATEGORIES_API = 'https://api.celereapp.com.br/mnt/categoriasdespesa/?page=1&page_size=30';
 const MONTHS_API = 'https://api.celereapp.com.br/api/despesas_recorrencias/';
@@ -74,8 +72,6 @@ const NewExpense = ({ navigation  }) => {
   const [recorrenciaText, setRecorrenciaText] = useState('Pagamento único'); // Estado para a recorrência
   const [isCalendarVisible, setIsCalendarVisible] = useState(false); // Controla a visibilidade do CustomCalendar
 
-
-
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
     try {
@@ -100,8 +96,6 @@ const NewExpense = ({ navigation  }) => {
     setDate(selectedDate); // Atualiza a data de pagamento diretamente
     setIsCalendarVisible(false); // Fecha o calendário
   };
-  
-
 
   const fetchCategories = useCallback(async () => {
     setLoading(true);
@@ -127,8 +121,6 @@ const NewExpense = ({ navigation  }) => {
     }
     setLoading(false);
   }, []);
-  
-  
 
 // Função para buscar fornecedores da API usando o ID da empresa logada
 const fetchSuppliers = useCallback(async () => {
@@ -248,7 +240,6 @@ useFocusEffect(
       return text;
     };
 
-
   const handleSave = () => {
     console.log('Categoria:', categoria);
     console.log('Valor:', valor);
@@ -269,14 +260,12 @@ useFocusEffect(
       Alert.alert('Erro', 'Por favor, selecione um fornecedor.');
       return;
     }
-  
        // Define o texto da recorrência antes de abrir o modal
        const recurrenceText = determineRecurrenceText();
        setRecorrenciaText(recurrenceText);  // Define o texto da recorrência
     // Se tudo estiver preenchido corretamente, abre o modal de confirmação
     setModalVisible(true);
   };
-  
 
   const handleConfirm = async () => {
     setModalVisible(false);
@@ -344,7 +333,6 @@ useFocusEffect(
     setSuccessModalVisible(false);
   };
 
-
   const toggleExpenseType = () => {
     setIsLiquidateNow(!isLiquidateNow);
   };
@@ -356,8 +344,6 @@ useFocusEffect(
   const handleCategoriesScreen = () => {
     navigation.navigate('IncludeCategoriesExpense');
   };
-
-
 
   return (
     <ScrollView style={styles.container}>
@@ -405,8 +391,6 @@ useFocusEffect(
                 </TouchableOpacity>
               </View>
             </View>
-
-
 
             {/* Campo de Código de Barras */}
             <View style={styles.inputContainer}>

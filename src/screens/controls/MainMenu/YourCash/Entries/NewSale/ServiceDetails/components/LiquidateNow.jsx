@@ -138,10 +138,6 @@ const handleRegisterSale = async () => {
     const currentDate = new Date().toISOString().split('T')[0]; // Data atual do dispositivo
     const totalValue = liquidValue; // Valor bruto a receber após desconto
 
-    if (!selectedClient || !selectedClient.id) {
-      Alert.alert("Erro", "Selecione um cliente para registrar a venda.");
-      return;
-    }
 
     if (!selectedPaymentMethod) {
       Alert.alert("Erro", "Selecione uma forma de pagamento.");
@@ -151,7 +147,7 @@ const handleRegisterSale = async () => {
     // Registra a venda primeiro
     const vendaData = {
       empresa: empresaId,
-      cliente_id: selectedClient.id, // Cliente selecionado
+      cliente_id: selectedClient ? selectedClient.id : null,  // Cliente selecionado
       dt_pagamento: currentDate, // Data de pagamento (data atual)
       percentual_desconto: parseFloat(discount) || 0, // Percentual de desconto sempre como número válido
       tipo_pagamento_venda: selectedPaymentMethod, // ID da forma de pagamento selecionada
@@ -297,11 +293,10 @@ useEffect(() => {
     navigation.navigate('NewRegisteredSale', { clearCart: true });
   };
 
-  const handleCloseModal = () => {
-      setIsModalVisible(false);
+  const handleCloseModal= () => {
+    setIsModalVisible(false);
+    navigation.navigate('MainTab')
   };
-
-  
 
   const handleAddProduct = () => {
       navigation.navigate('NewRegisteredSale');
@@ -322,6 +317,8 @@ const formatCurrency = (value) => {
     currency: 'BRL',
   });
 };
+
+
 
   
     return (
@@ -570,7 +567,11 @@ const formatCurrency = (value) => {
 
 
             {/* Modal de confirmação */}
-            <Modal transparent={true} animationType="slide" visible={isModalVisible} onRequestClose={handleCloseModal}>
+            <Modal
+            transparent={true} 
+            animationType="slide" 
+            visible={isModalVisible} 
+            onRequestClose={() => setIsModalVisible(false)}>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         <Icon name="checkmark-circle" size={100} color={COLORS.green} />
@@ -583,17 +584,28 @@ const formatCurrency = (value) => {
                             <Icon name="cart" size={20} color={COLORS.black} />
                             <Text style={styles.modalPrimaryButtonText}>Emitir NF-e ou Recibo</Text>
                         </TouchableOpacity>
+                        <TouchableOpacity style={styles.modalBackButton} onPress={handleCloseModal}>
+                          <Icon name="arrow-back" size={20} color={COLORS.black} />
+                          <Text style={styles.modalBackButtonText}>Voltar ao resumo</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
-                        {/* Modal para escolha entre Recibo e Nota Fiscal */}
-                        <Modal transparent={true} animationType="fade" visible={isInvoiceModalVisible} onRequestClose={handleCloseInvoiceModal}>
+           {/* Modal para escolha entre Recibo e Nota Fiscal */}
+                <Modal 
+                transparent={true} 
+                animationType="fade" 
+                visible={isInvoiceModalVisible} 
+                onRequestClose={handleCloseInvoiceModal}>
                 <View style={styles.invoiceModalContainer}>
                     <View style={styles.invoiceModalContent}>
                         <Text style={styles.invoiceModalTitle}>Escolha uma opção:</Text>
-                        <TouchableOpacity style={styles.invoiceOptionButtonRecibo} onPress={() => {
-                            navigation.navigate('ReceiptScreen', { saleId: saleId });
-                        }}>
+                        <TouchableOpacity  style={styles.invoiceOptionButtonRecibo} 
+                              onPress={() => {
+                                handleCloseInvoiceModal(); // Fecha o modal de Invoice
+                                navigation.navigate('ReceiptScreen', { saleId, fromLiquidateNowService: true }); // Passa o saleId e a flag fromLiquidateNow
+                              }}
+                            >
                             <Text style={styles.invoiceOptionTextRecibo}>Recibo</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.invoiceOptionButtonNotaFiscal} onPress={() => console.log("Emitir Nota Fiscal")} disabled={true}>

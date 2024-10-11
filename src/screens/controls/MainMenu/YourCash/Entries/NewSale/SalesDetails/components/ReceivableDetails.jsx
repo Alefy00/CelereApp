@@ -80,6 +80,11 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
     setPaymentDate(new Date(day.dateString)); // Atualiza a data selecionada
   };
 
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    navigation.navigate('MainTab');
+  };
+
 // Função de registrar venda e itens
 const handleRegisterSale = async () => {
   try {
@@ -302,6 +307,10 @@ const handleRegisterSale = async () => {
             <TouchableOpacity style={styles.modalPrimaryButton} onPress={handleRegisterSale}>
               <Icon name="cart" size={20} color={COLORS.black} />
               <Text style={styles.modalPrimaryButtonText}>Registrar outra venda</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalBackButton} onPress={handleCloseModal}>
+              <Icon name="arrow-back" size={20} color={COLORS.black} />
+              <Text style={styles.modalBackButtonText}>Voltar ao resumo</Text>
             </TouchableOpacity>
           </View>
         </View>

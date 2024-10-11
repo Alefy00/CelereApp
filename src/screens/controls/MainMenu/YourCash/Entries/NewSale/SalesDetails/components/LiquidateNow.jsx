@@ -202,6 +202,11 @@ const handleRegisterSale = async () => {
     setIsInvoiceModalVisible(false);
   };
 
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    navigation.navigate('MainTab')
+  };
+
 // Função para calcular o valor líquido considerando o desconto e calcular o valor das parcelas
 const calculateValues = useCallback(() => {
   let discount = 0;
@@ -430,6 +435,10 @@ useEffect(() => {
             <TouchableOpacity style={styles.modalPrimaryButton2} onPress={handleOpenInvoiceModal}>
               <Icon name="cart" size={20} color={COLORS.black} />
               <Text style={styles.modalPrimaryButtonText}>Emitir NF-e ou Recibo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalBackButton} onPress={handleCloseModal}>
+              <Icon name="arrow-back" size={20} color={COLORS.black} />
+              <Text style={styles.modalBackButtonText}>Voltar ao resumo</Text>
             </TouchableOpacity>
           </View>
         </View>

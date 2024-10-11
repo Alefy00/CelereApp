@@ -7,6 +7,7 @@ import { COLORS } from '../../../../../constants';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import UpdateStockModal from './components/UpdateStockModal';
 
 const SLIDER_WIDTH = Dimensions.get('window').width;
 
@@ -19,14 +20,17 @@ const StockInfo = ({ navigation }) => {
   const [activeFilter, setActiveFilter] = useState('all'); // Filtro "Todos os produtos" como padrão
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]); // Para armazenar os produtos filtrados
-  const [categories, setCategories] = useState([{ id: 'all', label: 'Todos os produtos' }]); // Incluímos "Todos os produtos"
+  const [categories, setCategories] = useState([{ id: 'all', label: 'Todos os produtos' }]); // Todos os produtos
   const [searchTerm, setSearchTerm] = useState(''); // Estado para o termo de busca
   const [loading, setLoading] = useState(true);
-
-  // ** Novos estados para armazenar os valores calculados **
   const [totalCusto, setTotalCusto] = useState(0);
   const [totalVenda, setTotalVenda] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
+  const [isModalVisible, setIsModalVisible] = useState(false); // Controle da visibilidade do modal
+  const [selectedProduct, setSelectedProduct] = useState(null); // Produto selecionado
+  const [empresaId, setEmpresaId] = useState(null);
+
+
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
@@ -45,35 +49,37 @@ const StockInfo = ({ navigation }) => {
   };
 
   // Função para buscar os produtos da API e calcular os totais
-  const fetchProducts = useCallback(async () => {
-    try {
-      const empresaId = await getEmpresaId();
-      if (empresaId) {
-        const response = await axios.get(`${PRODUCTS_API}?page_size=100&empresa_id=${empresaId}`);
-        if (response.data && response.data.status === 200) {
-          const productsData = response.data.data;
-          setProducts(productsData);
-          setFilteredProducts(productsData); // Inicialmente, todos os produtos são exibidos
+// Função para buscar os produtos da API e calcular os totais
+const fetchProducts = useCallback(async () => {
+  try {
+    const empresaId = await getEmpresaId();
+    if (empresaId) {
+      // Atualizando o parâmetro de empresa_id para empresa
+      const response = await axios.get(`${PRODUCTS_API}?empresa=${empresaId}`);
+      if (response.data && response.data.status === 200) {
+        const productsData = response.data.data;
+        setProducts(productsData);
+        setFilteredProducts(productsData); // Inicialmente, todos os produtos são exibidos
 
-          // ** Cálculos dos totais **
-          const totalCustoCalc = productsData.reduce((sum, product) => sum + parseFloat(product.custo), 0);
-          const totalVendaCalc = productsData.reduce((sum, product) => sum + (parseFloat(product.preco_venda) * product.qtd_estoque), 0);
-          const totalItemsCalc = productsData.reduce((sum, product) => sum + product.qtd_estoque, 0);
+        // ** Cálculos dos totais **
+        const totalCustoCalc = productsData.reduce((sum, product) => sum + parseFloat(product.custo), 0);
+        const totalVendaCalc = productsData.reduce((sum, product) => sum + (parseFloat(product.preco_venda) * product.qtd_estoque), 0);
+        const totalItemsCalc = productsData.reduce((sum, product) => sum + product.qtd_estoque, 0);
 
-          setTotalCusto(totalCustoCalc.toFixed(2)); // Atualiza o preço de custo
-          setTotalVenda(totalVendaCalc.toFixed(2)); // Atualiza o preço de venda
-          setTotalItems(totalItemsCalc); // Atualiza a quantidade de itens
-        } else {
-          Alert.alert('Erro', 'Falha ao recuperar produtos.');
-        }
+        setTotalCusto(totalCustoCalc.toFixed(2)); // Atualiza o preço de custo
+        setTotalVenda(totalVendaCalc.toFixed(2)); // Atualiza o preço de venda
+        setTotalItems(totalItemsCalc); // Atualiza a quantidade de itens
+      } else {
+        Alert.alert('Erro', 'Falha ao recuperar produtos.');
       }
-    } catch (error) {
-      console.error('Erro ao buscar produtos:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao buscar os produtos.');
-    } finally {
-      setLoading(false);
     }
-  }, []);
+  } catch (error) {
+    console.error('Erro ao buscar produtos:', error);
+    Alert.alert('Erro', 'Ocorreu um erro ao buscar os produtos.');
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
   // Função para buscar as categorias da API e remover duplicatas
   const fetchCategories = useCallback(async () => {
@@ -136,10 +142,22 @@ const StockInfo = ({ navigation }) => {
     setActiveFilter(categoryId);
   };
 
-    // ** Nova função para navegar para a AddProductScreen com o produto selecionado **
-    const handleProductSelect = (product) => {
-      navigation.navigate('AddProductScreen', { product }); // Passa o produto selecionado para a tela de edição
+  const handleProductSelect = (product) => {
+    setSelectedProduct(product); // Define o produto selecionado
+    setIsModalVisible(true);     // Abre o modal
+  };
+  
+  useEffect(() => {
+    const fetchEmpresaId = async () => {
+      const id = await getEmpresaId();
+      setEmpresaId(id);
     };
+    
+    fetchEmpresaId();
+    fetchProducts();
+    fetchCategories(); // Faz a requisição para as categorias também
+  }, [fetchProducts, fetchCategories]);
+  
   
   // Renderização dos botões de filtro de categorias
   const renderFilterItem = ({ item }) => (
@@ -157,20 +175,22 @@ const StockInfo = ({ navigation }) => {
   );
 
   const renderProductItem = ({ item }) => (
-    <View style={styles.productItem}>
-      {/* Verifica se há uma imagem associada ao produto, caso contrário usa uma imagem padrão */}
-      <Image
-        source={item.image_url ? { uri: item.image_url } : require('../../../../../assets/images/png/placeholder.png')}
-        style={styles.productImage}
-      />
-      <View style={styles.productInfo}>
-        <View style={{ flexDirection: 'column' }}>
-          <Text style={styles.productTitle}>{item.nome}</Text>
-          <Text style={styles.productAvailable}>Disponíveis: {item.qtd_estoque}</Text>
+    <TouchableOpacity onPress={() => handleProductSelect(item)}>
+      <View style={styles.productItem}>
+        <Image
+          source={item.image_url ? { uri: item.image_url } : require('../../../../../assets/images/png/placeholder.png')}
+          style={styles.productImage}
+        />
+        <View style={styles.productInfo}>
+          <View style={{ flexDirection: 'column' }}>
+            <Text style={styles.productTitle}>{item.nome}</Text>
+            <Text style={styles.productAvailable}>Disponíveis: {item.qtd_estoque}</Text>
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
+  
 
   const handleAddProduct = () => {
     navigation.navigate("AddProductScreen");
@@ -260,6 +280,18 @@ const StockInfo = ({ navigation }) => {
           <Text style={styles.textAdd}>Adicionar produto</Text>
         </TouchableOpacity>
       </View>
+
+      {selectedProduct && empresaId && (
+        <UpdateStockModal
+          isVisible={isModalVisible}
+          onClose={() => {
+            setIsModalVisible(false);
+            fetchProducts(); // Atualiza a lista de produtos após fechar o modal
+          }}
+          product={selectedProduct}
+          empresaId={empresaId}
+        />
+      )}
     </View>
   );
 };

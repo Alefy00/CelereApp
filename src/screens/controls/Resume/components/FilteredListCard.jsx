@@ -223,7 +223,6 @@ const FilteredListCard = () => {
   }, []);
 
   const dataToShow = selectedTab === 'sales' ? salesData : expenseData;
-
   const filteredData = dataToShow.filter(item =>
     item.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -286,8 +285,7 @@ const FilteredListCard = () => {
         </View>
 
         {/* Lista de Itens Filtrados */}
-        
-                <View>
+          <View>
           {filteredData.map(item => {
             console.log('ID do método de pagamento:', item.tipo_pagamento_venda); // Log para ver o ID
 
