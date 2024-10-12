@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, Platform } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SvgPixIcon from '../../../../assets/images/svg/initial/IconPix.svg';
@@ -8,6 +8,8 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import styles from './stylesFilterListCard';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 const API_URL_VENDAS = 'https://api.celereapp.com.br/cad/vendas/';
 const API_ITENS_VENDA = 'https://api.celereapp.com.br/cad/itens_venda/';
@@ -31,6 +33,7 @@ const getEmpresaId = async () => {
     return null;
   }
 };
+
 
 // Função utilitária para formatar valores como moeda Real Brasileiro (BRL)
 const formatToBRL = (value) => {
@@ -191,37 +194,37 @@ const FilteredListCard = () => {
   const [salesTotal, setSalesTotal] = useState(0);
   const [expenseData, setExpenseData] = useState([]);
 
-  // Carregar dados de vendas
-  useEffect(() => {
-    const loadSalesData = async () => {
-      const empresaId = await getEmpresaId();
-      if (empresaId) {
-        const sales = await fetchAllVendas(empresaId);
-        const vendasProcessadas = await processarVendas(sales);
-        const mappedSales = mapSalesData(vendasProcessadas);
-        setSalesData(mappedSales);
-
-        // Soma o valor total das vendas finalizadas
-        const total = mappedSales.reduce((sum, sale) => sum + sale.amount, 0);
-        setSalesTotal(total);
-      }
-    };
-    loadSalesData();
-  }, []);
-
-  // Carregar dados de despesas
-  useEffect(() => {
-    const loadExpenseData = async () => {
-      const empresaId = await getEmpresaId();
-      if (empresaId) {
-        const despesas = await fetchAllDespesas(empresaId);
-        const mappedExpenses = mapExpenseData(despesas);
-        setExpenseData(mappedExpenses);
-      }
-    };
-    loadExpenseData();
-  }, []);
-
+  useFocusEffect(
+    useCallback(() => {
+      const loadSalesData = async () => {
+        const empresaId = await getEmpresaId();
+        if (empresaId) {
+          const sales = await fetchAllVendas(empresaId);
+          const vendasProcessadas = await processarVendas(sales);
+          const mappedSales = mapSalesData(vendasProcessadas);
+          setSalesData(mappedSales);
+  
+          // Soma o valor total das vendas finalizadas
+          const total = mappedSales.reduce((sum, sale) => sum + sale.amount, 0);
+          setSalesTotal(total);
+        }
+      };
+  
+      const loadExpenseData = async () => {
+        const empresaId = await getEmpresaId();
+        if (empresaId) {
+          const despesas = await fetchAllDespesas(empresaId);
+          const mappedExpenses = mapExpenseData(despesas);
+          setExpenseData(mappedExpenses);
+        }
+      };
+  
+      // Chama as funções para carregar as vendas e despesas
+      loadSalesData();
+      loadExpenseData();
+    }, [])
+  );
+  
   const dataToShow = selectedTab === 'sales' ? salesData : expenseData;
   const filteredData = dataToShow.filter(item =>
     item.description.toLowerCase().includes(searchQuery.toLowerCase())

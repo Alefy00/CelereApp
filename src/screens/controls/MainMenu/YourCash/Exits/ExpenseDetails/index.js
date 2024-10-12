@@ -84,11 +84,6 @@ const ExpenseDetails = ({ route, navigation }) => {
   const handleOpenDateModal = () => {
     setIsDateModalVisible(true);
   };
-
-  // Abrir o modal de adiamento
-  const handleOpenPostponeModal = () => {
-    setIsPostponeModalVisible(true);
-  };
   
   // Abrir o modal de liquidação parcial
   const handleOpenPartialModal = () => {
@@ -168,7 +163,6 @@ const ExpenseDetails = ({ route, navigation }) => {
   
       // Verifica o status da resposta
       if (response.status === 200) {
-        Alert.alert('Sucesso', 'Despesa baixada com sucesso!');
         setIsConfirmationModalVisible(false); // Fecha o modal de confirmação
   
         // Redireciona de volta para a tela de consulta
@@ -197,10 +191,16 @@ const ExpenseDetails = ({ route, navigation }) => {
       Alert.alert('Erro', 'Insira um valor parcial válido.');
       return;
     }
-
+  
+    if (!date) {
+      Alert.alert('Erro', 'Selecione uma data para pagamento.');
+      return;
+    }
+  
     setIsPartialModalVisible(false); // Fecha o primeiro modal
     setPartialAmount(parsedAmount); // Define o valor parcial
-
+    setSelectedDate(date); // Armazena a data de pagamento
+  
     // Calcula o valor restante
     const newRemainingAmount = parseFloat(expense.valor) - parsedAmount;
     if (newRemainingAmount < 0) {
@@ -208,15 +208,57 @@ const ExpenseDetails = ({ route, navigation }) => {
       return;
     }
     setRemainingAmount(newRemainingAmount.toFixed(2)); // Atualiza o valor restante
-    setIsSecondPartialModalVisible(true); // Abre o segundo modal
+    setIsSecondPartialModalVisible(true); // Abre o segundo modal de confirmação
   };
+  
 
   // Confirmar a liquidação parcial e fechar o modal
-  const handleFinalConfirmation = () => {
-    setIsSecondPartialModalVisible(false);
-    Alert.alert('Sucesso', 'Liquidação parcial realizada com sucesso!');
-    // Adicione a lógica de liquidação parcial aqui, se necessário
+  const handleFinalConfirmation = async () => {
+    if (!partialAmount || partialAmount <= 0) {
+      Alert.alert('Erro', 'Valor parcial inválido.');
+      return;
+    }
+  
+    if (!selectedDate) {
+      Alert.alert('Erro', 'Data de pagamento não selecionada.');
+      return;
+    }
+  
+    // Formatar a data no formato ISO (YYYY-MM-DD)
+    const formattedDate = formatDateToISO(selectedDate);
+  
+    try {
+      // Fazer a requisição PATCH para liquidar parcialmente a despesa
+      const response = await axios.patch(
+        `${API_URL}/${expense.id}/baixar_despesa_parcialmente/`,
+        {
+          dt_pagamento: formattedDate,
+          vlr_pagamento: partialAmount,
+        }
+      );
+  
+      if (response.status === 200 || response.data.status === 'success') {
+        Alert.alert('Sucesso', 'Liquidação parcial realizada com sucesso!');
+        setIsSecondPartialModalVisible(false);
+  
+        // Redirecionar ou atualizar a lista de despesas
+        navigation.goBack();
+      } else {
+        Alert.alert('Erro', 'Ocorreu um problema ao realizar a liquidação parcial.');
+      }
+    } catch (error) {
+      console.error('Erro ao fazer requisição PATCH:', error);
+      if (error.response) {
+        const errorMessage = error.response.data.message || 'Erro ao realizar a liquidação parcial.';
+        Alert.alert('Erro', errorMessage);
+      } else if (error.request) {
+        Alert.alert('Erro', 'Não foi possível conectar-se ao servidor. Verifique sua conexão.');
+      } else {
+        Alert.alert('Erro', 'Ocorreu um erro inesperado. Tente novamente.');
+      }
+    }
   };
+  
 
   return (
     <View style={styles.containerMain}>
@@ -256,7 +298,7 @@ const ExpenseDetails = ({ route, navigation }) => {
           <Text style={styles.actionButtonText}>Liquidar parcialmente</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton} disabled={true}>
+        <TouchableOpacity style={styles.actionButtonAdiar} disabled={true}>
           <Icon name="calendar" size={20} color={COLORS.black} />
           <Text style={styles.actionButtonText}>Adiar</Text>
         </TouchableOpacity>

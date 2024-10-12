@@ -8,6 +8,7 @@ import styles from './styles';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Importando AsyncStorage
 import FilterModal from "../../Entries/SettleCredit/components/FilterModal";
+import { useFocusEffect } from '@react-navigation/native'; 
 
 // Constantes para URLs de API
 const API_BASE_URL = "https://api.celereapp.com.br";
@@ -40,7 +41,20 @@ const ConsultExpense = ({ navigation }) => {
     setIsFilterModalVisible(false); // Fecha o modal após aplicar o filtro
   };
 
-
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        const id = await getEmpresaId();
+        if (id) {
+          fetchExpenses(id, toggleState);  // Chama a API com base no estado selecionado
+        }
+        await fetchCategories();
+        setLoading(false);
+      };
+  
+      fetchData();
+    }, [fetchExpenses, toggleState])  // Atualiza ao mudar o estado de toggle
+  );
 
   const getEmpresaId = async () => {
     try {
@@ -52,7 +66,6 @@ const ConsultExpense = ({ navigation }) => {
       if (isNaN(empresaId)) {
         throw new Error('ID da empresa inválido.');
       }
-      console.log('Empresa ID:', empresaId); // Log para verificar o ID da empresa
       return empresaId;
     } catch (error) {
       console.error('Erro ao buscar o ID da empresa:', error);
@@ -246,23 +259,30 @@ const ConsultExpense = ({ navigation }) => {
 
       {/* Lista de despesas */}
       <ScrollView style={styles.expensesListContainer}>
-        {filteredExpenses.map(expenseGroup => (
-          <TouchableOpacity
-            key={expenseGroup.despesa_pai}
-            style={styles.expenseContainer}
-            onPress={() => goToExpenseDetails(expenseGroup)}
-          >
-            <View style={styles.expenseInfo}>
-              <Text style={styles.expenseName}>{expenseGroup.item}</Text>
-              <Text style={styles.expenseType}>{categories[expenseGroup.categoria_despesa] || 'Categoria desconhecida'}</Text>
-              <Text style={styles.expenseReference}>Referência: {getMonthReference(expenseGroup.dt_vencimento)}</Text>
-              <Text style={styles.expenseDueDate}>Data de vencimento:{'\n'}{formatDate(expenseGroup.dt_vencimento)}</Text>
-              <Text style={styles.expenseStatus}>Situação: <Text style={expenseGroup.situacao === 'Contas a pagar' ? styles.expenseStatusPending : styles.expenseStatusPaid}>{expenseGroup.situacao}</Text></Text>
-            </View>
-            <Text style={styles.expenseAmount}>R${expenseGroup.total.toFixed(2)}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+  {filteredExpenses.map(expenseGroup => (
+    <TouchableOpacity
+      key={expenseGroup.despesa_pai}
+      style={styles.expenseContainer}
+      onPress={() => {
+        if (toggleState === 'pendente') {
+          // Somente permite abrir detalhes na aba de "Contas a pagar"
+          goToExpenseDetails(expenseGroup);
+        }
+      }}
+      disabled={toggleState !== 'pendente'} // Desabilita o botão se estiver na aba de "liquidadas"
+    >
+      <View style={styles.expenseInfo}>
+        <Text style={styles.expenseName}>{expenseGroup.item}</Text>
+        <Text style={styles.expenseType}>{categories[expenseGroup.categoria_despesa] || 'Categoria desconhecida'}</Text>
+        <Text style={styles.expenseReference}>Referência: {getMonthReference(expenseGroup.dt_vencimento)}</Text>
+        <Text style={styles.expenseDueDate}>Data de vencimento:{'\n'}{formatDate(expenseGroup.dt_vencimento)}</Text>
+        <Text style={styles.expenseStatus}>Situação: <Text style={expenseGroup.situacao === 'Contas a pagar' ? styles.expenseStatusPending : styles.expenseStatusPaid}>{expenseGroup.situacao}</Text></Text>
+      </View>
+      <Text style={styles.expenseAmount}>R${expenseGroup.total.toFixed(2)}</Text>
+    </TouchableOpacity>
+  ))}
+</ScrollView>
+
 
       {!isSearching && (
         <TouchableOpacity

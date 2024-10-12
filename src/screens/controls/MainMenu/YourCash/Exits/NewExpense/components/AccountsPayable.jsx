@@ -28,7 +28,6 @@ import CustomCalendar from '../../../../../../../components/CustomCalendar';
 
 // Constantes para os endpoints da API
 const CATEGORIES_API = 'https://api.celereapp.com.br/mnt/categoriasdespesa/?page=1&page_size=30';
-const MONTHS_API = 'https://api.celereapp.com.br/api/despesas_recorrencias/';
 const SAVE_EXPENSE_API = 'https://api.celereapp.com.br/cad/despesa/';
 
 const categoryIcons = {
@@ -52,23 +51,24 @@ const AccountsPayable = ({ navigation }) => {
   const [item, setItem] = useState('');
   const [parceiro, setParceiro] = useState('');
   const [suppliers, setSuppliers] = useState([]);
-  const [months, setMonths] = useState([]);
   const [date, setDate] = useState(new Date());
   const [dueDate, setDueDate] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [loadingMonths, setLoadingMonths] = useState(false);
   const [barcode, setBarcode] = useState('');
   const [isLiquidateNow, setIsLiquidateNow] = useState(false);
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSupplier, setSelectedSupplier] = useState(null);
-  const [selectedFrequencyId, setSelectedFrequencyId] = useState(null); // ID da frequência selecionada
-  const [repeatCount, setRepeatCount] = useState(0); // Quantidade de repetições
-  const [isIndeterminate, setIsIndeterminate] = useState(false); // Tempo indeterminado
   const [recorrenciaText, setRecorrenciaText] = useState('Pagamento único'); // Estado para a recorrência
-  const [showCalendar, setShowCalendar] = useState(false); 
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [isRecurring, setIsRecurring] = useState(false); // Controle de recorrência
+  const [selectedFrequencyId, setSelectedFrequencyId] = useState(''); // Tipo de recorrência (nome)
+  const [isIndeterminate, setIsIndeterminate] = useState(false); // Tempo indeterminado
+  const [repeatCount, setRepeatCount] = useState(0); // Quantidade de repetições
+  const [valorNumerico, setValorNumerico] = useState(0);
+  const [selectedFrequencyName, setSelectedFrequencyName] = useState('');
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
@@ -118,13 +118,10 @@ const AccountsPayable = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Erro ao buscar categorias:', error);
-      handleRequestError(error);
     }
     setLoading(false);
   }, []);
   
-  
-
 // Função para buscar fornecedores da API usando o ID da empresa logada
 const fetchSuppliers = useCallback(async () => {
   setLoading(true);
@@ -155,7 +152,6 @@ const fetchSuppliers = useCallback(async () => {
     }
   } catch (error) {
     console.error('Erro ao buscar fornecedores:', error);
-    handleRequestError(error);
   }
   setLoading(false);
 }, []);
@@ -165,47 +161,11 @@ useEffect(() => {
   fetchSuppliers();
 }, [fetchSuppliers]);
 
-  const fetchMonths = useCallback(async () => {
-    setLoadingMonths(true);
-    try {
-      const response = await axios.get(MONTHS_API);
-      const data = response.data;
-      if (data.data) {
-        const fetchedMonths = data.data.map((item) => ({
-          label: item.nome,
-          value: item.meses, // Usar 'meses' como valor numérico para envio
-        }));
-        setMonths([{ label: 'Selecione o número de meses', value: '' }, ...fetchedMonths]);
-      } else {
-        console.error('Erro ao buscar meses:', data.message || 'Formato de resposta inesperado');
-        Alert.alert('Erro', 'Não foi possível carregar os meses. Tente novamente.');
-      }
-    } catch (error) {
-      console.error('Erro ao buscar meses:', error);
-      handleRequestError(error);
-    }
-    setLoadingMonths(false);
-  }, []);
-
-  const handleRequestError = (error) => {
-    if (error.response) {
-      console.error('Erro na resposta da API:', error.response.data);
-      Alert.alert('Erro', `Erro na resposta da API: ${JSON.stringify(error.response.data) || 'Erro desconhecido'}`);
-    } else if (error.request) {
-      console.error('Erro na requisição da API:', error.request);
-      Alert.alert('Erro', 'Erro na requisição da API. Verifique sua conexão e tente novamente.');
-    } else {
-      console.error('Erro desconhecido:', error.message);
-      Alert.alert('Erro', 'Ocorreu um erro desconhecido. Tente novamente.');
-    }
-  };
 
   useEffect(() => {
     fetchCategories();
     fetchSuppliers();
-    fetchMonths();
-  }, [fetchCategories, fetchSuppliers, fetchMonths]);
-
+  }, [fetchCategories, fetchSuppliers]);
 
 
   const determineRecurrenceText = () => {
@@ -225,7 +185,7 @@ useEffect(() => {
           text = 'Anual';
           break;
         default:
-          text = 'Recorrência indefinida';
+          text = 'Recorrência';
       }
     }
     if (isIndeterminate) {
@@ -244,7 +204,7 @@ useEffect(() => {
       return;
     }
   
-    if (!valor || isNaN(parseFloat(valor)) || parseFloat(valor) <= 0) {
+    if (!valor || isNaN(valorNumerico) || valorNumerico <= 0) {
       Alert.alert('Erro', 'Por favor, insira um valor válido.');
       return;
     }
@@ -262,34 +222,40 @@ useEffect(() => {
     setModalVisible(true);
   };
   
-   const handleConfirm = async () => {
+  const handleConfirm = async () => {
     setModalVisible(false);
     setLoading(true);
-
+  
     const empresa_id = await getEmpresaId();
     if (!empresa_id) {
-      Alert.alert('Erro', 'ID da empresa não encontrado. Por favor, verifique as configurações de login.');
+      Alert.alert('Erro', 'ID da empresa não encontrado. Verifique as configurações.');
       setLoading(false);
       return;
     }
-
+  
     const expenseData = {
       empresa_id: Number(empresa_id),
       item: item || '',
-      valor: parseFloat(valor),
-      dt_vencimento: format(dueDate, 'yyyy-MM-dd'), // Data de vencimento
-      dt_pagamento: null, // Data de pagamento será null para "Contas a pagar"
+      valor: valorNumerico,
+      dt_vencimento: format(dueDate, 'yyyy-MM-dd'),
+      dt_pagamento: null,
       fornecedor_id: Number(parceiro),
       categoria_despesa_id: Number(categoria),
-      classificacao_lancamento: 4,
-      recorrencia: selectedFrequencyId || null, // Se não houver frequência selecionada, a recorrência será null
-      is_recorrencia_tempo_indeterminado: !!isIndeterminate,
-      quantidade_repeticoes: !isIndeterminate && repeatCount > 0 ? repeatCount : null,
-      status: 'pendente', // Status será "pendente" para contas a pagar
+      status: 'pendente',
     };
 
-    console.log('Dados enviados para a API:', expenseData);
-
+    // Somente adicionar os campos de recorrência se isRecurring for true
+    if (isRecurring) {
+      expenseData.tipo_recorrencia = selectedFrequencyId || null;
+      expenseData.recorrencia = !isIndeterminate && repeatCount > 0 ? repeatCount : 0;
+      expenseData.eh_recorrencia_indeterminada = !!isIndeterminate;
+    } else {
+      // Limpa os campos de recorrência se não for uma despesa recorrente
+      delete expenseData.tipo_recorrencia;
+      delete expenseData.recorrencia;
+      delete expenseData.eh_recorrencia_indeterminada;
+    }
+  
     try {
       const response = await axios.post(SAVE_EXPENSE_API, expenseData, {
         headers: {
@@ -298,21 +264,19 @@ useEffect(() => {
       });
       console.log('Resposta da API:', response.data);
       if (response.status === 201 || response.data.status === 'success') {
-        const despesaId = response.data.data[0].id; // Captura o id da primeira despesa criada
-        console.log('ID da despesa cadastrada:', despesaId); // Log do id da despesa
         setSuccessModalVisible(true);
-        handleRegisterNew(); // Limpa todos os campos após o envio bem-sucedido
+        handleRegisterNew();
       } else {
-        Alert.alert('Erro', `Ocorreu um erro ao salvar a despesa: ${response.data.message || 'Erro desconhecido'}`);
+        Alert.alert('Erro', `Erro ao salvar a despesa: ${response.data.message || 'Erro desconhecido'}`);
       }
     } catch (error) {
       console.error('Erro ao salvar a despesa:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao salvar a despesa. Verifique sua conexão com a internet e tente novamente.');
+      Alert.alert('Erro', 'Ocorreu um erro ao salvar a despesa. Tente novamente.');
     } finally {
       setLoading(false);
     }
   };
-
+  
   const handleRegisterNew = () => {
     setCategoria('');
     setSelectedCategory('');
@@ -322,16 +286,16 @@ useEffect(() => {
     setSelectedSupplier(null);
     setRepeatCount(0);  // Limpa a quantidade de repetições
     setIsIndeterminate(false);  // Reseta a recorrência indeterminada
-    setSelectedFrequencyId(null);  // Reseta a frequência
+    setSelectedFrequencyId('');  // Limpa a frequência
+    setIsRecurring(false);  // Reseta a recorrência
     setRecorrenciaText('Pagamento único');  // Volta ao padrão de recorrência
     setDate(new Date());
     setDueDate(new Date());
     setBarcode('');
-    setIsLiquidateNow(true);
     setSuccessModalVisible(false);
   };
   
-  
+
   const toggleExpenseType = () => {
     navigation.navigate('NewExpense');
   };
@@ -346,6 +310,19 @@ useEffect(() => {
     setSelectedSupplier(supplier);  // Define o fornecedor selecionado
     setParceiro(supplier.value);    // Define o ID do parceiro corretamente
   };
+
+  const formatCurrency = (value) => {
+    const numericValue = value.replace(/\D/g, '');
+    const numberValue = parseFloat(numericValue) / 100;
+    // Formata para o padrão BRL
+    if (isNaN(numberValue)) {
+      return '';
+    } else {
+      return numberValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+  };
+  
+
   
   return (
     <ScrollView style={styles.container}>
@@ -380,16 +357,14 @@ useEffect(() => {
             {/* Date Picker para Data de Vencimento */}
             <View style={styles.datePickerContainer}>
             <Text style={styles.dateLabel}>Data de vencimento</Text>
-            <View style={styles.datePickerRow}>
+            <TouchableOpacity style={styles.datePickerRow} onPress={handleShowCalendar}>
               <TextInput
                 style={styles.dateInput}
                 value={format(dueDate, 'dd/MM/yyyy', { locale: ptBR })}
                 editable={false}
               />
-              <TouchableOpacity onPress={handleShowCalendar}>
                 <Icon name="calendar" size={20} color={COLORS.gray} />
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           </View>
 
             {/* Campo de Código de Barras */}
@@ -471,12 +446,20 @@ useEffect(() => {
 
               {/* Campo de Valor */}
               <TextInput
-                style={styles.input}
-                placeholder="Valor (R$)"
-                value={valor}
-                onChangeText={setValor}
-                keyboardType="numeric"
-              />
+              style={styles.input}
+              placeholder="Valor (R$)"
+              value={valor}
+              onChangeText={(text) => {
+                const formattedValue = formatCurrency(text);
+                setValor(formattedValue);
+                
+                // Também armazenamos o valor numérico para uso na requisição
+                const numericValue = text.replace(/\D/g, '');
+                const numberValue = parseFloat(numericValue) / 100;
+                setValorNumerico(numberValue);
+              }}
+              keyboardType="numeric"
+            />
 
               {/* Campo de Descrição */}
               <TextInput
@@ -504,10 +487,16 @@ useEffect(() => {
 
             {/* Cartão de Recorrência */}
             <RecurrenceField
-              setSelectedFrequencyId={setSelectedFrequencyId} // Passa função para definir a frequência
-              setRepeatCount={setRepeatCount} // Passa função para definir o número de repetições
-              setIsIndeterminate={setIsIndeterminate} // Passa função para definir se é indeterminado
-            />
+                  setSelectedFrequencyId={setSelectedFrequencyId}
+                  setSelectedFrequencyName={setSelectedFrequencyName}
+                setIsIndeterminate={setIsIndeterminate}          // Passa a função para definir se é indeterminado
+                setRepeatCount={setRepeatCount}                  // Passa a função para definir a quantidade de repetições
+                setIsRecurring={setIsRecurring}
+                isRecurring={isRecurring}                        // Passa o estado para controlar a limpeza
+                selectedFrequencyId={selectedFrequencyId}        // Passa o estado de frequência para controle
+                repeatCount={repeatCount}                        // Passa o estado de repetições
+                isIndeterminate={isIndeterminate}               // Passa a função para definir se é recorrente
+              />
 
             {/* Botão de Salvar Despesa */}
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -526,18 +515,22 @@ useEffect(() => {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         onConfirm={handleConfirm}
-        valor={valor}
+        valor={valor} // O valor já está formatado
         parceiro={getSupplierNameById(parceiro)}
-        dataVencimento={dueDate.toLocaleDateString()}
-        recorrencia={recorrenciaText}
+        dataVencimento={format(dueDate, 'dd/MM/yyyy', { locale: ptBR })}
+        isRecurring={isRecurring}
+        tipoRecorrencia={selectedFrequencyName}
+        repeatCount={repeatCount}
+        isIndeterminate={isIndeterminate}
       />
 
       <SucessModal
         visible={successModalVisible}
-        onClose={() => navigation.navigate('MainTab')}
+        onClose={() => setSuccessModalVisible(false)} // Agora fecha o modal e mantém o usuário na tela
         onRegisterNew={handleRegisterNew}
         onConfirm={handleConfirm}
       />
+
     </ScrollView>
   );
 };

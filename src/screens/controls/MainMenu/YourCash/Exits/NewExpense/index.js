@@ -29,7 +29,6 @@ import CustomCalendar from '../../../../../../components/CustomCalendar';
 
 // Constantes para os endpoints da API
 const CATEGORIES_API = 'https://api.celereapp.com.br/mnt/categoriasdespesa/?page=1&page_size=30';
-const MONTHS_API = 'https://api.celereapp.com.br/api/despesas_recorrencias/';
 const SAVE_EXPENSE_API = 'https://api.celereapp.com.br/cad/despesa/';
 
 const categoryIcons = {
@@ -53,24 +52,26 @@ const NewExpense = ({ navigation  }) => {
   const [item, setItem] = useState('');
   const [parceiro, setParceiro] = useState('');
   const [suppliers, setSuppliers] = useState([]);
-  const [months, setMonths] = useState([]);
   const [date, setDate] = useState(new Date());
   const [dueDate, setDueDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [loadingMonths, setLoadingMonths] = useState(false);
   const [barcode, setBarcode] = useState('');
   const [isLiquidateNow, setIsLiquidateNow] = useState(true);
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSupplier, setSelectedSupplier] = useState(null);
-  const [selectedFrequencyId, setSelectedFrequencyId] = useState(null); // ID da frequência selecionada
-  const [repeatCount, setRepeatCount] = useState(0); // Quantidade de repetições
-  const [isIndeterminate, setIsIndeterminate] = useState(false); // Tempo indeterminado
   const [recorrenciaText, setRecorrenciaText] = useState('Pagamento único'); // Estado para a recorrência
   const [isCalendarVisible, setIsCalendarVisible] = useState(false); // Controla a visibilidade do CustomCalendar
+  const [isRecurring, setIsRecurring] = useState(false); // Controle de recorrência
+  const [isIndeterminate, setIsIndeterminate] = useState(false); // Tempo indeterminado
+  const [repeatCount, setRepeatCount] = useState(0); // Quantidade de repetições
+  const [selectedFrequencyId, setSelectedFrequencyId] = useState(null);
+  const [selectedFrequencyName, setSelectedFrequencyName] = useState('');// Nome da frequência para exibição
+  const [valorNumerico, setValorNumerico] = useState(0);
+
+
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
@@ -172,28 +173,6 @@ useFocusEffect(
   }, [fetchSuppliers])
 );
 
-  const fetchMonths = useCallback(async () => {
-    setLoadingMonths(true);
-    try {
-      const response = await axios.get(MONTHS_API);
-      const data = response.data;
-      if (data.data) {
-        const fetchedMonths = data.data.map((item) => ({
-          label: item.nome,
-          value: item.meses, // Usar 'meses' como valor numérico para envio
-        }));
-        setMonths([{ label: 'Selecione o número de meses', value: '' }, ...fetchedMonths]);
-      } else {
-        console.error('Erro ao buscar meses:', data.message || 'Formato de resposta inesperado');
-        Alert.alert('Erro', 'Não foi possível carregar os meses. Tente novamente.');
-      }
-    } catch (error) {
-      console.error('Erro ao buscar meses:', error);
-      handleRequestError(error);
-    }
-    setLoadingMonths(false);
-  }, []);
-
   const handleRequestError = (error) => {
     if (error.response) {
       console.error('Erro na resposta da API:', error.response.data);
@@ -210,36 +189,26 @@ useFocusEffect(
   useEffect(() => {
     fetchCategories();
     fetchSuppliers();
-    fetchMonths();
-  }, [fetchCategories, fetchSuppliers, fetchMonths]);
+  }, [fetchCategories, fetchSuppliers]);
 
-    // Função para determinar o texto da recorrência
-    const determineRecurrenceText = () => {
-      let text = 'Sem recorrência';
-      if (selectedFrequencyId) {
-        switch (selectedFrequencyId) {
-          case 1:
-            text = 'Semanal';
-            break;
-          case 2:
-            text = 'Quinzenal';
-            break;
-          case 3:
-            text = 'Mensal';
-            break;
-          case 4:
-            text = 'Anual';
-            break;
-          default:
-            text = 'Recorrência indefinida';
-        }
-      }
+  // Função para determinar o texto da recorrência
+  const determineRecurrenceText = () => {
+    if (!isRecurring) {
+      return 'Pagamento único';
+    } else {
+      let text = selectedFrequencyId || 'Recorrência';
       if (isIndeterminate) {
         text += ' (tempo indeterminado)';
+      } else if (repeatCount > 0) {
+        text += ` - Repetições: ${repeatCount}`;
       }
       return text;
-    };
-
+    }
+  };
+  const getSupplierNameById = (id) => {
+    const supplier = suppliers.find((s) => s.value === id);
+    return supplier ? supplier.label : 'Parceiro não encontrado';
+  };
   const handleSave = () => {
     console.log('Categoria:', categoria);
     console.log('Valor:', valor);
@@ -262,7 +231,7 @@ useFocusEffect(
     }
        // Define o texto da recorrência antes de abrir o modal
        const recurrenceText = determineRecurrenceText();
-       setRecorrenciaText(recurrenceText);  // Define o texto da recorrência
+       setRecorrenciaText(recurrenceText);
     // Se tudo estiver preenchido corretamente, abre o modal de confirmação
     setModalVisible(true);
   };
@@ -281,16 +250,26 @@ useFocusEffect(
     const expenseData = {
       empresa_id: Number(empresa_id),
       item: item || '',
-      valor: parseFloat(valor),
+      valor: valorNumerico,
       dt_vencimento: format(dueDate, 'yyyy-MM-dd'),
       dt_pagamento: date ? format(date, 'yyyy-MM-dd') : null,
       fornecedor_id: Number(parceiro),
       categoria_despesa_id: Number(categoria),
-      classificacao_lancamento: 4,
-      recorrencia: selectedFrequencyId || null, // Se não houver frequência selecionada, a recorrência será null
-      is_recorrencia_tempo_indeterminado: !!isIndeterminate,
-      quantidade_repeticoes: !isIndeterminate && repeatCount > 0 ? repeatCount : null,
+      status: 'finalizada',
     };
+
+    // Somente adicionar os campos de recorrência se isRecurring for true
+    if (isRecurring) {
+      expenseData.tipo_recorrencia = selectedFrequencyName.toLowerCase();
+      expenseData.recorrencia = !isIndeterminate && repeatCount > 0 ? repeatCount : 0;
+      expenseData.eh_recorrencia_indeterminada = !!isIndeterminate;
+    } else {
+      // Limpa os campos de recorrência se não for uma despesa recorrente
+      delete expenseData.tipo_recorrencia;
+      delete expenseData.recorrencia;
+      delete expenseData.eh_recorrencia_indeterminada;
+    }
+
     console.log('Dados enviados para a API:', expenseData);
     try {
       const response = await axios.post(SAVE_EXPENSE_API, expenseData, {
@@ -324,13 +303,15 @@ useFocusEffect(
     setSelectedSupplier(null);
     setRepeatCount(0);
     setIsIndeterminate(false);
-    setSelectedFrequencyId(null);
-    setRecorrenciaText('Pagamento único'); // Volta ao padrão
     setDate(new Date());
     setDueDate(new Date());
     setBarcode('');
-    setIsLiquidateNow(true);
     setSuccessModalVisible(false);
+    setRepeatCount(0);
+    setIsIndeterminate(false);
+    setSelectedFrequencyId('');
+    setIsRecurring(false);
+    setRecorrenciaText('Pagamento único');
   };
 
   const toggleExpenseType = () => {
@@ -344,6 +325,17 @@ useFocusEffect(
   const handleCategoriesScreen = () => {
     navigation.navigate('IncludeCategoriesExpense');
   };
+
+  const formatCurrency = (value) => {
+    const numericValue = value.replace(/\D/g, '');
+    const numberValue = parseFloat(numericValue) / 100;
+    // Formata para o padrão BRL
+    if (isNaN(numberValue)) {
+      return '';
+    } else {
+      return numberValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -471,12 +463,20 @@ useFocusEffect(
 
               {/* Campo de Valor */}
               <TextInput
-                style={styles.input}
-                placeholder="Valor (R$)"
-                value={valor}
-                onChangeText={setValor}
-                keyboardType="numeric"
-              />
+              style={styles.input}
+              placeholder="Valor (R$)"
+              value={valor}
+              onChangeText={(text) => {
+                const formattedValue = formatCurrency(text);
+                setValor(formattedValue);
+                
+                // Também armazenamos o valor numérico para uso na requisição
+                const numericValue = text.replace(/\D/g, '');
+                const numberValue = parseFloat(numericValue) / 100;
+                setValorNumerico(numberValue);
+              }}
+              keyboardType="numeric"
+            />
 
               {/* Campo de Descrição */}
               <TextInput
@@ -503,11 +503,17 @@ useFocusEffect(
             </View>
 
            {/* Recorrencia */}
-           <RecurrenceField
-              setSelectedFrequencyId={setSelectedFrequencyId} // Passa função para definir a frequência
-              setRepeatCount={setRepeatCount} // Passa função para definir o número de repetições
-              setIsIndeterminate={setIsIndeterminate} // Passa função para definir se é indeterminado
-            />
+            <RecurrenceField
+                  setSelectedFrequencyId={setSelectedFrequencyId}
+                  setSelectedFrequencyName={setSelectedFrequencyName}
+                setIsIndeterminate={setIsIndeterminate}          // Passa a função para definir se é indeterminado
+                setRepeatCount={setRepeatCount}                  // Passa a função para definir a quantidade de repetições
+                setIsRecurring={setIsRecurring}
+                isRecurring={isRecurring}                        // Passa o estado para controlar a limpeza
+                selectedFrequencyId={selectedFrequencyId}        // Passa o estado de frequência para controle
+                repeatCount={repeatCount}                        // Passa o estado de repetições
+                isIndeterminate={isIndeterminate}               // Passa a função para definir se é recorrente
+              />
 
             {/* Botão de Salvar Despesa */}
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -523,20 +529,26 @@ useFocusEffect(
           onClose={() => setIsCalendarVisible(false)}
           onDayPress={handleDayPress}
         />
+
       <ConfirmModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         onConfirm={handleConfirm}
         valor={valor}
-        parceiro={parceiro}
-        dataPagamento={date.toLocaleDateString()}
-        dataVencimento={dueDate.toLocaleDateString()}
-        recorrencia={recorrenciaText}
+        parceiro={getSupplierNameById(parceiro)}
+        dataPagamento={format(date, 'dd/MM/yyyy', { locale: ptBR })}
+        dataVencimento={format(dueDate, 'dd/MM/yyyy', { locale: ptBR })}
+        isRecurring={isRecurring}
+        tipoRecorrencia={selectedFrequencyName}
+        repeatCount={repeatCount}
+        isIndeterminate={isIndeterminate}
       />
+
       <SucessModal
         visible={successModalVisible}
-        onClose={() => navigation.navigate('MainTab')}
+        onClose={() => setSuccessModalVisible(false)} // Agora fecha o modal e mantém o usuário na tela
         onRegisterNew={handleRegisterNew}
+        onConfirm={handleConfirm}
       />
     </ScrollView>
   );

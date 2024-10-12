@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,7 +11,7 @@ import { COLORS } from '../../../constants';
 import styles from './styles';
 
 const API_URL_CARGOS = 'https://api.celereapp.com.br/api/cargos_negocio/';
-const API_URL_CLASSIFICAR = 'https://api.celereapp.com.br/config/classificar_empreendedor/';
+const API_URL_CLASSIFICAR = 'https://api.celereapp.com.br/config/empreendedor/atualizar-por-id/';
 
 const BusinessInfoScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
@@ -22,7 +22,7 @@ const BusinessInfoScreen = ({ navigation }) => {
   const [cnpj, setCnpj] = useState('');
   const [rolesList, setRolesList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState(''); // Mantendo apenas mensagens de erro
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -32,7 +32,6 @@ const BusinessInfoScreen = ({ navigation }) => {
           setUserData(JSON.parse(storedUserData));
         } else {
           setErrorMessage('Dados do usuário não encontrados.');
-          
         }
       } catch (error) {
         console.error('Erro ao carregar dados do usuário:', error);
@@ -80,25 +79,32 @@ const BusinessInfoScreen = ({ navigation }) => {
   const handleNext = useCallback(async () => {
     if (!validateFields()) return;
 
-    if (!userData || !userData.id) {
-      setErrorMessage('Dados do usuário não carregados. Tente novamente.');
-      return;
-    }
-
-    setLoading(true);
     try {
+      const empresaId = await AsyncStorage.getItem('empresaId'); // Obtendo o ID da empresa logada
+      if (!empresaId) {
+        setErrorMessage('ID da empresa não encontrado. Tente novamente.');
+        return;
+      }
+
+      if (!userData || !userData.id) {
+        setErrorMessage('Dados do usuário não carregados. Tente novamente.');
+        return;
+      }
+
+      setLoading(true);
       const dataToSend = {
-        nome: name, // Enviar o nome do usuário para a API
+        nome: name,
         email: email,
         nome_negocio: businessName,
         cargo: role,
-        cnpj: cnpj || null,
+        cnpj: cnpj || null, // CNPJ é opcional
       };
 
       const response = await axios.patch(`${API_URL_CLASSIFICAR}${userData.id}/`, dataToSend);
 
       if (response.status === 200 && response.data.status === 'success') {
-        navigation.navigate('InitialBranch'); // Navegação direta em caso de sucesso
+  
+        navigation.navigate('InitialBranch'); // Navegação em caso de sucesso
       } else {
         setErrorMessage(response.data.message || 'Erro ao salvar as informações. Tente novamente.');
       }
@@ -114,11 +120,10 @@ const BusinessInfoScreen = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
-  }, [name, email,businessName, role, cnpj, userData, validateFields, navigation]);
+  }, [name, email, businessName, role, cnpj, userData, validateFields, navigation]);
 
   return (
     <View style={styles.container}>
-      {/* BarTop3 no topo */}
       <View style={styles.barTopContainer}>
         <BarTop3
           titulo={'Voltar'}
@@ -129,10 +134,8 @@ const BusinessInfoScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* Barra de Progresso logo abaixo do BarTop3 */}
       <ProgressBar currentStep={3} totalSteps={4} />
 
-      {/* Conteúdo Centralizado no Meio da Tela */}
       <View style={styles.contentContainer}>
         <Text style={styles.title}>Quase lá!</Text>
         <View style={styles.cardContainer}>
@@ -143,14 +146,13 @@ const BusinessInfoScreen = ({ navigation }) => {
             value={name}
             onChangeText={setName}
           />
-            <TextInput
+          <TextInput
             style={styles.input}
             placeholder="E-mail"
             placeholderTextColor={COLORS.gray}
             value={email}
             onChangeText={setEmail}
           />
-
           <TextInput
             style={styles.input}
             placeholder="Nome do seu negócio"
@@ -165,7 +167,7 @@ const BusinessInfoScreen = ({ navigation }) => {
               style={styles.picker}
               onValueChange={(itemValue) => setRole(itemValue)}
             >
-              <Picker.Item label="Sua posição no negócio" value=""  color={COLORS.gray}/>
+              <Picker.Item label="Sua posição no negócio" value="" color={COLORS.gray} />
               {rolesList && rolesList.length > 0 && rolesList.map((roleItem) => (
                 <Picker.Item key={roleItem.id} label={roleItem.nome} value={roleItem.id} />
               ))}
@@ -187,12 +189,13 @@ const BusinessInfoScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Exibição de mensagem de erro */}
         {errorMessage ? (
           <View style={styles.errorMessageContainer}>
             <Text style={styles.errorMessageText}>{errorMessage}</Text>
           </View>
         ) : null}
+
+        {loading && <ActivityIndicator size="large" color={COLORS.primary} />}
       </View>
     </View>
   );

@@ -1,15 +1,25 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/Ionicons';
-
+import CustomCalendar from '../../../../../../../components/CustomCalendar';
 import { COLORS } from '../../../../../../../constants';
+
+const formatCurrency = (value) => {
+  const number = value.replace(/\D/g, ''); // Remove tudo que não for número
+  const formatted = (number / 100).toFixed(2).replace('.', ','); // Formata o valor
+  return `R$ ${formatted.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`; // Adiciona ponto como separador de milhar
+};
 
 const PartialLiquidationModal = ({ visible, onClose, onConfirmPartialLiquidation }) => {
   const [paymentDate, setPaymentDate] = useState(new Date());
   const [partialValue, setPartialValue] = useState('');
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
+
+    // Função para lidar com a entrada de texto e formatar como moeda
+    const handleValueChange = (text) => {
+      setPartialValue(formatCurrency(text));
+    };
 
   // Garantir que o valor seja convertido para número corretamente
   const handlePartialLiquidation = () => {
@@ -22,6 +32,14 @@ const PartialLiquidationModal = ({ visible, onClose, onConfirmPartialLiquidation
 
     onClose(); // Fecha o modal atual
     onConfirmPartialLiquidation(parsedValue, paymentDate); // Envia o valor numérico e a data ao componente pai
+  };
+
+  const handleDayPress = (day) => {
+    setPaymentDate(new Date(day.dateString)); // Atualiza a data selecionada
+  };
+
+  const handleShowCalendar = () => {
+    setIsCalendarVisible(true);
   };
 
   return (
@@ -39,31 +57,23 @@ const PartialLiquidationModal = ({ visible, onClose, onConfirmPartialLiquidation
           {/* Data de Pagamento */}
           <View style={styles.datePickerContainer}>
             <Text style={styles.dateLabel}>Hoje, {paymentDate.toLocaleDateString('pt-BR')}</Text>
-            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.datePickerButton}>
+            <TouchableOpacity onPress={handleShowCalendar} style={styles.datePickerButton}>
               <Icon name="calendar" size={20} color={COLORS.lightGray} />
             </TouchableOpacity>
           </View>
 
-          {showDatePicker && (
-            <DateTimePicker
-              value={paymentDate}
-              mode="date"
-              display="default"
-              onChange={(event, selectedDate) => {
-                setShowDatePicker(false);
-                if (selectedDate) setPaymentDate(selectedDate);
-              }}
-              maximumDate={new Date()}
-              locale="pt-BR"
-            />
-          )}
+          <CustomCalendar
+          visible={isCalendarVisible}
+          onClose={() => setIsCalendarVisible(false)}
+          onDayPress={handleDayPress}
+          />
 
           {/* Campo para valor parcial */}
           <TextInput
             style={styles.input}
             placeholder="Valor a liquidar parcialmente"
             value={partialValue}
-            onChangeText={(text) => setPartialValue(text.replace(/[^0-9,.]/g, ''))} // Permite apenas números, vírgula e ponto
+            onChangeText={handleValueChange} // Formata o valor em tempo real
             keyboardType="numeric"
           />
 
@@ -138,6 +148,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   dateLabel: {
-    color: COLORS.lightGray,
+    color: COLORS.black,
   },
 });

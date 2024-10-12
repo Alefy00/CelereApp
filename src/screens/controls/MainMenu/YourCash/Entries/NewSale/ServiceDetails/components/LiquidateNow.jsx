@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, Modal, Alert, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from '../styles';
@@ -132,94 +132,104 @@ const LiquidateNow = ({ navigation, route, clients }) => {
 // Função para registrar venda e itens (produtos e serviços)
 const handleRegisterSale = async () => {
   try {
-    const empresaId = await getEmpresaId(); // Obtém o ID da empresa logada
+    const empresaId = await getEmpresaId();
     if (!empresaId) return;
 
-    const currentDate = new Date().toISOString().split('T')[0]; // Data atual do dispositivo
-    const totalValue = liquidValue; // Valor bruto a receber após desconto
-
+    const currentDate = new Date().toISOString().split('T')[0];
 
     if (!selectedPaymentMethod) {
       Alert.alert("Erro", "Selecione uma forma de pagamento.");
       return;
     }
 
-    // Registra a venda primeiro
-    const vendaData = {
-      empresa: empresaId,
-      cliente_id: selectedClient ? selectedClient.id : null,  // Cliente selecionado
-      dt_pagamento: currentDate, // Data de pagamento (data atual)
-      percentual_desconto: parseFloat(discount) || 0, // Percentual de desconto sempre como número válido
-      tipo_pagamento_venda: selectedPaymentMethod, // ID da forma de pagamento selecionada
-      valor_total_venda: totalValue, // Valor bruto a receber
-      gastos_envolvidos: parseFloat(additionalCosts || 0).toFixed(2)// Custos adicionais
-    };
-
-    // Log do payload de venda enviado
-    console.log('Payload da venda a ser enviada:', vendaData);
-
-    const vendaResponse = await axios.post(REGISTER_SALE_API, vendaData);
-
-    // Log da resposta da requisição de venda
-    console.log('Resposta da API após registrar venda:', vendaResponse.data);
-
-    const vendaId = vendaResponse.data.data.id;
-    console.log('Venda registrada com sucesso, ID da venda:', vendaId);
-
-    setSaleId(vendaId);
-
-    // Agora registra os serviços da venda
+    // Preparar os itens de serviço
     const serviceItems = services.map(service => {
       const servicePrice = service.preco_venda && parseFloat(service.preco_venda) !== 0
         ? parseFloat(service.preco_venda).toFixed(2)
-        : parseFloat(servicePrices[service.id]).toFixed(2); // Usa o valor inserido no input se o preço for 0
-
-        console.log('Valor unitário enviado:', servicePrice);
+        : parseFloat(servicePrices[service.id] || 0).toFixed(2);
 
       return {
         empresa_id: empresaId,
-        venda_id: vendaId, // ID da venda registrada
-        servico_id: service.id, // ID do serviço
-        quantidade: service.amount || 1, // Quantidade
-        percentual_desconto: !isNaN(parseFloat(discount)) ? (discountType === '%' ? parseFloat(discount) : 0) : 0,
-        valor_desconto: !isNaN(parseFloat(discount)) ? (discountType === 'R$' ? parseFloat(discount) : 0) : 0,
-        valor_unitario: servicePrice, // Considera o preço do input se necessário
-        
+        venda_id: null, // Será atualizado após criar a venda
+        servico_id: service.id,
+        quantidade: service.amount || 1,
+        percentual_desconto: parseFloat(discount) || 0,
+        valor_desconto: parseFloat(discount) || 0,
+        preco_unitario_venda: servicePrice,
       };
     });
-    
 
-    // Log dos itens de serviços a serem enviados
-    console.log('Payload dos serviços a serem enviados:', serviceItems);
+    // Calcular o total dos serviços
+    const totalServicePrice = serviceItems.reduce((sum, item) => {
+      return sum + (parseFloat(item.preco_unitario_venda) * (item.quantidade || 1));
+    }, 0);
 
-    const servicePromises = serviceItems.map(item => axios.post(REGISTER_ITEM_SALE_API, item));
-
-    // Agora registra os produtos da venda
+    // Preparar os itens de produto
     const productItems = products.map(product => ({
       empresa_id: empresaId,
-      venda_id: vendaId,
+      venda_id: null, // Será atualizado após criar a venda
       produto_id: product.id,
       quantidade: product.amount || 1,
-      percentual_desconto: !isNaN(parseFloat(discount)) ? (discountType === '%' ? parseFloat(discount) : 0) : 0,
-      valor_desconto: !isNaN(parseFloat(discount)) ? (discountType === 'R$' ? parseFloat(discount) : 0) : 0,
-      valor_unitario: product.preco_venda,
+      percentual_desconto: parseFloat(discount) || 0,
+      valor_desconto: parseFloat(discount) || 0,
+      valor_unitario: parseFloat(product.preco_venda).toFixed(2),
     }));
 
-    // Log dos itens de produtos a serem enviados
-    console.log('Payload dos produtos a serem enviados:', productItems);
+    // Calcular o total dos produtos
+    const totalProductPrice = productItems.reduce((sum, item) => {
+      return sum + (parseFloat(item.valor_unitario) * (item.quantidade || 1));
+    }, 0);
 
-    const productPromises = productItems.map(item => axios.post(REGISTER_ITEM_SALE_API, item));
+    // Calcular o valor total da venda
+    let totalValue = totalProductPrice + totalServicePrice + parseFloat(additionalCosts || 0);
 
-    // Aguarda todas as requisições de serviços e produtos
+    // Aplicar descontos
+    if (discountType === '%' && !isNaN(discount) && discount !== '') {
+      totalValue -= (totalValue * (parseFloat(discount) / 100));
+    } else if (discountType === 'R$' && !isNaN(discount) && discount !== '') {
+      totalValue -= parseFloat(discount || 0);
+    }
+
+    totalValue = parseFloat(totalValue.toFixed(2));
+
+    // Preparar os dados da venda
+    const vendaData = {
+      empresa: empresaId,
+      cliente_id: selectedClient ? selectedClient.id : null,
+      dt_pagamento: currentDate,
+      percentual_desconto: parseFloat(discount) || 0,
+      tipo_pagamento_venda: selectedPaymentMethod,
+      valor_total_venda: totalValue,
+      gastos_envolvidos: parseFloat(additionalCosts || 0).toFixed(2),
+    };
+
+    console.log('Payload da venda a ser enviada:', vendaData);
+
+    // Registrar a venda
+    const vendaResponse = await axios.post(REGISTER_SALE_API, vendaData);
+    const vendaId = vendaResponse.data.data.id;
+    console.log('Venda registrada com sucesso, ID da venda:', vendaId);
+    setSaleId(vendaId);
+
+    // Atualizar venda_id nos itens
+    const updatedServiceItems = serviceItems.map(item => ({ ...item, venda_id: vendaId }));
+    const updatedProductItems = productItems.map(item => ({ ...item, venda_id: vendaId }));
+
+    // Registrar os itens de serviço
+    const servicePromises = updatedServiceItems.map(item => axios.post(REGISTER_ITEM_SALE_API, item));
+    // Registrar os itens de produto
+    const productPromises = updatedProductItems.map(item => axios.post(REGISTER_ITEM_SALE_API, item));
+
+    // Aguardar todas as requisições
     await Promise.all([...servicePromises, ...productPromises]);
 
     setIsModalVisible(true);
   } catch (error) {
-    // Log do erro da requisição
     console.error('Erro ao registrar venda:', error.response ? error.response.data : error);
     Alert.alert('Erro', 'Ocorreu um erro ao registrar a venda e os itens.');
   }
 };
+
 
   const toggleDropdown = () => {
       setDropdownVisible(!isDropdownVisible);

@@ -1,5 +1,4 @@
 /* eslint-disable prettier/prettier */
-// SalesChartCard.js
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { PieChart } from 'react-native-svg-charts';

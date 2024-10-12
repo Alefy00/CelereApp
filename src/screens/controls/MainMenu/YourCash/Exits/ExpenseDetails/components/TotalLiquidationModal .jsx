@@ -4,16 +4,20 @@ import { View, Text, TouchableOpacity, Modal,StyleSheet } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { COLORS } from '../../../../../../../constants';
 import Icon from 'react-native-vector-icons/Ionicons';
+import CustomCalendar from '../../../../../../../components/CustomCalendar';
 
 
 const TotalLiquidationModal = ({ visible, onClose, onConfirm }) => {
     const [selectedDate, setSelectedDate] = useState(new Date()); // Data selecionada pelo usuário
-    const [showDatePicker, setShowDatePicker] = useState(false); // Controla a exibição do date picker
+    const [isCalendarVisible, setIsCalendarVisible] = useState(false);
 
-    const handleDateChange = (event, date) => {
-        setShowDatePicker(false); // Fecha o date picker após selecionar a data
-        if (date) setSelectedDate(date);
-    };
+    const handleDayPress = (day) => {
+        setSelectedDate(new Date(day.dateString)); // Atualiza a data selecionada
+      };
+
+      const handleShowCalendar = () => {
+        setIsCalendarVisible(true);
+      };
 
     return (
         <Modal
@@ -34,7 +38,7 @@ const TotalLiquidationModal = ({ visible, onClose, onConfirm }) => {
                     {/* Botão de seleção de data */}
                     <TouchableOpacity 
                         style={styles.datePickerButton} 
-                        onPress={() => setShowDatePicker(true)}
+                        onPress={handleShowCalendar}
                     >
                         <Text style={styles.dateText}>
                             {`Hoje, ${selectedDate.toLocaleDateString('pt-BR')}`}
@@ -42,16 +46,11 @@ const TotalLiquidationModal = ({ visible, onClose, onConfirm }) => {
                         <Icon name="calendar" size={24} color={COLORS.lightGray} />
                     </TouchableOpacity>
 
-                    {/* Renderiza o DateTimePicker ao clicar no botão de seleção de data */}
-                    {showDatePicker && (
-                        <DateTimePicker
-                            value={selectedDate}
-                            mode="date"
-                            display="default"
-                            onChange={handleDateChange}
+                            <CustomCalendar
+                            visible={isCalendarVisible}
+                            onClose={() => setIsCalendarVisible(false)}
+                            onDayPress={handleDayPress}
                         />
-                    )}
-
                     <TouchableOpacity style={styles.confirmButton} onPress={() => onConfirm(selectedDate)}>
                         <Icon name="checkmark-circle" size={24} color="#000" />
                         <Text style={styles.confirmButtonText}>Liquidar despesa</Text>
@@ -108,7 +107,7 @@ const styles = StyleSheet.create({
     },
     dateText: {
         fontSize: 16,
-        color: COLORS.lightGray,
+        color: COLORS.black,
     },
     confirmButton: {
         flexDirection: 'row',

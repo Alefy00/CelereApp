@@ -105,6 +105,18 @@ const styles = StyleSheet.create({
         borderColor: COLORS.black,
         elevation: 1,
     },
+    actionButtonAdiar: {
+        backgroundColor: COLORS.lightGray2,
+        padding: 25,
+        borderRadius: 5,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: COLORS.black,
+        elevation: 1,
+    },
     actionButton2: {
         backgroundColor: COLORS.white,
         padding: 25,

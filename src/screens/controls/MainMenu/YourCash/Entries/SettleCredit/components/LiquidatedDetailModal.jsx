@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, Modal, FlatList, TouchableOpacity, Image, } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import styles from './styles';
@@ -57,6 +57,30 @@ const LiquidatedDetailModal = ({ visible, onClose, account,  servicoNomes, onSal
             </View>
         );
     };
+    const formatCurrency = (value) => {
+        if (!value) return 'R$ 0,00';
+        return parseFloat(value).toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        });
+      };
+
+      // Função para obter os gastos envolvidos da venda
+const calculateTotalGastosEnvolvidos = useCallback(() => {
+    return parseFloat(account?.gastos_envolvidos || 0);
+  }, [account]);
+
+    // Função para calcular o valor total da venda incluindo os gastos envolvidos
+const calculateTotalAmount = useCallback(() => {
+    const valorTotalVenda = parseFloat(account?.valor_total_venda || 0);
+    const gastosEnvolvidos = parseFloat(account?.gastos_envolvidos || 0);
+    const totalPagamentos = parseFloat(account?.total_pagamentos || 0);
+  
+    // Calcular o total geral
+    const totalGeral = valorTotalVenda + gastosEnvolvidos - totalPagamentos;
+  
+    return totalGeral;
+  }, [account]);
 
   return (
       <Modal visible={isFirstModalVisible} transparent={true} animationType="slide">
@@ -84,10 +108,15 @@ const LiquidatedDetailModal = ({ visible, onClose, account,  servicoNomes, onSal
                       style={{ maxHeight: 150 }}  // Limitar a altura do FlatList
                   />
 
-                  {/* Exibir valor total */}
+                        <View style={styles.totalContainer2}>
+                          <Text style={styles.totalLabel}>Gastos envolvidos:</Text>
+                          <Text style={styles.totalValue}>{formatCurrency(calculateTotalGastosEnvolvidos())}</Text>
+                        </View>
                   <View style={styles.totalContainer}>
                       <Text style={styles.totalLabel}>Valor total:</Text>
-                      <Text style={styles.totalValue}>R${account.valor_total_venda}</Text>
+                      <Text style={styles.totalValue}>
+                      {formatCurrency(calculateTotalAmount())}
+                      </Text>
                   </View>
 
                   {/* Manter outros botões conforme solicitado */}

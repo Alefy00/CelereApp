@@ -4,17 +4,19 @@ import { COLORS } from "../../../../../../../constants";
 import { Modal, View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const ConfirmModal = ({ visible, onClose, onConfirm, valor, parceiro, dataPagamento, dataVencimento, recorrencia }) => {
-  
-  // Função para formatar o valor como moeda BRL
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
+const ConfirmModal = ({
+  visible,
+  onClose,
+  onConfirm,
+  valor,
+  parceiro,
+  dataVencimento,
+  isRecurring,
+  tipoRecorrencia,
+  repeatCount,
+  isIndeterminate,
+  dataPagamento,
+}) => {
 
   return (
     <Modal
@@ -27,21 +29,20 @@ const ConfirmModal = ({ visible, onClose, onConfirm, valor, parceiro, dataPagame
         <View style={styles.modalContainer}>
           {/* Botão de Fechar */}
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Icon name="close" size={30} color={COLORS.black} />
+            <Icon name="close" size={30} color={COLORS.black} />
           </TouchableOpacity>
-          
+
           <Text style={styles.title}>Confirme os dados</Text>
-          
+
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Valor:</Text>
-            <Text style={styles.input}>{formatCurrency(valor)}</Text>
+            <Text style={styles.input}>{valor}</Text>
           </View>
-          
+
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Parceiro:</Text>
             <Text style={styles.input}>{parceiro}</Text>
           </View>
-          
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Data de pagamento:</Text>
             <Text style={styles.input}>{dataPagamento}</Text>
@@ -51,14 +52,36 @@ const ConfirmModal = ({ visible, onClose, onConfirm, valor, parceiro, dataPagame
             <Text style={styles.label}>Data de vencimento:</Text>
             <Text style={styles.input}>{dataVencimento}</Text>
           </View>
-          
+
+          {/* Informações de Recorrência */}
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Recorrência:</Text>
-            <Text style={styles.input}>{recorrencia}</Text>
+            <Text style={styles.label}>É recorrente?</Text>
+            <Text style={styles.input}>{isRecurring ? 'Sim' : 'Não'}</Text>
           </View>
-          
+
+          {isRecurring && (
+            <>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Tipo de recorrência:</Text>
+                <Text style={styles.input}>{tipoRecorrencia}</Text>
+              </View>
+
+              {isIndeterminate ? (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Recorrência:</Text>
+                  <Text style={styles.input}>Tempo indeterminado</Text>
+                </View>
+              ) : (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Quantidade de repetições:</Text>
+                  <Text style={styles.input}>{repeatCount}</Text>
+                </View>
+              )}
+            </>
+          )}
+
           <TouchableOpacity style={styles.confirmButton} onPress={onConfirm}>
-          <Icon name="checkmark-circle" size={22} color={COLORS.black} />
+            <Icon name="checkmark-circle" size={22} color={COLORS.black} />
             <Text style={styles.confirmButtonText}>Confirmar</Text>
           </TouchableOpacity>
         </View>

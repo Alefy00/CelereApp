@@ -116,6 +116,11 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
     const handleDayPress = (day) => {
       setPaymentDate(new Date(day.dateString)); // Atualiza a data selecionada
     };
+    
+    const handleCloseModalMain= () => {
+      setIsModalVisible(false);
+      navigation.navigate('MainTab')
+    };
 
 // Função para registrar venda e itens (produtos e serviços)
 const handleRegisterSale = async () => {
@@ -158,16 +163,16 @@ const handleRegisterSale = async () => {
       // Agora registra os serviços da venda
       const serviceItems = services.map(service => {
           // Verifica se o serviço tem o preço zerado e usa o valor do input
-          const precoVenda = service.preco_venda === 0 
-              ? parseFloat(priceInputValues[service.id] || 0) 
-              : service.preco_venda;
+          const servicePrice = service.preco_venda && parseFloat(service.preco_venda) !== 0
+          ? parseFloat(service.preco_venda).toFixed(2)
+          : parseFloat(servicePrices[service.id] || 0).toFixed(2);
 
           return {
               empresa_id: empresaId,
               venda_id: vendaId, // ID da venda registrada
               servico_id: service.id, // ID do serviço
               quantidade: service.amount || 1, // Quantidade do serviço
-              preco_unitario_venda: precoVenda, // Define o preço correto
+              preco_unitario_venda: servicePrice, // Define o preço correto
               percentual_desconto: parseFloat(discount) || 0, // Percentual de desconto sempre como número válido
               valor_desconto: discountType === 'R$' ? parseFloat(discount) || 0 : 0, // Valor de desconto sempre como número válido
               
@@ -492,6 +497,10 @@ const formatCurrency = (value) => {
                         <TouchableOpacity style={styles.modalPrimaryButton} onPress={handleConfirm}>
                             <Icon name="cart" size={20} color={COLORS.black} />
                             <Text style={styles.modalPrimaryButtonText}>Registrar outra venda</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.modalBackButton} onPress={handleCloseModalMain}>
+                          <Icon name="arrow-back" size={20} color={COLORS.black} />
+                          <Text style={styles.modalBackButtonText}>Voltar ao resumo</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

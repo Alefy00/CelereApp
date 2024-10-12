@@ -8,14 +8,28 @@ import axios from 'axios';
 
 const FREQUENCY_API = 'https://api.celereapp.com.br/api/frequenciarecorrencia/';
 
-const RecurrenceField = ({ setSelectedFrequencyId, setIsIndeterminate, setRepeatCount }) => {
-  const [isRecurring, setIsRecurring] = useState(false);
-  const [frequency, setFrequency] = useState('');
+const RecurrenceField = ({
+  setSelectedFrequencyId,
+  setSelectedFrequencyName,
+  setIsIndeterminate,
+  setRepeatCount,
+  setIsRecurring,
+  isRecurring,
+  selectedFrequencyId,
+  selectedFrequencyName,
+  repeatCount,
+  isIndeterminate,
+}) => {
+  const [frequency, setFrequency] = useState(selectedFrequencyName || '');
   const [frequencies, setFrequencies] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [localRepeatCount, setLocalRepeatCount] = useState(0); // Local repeatCount para manuseio dentro do componente
-  const [isIndeterminate, setLocalIsIndeterminate] = useState(false);
+  const [localRepeatCount, setLocalRepeatCount] = useState(repeatCount);
+  const [localIsIndeterminate, setLocalIsIndeterminate] = useState(isIndeterminate);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setFrequency(selectedFrequencyName);
+  }, [selectedFrequencyName]);
 
   // Função para buscar as frequências da API
   useEffect(() => {
@@ -40,48 +54,59 @@ const RecurrenceField = ({ setSelectedFrequencyId, setIsIndeterminate, setRepeat
   };
 
   const handleIncrease = () => {
-    if (!isIndeterminate) {
+    if (!localIsIndeterminate) {
       const newRepeatCount = localRepeatCount + 1;
       setLocalRepeatCount(newRepeatCount);
-      setRepeatCount(newRepeatCount); // Atualiza o repeatCount no NewExpense
+      setRepeatCount(newRepeatCount); // Atualiza o repeatCount no componente pai
     }
   };
 
   const handleDecrease = () => {
-    if (localRepeatCount > 0 && !isIndeterminate) {
+    if (localRepeatCount > 0 && !localIsIndeterminate) {
       const newRepeatCount = localRepeatCount - 1;
       setLocalRepeatCount(newRepeatCount);
-      setRepeatCount(newRepeatCount); // Atualiza o repeatCount no NewExpense
+      setRepeatCount(newRepeatCount); // Atualiza o repeatCount no componente pai
     }
   };
 
   const handleSelectFrequency = (freqId, freqName) => {
     setFrequency(freqName); // Exibe o nome da frequência no dropdown
-    setSelectedFrequencyId(freqId); // Envia o ID da frequência para o NewExpense
+    setSelectedFrequencyId(freqId); // Passa o ID da frequência para o componente pai
+    setSelectedFrequencyName(freqName); // Passa o nome da frequência para o componente pai
     setDropdownOpen(false);
   };
 
   const handleIndeterminateChange = (value) => {
     setLocalIsIndeterminate(value);
-    setIsIndeterminate(value); // Atualiza o estado de indeterminado no NewExpense
+    setIsIndeterminate(value); // Atualiza o estado no componente pai
     if (value) {
       setLocalRepeatCount(0); // Reseta o contador local se for indeterminado
-      setRepeatCount(0); // Reseta o repeatCount no NewExpense
+      setRepeatCount(0); // Reseta o repeatCount no componente pai
+    }
+  };
+
+  const handleToggleRecurring = (value) => {
+    setIsRecurring(value); // Atualiza o estado no componente pai
+    if (!value) {
+      // Se desmarcado, resetar os campos
+      setFrequency('');
+      setSelectedFrequencyId(null); // Atualiza no componente pai
+      setSelectedFrequencyName(''); // Atualiza no componente pai
+      setLocalRepeatCount(0);
+      setRepeatCount(0); // Atualiza no componente pai
+      setLocalIsIndeterminate(false);
+      setIsIndeterminate(false); // Atualiza no componente pai
     }
   };
 
   return (
     <View style={styles.container}>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Text style={styles.cardTitle}>Recorrência</Text>
-        <Text style={styles.checkboxLabelSmall}>(repetição da despesa)</Text>
-      </View>
-
+      {/* ... restante do componente ... */}
       {/* Checkbox para definir se é uma despesa recorrente */}
       <View style={styles.checkboxContainer}>
         <CheckBox
           value={isRecurring}
-          onValueChange={setIsRecurring}
+          onValueChange={handleToggleRecurring}
           tintColors={{ true: COLORS.black, false: COLORS.black }}
         />
         <Text style={styles.checkboxLabel}>É uma despesa recorrente</Text>
@@ -129,7 +154,7 @@ const RecurrenceField = ({ setSelectedFrequencyId, setIsIndeterminate, setRepeat
           {/* Checkbox para recorrência por tempo indeterminado */}
           <View style={styles.checkboxContainer}>
             <CheckBox
-              value={isIndeterminate}
+              value={localIsIndeterminate}
               onValueChange={handleIndeterminateChange}
               tintColors={{ true: COLORS.black, false: COLORS.black }}
             />
@@ -140,7 +165,6 @@ const RecurrenceField = ({ setSelectedFrequencyId, setIsIndeterminate, setRepeat
     </View>
   );
 };
-
 
 
 

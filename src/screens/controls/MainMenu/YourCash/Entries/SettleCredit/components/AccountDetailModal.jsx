@@ -113,31 +113,31 @@ const AccountDetailModal = ({ visible, onClose,  account, onSaleCanceled }) => {
    const renderItem = ({ item }) => {
     const isProduct = item.produto !== null;
     const isService = item.servico !== null;
-    // Verificar se o produto ou serviço tem uma imagem
-    const imagem = isProduct ? item.produto.imagem : isService ? item.servico?.imagem : null;
+    const imageUrl = isProduct ? item.produto.imagem : isService ? item.servico?.imagem : null;
 
     return (
-      <View style={styles.productItem}>
+        <View style={styles.productItem}>
+              {imageUrl ? (
+                  <Image
+                      source={{ uri: imageUrl }}
+                      style={styles.productImage} // Defina o estilo da imagem no seu arquivo de estilos
+                  />
+              ) : (
+                  <Icon name="pricetag-outline" size={24} color="gray" />
+              )}
+              <View style={styles.productInfo}>
+                  {/* Nome do Produto ou Serviço */}
+                  <Text style={styles.productNome}>
+                      {isProduct ? item.produto.nome : isService ? servicoNomes[item.servico] || 'Nome do serviço indisponível' : 'Item não identificado'}
+                  </Text>
 
-        {imagem ? (
-          <Image source={{ uri: imagem }} style={styles.productImage} /> // Imagem do produto/serviço
-        ) : (
-          <Icon name="pricetag-outline" size={24} color="gray" /> // Ícone de fallback
-        )}
-        <View style={styles.productInfo}>
-
-          <Text style={styles.productNome}>
-            {isProduct ? item.produto.nome : isService ? servicoNomes[item.servico] || 'Serviço não identificado' : 'Item não identificado'}
-          </Text>
-
-          <Text style={{ color: COLORS.black }}>R${item.valor_total_venda}</Text>
-
-          <Text style={styles.productQuantidade}>
-            Qtd: {item.quantidade}
-          </Text>
-        </View>
-      </View>
-    );
+                  {/* Valor do Produto ou Serviço */}
+                  <Text style={{ color: COLORS.black }}>
+                      R${item.valor_total_venda}
+                  </Text>
+              </View>
+          </View>
+      );
   };
 
   // Função para formatar valores como moeda
@@ -149,15 +149,25 @@ const formatCurrency = (value) => {
   });
 };
 
-// Função para calcular o total dos gastos envolvidos somando os itens
-const calculateTotalGastosEnvolvidos = useCallback(() => {
-  if (!account?.itens || account.itens.length === 0) return 0;
 
-  // Somar todos os valores de gastos envolvidos dos itens
-  return account.itens.reduce((sum, item) => {
-    return sum + (parseFloat(item.gastos_envolvidos) || 0);
-  }, 0);
+// Função para obter os gastos envolvidos da venda
+const calculateTotalGastosEnvolvidos = useCallback(() => {
+  return parseFloat(account?.gastos_envolvidos || 0);
 }, [account]);
+
+// Função para calcular o valor total da venda incluindo os gastos envolvidos
+const calculateTotalAmount = useCallback(() => {
+  const valorTotalVenda = parseFloat(account?.valor_total_venda || 0);
+  const gastosEnvolvidos = parseFloat(account?.gastos_envolvidos || 0);
+  const totalPagamentos = parseFloat(account?.total_pagamentos || 0);
+
+  // Calcular o total geral
+  const totalGeral = valorTotalVenda + gastosEnvolvidos - totalPagamentos;
+
+  return totalGeral;
+}, [account]);
+
+
   return (
     <>
         <Modal visible={isFirstModalVisible} transparent={true} animationType="slide">
@@ -191,7 +201,7 @@ const calculateTotalGastosEnvolvidos = useCallback(() => {
           <View style={styles.totalContainer}>
             <Text style={styles.totalLabel}>Valor total:</Text>
             <Text style={styles.totalValue}>
-              {formatCurrency(account?.valor_total_venda - account.total_pagamentos)}
+            {formatCurrency(calculateTotalAmount())}
             </Text>
           </View>
 
