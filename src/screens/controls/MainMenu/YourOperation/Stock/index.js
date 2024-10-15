@@ -177,10 +177,12 @@ const fetchProducts = useCallback(async () => {
   const renderProductItem = ({ item }) => (
     <TouchableOpacity onPress={() => handleProductSelect(item)}>
       <View style={styles.productItem}>
-        <Image
-          source={item.image_url ? { uri: item.image_url } : require('../../../../../assets/images/png/placeholder.png')}
-          style={styles.productImage}
-        />
+      <Image
+        source={item.image_url ? { uri: item.image_url } : require('../../../../../assets/images/png/placeholder.png')}
+        style={styles.productImage}
+        onError={() => console.log('Erro ao carregar a imagem do produto', item.nome)}
+      />
+
         <View style={styles.productInfo}>
           <View style={{ flexDirection: 'column' }}>
             <Text style={styles.productTitle}>{item.nome}</Text>
@@ -190,7 +192,6 @@ const fetchProducts = useCallback(async () => {
       </View>
     </TouchableOpacity>
   );
-  
 
   const handleAddProduct = () => {
     navigation.navigate("AddProductScreen");
@@ -270,11 +271,12 @@ const fetchProducts = useCallback(async () => {
         showsVerticalScrollIndicator={true} // Ativa o scroll vertical
       />
 
-      {/* Botões Fixos de Ação */}
       <View style={styles.fixedButtonsContainer}>
+      {/* Botões Fixos de Ação 
         <TouchableOpacity style={styles.fixedButton}>
           <Icon name="barcode-outline" size={30} color="#000" />
         </TouchableOpacity>
+        */}
         <TouchableOpacity style={styles.fixedButton2} onPress={handleAddProduct}>
           <Icon name="add-outline" size={30} color="#000" />
           <Text style={styles.textAdd}>Adicionar produto</Text>

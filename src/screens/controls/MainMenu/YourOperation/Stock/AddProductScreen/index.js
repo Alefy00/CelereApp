@@ -1,41 +1,22 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useRef, useCallback } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView, Modal, Alert, Image, PermissionsAndroid  } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, Modal, Alert, Image, ActivityIndicator, PermissionsAndroid, Platform } from 'react-native';
 import styles from './styles';
 import BarTop2 from '../../../../../../components/BarTop2';
 import { COLORS } from '../../../../../../constants';
 import Icon from 'react-native-vector-icons/Ionicons';
-import ProductValues from './componentes/ProductValues';
+import ProductValues from './componentes/ProductValues';  // Importando o componente
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { launchCamera } from 'react-native-image-picker';
+import { launchCamera } from 'react-native-image-picker'; // Para capturar a foto
 
+// ** Constantes para URLs e Headers **
 const API_BASE_URL = 'https://api.celereapp.com.br';
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
-const UPLOAD_IMAGE_API = `${API_BASE_URL}/mnt/imagensproduto/`;
-
-// Função para solicitar permissão de câmera
-const requestCameraPermission = async () => {
-  try {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.CAMERA,
-      {
-        title: "Permissão de Câmera",
-        message: "Este aplicativo precisa acessar sua câmera para tirar fotos.",
-        buttonNeutral: "Pergunte-me depois",
-        buttonNegative: "Cancelar",
-        buttonPositive: "OK"
-      }
-    );
-    return granted === PermissionsAndroid.RESULTS.GRANTED;
-  } catch (err) {
-    console.warn(err);
-    return false;
-  }
-};
+const IMAGE_UPLOAD_API = `${API_BASE_URL}/mnt/imagensproduto/`;
 
 const AddProductScreen = ({ navigation }) => {
   const [barcode, setBarcode] = useState('');
@@ -44,20 +25,20 @@ const AddProductScreen = ({ navigation }) => {
   const [productName, setProductName] = useState('');
   const [serviceDescription, setServiceDescription] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [custo, setCusto] = useState('');
-  const [precoVenda, setPrecoVenda] = useState('');
+  const [custo, setCusto] = useState('');  // Atualizado pelo ProductValues
+  const [precoVenda, setPrecoVenda] = useState('');  // Atualizado pelo ProductValues
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [productImage, setProductImage] = useState(null);  // Para armazenar a URI da imagem
-  const productValuesRef = useRef();
+  const [categories, setCategories] = useState([]);  // Lista de categorias
+  const [loading, setLoading] = useState(false); // Atualizado
+  const [photo, setPhoto] = useState(null);  // Estado para armazenar a foto tirada
+  const productValuesRef = useRef(); // Usamos uma referência para o componente ProductValues
 
-
+  // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
     try {
       const storedEmpresaId = await AsyncStorage.getItem('empresaId');
       if (storedEmpresaId) {
-        return Number(storedEmpresaId);
+        return Number(storedEmpresaId);  // Converte para número se estiver como string
       } else {
         Alert.alert('Erro', 'ID da empresa não encontrado.');
         return null;
@@ -68,6 +49,77 @@ const AddProductScreen = ({ navigation }) => {
     }
   };
 
+  // Função para pedir permissão no Android
+  const requestCameraPermission = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: 'Permissão para usar a câmera',
+          message: 'Precisamos de acesso à sua câmera para tirar fotos do produto.',
+          buttonNeutral: 'Perguntar depois',
+          buttonNegative: 'Cancelar',
+          buttonPositive: 'OK',
+        }
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return true; // No iOS, as permissões são tratadas no Info.plist
+  };
+
+  const requestExternalStoragePermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+      ]);
+      return (
+        granted['android.permission.WRITE_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED &&
+        granted['android.permission.READ_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED
+      );
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  };
+  
+ // Função para tirar foto
+ const handleTakePhoto = async () => {
+  const hasPermission = await requestCameraPermission();
+  if (!hasPermission) {
+    Alert.alert('Permissão negada', 'Você precisa permitir o acesso à câmera para tirar fotos.');
+    return;
+  }
+
+  launchCamera(
+    {
+      mediaType: 'photo',
+      includeBase64: false,
+    },
+    (response) => {
+      if (response.didCancel) {
+        console.log('Usuário cancelou a captura da imagem');
+      } else if (response.errorCode) {
+        console.error('Erro ao capturar a imagem:', response.errorMessage);
+      } else if (response.assets && response.assets.length > 0) {
+        const capturedPhoto = response.assets[0];
+        console.log('Imagem capturada com sucesso:', capturedPhoto); // Log da imagem capturada
+        setPhoto({
+          uri: capturedPhoto.uri,
+          type: capturedPhoto.type || 'image/jpeg',
+          name: capturedPhoto.fileName || `photo_${Date.now()}.jpg`,
+        });
+        console.log('Estado da foto atualizado:', {
+          uri: capturedPhoto.uri,
+          type: capturedPhoto.type || 'image/jpeg',
+          name: capturedPhoto.fileName || `photo_${Date.now()}.jpg`,
+        });
+      }
+    }
+  );
+};
+  
+  // Função para buscar categorias, agora memoizada com useCallback
   const fetchCategories = useCallback(async () => {
     try {
       const empresaId = await getEmpresaId();
@@ -75,73 +127,64 @@ const AddProductScreen = ({ navigation }) => {
         const response = await axios.get(
           `${CATEGORIES_API}?page_size=100&max_page_size=100&empresa=${empresaId}`
         );
-        setCategories(response.data.data);
+        setCategories(response.data.data);  // Atualiza a lista de categorias
       }
     } catch (error) {
       console.error('Erro ao buscar categorias:', error);
     } finally {
-      setLoading(false);
+      setLoading(false);  // Sempre encerra o loading
     }
   }, []);
 
+  // Atualiza as categorias sempre que a tela é focada
   useFocusEffect(
     useCallback(() => {
-      fetchCategories();
+      fetchCategories();  // Atualiza as categorias sempre que a tela é focada
     }, [fetchCategories])
   );
 
   const handleMinStockChange = (value) => {
-    const newValue = parseInt(value, 10);
-    setMinStock(isNaN(newValue) ? 0 : newValue);
+    const newValue = parseInt(value, 10);  // Convertendo o valor para inteiro
+    setMinStock(isNaN(newValue) ? 0 : newValue);  // Atualizando o estado de 'minStock'
   };
 
   const handleQuantityChange = (value) => {
-    const newValue = parseInt(value, 10);
-    setQuantity(isNaN(newValue) ? 0 : newValue);
+    const newValue = parseInt(value, 10);  // Convertendo o valor para inteiro
+    setQuantity(isNaN(newValue) ? 0 : newValue);  // Atualizando o estado de 'quantity'
   };
 
+  // Função genérica para validação de campos
+  const validateFields = () => {
+    if (!productName) return 'O nome do produto é obrigatório!';
+    if (quantity === 0) return 'A quantidade do produto deve ser maior que zero!';
+    if (!selectedCategory) return 'Selecione uma categoria para o produto!';
+    if (!custo) return 'O preço de custo é obrigatório!';
+    if (!precoVenda) return 'O preço de venda é obrigatório!';
+    return null;
+  };
+
+  // Função para confirmar e enviar o cadastro
   const handleConfirm = async () => {
+    const error = validateFields();
+    if (error) {
+      Alert.alert('Erro', error);
+      return;
+    }
+
     const empresaId = await getEmpresaId();
     if (!empresaId) {
-      Alert.alert('Erro', 'ID da empresa não encontrado.');
+      Alert.alert('Erro', 'ID da empresa não encontrado!');
       return;
     }
 
-    if (!productName) {
-      Alert.alert('Erro', 'O nome do produto é obrigatório.');
-      return;
-    }
-
-    if (quantity === 0) {
-      Alert.alert('Erro', 'A quantidade do produto deve ser maior que zero.');
-      return;
-    }
-
-    if (!selectedCategory) {
-      Alert.alert('Erro', 'Selecione uma categoria para o produto.');
-      return;
-    }
-
-    if (!custo) {
-      Alert.alert('Erro', 'O preço de custo é obrigatório.');
-      return;
-    }
-
-    if (!precoVenda) {
-      Alert.alert('Erro', 'O preço de venda é obrigatório.');
-      return;
-    }
-
-    const numericCusto = parseFloat(custo.replace(/[^\d,.-]/g, '').replace(',', '.'));
-    const numericPrecoVenda = parseFloat(precoVenda.replace(/[^\d,.-]/g, '').replace(',', '.'));
-
+    // Preparando os dados para o envio à API
     const productData = {
       status: true,
       nome: productName,
-      descricao: serviceDescription ? serviceDescription : '',
-      ean: barcode ? barcode : '',
-      custo: numericCusto,
-      preco_venda: numericPrecoVenda,
+      descricao: serviceDescription || '',
+      ean: barcode || '',
+      custo: parseFloat(custo.replace(',', '.')),
+      preco_venda: parseFloat(precoVenda.replace(',', '.')),
       qtd_estoque: quantity,
       super_categoria: 1,
       categoria: selectedCategory,
@@ -151,85 +194,59 @@ const AddProductScreen = ({ navigation }) => {
     };
 
     try {
-      const response = await axios.post(PRODUCTS_API, productData, {
-        headers: { 'Content-Type': 'application/json' },
-      });
-
+      setLoading(true);
+      const response = await axios.post(PRODUCTS_API, productData);
       if (response.data.status === 'success') {
-        await uploadImage(response.data.data.id); // Chama a função para fazer o upload da imagem
+        const productId = response.data.data.id;
+        if (photo) {
+          await uploadProductImage(productId, empresaId);
+        }
         setIsModalVisible(true);
         clearFields();
       } else {
-        Alert.alert('Erro', 'Falha ao cadastrar o produto. Tente novamente.');
+        Alert.alert('Erro', 'Falha ao cadastrar o produto.');
       }
     } catch (error) {
       console.error('Erro ao cadastrar produto:', error.response?.data || error.message);
-      Alert.alert('Erro', 'Ocorreu um erro ao cadastrar o produto.');
+      Alert.alert('Erro', 'Erro ao cadastrar o produto.');
+    } finally {
+      setLoading(false);
     }
   };
-  // Função para enviar a imagem capturada para a API
-  const uploadImage = async (produtoId) => {
-    const empresaId = await getEmpresaId();
-    if (!empresaId || !productImage) {
-      return;
-    }
 
-    const formData = new FormData();
-    formData.append('empresa', empresaId.toString());
-    formData.append('produto', produtoId.toString());
-    formData.append('usuario', '1'); // Ajuste o ID do usuário conforme necessário
-    formData.append('arquivo', {
-      uri: productImage.uri,
-      type: productImage.type,
-      name: productImage.fileName,
+// Função para enviar a imagem do produto
+const uploadProductImage = async (productId, empresaId) => {
+  if (!photo) return;  // Certifique-se de que a imagem existe
+
+  const formData = new FormData();
+  formData.append('produto', productId);  // ID do produto
+  formData.append('empresa', empresaId);  // ID da empresa
+  formData.append('arquivo', {
+    uri: photo.uri,  // Use o 'uri' da imagem
+    type: photo.type,  // Tipo da imagem, como 'image/jpeg'
+    name: photo.name,  // Nome do arquivo
+  });
+  formData.append('usuario', 1);  // ID do usuário (se aplicável)
+
+  try {
+    const response = await axios.post(IMAGE_UPLOAD_API, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',  // Define o tipo como multipart
+      },
     });
 
-    try {
-      const response = await axios.post(UPLOAD_IMAGE_API, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      if (response.data.status === 'success') {
-        Alert.alert('Sucesso', 'Imagem do produto enviada com sucesso!');
-        setProductImage(response.data.data.imagem); // Atualiza o estado da imagem com a URL retornada
-      } else {
-        Alert.alert('Erro', 'Falha ao enviar a imagem do produto.');
-      }
-    } catch (error) {
-      console.error('Erro ao enviar a imagem do produto:', error.response?.data || error.message);
-      Alert.alert('Erro', 'Ocorreu um erro ao enviar a imagem.');
+    if (response.data.status === 'success') {
+      console.log('Imagem do produto registrada com sucesso:', response.data);
+    } else {
+      Alert.alert('Erro', 'Falha ao enviar a imagem.');
     }
-  };
-  // Função para abrir a câmera e tirar uma foto
-  const handleTakePicture = async () => {
-    const hasPermission = await requestCameraPermission();
-    
-    if (!hasPermission) {
-      Alert.alert('Permissão negada', 'Você precisa conceder a permissão de câmera para usar essa funcionalidade.');
-      return;
-    }
+  } catch (error) {
+    console.error('Erro ao enviar imagem:', error.response?.data || error.message);
+    Alert.alert('Erro', 'Erro ao enviar a imagem.');
+  }
+};
 
-    const options = {
-      mediaType: 'photo',
-      cameraType: 'back',
-      quality: 1,
-      includeBase64: false,
-    };
-
-    launchCamera(options, (response) => {
-      if (response.didCancel) {
-        console.log('Usuário cancelou a captura de imagem.');
-      } else if (response.errorCode) {
-        console.log('Erro ao abrir a câmera: ', response.errorMessage);
-      } else if (response.assets && response.assets.length > 0) {
-        const selectedImage = response.assets[0];
-        setProductImage(selectedImage); // Salva a imagem selecionada
-        Alert.alert('Imagem capturada com sucesso!');
-      }
-    });
-  };
-  
-
+// Função para limpar os campos após cadastro
   const clearFields = () => {
     setBarcode('');
     setQuantity(0);
@@ -239,26 +256,25 @@ const AddProductScreen = ({ navigation }) => {
     setSelectedCategory('');
     setCusto('');
     setPrecoVenda('');
-    setProductImage(null);
+    setPhoto(null);  // Limpa a imagem também
     if (productValuesRef.current) {
-      productValuesRef.current.clearValues();
+      productValuesRef.current.clearValues();  // Chama a função clearValues no componente ProductValues
     }
   };
 
   const closeModal = () => {
     setIsModalVisible(false);
-    navigation.navigate('StockInfo');
+    navigation.navigate('StockInfo');  // Navegar após fechar o modal
   };
 
+  // Função para adicionar uma nova categoria
   const handleAddCategory = () => {
-    navigation.navigate('IncludeCategoryProducts');
+    navigation.navigate('IncludeCategoryProducts');  // Navega para a tela de categorias
   };
-
-
-
 
   return (
     <View style={styles.mainContainer}>
+      {/* Barra Superior */}
       <View style={styles.barTopContainer}>
         <BarTop2
           titulo="Voltar"
@@ -272,21 +288,27 @@ const AddProductScreen = ({ navigation }) => {
       <ScrollView style={styles.scrollContainer}>
         <Text style={styles.title}>Adicionar um produto no estoque</Text>
 
+        {/* Primeira Parte */}
         <View style={styles.contentContainer}>
           <View style={styles.leftContainer}>
-            <View style={styles.imageContainer}>
-              <TouchableOpacity style={styles.imageButton} onPress={handleTakePicture}>
-                {productImage ? (
-                  <Image source={{ uri: productImage.uri }} style={styles.productImage} />
-                ) : (
+          <View style={styles.imageContainer}>
+              {photo ? (
+                <Image
+                    source={{ uri: photo.uri }}
+                    style={{ width: 150, height: 130, resizeMode: 'contain' }}   // Tamanho fixo para garantir visualização
+                    onError={(error) => console.error('Erro ao carregar a imagem:', error.nativeEvent.error)}
+                  />
+              ) : (
+                <TouchableOpacity style={styles.imageButton} onPress={handleTakePhoto}>
                   <Icon name="camera" size={30} color={COLORS.black} />
-                )}
-              </TouchableOpacity>
+                </TouchableOpacity>
+              )}
               <Text style={styles.imageLabel}>Imagem{"\n"}do produto</Text>
             </View>
           </View>
 
           <View style={styles.rightContainer}>
+            {/* Campo de Código de Barras */}
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
@@ -297,7 +319,8 @@ const AddProductScreen = ({ navigation }) => {
               />
               <Icon name="barcode-outline" size={25} color={COLORS.black} />
             </View>
-            
+
+            {/* Controle de Quantidade */}
             <View style={styles.controlRow}>
               <Text style={styles.controlLabel}>Quantidade:</Text>
               <View style={styles.controlButtons}>
@@ -316,6 +339,7 @@ const AddProductScreen = ({ navigation }) => {
               </View>
             </View>
 
+            {/* Controle de Mínimo em Estoque */}
             <View style={styles.controlRow}>
               <Text style={styles.controlLabel}>Mínimo em estoque:</Text>
               <View style={styles.controlButtons}>
@@ -336,6 +360,7 @@ const AddProductScreen = ({ navigation }) => {
           </View>
         </View>
 
+        {/* Detalhes do Produto */}
         <View style={styles.productDetailsContainer}>
           <Text style={styles.sectionTitle}>Detalhes do Produto</Text>
           <TextInput
@@ -375,19 +400,22 @@ const AddProductScreen = ({ navigation }) => {
           </View>
         </View>
 
+        {/* Valores do Produto */}
         <View style={styles.containerProductValues}>
           <ProductValues 
-            ref={productValuesRef}
-            onCustoChange={setCusto}
-            onPrecoVendaChange={setPrecoVenda}
+            ref={productValuesRef} // Passando a referência para o ProductValues
+            onCustoChange={setCusto}  // Passando a função para capturar o valor de custo
+            onPrecoVendaChange={setPrecoVenda}  // Passando a função para capturar o valor de preço de venda
           />
         </View>
 
+        {/* Botão de Cadastrar Produto */}
         <TouchableOpacity style={styles.registerButton} onPress={handleConfirm}>
-          <Icon name="checkmark-circle" size={20} color="black" />
+          <Icon name="checkmark-circle" size={20} color={COLORS.black} />
           <Text style={styles.buttonText}>Cadastrar produto</Text>
         </TouchableOpacity>
 
+        {/* Modal de confirmação */}
         <Modal visible={isModalVisible} transparent={true} animationType="slide" onRequestClose={closeModal}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>

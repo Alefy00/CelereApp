@@ -97,6 +97,7 @@ const ActionButtons = ({navigation}) => {
 
   // Função para abrir o quarto modal de "Cadastrar Produtos ou Serviços"
   const toggleFourthModal = () => {
+    setModalVisible(false)
     setFourthModalVisible(!fourthModalVisible);
   };
 
@@ -165,11 +166,11 @@ const ActionButtons = ({navigation}) => {
   return (
     <View style={styles.container}>
       
-        {/* Botão de código de barras com animação de pulsar */}
+        {/* Botão de código de barras com animação de pulsar
           <TouchableOpacity style={styles.button}>
             <Ionicons name="barcode-outline" size={30} color={COLORS.black} />
           </TouchableOpacity>
-
+ */}
 
         {/* Botão de adicionar com animação de pulsar */}
         <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
