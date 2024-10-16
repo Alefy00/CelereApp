@@ -1,12 +1,30 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
-import { Modal, View, Text, TouchableOpacity, Image, Button, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Modal, View, Text, TouchableOpacity, Image, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../../../constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const UpdateStockModal = ({ isVisible, onClose, product, empresaId }) => {
+const UpdateStockModal = ({ isVisible, onClose, product }) => {
   const [newQuantity, setNewQuantity] = useState(product.qtd_estoque);
+  const [empresaId, setEmpresaId] = useState(null);
+
+  // Função para buscar o ID da empresa do AsyncStorage
+  const getEmpresaId = async () => {
+    try {
+      const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+      if (storedEmpresaId) {
+        return Number(storedEmpresaId);
+      } else {
+        Alert.alert('Erro', 'ID da empresa não encontrado.');
+        return null;
+      }
+    } catch (error) {
+      console.error('Erro ao buscar o ID da empresa:', error);
+      return null;
+    }
+  };
 
   // Função para adicionar mais quantidade
   const handleIncrease = () => {
@@ -23,22 +41,32 @@ const UpdateStockModal = ({ isVisible, onClose, product, empresaId }) => {
   // Função para salvar a nova quantidade de estoque
   const handleSave = async () => {
     try {
+      if (!empresaId) {
+        Alert.alert('Erro', 'ID da empresa não encontrado.');
+        return;
+      }
+      // Faz a requisição PATCH para atualizar o estoque
       const response = await axios.patch(`https://api.celereapp.com.br/cad/produtos/${product.id}/?empresa=${empresaId}&produto=${product.id}`, {
         qtd_estoque: newQuantity,
       });
 
-      if (response.data.status === "success") {
-        alert("Quantidade do estoque atualizada com sucesso!");
+      if (response.data.status === 'success') {
+        Alert.alert('Sucesso', 'Quantidade do estoque atualizada com sucesso!');
         onClose(); // Fecha o modal após salvar
       } else {
-        alert("Erro ao atualizar a quantidade do estoque.");
+        Alert.alert('Erro', 'Falha ao atualizar a quantidade do estoque.');
+        console.error('Erro na resposta da API:', response.data);
       }
     } catch (error) {
-      console.error('Erro ao atualizar o estoque:', error);
-      alert("Erro ao atualizar o estoque.");
+      console.error('Erro ao atualizar o estoque:', error.response?.data || error.message);
+      Alert.alert('Erro', 'Erro ao atualizar o estoque.');
     }
   };
 
+  // Busca o ID da empresa ao montar o componente
+  useEffect(() => {
+    getEmpresaId();
+  }, []);
 
   return (
     <Modal visible={isVisible} transparent={true} animationType="slide">

@@ -13,8 +13,8 @@ const RenderProduct = memo(({ item, handleQuantityChange, quantities }) => {
   const isSelected = quantities[item.id] > 0; // Verifica se o item foi selecionado (quantidade maior que 0)
 
   // Lida com a exibição da imagem correta para produtos e serviços
-  const imageSource = item.imagem
-    ? { uri: item.imagem } // Exibe a imagem do produto/serviço se houver
+  const imageSource = item.image_url // Utiliza o campo `image_url` que foi adicionado aos dados
+    ? { uri: item.image_url } // Exibe a imagem do produto/serviço se houver
     : placeholderImage; // Placeholder caso não tenha imagem
 
   const handleIncrement = () => {
@@ -32,13 +32,13 @@ const RenderProduct = memo(({ item, handleQuantityChange, quantities }) => {
 
   return (
     <View style={styles.productCard}>
-      {/* Exibe imagem do produto ou serviço */}
-      <Image source={imageSource} style={styles.productImage} />
+      {/* Exibe imagem do produto ou serviço */} 
+      <Image source={imageSource} style={styles.productImage} /> 
 
       {/* Nome do produto ou serviço */}
       <Text style={styles.productName}>{item.nome}</Text>
 
-        <View style={styles.containerProduct}>
+      <View style={styles.containerProduct}>
         <Text style={styles.productPrice}>R$ {parseFloat(item.preco_venda).toFixed(2)}</Text>
         {!isService && (
           <Text style={item.qtd_estoque > 0 ? styles.inStock : styles.outOfStock}>
@@ -46,7 +46,7 @@ const RenderProduct = memo(({ item, handleQuantityChange, quantities }) => {
           </Text>
         )}
         {isService && (
-          <Text style={styles.inStock}>Serviço disponível</Text> // Nova linha para serviços
+          <Text style={styles.inStock}>Serviço disponível</Text> // Linha para serviços
         )}
       </View>
 
@@ -69,5 +69,6 @@ const RenderProduct = memo(({ item, handleQuantityChange, quantities }) => {
     </View>
   );
 });
+
 
 export default RenderProduct;

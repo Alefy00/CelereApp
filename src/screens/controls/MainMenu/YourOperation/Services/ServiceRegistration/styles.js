@@ -24,8 +24,8 @@ const styles = StyleSheet.create({
     paddingBottom: 10
   },
   imageWrapper: {
-    width: 90,
-    height: 90,
+    width: 100,
+    height: 100,
     borderRadius: 10,
     backgroundColor: COLORS.white,
     justifyContent: 'center',
@@ -33,6 +33,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 20
     
   },
+  selectedImage: {
+    width: "100%", // Ou ajuste conforme necessário
+    height:"100%", // Ou ajuste conforme necessário
+    resizeMode: 'cover', // Para cobrir o espaço completamente
+    borderRadius: 10, // Se desejar manter cantos arredondados
+  },  
   barcodeInput: {
     height: 40,
     borderColor: COLORS.black,
@@ -40,7 +46,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginRight: 10,
     flex: 1,
-    marginLeft: 15,
     borderBottomWidth: 1,
   },
   imageLabelTitle: {

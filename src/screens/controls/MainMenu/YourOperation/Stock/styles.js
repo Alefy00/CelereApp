@@ -107,9 +107,10 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   productImage: {
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 60,
     marginRight: 10,
+    borderRadius: 10,
   },
   productInfo: {
     flexDirection: 'row',

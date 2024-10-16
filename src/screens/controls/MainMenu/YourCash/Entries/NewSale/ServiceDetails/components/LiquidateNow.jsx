@@ -47,8 +47,6 @@ const LiquidateNow = ({ navigation, route, clients }) => {
       [serviceId]: numericValue,
     }));
   };
-  
-
       // Função para mostrar alertas
       const showAlert = (title, message) => {
         Alert.alert(title, message);
@@ -102,8 +100,6 @@ const LiquidateNow = ({ navigation, route, clients }) => {
             return <Icon name="card" size={20} color="black" />;
         }
       };
-      
-
 
   useEffect(() => {
     const date = new Date();
@@ -230,7 +226,6 @@ const handleRegisterSale = async () => {
   }
 };
 
-
   const toggleDropdown = () => {
       setDropdownVisible(!isDropdownVisible);
   };
@@ -289,15 +284,9 @@ const calculateTotal = useCallback(() => {
   }
 }, [products, services, servicePrices, discount, discountType, additionalCosts, installments]);
 
-
-
-
 useEffect(() => {
   calculateTotal();
 }, [products, services, servicePrices, discount, calculateTotal]);
-
-
-
 
   const handleConfirm = () => {
     navigation.navigate('NewRegisteredSale', { clearCart: true });
@@ -328,9 +317,6 @@ const formatCurrency = (value) => {
   });
 };
 
-
-
-  
     return (
       <ScrollView style={styles.containerBase}>
       <Text style={styles.title}>Detalhes da venda</Text>
@@ -381,7 +367,7 @@ const formatCurrency = (value) => {
         Unid. de medida: {service.unidade_medida || 'Por manutenção'}
       </Text>
       <Text style={styles.cartItemPrice}>
-        Preço unitário: R$ {service.preco_venda ? parseFloat(service.preco_venda).toFixed(2) : 'Defina o preço'}
+        Preço unitário: {service.preco_venda ? formatCurrency(service.preco_venda) : 'Defina o preço'}
       </Text>
       <Text style={styles.cartItemSubtitleMedida}>
         Quantidade: {service.amount}
@@ -399,17 +385,14 @@ const formatCurrency = (value) => {
       />
     ) : (
       <Text style={styles.cartItemTotal}>
-        R$ {(service.preco_venda * service.amount).toFixed(2)}
+        {formatCurrency(service.preco_venda * service.amount)}
       </Text>
     )}
   </View>
 ))}
-
     </View>
   </>
 )}
-
-
 
 {products.length > 0 && (
         <>
@@ -421,14 +404,14 @@ const formatCurrency = (value) => {
                 <View style={styles.containerServiço}>
                   <Text style={styles.cartItemTitle}>{product.nome}</Text>
                   <Text style={styles.cartItemPrice}>
-                    Preço unitário: R$ {product.preco_venda ? parseFloat(product.preco_venda).toFixed(2) : 'Defina o preço'}
+                    Preço unitário: {product.preco_venda ? formatCurrency(product.preco_venda) : 'Defina o preço'}
                   </Text>
                   <Text style={styles.cartItemSubtitleMedida}>
                     Quantidade: {product.amount}
                   </Text>
                 </View>
-                <Text style={styles.cartItemTotal}>
-                  R$ {(product.preco_venda * product.amount).toFixed(2)}
+                <Text style={styles.cartItemTotalProduto}>
+                  {formatCurrency(product.preco_venda * product.amount)}
                 </Text>
               </View>
             ))}
@@ -439,7 +422,7 @@ const formatCurrency = (value) => {
         style={styles.additionalCostsInput}
         placeholder="Adicionar gastos envolvidos se houver (R$) - Opcional"
         keyboardType="numeric"
-        value={additionalCosts}
+        value={formatCurrency(additionalCosts)}
         onChangeText={setAdditionalCosts}
       />
             {/* Descontos */}
@@ -488,7 +471,6 @@ const formatCurrency = (value) => {
         keyExtractor={item => item.id.toString()}
         showsHorizontalScrollIndicator={false}
       />
-
             {/* Se o método selecionado for cartão de crédito, exibir a opção de parcelamento */}
             {selectedPaymentMethod && paymentMethods.find(method => method.id === selectedPaymentMethod)?.nome?.toLowerCase() === 'cartao de credito' && (
               <View style={styles.parcelamentoSection}>
@@ -513,15 +495,11 @@ const formatCurrency = (value) => {
                     ))}
                   </ScrollView>
                 )}
-
                 {/* Exibir o valor parcelado baseado no valor líquido */}
-                <Text style={styles.parcelamentoValue}>
-                  {installments}x de R${installmentValue}
+                <Text style={styles.parcelamentoValue}>   {installments}x de  {formatCurrency(installmentValue)}
                 </Text>
               </View>
             )}
-
-
       {/* Desabilitar CelerePay e Maquininha */}
       <View style={styles.paymentSelectionContainer}>
         <TouchableOpacity
@@ -539,21 +517,20 @@ const formatCurrency = (value) => {
         </TouchableOpacity>
       </View>
 
-
       {/* Campos para mostrar Valor Bruto e Valor Líquido */}
       <View style={styles.valueSummaryContainer}>
         <View style={styles.valueItem}>
           <Text style={styles.valueLabel}>Valor Bruto</Text>
           <Text style={styles.valueAmount2}>
-      R$ {(
-        products.reduce((sum, product) => sum + (product.preco_venda * product.amount), 0) +
-        services.reduce((sum, service) => {
-          const servicePrice = service.preco_venda && parseFloat(service.preco_venda) !== 0
-            ? service.preco_venda
-            : servicePrices[service.id] || 0; // Verifica o valor inserido no input
-          return sum + (parseFloat(servicePrice) * (service.amount || 1));
-        }, 0) + parseFloat(additionalCosts || 0)
-      ).toFixed(2)}
+          {formatCurrency(
+              products.reduce((sum, product) => sum + (product.preco_venda * product.amount), 0) +
+              services.reduce((sum, service) => {
+                const servicePrice = service.preco_venda && parseFloat(service.preco_venda) !== 0
+                  ? service.preco_venda
+                  : servicePrices[service.id] || 0;
+                return sum + (parseFloat(servicePrice) * (service.amount || 1));
+              }, 0) + parseFloat(additionalCosts || 0)
+            )}
     </Text>
         </View>
         <View style={styles.valueItem}>
@@ -563,7 +540,7 @@ const formatCurrency = (value) => {
 
         <View style={styles.valueItem}>
           <Text style={styles.valueLabel}>Valor Líquido a Receber</Text>
-          <Text style={styles.valueAmount}>R$ {liquidValue.toFixed(2)}</Text>
+          <Text style={styles.valueAmount}>{formatCurrency(liquidValue)}</Text>
         </View>
       </View>
 
@@ -574,8 +551,6 @@ const formatCurrency = (value) => {
           <Text style={styles.concludeButtonText}>Concluir esta venda</Text>
         </TouchableOpacity>
       </View>
-
-
             {/* Modal de confirmação */}
             <Modal
             transparent={true} 

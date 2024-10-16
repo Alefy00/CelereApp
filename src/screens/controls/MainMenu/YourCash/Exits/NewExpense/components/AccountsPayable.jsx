@@ -203,6 +203,10 @@ useEffect(() => {
       Alert.alert('Erro', 'Por favor, selecione uma categoria.');
       return;
     }
+    if (!item) {
+      Alert.alert('Erro', 'Insira o nome do item');
+      return;
+    }
   
     if (!valor || isNaN(valorNumerico) || valorNumerico <= 0) {
       Alert.alert('Erro', 'Por favor, insira um valor válido.');

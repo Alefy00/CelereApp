@@ -85,6 +85,13 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
     navigation.navigate('MainTab');
   };
 
+  const formatCurrency = (value) => {
+    if (!value) return '';
+    return parseFloat(value).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  };
 // Função de registrar venda e itens
 const handleRegisterSale = async () => {
   try {
@@ -138,7 +145,6 @@ const handleRegisterSale = async () => {
   }
 };
 
-  
   const calculateLiquidValue = useCallback(() => {
     let discount = 0;
 
@@ -220,9 +226,12 @@ const handleRegisterSale = async () => {
               <Image source={{ uri: product.imagem }} style={styles.productImage} />
               <View style={styles.productInfo}>
                 <Text style={styles.productText}>{product.nome}</Text>
+                <Text style={styles.productPrice}>
+                Preço unitário: {product.preco_venda ? formatCurrency(product.preco_venda) : 'N/A'}
+              </Text>
                 <Text style={styles.productAmount}>Quantidade: {product.amount}</Text>
               </View>
-              <Text style={styles.productTotal}>R${product.total.toFixed(2)}</Text>
+              <Text style={styles.productTotal}>{formatCurrency(product.preco_venda * product.amount)}</Text>
             </View>
           ))}
         </View>
@@ -285,7 +294,7 @@ const handleRegisterSale = async () => {
         {/* Total e valor líquido a receber */}
         <View style={styles.totalContainer}>
           <Text style={styles.totalLabel}>Valor a receber <Icon name="alert-circle" size={20} color={COLORS.lightGray} /></Text>
-          <Text style={styles.totalValue}>R$ {liquidValue.toFixed(2)}</Text>
+          <Text style={styles.totalValue}>{formatCurrency(liquidValue)}</Text>
         </View>
 
         <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>

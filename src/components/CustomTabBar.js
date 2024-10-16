@@ -34,8 +34,8 @@ const TabItem = styled.TouchableOpacity`
   margin-top: 20px;
 `;
 const TabItemCenter = styled.TouchableOpacity`
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   justify-content: center;
   align-items: center;
   background-color: ${COLORS.primary};

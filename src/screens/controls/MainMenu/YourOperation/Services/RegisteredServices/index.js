@@ -38,25 +38,46 @@ const RegisteredServices = ({ navigation }) => {
     }
   };
 
-  // Função para buscar os serviços da API
+  const fetchServiceImage = async (empresaId, serviceId) => {
+    try {
+      const response = await axios.get(
+        `${BASE_API_URL}/mnt/imagensservico/getImagemServ/?empresa=${empresaId}&servico=${serviceId}`
+      );
+      if (response.data && response.data.status === 'success') {
+        return `${BASE_API_URL}${response.data.data.imagem}`;  // URL completa da imagem
+      } else {
+        return null;  // Retorna null se não houver imagem
+      }
+    } catch (error) {
+      console.error('Erro ao buscar imagem do serviço:', error);
+      return null;  // Retorna null em caso de erro
+    }
+  };
+  
   const fetchServices = useCallback(async () => {
     try {
-      setLoading(true); // Inicia o loading
+      setLoading(true);  // Inicia o loading
       const empresaId = await getEmpresaId();
       if (empresaId) {
         let query = `?page=1&page_size=100`;
-
+  
         // Filtro por nome de serviço
         if (nome) {
           query += `&search=${nome}`;
         }
-
+  
         const response = await axios.get(`${REGISTERED_SERVICES_API}${query}`);
-
+  
         if (response.data && response.data.results && response.data.results.data) {
-          // Filtramos os serviços apenas da empresa logada
           const filteredServices = response.data.results.data.filter(service => service.empresa.id === empresaId);
-          setServices(filteredServices); // Popula a lista de serviços filtrada
+  
+          // Agora, para cada serviço, busca a imagem correspondente
+          const servicesWithImages = await Promise.all(filteredServices.map(async (service) => {
+            const imageUrl = await fetchServiceImage(empresaId, service.id);
+            return { ...service, image_url: imageUrl };  // Adiciona o campo image_url com a imagem recuperada
+          }));
+  
+          setServices(servicesWithImages);  // Popula a lista de serviços com as imagens
         } else {
           Alert.alert('Erro', 'Falha ao recuperar os serviços.');
         }
@@ -65,9 +86,10 @@ const RegisteredServices = ({ navigation }) => {
       console.error('Erro ao buscar serviços:', error);
       Alert.alert('Erro', 'Ocorreu um erro ao buscar os serviços.');
     } finally {
-      setLoading(false); // Finaliza o loading
+      setLoading(false);  // Finaliza o loading
     }
   }, [nome]);
+  
 
   useEffect(() => {
     fetchServices(); // Chama a função ao carregar a tela

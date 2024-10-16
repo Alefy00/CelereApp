@@ -36,8 +36,7 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
     const [isCalendarVisible, setIsCalendarVisible] = useState(false);
     const [servicePrices, setServicePrices] = useState({});
     const [priceInputValues, setPriceInputValues] = useState({});
-
-
+    const [currentDate, setCurrentDate] = useState('');
 
           // Função para mostrar alertas
           const showAlert = (title, message) => {
@@ -59,9 +58,6 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
               return null;
             }
           }, []);
-
-
-    const [currentDate, setCurrentDate] = useState('');
 
     // Filtrar e separar produtos de serviços
     useEffect(() => {
@@ -90,8 +86,6 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
         setCurrentDate(formattedDate);
     }, []);
 
-
-
     const toggleDropdown = () => {
         setDropdownVisible(!isDropdownVisible);
     };
@@ -116,7 +110,7 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
     const handleDayPress = (day) => {
       setPaymentDate(new Date(day.dateString)); // Atualiza a data selecionada
     };
-    
+
     const handleCloseModalMain= () => {
       setIsModalVisible(false);
       navigation.navigate('MainTab')
@@ -175,7 +169,6 @@ const handleRegisterSale = async () => {
               preco_unitario_venda: servicePrice, // Define o preço correto
               percentual_desconto: parseFloat(discount) || 0, // Percentual de desconto sempre como número válido
               valor_desconto: discountType === 'R$' ? parseFloat(discount) || 0 : 0, // Valor de desconto sempre como número válido
-              
           };
       });
 
@@ -195,7 +188,6 @@ const handleRegisterSale = async () => {
               .then(response => console.log('Item de serviço registrado:', response.data))
               .catch(error => console.error('Erro ao registrar item de serviço:', error.response ? error.response.data : error))
       );
-
       const productPromises = productItems.map(item =>
           axios.post(API_ITENS_VENDA, item)
               .then(response => console.log('Item de produto registrado:', response.data))
@@ -215,7 +207,7 @@ const handleRegisterSale = async () => {
       Alert.alert('Erro', 'Ocorreu um erro ao registrar a venda e os itens.');
   }
 };
-    
+
     // Adiciona uma função que reseta o carrinho
 const resetCart = () => {
   setProducts([]);
@@ -224,9 +216,6 @@ const resetCart = () => {
     
     const handleConfirm = () => {
         navigation.navigate('NewRegisteredSale', { clearCart: true });
-    };
-    const handleOpenInvoiceModal = () => {
-        setIsInvoiceModalVisible(true);
     };
 
     const handleCloseInvoiceModal = () => {
@@ -250,7 +239,6 @@ const calculateTotalWithoutDiscount = useCallback(() => {
   const total = totalProductPrice + totalServicePrice + parseFloat(additionalCosts || 0);
   setTotalWithoutDiscount(total);
 }, [products, services, servicePrices, additionalCosts]);
-
 
 // Função para calcular o total com desconto
 const calculateTotalWithDiscount = useCallback(() => {
@@ -343,7 +331,6 @@ const formatCurrency = (value) => {
             )}
 
         {/* Exibe os serviços separadamente */}
-
 {services.length > 0 && (
   <>
     <Text style={styles.sectionTitle}>Serviços</Text>
@@ -357,36 +344,31 @@ const formatCurrency = (value) => {
               Unid. de medida: {service.unidade_medida || 'Por manutenção'}
             </Text>
             <Text style={styles.cartItemPrice}>
-              Preço unitário: R$ {service.preco_venda ? parseFloat(service.preco_venda).toFixed(2) : 'Defina o preço'}
+              Preço unitário: {service.preco_venda ? formatCurrency(service.preco_venda) : 'Defina o preço'}
             </Text>
             <Text style={styles.cartItemSubtitleMedida}>
               Quantidade: {service.amount}
             </Text>
           </View>
             {/* Input de preço para serviços com valor 0 */}
-
-{!service.preco_venda || parseFloat(service.preco_venda) === 0 ? (
-  <TextInput
-    style={styles.priceInput}
-    keyboardType="numeric"
-    value={servicePrices[service.id] ? formatCurrency(servicePrices[service.id]) : ''} // Exibe o valor formatado
-    onChangeText={text => handleServicePriceChange(service.id, text)} // Atualiza o valor do serviço
-    placeholder="Preço (R$)"
-  />
-) : (
-  <Text style={styles.cartItemTotal}>
-    R$ {(service.preco_venda * service.amount).toFixed(2)}
-  </Text>
-)}
-
-
+            {!service.preco_venda || parseFloat(service.preco_venda) === 0 ? (
+              <TextInput
+                style={styles.priceInput}
+                keyboardType="numeric"
+                value={servicePrices[service.id] ? formatCurrency(servicePrices[service.id]) : ''} // Exibe o valor 
+                onChangeText={text => handleServicePriceChange(service.id, text)} // Atualiza o valor do serviço
+                placeholder="Preço (R$)"
+              />
+            ) : (
+              <Text style={styles.cartItemTotal}>
+                {formatCurrency(service.preco_venda * service.amount)}
+              </Text>
+            )}
         </View>
       ))}
     </View>
   </>
 )}
-
-
 {products.length > 0 && (
         <>
           <Text style={styles.sectionTitle}>Produtos</Text>
@@ -397,34 +379,32 @@ const formatCurrency = (value) => {
                 <View style={styles.containerServiço}>
                   <Text style={styles.cartItemTitle}>{product.nome}</Text>
                   <Text style={styles.cartItemPrice}>
-                    Preço unitário: R$ {product.preco_venda ? parseFloat(product.preco_venda).toFixed(2) : 'Defina o preço'}
+                    Preço unitário: R$ {product.preco_venda ? formatCurrency(product.preco_venda) : 'Defina o preço'}
                   </Text>
                   <Text style={styles.cartItemSubtitleMedida}>
                     Quantidade: {product.amount}
                   </Text>
                 </View>
-                <Text style={styles.cartItemTotal}>
-                  R$ {(product.preco_venda * product.amount).toFixed(2)}
+                <Text style={styles.cartItemTotalProduct}>
+                {formatCurrency(product.preco_venda * product.amount)}
                 </Text>
               </View>
             ))}
           </View>
         </>
       )}
-
          <TextInput
         style={styles.additionalCostsInput}
         placeholder="Adicionar gastos envolvidos se houver (R$) - Opcional"
         keyboardType="numeric"
-        value={additionalCosts}
+        value={formatCurrency(additionalCosts)}
         onChangeText={setAdditionalCosts}
         />
-                {/* Total e valor líquido a receber */}
+        {/* Total e valor líquido a receber */}
         <View style={styles.totalContainer2}>
           <Text style={styles.totalLabel}>Valor total <Icon name="alert-circle" size={20} color={COLORS.lightGray} /></Text>
-          <Text style={styles.totalValue}>R$ {totalWithoutDiscount.toFixed(2)}</Text>
+          <Text style={styles.totalValue}>R$ {formatCurrency(totalWithoutDiscount)}</Text>
         </View>
-
 
 {/* Botão de Adicionar Produtos */}
 <TouchableOpacity style={styles.addProductButton} onPress={handleAddProduct}>
@@ -476,10 +456,9 @@ const formatCurrency = (value) => {
         {/* Total e valor líquido a receber */}
         <View style={styles.totalContainer}>
           <Text style={styles.totalLabel}>Valor a receber <Icon name="alert-circle" size={20} color={COLORS.lightGray} /></Text>
-          <Text style={styles.totalValue}>R$ {totalWithDiscount.toFixed(2)} </Text>
+          <Text style={styles.totalValue}>R$ {formatCurrency(totalWithDiscount)} </Text>
         </View>
-
-
+        
             {/* Botão de Concluir Venda */}
             <View style={styles.footer}>
                 <TouchableOpacity style={styles.concludeButton} onPress={handleRegisterSale}>

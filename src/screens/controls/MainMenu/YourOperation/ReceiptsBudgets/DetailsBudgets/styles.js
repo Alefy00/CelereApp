@@ -95,8 +95,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   dropdownContainer: {
-    borderWidth: 1,
-    borderColor: COLORS.grey,
     borderRadius: 5,
     marginTop: 4,
   },
@@ -319,6 +317,11 @@ const styles = StyleSheet.create({
   },
   cartItemTotal:{
     marginLeft: 70,
+    color: COLORS.black,
+    fontWeight:'bold',
+  },
+  cartItemTotalProduct:{
+    marginLeft: 60,
     color: COLORS.black,
     fontWeight:'bold',
   },

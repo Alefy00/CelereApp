@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import BarTop3 from '../../../../../../../components/BarTop3';
@@ -80,7 +80,7 @@ const fetchClients = useCallback(async () => {
     return null; // Não renderiza a tela caso não haja serviços
   }
   return (
-    <View style={styles.containerBase}>
+    <ScrollView style={styles.containerBase}>
       <View style={styles.containerBartop}>
         <BarTop3
           titulo={'Voltar'}
@@ -128,7 +128,7 @@ const fetchClients = useCallback(async () => {
           clearCart={clearCart}
         />
       )}
-    </View>
+    </ScrollView>
   );
 };
 

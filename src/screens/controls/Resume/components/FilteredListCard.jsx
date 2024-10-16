@@ -187,7 +187,7 @@ const getPaymentIconById = (paymentTypeId) => {
       return <Ionicons name="document-outline" size={20} color={COLORS.green} />;
   }
 };
-const FilteredListCard = () => {
+const FilteredListCard = ({ selectedDate }) => {
   const [selectedTab, setSelectedTab] = useState('sales'); // 'sales' ou 'expenses'
   const [searchQuery, setSearchQuery] = useState('');
   const [salesData, setSalesData] = useState([]);

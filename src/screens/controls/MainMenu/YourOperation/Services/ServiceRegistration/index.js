@@ -1,15 +1,18 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, Alert, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { launchImageLibrary } from 'react-native-image-picker';
 import BarTop2 from '../../../../../../components/BarTop2';
 import { COLORS } from '../../../../../../constants';
 import styles from './styles';
+import axios from 'axios';
 
 const BASE_API_URL = 'https://api.celereapp.com.br';
 const UNIT_MEASURE_API_ENDPOINT = `${BASE_API_URL}/api/und_medida_servico/?page=1&page_size=100`;
 const REGISTER_SERVICE_API_ENDPOINT = `${BASE_API_URL}/cad/servicos/`;
+const IMAGE_UPLOAD_API = `${BASE_API_URL}/mnt/imagensservico/`;
 
 const AddService = ({ navigation }) => {
   const [barcode, setBarcode] = useState('');
@@ -21,17 +24,17 @@ const AddService = ({ navigation }) => {
   const [unitsOfMeasure, setUnitsOfMeasure] = useState([]);
   const [isUnitMeasureDropdownVisible, setIsUnitMeasureDropdownVisible] = useState(false);
   const [isPriceDisabled, setIsPriceDisabled] = useState(false); // Estado para controlar o checkbox
-  const [imageUri, setImageUri] = useState(null); // Para controlar a imagem do serviço
+  const [photo, setPhoto] = useState(null);  // Estado para armazenar a foto selecionada
   const [modalVisible, setModalVisible] = useState(false); // Estado para controlar o modal de sucesso
   const defaultImageUrl = require('../../../../../../assets/images/png/placeholder.png'); // URL da imagem padrão
-
+  
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
     try {
       const storedEmpresaId = await AsyncStorage.getItem('empresaId');
       if (storedEmpresaId) {
-        console.log("ID da empresa encontrado:", storedEmpresaId); // Log do ID da empresa
+
         return Number(storedEmpresaId);
       } else {
         Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
@@ -43,6 +46,7 @@ const AddService = ({ navigation }) => {
     return null;
   };
 
+  // Função para buscar as unidades de medida da API
   const fetchUnitsOfMeasure = async (empresa_id) => {
     try {
       const response = await fetch(`${UNIT_MEASURE_API_ENDPOINT}&empresa_id=${empresa_id}`);
@@ -70,7 +74,6 @@ const AddService = ({ navigation }) => {
     fetchData();
   }, []);
 
-  // Função que lida com a requisição para salvar o serviço
   const handleSave = async () => {
     if (!name || (!price && !isPriceDisabled) || !unitMeasure) {
       Alert.alert('Erro', 'Todos os campos obrigatórios devem ser preenchidos.');
@@ -83,27 +86,18 @@ const AddService = ({ navigation }) => {
     }
   
     const currentDate = new Date().toISOString().split('T')[0];
-  
-    // Definir o preço como 0 se o checkbox estiver marcado
-    const finalPrice = isPriceDisabled ? 0 : removeCurrencyFormatting(price); // Remover formatação para garantir que seja numérico
-  
-    // Corrigir o valor de `image_url` para garantir que seja um URL válido ou imagem padrão
-    const imageUrl = imageUri ? imageUri : "https://via.placeholder.com/150"; // Defina aqui uma URL válida ou imagem padrão
+    const finalPrice = isPriceDisabled ? 0 : removeCurrencyFormatting(price);
   
     const serviceData = {
       empresa_id: empresaId,
       dt_servico: currentDate,
       nome: name,
       descricao: description || null,
-      preco_venda: finalPrice, // Agora garantindo que o valor seja numérico
+      preco_venda: finalPrice,
       status: 'ativo',
       unidade_medida: unitMeasure,
       ean: barcode || null,
-      image_url: imageUrl,
     };
-  
-    // Adicionando log do corpo da requisição
-    console.log('Corpo da requisição:', serviceData);
   
     try {
       const response = await fetch(REGISTER_SERVICE_API_ENDPOINT, {
@@ -118,15 +112,13 @@ const AddService = ({ navigation }) => {
       const result = await response.json();
   
       if (response.ok) {
-        setModalVisible(true); // Exibe o modal de sucesso
-        // Limpa os campos do formulário
-        setBarcode('');
-        setName('');
-        setUnitMeasure('');
-        setPrice('');
-        setDescription('');
-        setIsPriceDisabled(false); // Restaura o estado do checkbox
-        setImageUri(null); // Limpa a imagem
+        const serviceId = result.data.id;  // Obtém o ID do serviço recém-cadastrado
+        // Se houver uma foto, faz o upload
+        if (photo) {
+          await uploadServiceImage(serviceId, empresaId);  // Faz o upload da imagem
+        }
+        setModalVisible(true);  // Exibe o modal de sucesso
+        clearForm();  // Limpa o formulário
       } else {
         Alert.alert('Erro', result.message || 'Ocorreu um erro ao registrar o serviço.');
       }
@@ -135,8 +127,73 @@ const AddService = ({ navigation }) => {
       Alert.alert('Erro', 'Não foi possível registrar o serviço. Verifique sua conexão e tente novamente.');
     }
   };
- 
   
+// Função para enviar a imagem do produto
+const uploadServiceImage = async (serviceId, empresaId) => {
+  if (!photo) return;  // Certifique-se de que a imagem existe
+
+  const formData = new FormData();
+  formData.append('servico', serviceId);  // ID do produto
+  formData.append('empresa', empresaId);  // ID da empresa
+  formData.append('arquivo', {
+    uri: photo.uri,  // Use o 'uri' da imagem
+    type: photo.type,  // Tipo da imagem, como 'image/jpeg'
+    name: photo.name,  // Nome do arquivo
+  });
+  formData.append('usuario', 1);  // ID do usuário (se aplicável)
+
+  try {
+    const response = await axios.post(IMAGE_UPLOAD_API, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',  // Define o tipo como multipart
+      },
+    });
+
+    if (response.data.status === 'success') {
+      console.log('Imagem do produto registrada com sucesso:', response.data);
+    } else {
+      Alert.alert('Erro', 'Falha ao enviar a imagem.');
+    }
+  } catch (error) {
+    console.error('Erro ao enviar imagem:', error.response?.data || error.message);
+    Alert.alert('Erro', 'Erro ao enviar a imagem.');
+  }
+};
+
+// Função para selecionar imagem da galeria
+const handleSelectImage = async () => {
+  launchImageLibrary({ mediaType: 'photo', includeBase64: false }, (response) => {
+    if (response.didCancel) {
+      console.log('Usuário cancelou a seleção da imagem');
+    } else if (response.errorCode) {
+      console.error('Erro ao selecionar imagem:', response.errorMessage);
+    } else if (response.assets && response.assets.length > 0) {
+      const selectedPhoto = response.assets[0];
+      console.log('Imagem capturada:', selectedPhoto);  // Log da imagem capturada
+
+      // Adicionando mais logs para conferir o conteúdo
+      console.log('Imagem URI:', selectedPhoto.uri);
+      console.log('Imagem Tipo:', selectedPhoto.type);
+      console.log('Imagem Nome:', selectedPhoto.fileName);
+
+      setPhoto({
+        uri: selectedPhoto.uri,
+        type: selectedPhoto.type || 'image/jpeg',  // Define o tipo como 'image/jpeg' por padrão, caso não esteja presente
+        name: selectedPhoto.fileName || `photo_${Date.now()}.jpg`,  // Define um nome padrão se 'fileName' estiver ausente
+      });
+    }
+  });
+};
+
+  const clearForm = () => {
+    setBarcode('');
+    setName('');
+    setUnitMeasure('');
+    setPrice('');
+    setDescription('');
+    setIsPriceDisabled(false);
+    setPhoto(null);  // Limpa a imagem
+  };
 
   const toggleUnitMeasureDropdown = () => {
     setIsUnitMeasureDropdownVisible(!isUnitMeasureDropdownVisible);
@@ -146,13 +203,12 @@ const AddService = ({ navigation }) => {
     setUnitMeasure(unit.cod); // Armazenar o código da unidade de medida selecionada
     setIsUnitMeasureDropdownVisible(false);
   };
-  
+
   const handleCloseModal = () => {
     setModalVisible(false); // Fecha o modal
     navigation.navigate('RegisteredServices'); // Redireciona para a próxima tela
   };
 
-  // Atualiza o valor do preço para 0 quando o checkbox é marcado
   const handlePriceCheckboxChange = () => {
     setIsPriceDisabled(!isPriceDisabled);
     if (!isPriceDisabled) {
@@ -165,33 +221,26 @@ const AddService = ({ navigation }) => {
       fetchUnitsOfMeasure(empresaId); // Recarrega as unidades de medida da API ao desmarcar o checkbox
     }
   };
-  
 
-  // Função para formatar o valor como moeda Real Brasileiro
-const formatPriceToBRL = (value) => {
-  const numericValue = parseFloat(value.replace(/[^0-9]/g, '')) / 100; // Remove caracteres não numéricos e divide por 100 para ajustar centavos
-  if (isNaN(numericValue)) return ''; // Caso o valor seja inválido, retorna uma string vazia
+  const formatPriceToBRL = (value) => {
+    const numericValue = parseFloat(value.replace(/[^0-9]/g, '')) / 100;
+    if (isNaN(numericValue)) return '';
 
-  return numericValue.toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
-};
+    return numericValue.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  };
 
-const removeCurrencyFormatting = (formattedValue) => {
-  // Remove tudo que não seja número, ponto ou vírgula
-  const numericValue = formattedValue.replace(/[^\d,]/g, '').replace(',', '.');
-  return parseFloat(numericValue); // Converte a string para número float
-};
+  const removeCurrencyFormatting = (formattedValue) => {
+    const numericValue = formattedValue.replace(/[^\d,]/g, '').replace(',', '.');
+    return parseFloat(numericValue);
+  };
 
-
-// Função para lidar com a mudança no campo de preço
-const handlePriceChange = (text) => {
-  const formattedValue = formatPriceToBRL(text);
-  setPrice(formattedValue); // Atualiza o estado com o valor formatado
-};
-
-  
+  const handlePriceChange = (text) => {
+    const formattedValue = formatPriceToBRL(text);
+    setPrice(formattedValue);
+  };
 
   return (
     <KeyboardAvoidingView
@@ -203,14 +252,21 @@ const handlePriceChange = (text) => {
         backColor={COLORS.primary}
         foreColor={COLORS.black}
       />
-
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.imageContainer}>
           <Text style={styles.imageLabelTitle}>Adicionar um novo serviço</Text>
           <View style={styles.containerColor}>
-            <View style={styles.imageWrapper}>
-              <Icon name="camera" size={40} color={COLORS.black} />
-            </View>
+            <TouchableOpacity style={styles.imageWrapper} onPress={handleSelectImage}>
+              {photo ? (
+                <Image
+                  source={{ uri: photo.uri }}
+                  style={{ width: 120, height: 120, resizeMode: 'contain', borderRadius: 10, }}
+                  onError={(error) => console.error('Erro ao carregar a imagem:', error.nativeEvent.error)}
+                />
+              ) : (
+                <Icon name="camera" size={40} color={COLORS.black} />
+              )}
+            </TouchableOpacity>
             <TextInput
               style={styles.barcodeInput}
               placeholder="Código (opcional)"
@@ -219,9 +275,8 @@ const handlePriceChange = (text) => {
               keyboardType="numeric"
             />
           </View>
-          <Text style={styles.imageLabel}>Imagem{'\n'}do serviço</Text>
+          <Text style={styles.imageLabel}>  Imagem{"\n"}do serviço</Text>
         </View>
-
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Detalhes do Serviço</Text>
           <TextInput
@@ -242,7 +297,6 @@ const handlePriceChange = (text) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Valores do Serviço</Text>
 
-          {/* Checkbox para desativar o campo de preço */}
           <View style={styles.checkboxContainer}>
             <TouchableOpacity onPress={handlePriceCheckboxChange} style={styles.checkbox}>
               <Icon name={isPriceDisabled ? 'checkbox' : 'square-outline'} size={24} color={COLORS.black} />
@@ -250,13 +304,12 @@ const handlePriceChange = (text) => {
             <Text style={styles.checkboxLabel}>Não inserir preço neste momento</Text>
           </View>
 
-          {/* Input de preço que é desativado quando o checkbox está marcado */}
           <TextInput
             style={[styles.input, isPriceDisabled && { backgroundColor: COLORS.lightGray }]}
             placeholder="Preço de Venda (R$)"
             value={price}
             onChangeText={handlePriceChange}
-            editable={!isPriceDisabled} // Desabilita o campo se o checkbox estiver marcado
+            editable={!isPriceDisabled}
             keyboardType="numeric"
           />
 
@@ -285,7 +338,6 @@ const handlePriceChange = (text) => {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Modal de sucesso */}
       <Modal
         visible={modalVisible}
         transparent={true}

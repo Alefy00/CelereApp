@@ -16,28 +16,28 @@ const API_BASE_URL = 'https://api.celereapp.com.br';
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
 
+// Novo endpoint para buscar imagens
+const IMAGE_API = `${API_BASE_URL}/mnt/imagensproduto/getImagemProd/`;
+
 const StockInfo = ({ navigation }) => {
-  const [activeFilter, setActiveFilter] = useState('all'); // Filtro "Todos os produtos" como padrão
+  const [activeFilter, setActiveFilter] = useState('all');
   const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]); // Para armazenar os produtos filtrados
-  const [categories, setCategories] = useState([{ id: 'all', label: 'Todos os produtos' }]); // Todos os produtos
-  const [searchTerm, setSearchTerm] = useState(''); // Estado para o termo de busca
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [categories, setCategories] = useState([{ id: 'all', label: 'Todos os produtos' }]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [totalCusto, setTotalCusto] = useState(0);
   const [totalVenda, setTotalVenda] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
-  const [isModalVisible, setIsModalVisible] = useState(false); // Controle da visibilidade do modal
-  const [selectedProduct, setSelectedProduct] = useState(null); // Produto selecionado
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [empresaId, setEmpresaId] = useState(null);
 
-
-
-  // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
     try {
       const storedEmpresaId = await AsyncStorage.getItem('empresaId');
       if (storedEmpresaId) {
-        return Number(storedEmpresaId); // Converte para número se estiver como string
+        return Number(storedEmpresaId);
       } else {
         Alert.alert('Erro', 'ID da empresa não encontrado.');
         return null;
@@ -48,40 +48,60 @@ const StockInfo = ({ navigation }) => {
     }
   };
 
-  // Função para buscar os produtos da API e calcular os totais
-// Função para buscar os produtos da API e calcular os totais
-const fetchProducts = useCallback(async () => {
-  try {
-    const empresaId = await getEmpresaId();
-    if (empresaId) {
-      // Atualizando o parâmetro de empresa_id para empresa
-      const response = await axios.get(`${PRODUCTS_API}?empresa=${empresaId}`);
-      if (response.data && response.data.status === 200) {
-        const productsData = response.data.data;
-        setProducts(productsData);
-        setFilteredProducts(productsData); // Inicialmente, todos os produtos são exibidos
-
-        // ** Cálculos dos totais **
-        const totalCustoCalc = productsData.reduce((sum, product) => sum + parseFloat(product.custo), 0);
-        const totalVendaCalc = productsData.reduce((sum, product) => sum + (parseFloat(product.preco_venda) * product.qtd_estoque), 0);
-        const totalItemsCalc = productsData.reduce((sum, product) => sum + product.qtd_estoque, 0);
-
-        setTotalCusto(totalCustoCalc.toFixed(2)); // Atualiza o preço de custo
-        setTotalVenda(totalVendaCalc.toFixed(2)); // Atualiza o preço de venda
-        setTotalItems(totalItemsCalc); // Atualiza a quantidade de itens
+  const fetchProductImage = async (empresaId, produtoId) => {
+    try {
+      const response = await axios.get(`${IMAGE_API}?empresa=${empresaId}&produto=${produtoId}`);
+      if (response.data && response.data.status === 'success') {
+        return response.data.data.imagem;
       } else {
-        Alert.alert('Erro', 'Falha ao recuperar produtos.');
+        console.error('Erro ao buscar imagem do produto:', response.data.message);
+        return null;
       }
+    } catch (error) {
+      console.error('Erro ao buscar imagem do produto:', error.message);
+      return null;
     }
-  } catch (error) {
-    console.error('Erro ao buscar produtos:', error);
-    Alert.alert('Erro', 'Ocorreu um erro ao buscar os produtos.');
-  } finally {
-    setLoading(false);
-  }
-}, []);
+  };
 
-  // Função para buscar as categorias da API e remover duplicatas
+  // Memoize fetchProductsWithImages using useCallback
+  const fetchProductsWithImages = useCallback(async () => {
+    try {
+      const empresaId = await getEmpresaId();
+      if (empresaId) {
+        const response = await axios.get(`${PRODUCTS_API}?empresa=${empresaId}`);
+        if (response.data && response.data.status === 200) {
+          const productsData = response.data.data;
+
+          const productsWithImages = await Promise.all(productsData.map(async (product) => {
+            const imagePath = await fetchProductImage(empresaId, product.id);
+            return {
+              ...product,
+              image_url: imagePath ? `${API_BASE_URL}${imagePath}` : null,
+            };
+          }));
+
+          setProducts(productsWithImages);
+          setFilteredProducts(productsWithImages);
+
+          const totalCustoCalc = productsWithImages.reduce((sum, product) => sum + parseFloat(product.custo), 0);
+          const totalVendaCalc = productsWithImages.reduce((sum, product) => sum + (parseFloat(product.preco_venda) * product.qtd_estoque), 0);
+          const totalItemsCalc = productsWithImages.reduce((sum, product) => sum + product.qtd_estoque, 0);
+
+          setTotalCusto(totalCustoCalc.toFixed(2));
+          setTotalVenda(totalVendaCalc.toFixed(2));
+          setTotalItems(totalItemsCalc);
+        } else {
+          Alert.alert('Erro', 'Falha ao recuperar produtos.');
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar produtos:', error.message);
+      Alert.alert('Erro', 'Ocorreu um erro ao buscar os produtos.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const fetchCategories = useCallback(async () => {
     try {
       const empresaId = await getEmpresaId();
@@ -89,19 +109,18 @@ const fetchProducts = useCallback(async () => {
         const response = await axios.get(`${CATEGORIES_API}?empresa_id=${empresaId}`);
         if (response.data && response.data.data) {
           const apiCategories = response.data.data
-            .filter(cat => cat.empresa.id === empresaId)  // Filtrar categorias da empresa
+            .filter(cat => cat.empresa.id === empresaId)
             .map((cat) => ({
               id: cat.id.toString(),
               label: cat.nome,
             }));
 
-          // Remover duplicatas
           const uniqueCategories = Array.from(new Set(apiCategories.map(a => a.id)))
             .map(id => {
               return apiCategories.find(a => a.id === id);
             });
 
-          setCategories([{ id: 'all', label: 'Todos os produtos' }, ...uniqueCategories]); // Exibe as categorias filtradas e únicas
+          setCategories([{ id: 'all', label: 'Todos os produtos' }, ...uniqueCategories]);
         } else {
           Alert.alert('Erro', 'Falha ao recuperar categorias.');
         }
@@ -113,11 +132,10 @@ const fetchProducts = useCallback(async () => {
   }, []);
 
   useEffect(() => {
-    fetchProducts();
-    fetchCategories(); // Faz a requisição para as categorias também
-  }, [fetchProducts, fetchCategories]);
+    fetchProductsWithImages();
+    fetchCategories();
+  }, [fetchProductsWithImages, fetchCategories]);
 
-  // Função para aplicar o filtro de categoria e de busca nos produtos
   const applyFilters = useCallback(() => {
     let filtered = products;
 
@@ -129,37 +147,26 @@ const fetchProducts = useCallback(async () => {
       filtered = filtered.filter(product => product.nome.toLowerCase().includes(searchTerm.toLowerCase()));
     }
 
-    setFilteredProducts(filtered); // Atualiza a lista de produtos filtrados
+    setFilteredProducts(filtered);
   }, [activeFilter, searchTerm, products]);
 
-  // Chama o filtro sempre que o termo de busca ou o filtro de categoria mudarem
   useEffect(() => {
     applyFilters();
   }, [applyFilters]);
 
-  // Modificar a função que lida com a seleção de categorias
   const handleCategorySelect = (categoryId) => {
     setActiveFilter(categoryId);
   };
 
+  // Função para selecionar o produto e abrir o modal
   const handleProductSelect = (product) => {
-    setSelectedProduct(product); // Define o produto selecionado
-    setIsModalVisible(true);     // Abre o modal
+    console.log('Produto selecionado:', product);  // Verifica se o produto está sendo selecionado corretamente
+    setSelectedProduct(product);  // Define o produto selecionado
+    setIsModalVisible(true);  // Abre o modal
+    console.log('Modal visível?', isModalVisible);  // Verifica o estado do modal
   };
+
   
-  useEffect(() => {
-    const fetchEmpresaId = async () => {
-      const id = await getEmpresaId();
-      setEmpresaId(id);
-    };
-    
-    fetchEmpresaId();
-    fetchProducts();
-    fetchCategories(); // Faz a requisição para as categorias também
-  }, [fetchProducts, fetchCategories]);
-  
-  
-  // Renderização dos botões de filtro de categorias
   const renderFilterItem = ({ item }) => (
     <TouchableOpacity
       style={activeFilter === item.id ? styles.filterButtonActive : styles.filterButton}
@@ -177,12 +184,11 @@ const fetchProducts = useCallback(async () => {
   const renderProductItem = ({ item }) => (
     <TouchableOpacity onPress={() => handleProductSelect(item)}>
       <View style={styles.productItem}>
-      <Image
-        source={item.image_url ? { uri: item.image_url } : require('../../../../../assets/images/png/placeholder.png')}
-        style={styles.productImage}
-        onError={() => console.log('Erro ao carregar a imagem do produto', item.nome)}
-      />
-
+        <Image
+          source={item.image_url ? { uri: item.image_url } : require('../../../../../assets/images/png/placeholder.png')}
+          style={styles.productImage}
+          onError={() => console.log('Erro ao carregar a imagem do produto', item.nome)}
+        />
         <View style={styles.productInfo}>
           <View style={{ flexDirection: 'column' }}>
             <Text style={styles.productTitle}>{item.nome}</Text>
@@ -215,7 +221,6 @@ const fetchProducts = useCallback(async () => {
         <View style={styles.contentContainer}>
           <Text style={styles.title}>Seu estoque</Text>
           <View style={styles.gridContainer}>
-            {/* Exibindo os valores calculados */}
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Qtd. Categorias</Text>
               <Text style={styles.cardValue}>{categories.length}</Text>
@@ -230,14 +235,13 @@ const fetchProducts = useCallback(async () => {
             </View>
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Preço de Venda</Text>
-              <Text style={styles.cardValue}>R${totalVenda}</Text> 
+              <Text style={styles.cardValue}>R${totalVenda}</Text>
             </View>
           </View>
         </View>
 
-        {/* FlatList para Filtros Horizontal */}
         <FlatList
-          data={categories} // Adiciona opção "Todos os produtos"
+          data={categories}
           renderItem={renderFilterItem}
           keyExtractor={(item) => item.id}
           horizontal
@@ -248,47 +252,40 @@ const fetchProducts = useCallback(async () => {
         />
       </View>
 
-      {/* Campo de Busca */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
           placeholder="Pesquise um produto..."
           placeholderTextColor="#AAAAAA"
           value={searchTerm}
-          onChangeText={setSearchTerm} // Atualiza o estado de busca
+          onChangeText={setSearchTerm}
         />
         <TouchableOpacity style={styles.searchIcon}>
           <Icon name="search" size={20} color="#ccc" />
         </TouchableOpacity>
       </View>
 
-      {/* Lista de Produtos (com scroll) */}
       <FlatList
-        data={filteredProducts} // Exibimos os produtos filtrados
+        data={filteredProducts}
         renderItem={renderProductItem}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.productList}
-        showsVerticalScrollIndicator={true} // Ativa o scroll vertical
+        showsVerticalScrollIndicator={true}
       />
 
       <View style={styles.fixedButtonsContainer}>
-      {/* Botões Fixos de Ação 
-        <TouchableOpacity style={styles.fixedButton}>
-          <Icon name="barcode-outline" size={30} color="#000" />
-        </TouchableOpacity>
-        */}
         <TouchableOpacity style={styles.fixedButton2} onPress={handleAddProduct}>
           <Icon name="add-outline" size={30} color="#000" />
           <Text style={styles.textAdd}>Adicionar produto</Text>
         </TouchableOpacity>
       </View>
 
-      {selectedProduct && empresaId && (
+      {selectedProduct && (
         <UpdateStockModal
           isVisible={isModalVisible}
           onClose={() => {
             setIsModalVisible(false);
-            fetchProducts(); // Atualiza a lista de produtos após fechar o modal
+            fetchProductsWithImages();  // Atualiza a lista de produtos após fechar o modal
           }}
           product={selectedProduct}
           empresaId={empresaId}

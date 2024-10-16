@@ -248,6 +248,14 @@ const registerServicesOrcamento = async (empresaId, orcamentoId, services) => {
     setIsModalVisible(false);
   };
 
+  const formatCurrency = (value) => {
+    if (!value) return '';
+    return parseFloat(value).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  };
+
   return (
     <View style={styles.containerBase}>
       <View style={styles.containerBartop}>
@@ -308,14 +316,14 @@ const registerServicesOrcamento = async (empresaId, orcamentoId, services) => {
                       Unid. de medida: {service.unidade_medida || 'Por manutenção'}
                     </Text>
                     <Text style={styles.cartItemPrice}>
-                      Preço unitário: R$ {service.preco_venda ? parseFloat(service.preco_venda).toFixed(2) : 'Defina o preço'}
+                      Preço unitário: {service.preco_venda ? formatCurrency(service.preco_venda) : 'Defina o preço'}
                     </Text>
                     <Text style={styles.cartItemSubtitleMedida}>
                       Quantidade: {service.amount}
                     </Text>
                   </View>
                   <Text style={styles.cartItemTotal}>
-                    R$ {(service.preco_venda * service.amount).toFixed(2)}
+                  {formatCurrency(service.preco_venda * service.amount)}
                   </Text>
 
                   {/* Caso o preço não esteja definido, permitir a entrada do valor */}
@@ -323,7 +331,7 @@ const registerServicesOrcamento = async (empresaId, orcamentoId, services) => {
                     <TextInput
                       style={styles.priceInput}
                       keyboardType="numeric"
-                      value={service.preco_venda ? parseFloat(service.preco_venda).toFixed(2) : ''}
+                      value={service.preco_venda ? formatCurrency(service.preco_venda) : ''}
                       onChangeText={text => {
                         // Atualiza o preço na lista de serviços
                         const updatedServices = services.map(s => s.id === service.id ? { ...s, preco_venda: parseFloat(text) } : s);
@@ -349,14 +357,14 @@ const registerServicesOrcamento = async (empresaId, orcamentoId, services) => {
                   <View style={styles.containerServiço}>
                     <Text style={styles.cartItemTitle}>{product.nome}</Text>
                     <Text style={styles.cartItemPrice}>
-                      Preço unitário: R$ {product.preco_venda ? parseFloat(product.preco_venda).toFixed(2) : 'Defina o preço'}
+                      Preço unitário: {product.preco_venda ? formatCurrency(product.preco_venda) : 'Defina o preço'}
                     </Text>
                     <Text style={styles.cartItemSubtitleMedida}>
                       Quantidade: {product.amount}
                     </Text>
                   </View>
-                  <Text style={styles.cartItemTotal}>
-                    R$ {(product.preco_venda * product.amount).toFixed(2)}
+                  <Text style={styles.cartItemTotalProduct}>
+                  {formatCurrency(product.preco_venda * product.amount)}
                   </Text>
                 </View>
               ))}
@@ -426,7 +434,7 @@ const registerServicesOrcamento = async (empresaId, orcamentoId, services) => {
           <Text style={styles.totalLabel}>
             Total <Icon name="alert-circle" size={18} color={COLORS.lightGray} />
           </Text>
-          <Text style={styles.totalPrice}>R$ {discountedTotal.toFixed(2)}</Text>
+          <Text style={styles.totalPrice}>R$ {formatCurrency(discountedTotal)}</Text>
         </View>
       <TouchableOpacity style={styles.generateButton} onPress={handleGenerateBudget}>
         <Icon name="checkmark-circle" size={25} color={COLORS.black} />

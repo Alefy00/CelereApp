@@ -47,7 +47,12 @@ const DateCarousel = ({ onDateSelected }) => {
     return (
       <TouchableOpacity
         style={[styles.dateContainer, isSelected && styles.selectedDateContainer]}
-        onPress={() => setSelectedDate(item)}
+        onPress={() => {
+          setSelectedDate(item);
+          // Passa a data selecionada no formato YYYY-MM-DD para o componente pai
+          const formattedDate = item.toISOString().split('T')[0];
+          onDateSelected(formattedDate, formattedDate); // Para filtro diário, dt_ini e dt_end são iguais
+        }}
       >
         <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
           {item.getDate().toString().padStart(2, '0')}
@@ -120,7 +125,6 @@ const DateCarousel = ({ onDateSelected }) => {
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   carouselContainer: {

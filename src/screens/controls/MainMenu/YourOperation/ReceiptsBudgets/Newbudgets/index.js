@@ -59,42 +59,82 @@ const NewBudgets = ({ navigation, route }) => {
     }
   }, []);
 
- // Função para buscar produtos e serviços da API
- const fetchProductsAndServices = useCallback(async () => {
-  setLoading(true);
-  try {
-    const empresaId = await getEmpresaId();
-    if (empresaId) {
-      // Busca produtos
-      const productResponse = await axios.get(`${PRODUCTS_API}?page_size=100&empresa=${empresaId}`);
-      const fetchedProducts = productResponse.data.data;
-
-      // Busca serviços
-      const serviceResponse = await axios.get(`${SERVICES_API}?page_size=100&empresa_id=${empresaId}`);
-      const fetchedServices = serviceResponse.data.results.data;
-
-      // Filtrar apenas os serviços que pertencem à empresa logada
-      const filteredServices = fetchedServices.filter(service => service.empresa.id === empresaId);
-
-      // Adicionar propriedade `categoria` aos serviços
-      const servicesWithCategory = filteredServices.map(service => ({
-        ...service,
-        categoria: 'Serviços',
-        qtd_estoque: null, // Define `qtd_estoque` como null ou zero
-      }));
-
-      // Combina produtos e serviços
-      setProducts([...fetchedProducts, ...servicesWithCategory]);
-      setFilteredProducts([...fetchedProducts, ...servicesWithCategory]);
+  const fetchProductImage = async (empresaId, productId) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/mnt/imagensproduto/getImagemProd/?empresa=${empresaId}&produto=${productId}`
+      );
+      if (response.data && response.data.status === 'success') {
+        return `${API_BASE_URL}${response.data.data.imagem}`;  // URL completa da imagem
+      } else {
+        return null;  // Retorna null se não houver imagem
+      }
+    } catch (error) {
+      console.error('Erro ao buscar imagem do produto:', error);
+      return null;  // Retorna null em caso de erro
     }
-  } catch (error) {
-    showAlert("Erro", "Erro ao conectar à API.");
-  } finally {
-    setLoading(false);
-  }
-}, [getEmpresaId]);
+  };
+
+  const fetchServiceImage = async (empresaId, serviceId) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/mnt/imagensservico/getImagemServ/?empresa=${empresaId}&servico=${serviceId}`
+      );
+      if (response.data && response.data.status === 'success') {
+        return `${API_BASE_URL}${response.data.data.imagem}`;  // URL completa da imagem
+      } else {
+        return null;  // Retorna null se não houver imagem
+      }
+    } catch (error) {
+      console.error('Erro ao buscar imagem do serviço:', error);
+      return null;  // Retorna null em caso de erro
+    }
+  };
 
 
+  // Função para buscar produtos e serviços com suas imagens
+  const fetchProductsAndServices = useCallback(async () => {
+    setLoading(true);
+    try {
+      const empresaId = await getEmpresaId();
+      if (empresaId) {
+        // Busca produtos
+        const productResponse = await axios.get(`${PRODUCTS_API}?page_size=100&empresa=${empresaId}`);
+        const fetchedProducts = productResponse.data.data;
+
+        // Busca serviços
+        const serviceResponse = await axios.get(`${SERVICES_API}?page_size=100&empresa_id=${empresaId}`);
+        const fetchedServices = serviceResponse.data.results.data;
+
+        // Filtrar apenas os serviços que pertencem à empresa logada
+        const filteredServices = fetchedServices.filter(service => service.empresa.id === empresaId);
+
+        // Buscar imagens para produtos e serviços
+        const productsWithImages = await Promise.all(fetchedProducts.map(async (product) => {
+          const imageUrl = await fetchProductImage(empresaId, product.id);
+          return { ...product, image_url: imageUrl };  // Adiciona o campo image_url com a imagem recuperada
+        }));
+
+        const servicesWithImages = await Promise.all(filteredServices.map(async (service) => {
+          const imageUrl = await fetchServiceImage(empresaId, service.id);
+          return {
+            ...service,
+            categoria: 'Serviços',
+            qtd_estoque: null,
+            image_url: imageUrl,  // Adiciona o campo image_url com a imagem recuperada
+          };
+        }));
+
+        // Combina produtos e serviços
+        setProducts([...productsWithImages, ...servicesWithImages]);
+        setFilteredProducts([...productsWithImages, ...servicesWithImages]);
+      }
+    } catch (error) {
+      showAlert("Erro", "Erro ao conectar à API.");
+    } finally {
+      setLoading(false);
+    }
+  }, [getEmpresaId]);
 
   // Recarregar produtos e serviços ao voltar para a tela
   useFocusEffect(
@@ -102,7 +142,6 @@ const NewBudgets = ({ navigation, route }) => {
       fetchProductsAndServices(); // Recarrega a lista de produtos e serviços sempre que a tela ganha foco
     }, [fetchProductsAndServices])
   );
-// Recarregar produtos ao voltar para a tela;
 
   // Função para buscar as categorias da API e remover duplicatas
   const fetchCategories = useCallback(async () => {
@@ -214,14 +253,18 @@ const NewBudgets = ({ navigation, route }) => {
   const handleNext = () => {
     const selectedItems = Object.keys(quantities).map(key => {
       const product = products.find(p => p.id.toString() === key);
-      return {
-        ...product,
-        amount: quantities[key],
-        total: quantities[key] * (parseFloat(product.preco_venda) || 0),
-        imagem: product.imagem ? product.imagem : 'https://via.placeholder.com/150',
-      };
-    }).filter(item => item !== null);
   
+      // Verificar se o produto existe e adicionar ao carrinho, mesmo com preço 0
+      if (product) {
+        return {
+          ...product,
+          amount: quantities[key],
+          total: quantities[key] * (parseFloat(product.preco_venda) || 0), // Permitir preço 0
+          imagem: product.image_url ? product.image_url : 'https://via.placeholder.com/150', // Certifique-se de que estamos usando a propriedade correta para a URL da imagem
+        };
+      }
+      return null;
+    }).filter(item => item !== null); // Garantir que nenhum item nulo seja adicionado
     const allSelectedItems = [...selectedItems];
   
     const totalPrice = allSelectedItems.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
@@ -238,7 +281,7 @@ const NewBudgets = ({ navigation, route }) => {
     <>
       {totalPrice > 0 && (
         <View style={styles.confirmationCard}>
-          <Text style={styles.totalPrice}>Total: R${totalPrice.toFixed(2)}</Text>
+          <Text style={styles.totalPrice}>Total: R${formatCurrency(totalPrice)}</Text>
           <TouchableOpacity style={styles.confirmButton} onPress={handleNext}>
             <Icon name="checkmark-circle" size={25} color={COLORS.black} />
             <Text style={styles.confirmButtonText}>Confirmar Orçamento</Text>
@@ -262,6 +305,13 @@ const NewBudgets = ({ navigation, route }) => {
       navigation.navigate('AddService');
     };
 
+    const formatCurrency = (value) => {
+      if (!value) return '';
+      return parseFloat(value).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      });
+    };
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

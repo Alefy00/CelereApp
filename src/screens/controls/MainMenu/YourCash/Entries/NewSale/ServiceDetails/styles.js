@@ -170,7 +170,17 @@ Container: {
         marginLeft: 20,
       },
       cartItemTotal:{
-        marginLeft: 90,
+        marginLeft: 75,
+        color: COLORS.black,
+        fontWeight:'bold',
+      },
+      cartItemTotalProduct:{
+        marginLeft: 45,
+        color: COLORS.black,
+        fontWeight:'bold',
+      },
+      cartItemTotalProduto:{
+        marginLeft: 65,
         color: COLORS.black,
         fontWeight:'bold',
       },

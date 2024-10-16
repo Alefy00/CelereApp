@@ -81,11 +81,8 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   dropdownContainer: {
-    backgroundColor: COLORS.white,
-    borderRadius: 5,
     maxHeight: 150, // Limita a altura do dropdown
     marginTop: -25,
-    elevation: 3,
     width: '100%', // Certifica-se que o dropdown tenha a largura completa
   },
   dropdownItem: {
@@ -141,6 +138,9 @@ const styles = StyleSheet.create({
   productText: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: COLORS.black,
+  },
+  productPrice:{
     color: COLORS.black,
   },
   productAmount: {

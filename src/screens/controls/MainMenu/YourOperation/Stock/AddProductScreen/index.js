@@ -11,6 +11,7 @@ import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera } from 'react-native-image-picker'; // Para capturar a foto
+import { launchImageLibrary } from 'react-native-image-picker';
 
 // ** Constantes para URLs e Headers **
 const API_BASE_URL = 'https://api.celereapp.com.br';
@@ -67,57 +68,32 @@ const AddProductScreen = ({ navigation }) => {
     return true; // No iOS, as permissões são tratadas no Info.plist
   };
 
-  const requestExternalStoragePermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.requestMultiple([
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-      ]);
-      return (
-        granted['android.permission.WRITE_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED &&
-        granted['android.permission.READ_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED
-      );
-    } catch (err) {
-      console.warn(err);
-      return false;
-    }
-  };
-  
- // Função para tirar foto
- const handleTakePhoto = async () => {
-  const hasPermission = await requestCameraPermission();
-  if (!hasPermission) {
-    Alert.alert('Permissão negada', 'Você precisa permitir o acesso à câmera para tirar fotos.');
-    return;
-  }
 
-  launchCamera(
-    {
-      mediaType: 'photo',
-      includeBase64: false,
-    },
-    (response) => {
-      if (response.didCancel) {
-        console.log('Usuário cancelou a captura da imagem');
-      } else if (response.errorCode) {
-        console.error('Erro ao capturar a imagem:', response.errorMessage);
-      } else if (response.assets && response.assets.length > 0) {
-        const capturedPhoto = response.assets[0];
-        console.log('Imagem capturada com sucesso:', capturedPhoto); // Log da imagem capturada
-        setPhoto({
-          uri: capturedPhoto.uri,
-          type: capturedPhoto.type || 'image/jpeg',
-          name: capturedPhoto.fileName || `photo_${Date.now()}.jpg`,
-        });
-        console.log('Estado da foto atualizado:', {
-          uri: capturedPhoto.uri,
-          type: capturedPhoto.type || 'image/jpeg',
-          name: capturedPhoto.fileName || `photo_${Date.now()}.jpg`,
-        });
-      }
+// Função para selecionar imagem da galeria
+const handleSelectImage = async () => {
+  launchImageLibrary({ mediaType: 'photo', includeBase64: false }, (response) => {
+    if (response.didCancel) {
+      console.log('Usuário cancelou a seleção da imagem');
+    } else if (response.errorCode) {
+      console.error('Erro ao selecionar imagem:', response.errorMessage);
+    } else if (response.assets && response.assets.length > 0) {
+      const selectedPhoto = response.assets[0];
+      console.log('Imagem capturada:', selectedPhoto);  // Log da imagem capturada
+
+      // Adicionando mais logs para conferir o conteúdo
+      console.log('Imagem URI:', selectedPhoto.uri);
+      console.log('Imagem Tipo:', selectedPhoto.type);
+      console.log('Imagem Nome:', selectedPhoto.fileName);
+
+      setPhoto({
+        uri: selectedPhoto.uri,
+        type: selectedPhoto.type || 'image/jpeg',  // Define o tipo como 'image/jpeg' por padrão, caso não esteja presente
+        name: selectedPhoto.fileName || `photo_${Date.now()}.jpg`,  // Define um nome padrão se 'fileName' estiver ausente
+      });
     }
-  );
+  });
 };
+
   
   // Função para buscar categorias, agora memoizada com useCallback
   const fetchCategories = useCallback(async () => {
@@ -295,11 +271,11 @@ const uploadProductImage = async (productId, empresaId) => {
               {photo ? (
                 <Image
                     source={{ uri: photo.uri }}
-                    style={{ width: 150, height: 130, resizeMode: 'contain' }}   // Tamanho fixo para garantir visualização
+                    style={{ width: 120, height: 120, resizeMode: 'contain', borderRadius: 10, }}  // Tamanho fixo para garantir visualização
                     onError={(error) => console.error('Erro ao carregar a imagem:', error.nativeEvent.error)}
                   />
               ) : (
-                <TouchableOpacity style={styles.imageButton} onPress={handleTakePhoto}>
+                <TouchableOpacity style={styles.imageButton} onPress={handleSelectImage}>
                   <Icon name="camera" size={30} color={COLORS.black} />
                 </TouchableOpacity>
               )}

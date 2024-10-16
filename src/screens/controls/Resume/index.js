@@ -21,6 +21,10 @@ const MainMenu = ({ navigation }) => {
   const [isTaxModalVisible, setIsTaxModalVisible] = useState(false); // Estado para controlar a visibilidade do TaxModal
   const [saldoCaixa, setSaldoCaixa] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState({
+    dt_ini: '2024-10-01', // Valor padrão inicial para a data de início
+    dt_end: '2024-10-30', // Valor padrão inicial para a data de término
+  });
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
@@ -120,6 +124,14 @@ const MainMenu = ({ navigation }) => {
     return formattedValue.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
 
+    // Função para mudar as datas quando o usuário selecionar novas no DateCarousel
+    const handleDateChange = (startDate, endDate) => {
+      setSelectedDate({
+        dt_ini: startDate,
+        dt_end: endDate,
+      });
+    };
+
   return (
     <KeyboardAvoidingView behavior="position" enabled>
       <ScrollView style={{ backgroundColor: "#FDFCF0" }}>
@@ -131,7 +143,9 @@ const MainMenu = ({ navigation }) => {
           foreColor={'#000000'}
         />
         <View style={styles.container}>
-          <DateCarousel onDateSelected={() => {}} />
+        <DateCarousel onDateSelected={(startDate, endDate) => handleDateChange(startDate, endDate)} />
+
+
           <Text style={styles.label}>Resumo do dia</Text>
 
           <View style={styles.ContainerCarousel}>
@@ -150,7 +164,7 @@ const MainMenu = ({ navigation }) => {
           </View>
 
           <View style={styles.ContainerCircle}>
-            <SalesChartCard />
+          <SalesChartCard selectedDate={selectedDate} />
           </View>
           <Text style={styles.label2}>Transações do dia</Text>
           <View style={styles.ContainerFilter}>

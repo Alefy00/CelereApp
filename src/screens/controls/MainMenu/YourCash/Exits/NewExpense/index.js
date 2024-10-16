@@ -218,12 +218,15 @@ useFocusEffect(
       Alert.alert('Erro', 'Por favor, selecione uma categoria.');
       return;
     }
-  
-    if (!valor || isNaN(parseFloat(valor)) || parseFloat(valor) <= 0) {
-      Alert.alert('Erro', 'Por favor, insira um valor válido.');
+    if (!item) {
+      Alert.alert('Erro', 'Insira o nome do item');
       return;
     }
   
+    if (!valorNumerico || isNaN(valorNumerico) || valorNumerico <= 0) {
+      Alert.alert('Erro', 'Por favor, insira um valor válido.');
+      return;
+    }
     // Verifica se o parceiro foi selecionado (fornecedor obrigatório)
     if (!parceiro) {
       Alert.alert('Erro', 'Por favor, selecione um fornecedor.');
@@ -327,15 +330,12 @@ useFocusEffect(
   };
 
   const formatCurrency = (value) => {
-    const numericValue = value.replace(/\D/g, '');
-    const numberValue = parseFloat(numericValue) / 100;
-    // Formata para o padrão BRL
-    if (isNaN(numberValue)) {
-      return '';
-    } else {
-      return numberValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    }
-  }
+    if (!value) return '';
+    return parseFloat(value).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -463,21 +463,29 @@ useFocusEffect(
 
               {/* Campo de Valor */}
               <TextInput
-              style={styles.input}
-              placeholder="Valor (R$)"
-              value={valor}
-              onChangeText={(text) => {
-                const formattedValue = formatCurrency(text);
-                setValor(formattedValue);
-                
-                // Também armazenamos o valor numérico para uso na requisição
-                const numericValue = text.replace(/\D/g, '');
-                const numberValue = parseFloat(numericValue) / 100;
-                setValorNumerico(numberValue);
-              }}
-              keyboardType="numeric"
-            />
+                    style={styles.input}
+                    placeholder="Valor (R$)"
+                    value={valor}
+                    onChangeText={(text) => {
+                      // Remove todos os caracteres que não são números
+                      const numericValue = text.replace(/\D/g, '');
+                      
+                      // Divide por 100 para obter o valor com centavos
+                      const numberValue = parseFloat(numericValue) / 100;
 
+                      // Formata o valor como moeda brasileira
+                      const formattedValue = numberValue.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      });
+
+                      // Atualiza o estado do valor formatado para exibição
+                      setValor(formattedValue);
+                      // Atualiza o estado do valor numérico para processamento
+                      setValorNumerico(numberValue);
+                    }}
+                    keyboardType="numeric"
+                  />
               {/* Campo de Descrição */}
               <TextInput
                 style={styles.input}

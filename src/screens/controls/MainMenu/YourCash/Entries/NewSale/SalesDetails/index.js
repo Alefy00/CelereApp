@@ -17,7 +17,6 @@ const SaleDetails = ({ navigation, route }) => {
   const [viewMode, setViewMode] = useState('Liquidar agora');
   const [clients, setClients] = useState([]);  // Estado para armazenar os clientes
   const [loading, setLoading] = useState(false);
-  const [productsInCart, setProducts] = useState(products);
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {

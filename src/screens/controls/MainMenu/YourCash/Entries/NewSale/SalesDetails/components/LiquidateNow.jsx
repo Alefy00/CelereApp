@@ -5,14 +5,11 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import styles from "../styles";
 import { COLORS } from "../../../../../../../../constants";
 import axios from "axios";
-
-// Importando os ícones SVG diretamente do projeto
 import PixIcon from "../../../../../../../../assets/images/svg/iconPix.svg";
 import CashIcon from "../../../../../../../../assets/images/svg/iconMoney.svg";
 import CreditCardIcon from "../../../../../../../../assets/images/svg/iconCard.svg";
 import DebitCardIcon from "../../../../../../../../assets/images/svg/iconCard.svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 
 const PAYMENT_METHODS_API = 'https://api.celereapp.com.br/cad/metodos_pagamentos/';
 const API_VENDAS = 'https://api.celereapp.com.br/cad/vendas/';
@@ -34,8 +31,6 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route }) => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
   const [installmentValue, setInstallmentValue] = useState(0);
   const [saleId, setSaleId] = useState(null); // Estado para armazenar o ID da venda
-
-
 
     // Função para mostrar alertas
     const showAlert = (title, message) => {
@@ -92,7 +87,6 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route }) => {
         return <Icon name="card" size={20} color="black" />;
     }
   };
-  
 
   useEffect(() => {
     const date = new Date();
@@ -100,15 +94,12 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route }) => {
     setCurrentDate(formattedDate);
   }, []);
 
-
   const handleConfirm = () => {
         // Navegar ou limpar o carrinho após isso
         navigation.navigate('NewRegisteredSale', { clearCart: true });
-   
   };
 
   const paymentOptions = ['2x', '3x', '4x', '5x', '6x', '7x'];
-
 
   const togglePaymentDropdown = () => {
     setIsPaymentDropdownVisible(!isPaymentDropdownVisible);
@@ -238,8 +229,14 @@ const calculateValues = useCallback(() => {
 useEffect(() => {
   calculateValues(); // Recalcula os valores sempre que o desconto ou o parcelamento mudar
 }, [totalPrice, discountValue, discountType, installments, calculateValues]);
-// Adiciona verificação de segurança
 
+const formatCurrency = (value) => {
+  if (!value) return '';
+  return parseFloat(value).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+};
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -284,14 +281,14 @@ useEffect(() => {
             <View style={styles.productInfo}>
               <Text style={styles.productText}>{product.nome}</Text>
               <Text style={styles.productPrice}>
-                Preço unitário: R${product.preco_venda ? parseFloat(product.preco_venda).toFixed(2) : 'N/A'}
+                Preço unitário: {product.preco_venda ? formatCurrency(product.preco_venda) : 'N/A'}
               </Text>
               <Text style={styles.productAmount}>
                 Quantidade: {product.amount}
               </Text>
             </View>
             <Text style={styles.productTotal}>
-              R$ {product.total ? product.total.toFixed(2) : 'N/A'}
+            {formatCurrency(product.preco_venda * product.amount)}
             </Text>
           </View>
         ))}
@@ -390,7 +387,7 @@ useEffect(() => {
 
     {/* Exibir o valor parcelado baseado no valor líquido */}
     <Text style={styles.parcelamentoValue}>
-      {installments}x de R${installmentValue}
+      {installments}x de {formatCurrency(installmentValue)}
     </Text>
   </View>
 )}
@@ -399,7 +396,7 @@ useEffect(() => {
       <View style={styles.valueSummaryContainer}>
         <View style={styles.valueItem}>
           <Text style={styles.valueLabel}>Valor Bruto <Icon name="alert-circle" size={18} color={COLORS.lightGray} /></Text>
-          <Text style={styles.valueAmount2}>R$ {totalPrice.toFixed(2)}</Text>
+          <Text style={styles.valueAmount2}>{formatCurrency(totalPrice)}</Text>
         </View>
 
         <View style={styles.valueItem}>
@@ -409,7 +406,7 @@ useEffect(() => {
 
         <View style={styles.valueItem}>
           <Text style={styles.valueLabel}>Valor bruto a Receber<Icon name="alert-circle" size={18} color={COLORS.lightGray} /></Text>
-          <Text style={styles.valueAmount}>R$ {liquidValue.toFixed(2)}</Text>
+          <Text style={styles.valueAmount}>{formatCurrency(liquidValue)}</Text>
         </View>
       </View>
 

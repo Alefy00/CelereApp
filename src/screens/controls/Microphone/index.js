@@ -4,6 +4,7 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Text,
+  Platform,
 } from 'react-native';
 import {COLORS, FONTS, SIZES, icons, images} from '../../../constants';
 import {Container, Scroller} from './styles';
