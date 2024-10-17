@@ -258,7 +258,13 @@ const ExpenseDetails = ({ route, navigation }) => {
       }
     }
   };
-  
+  const formatCurrency = (value) => {
+    if (!value) return '';
+    return parseFloat(value).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  };
 
   return (
     <View style={styles.containerMain}>
@@ -273,7 +279,6 @@ const ExpenseDetails = ({ route, navigation }) => {
       <View style={styles.contentContainer}>
         <Text style={styles.title}>Detalhes da despesa</Text>
 
-        {/* Card de detalhes da despesa */}
         {/* Exibindo os detalhes da despesa */}
         <View style={styles.detailsCard}>
           <View style={styles.detailsInfo}>
@@ -282,9 +287,9 @@ const ExpenseDetails = ({ route, navigation }) => {
             <Text style={styles.expenseReference}>Referência: {getMonthReference(expense.dt_vencimento)}</Text>
             <Text style={styles.expenseCreatedDate}>Data de inclusão:{'\n'}{formatDateToBrazilian(expense.criado)}</Text>
             <Text style={styles.expenseDueDate}>Data de vencimento:{'\n'}{formatDateToBrazilian(expense.dt_vencimento)}</Text>
-            <Text style={styles.expenseStatus}>Situação: {expense.situacao}</Text>
+            <Text style={styles.expenseStatus}>Situação: {expense.status}</Text>
           </View>
-          <Text style={styles.expenseValue}>R${parseFloat(expense.total).toFixed(2)}</Text>
+          <Text style={styles.expenseValue}>{formatCurrency(expense.valor)}</Text>
         </View>
 
         {/* Botões de ações */}

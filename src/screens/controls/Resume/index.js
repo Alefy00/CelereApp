@@ -21,73 +21,67 @@ const MainMenu = ({ navigation }) => {
   const [isTaxModalVisible, setIsTaxModalVisible] = useState(false); // Estado para controlar a visibilidade do TaxModal
   const [saldoCaixa, setSaldoCaixa] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState({
-    dt_ini: '2024-10-01', // Valor padrão inicial para a data de início
-    dt_end: '2024-10-30', // Valor padrão inicial para a data de término
-  });
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [empresaId, setEmpresaId] = useState(null); // Armazena o ID da empresa logada
 
-  // Função para buscar o ID da empresa logada
-  const getEmpresaId = async () => {
+  // Função para buscar o ID da empresa logada e armazenar em estado
+  const getEmpresaId = useCallback(async () => {
     try {
       const storedEmpresaId = await AsyncStorage.getItem('empresaId');
       if (storedEmpresaId) {
-        return Number(storedEmpresaId);
+        setEmpresaId(Number(storedEmpresaId));
       } else {
         Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
       }
     } catch (error) {
       console.error('Erro ao obter o ID da empresa do AsyncStorage:', error);
     }
-    return null;
-  };
+  }, []);
 
-  // Função para recuperar o saldo de caixa com base no ID da empresa logada
+  // Função para recuperar o saldo de caixa com base no ID da empresa logada e na data selecionada
   const fetchSaldoCaixa = useCallback(async () => {
     try {
-      const empresaId = await getEmpresaId();
-      if (empresaId !== null) {
-        // Faz a requisição para buscar o saldo de caixa
-        const response = await axios.get(`${API_URL_SALDO}?empresa_id=${empresaId}`);
+      if (empresaId && selectedDate) {
+        const { dt_ini, dt_end } = selectedDate;
 
-        if (response.status === 200 && response.data.results.length > 0) {
-          // Pega o último saldo inserido (maior ID ou mais recente)
-          const saldoData = response.data.results.reduce((latest, current) => {
-            return current.id > latest.id ? current : latest;
-          });
+        const response = await axios.get(
+          `https://api.celereapp.com.br/api/composite/get/?empresa_id=${empresaId}&dt_ini=${dt_ini}&dt_end=${dt_end}`
+        );
 
-          const saldoTotal = parseFloat(saldoData.valor_especie) + parseFloat(saldoData.saldo_banco); // Soma valor_especie e saldo_banco
-          setSaldoCaixa(saldoTotal); // Armazena o saldo total
-
-          // Se há saldo, abre o TaxModal
-          const taxInfoAdded = await AsyncStorage.getItem('taxInfoAdded');
-          if (!taxInfoAdded) {
-            setIsTaxModalVisible(true);
+        if (response.status === 200 && response.data.status === 'success') {
+          const saldoData = response.data.data.find(item => item.item === "Saldo Caixa");
+          if (saldoData) {
+            const saldoTotal = parseFloat(saldoData.valor.replace(/\./g, '').replace(',', '.'));
+            setSaldoCaixa(saldoTotal); // Atualiza o estado apenas uma vez
+          } else {
+            setSaldoCaixa(0); // Define como 0 se não houver saldo
           }
         } else {
-          // Se não há saldo, abre o OpeningBalanceModal
-          setSaldoCaixa(0);
-          const initialBalanceAdded = await AsyncStorage.getItem('initialBalanceAdded');
-          if (!initialBalanceAdded) {
-            setIsModalVisible(true);
-          }
+          Alert.alert('Erro', 'Não foi possível recuperar o saldo de caixa.');
+          setSaldoCaixa(0); // Define como 0 em caso de erro
         }
       }
     } catch (error) {
       console.error('Erro ao buscar o saldo de caixa:', error.message);
       setSaldoCaixa(0); // Define como 0 em caso de erro
     } finally {
-      setLoading(false); // Finaliza o carregamento
+      setLoading(false);
     }
-  }, []);
+  }, [empresaId, selectedDate]); // Depende de empresaId e selectedDate
 
   useEffect(() => {
-    fetchSaldoCaixa(); // Faz a requisição de saldo ao montar o componente
-  }, [fetchSaldoCaixa]);
+    getEmpresaId(); // Obtém o ID da empresa ao montar o componente
+  }, [getEmpresaId]);
+
+  useEffect(() => {
+    if (selectedDate) {
+      fetchSaldoCaixa(); // Chama a função apenas quando `selectedDate` mudar
+    }
+  }, [selectedDate, fetchSaldoCaixa]); // Depende da data selecionada e da função memoizada
 
   // Função para fechar o OpeningBalanceModal e atualizar o saldo
   const handleCloseModal = async () => {
     setIsModalVisible(false);
-    await fetchSaldoCaixa(); // Atualiza o saldo de caixa após fechar o modal
   };
 
   // Função para salvar o saldo inicial
@@ -124,13 +118,24 @@ const MainMenu = ({ navigation }) => {
     return formattedValue.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
 
-    // Função para mudar as datas quando o usuário selecionar novas no DateCarousel
-    const handleDateChange = (startDate, endDate) => {
-      setSelectedDate({
-        dt_ini: startDate,
-        dt_end: endDate,
-      });
-    };
+  // Função para inicializar a data atual ao carregar a tela
+  const initializeDateFilter = () => {
+    const today = new Date();
+    const formattedToday = today.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+    setSelectedDate({ dt_ini: formattedToday, dt_end: formattedToday });
+  };
+
+  useEffect(() => {
+    initializeDateFilter(); // Inicializa a data com o dia atual
+  }, []);
+
+  // Função para mudar as datas quando o usuário selecionar novas no DateCarousel
+  const handleDateChange = useCallback((startDate, endDate) => {
+    setSelectedDate({
+      dt_ini: startDate,
+      dt_end: endDate,
+    });
+  }, []);
 
   return (
     <KeyboardAvoidingView behavior="position" enabled>
@@ -143,8 +148,7 @@ const MainMenu = ({ navigation }) => {
           foreColor={'#000000'}
         />
         <View style={styles.container}>
-        <DateCarousel onDateSelected={(startDate, endDate) => handleDateChange(startDate, endDate)} />
-
+          <DateCarousel onDateSelected={(startDate, endDate) => handleDateChange(startDate, endDate)} />
 
           <Text style={styles.label}>Resumo do dia</Text>
 
@@ -164,11 +168,11 @@ const MainMenu = ({ navigation }) => {
           </View>
 
           <View style={styles.ContainerCircle}>
-          <SalesChartCard selectedDate={selectedDate} />
+            <SalesChartCard selectedDate={selectedDate} />
           </View>
           <Text style={styles.label2}>Transações do dia</Text>
           <View style={styles.ContainerFilter}>
-            <FilteredListCard />
+            <FilteredListCard selectedDate={selectedDate} />
           </View>
         </View>
 

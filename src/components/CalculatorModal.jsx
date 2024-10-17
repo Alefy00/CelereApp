@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     width: 75,
     height: 75,
     borderRadius: 40,
-    backgroundColor: COLORS.primary, // Botões de operação com a cor primary
+    backgroundColor: '#333333', // Botões de operação com a cor primary
     justifyContent: 'center',
     alignItems: 'center',
   },

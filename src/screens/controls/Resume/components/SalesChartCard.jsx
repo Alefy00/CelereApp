@@ -78,9 +78,6 @@ const SalesChartCard = ({ selectedDate }) => {
         let vendasValor = parseToFloat(vendasLiquidadasData?.valor);
         let custosValor = parseToFloat(custosVendasData?.valor);
 
-        // Solução: Dividindo o valor dos custos por 100, já que ele parece estar multiplicado por 100
-        custosValor = custosValor / 100;
-
         console.log('Valores convertidos e corrigidos:', {
           vendasValor,
           custosValor,
@@ -127,8 +124,6 @@ const SalesChartCard = ({ selectedDate }) => {
         ]);
       }
     } catch (error) {
-      console.error('Erro ao buscar os dados do gráfico:', error);
-      Alert.alert('Erro', 'Erro ao buscar os dados do gráfico. Verifique sua conexão.');
       setLucroBruto('0,00');
       setMargemBruta('0,00%');
       setVendasLiquidadas('0,00');

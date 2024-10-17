@@ -15,10 +15,10 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     title:{
-        fontSize: 18,
+        fontSize: 22,
         fontWeight: '900',
         color: COLORS.black,
-        marginVertical: 10,
+        marginVertical: 5,
     },
     detailsCard: {
         backgroundColor: COLORS.white,

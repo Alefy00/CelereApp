@@ -10,7 +10,6 @@ import axios from 'axios';
 import styles from './stylesFilterListCard';
 import { useFocusEffect } from '@react-navigation/native';
 
-
 const API_URL_VENDAS = 'https://api.celereapp.com.br/cad/vendas/';
 const API_ITENS_VENDA = 'https://api.celereapp.com.br/cad/itens_venda/';
 const API_URL_DESPESAS = 'https://api.celereapp.com.br/cad/despesa/';
@@ -33,7 +32,6 @@ const getEmpresaId = async () => {
     return null;
   }
 };
-
 
 // Função utilitária para formatar valores como moeda Real Brasileiro (BRL)
 const formatToBRL = (value) => {
@@ -290,8 +288,6 @@ const FilteredListCard = ({ selectedDate }) => {
         {/* Lista de Itens Filtrados */}
           <View>
           {filteredData.map(item => {
-            console.log('ID do método de pagamento:', item.tipo_pagamento_venda); // Log para ver o ID
-
             return (
               <View key={item.id} style={styles.listItem}>
                 {getPaymentIconById(item.tipo_pagamento_venda)}

@@ -84,46 +84,24 @@ const ConsultExpense = ({ navigation }) => {
           page: 1,
           page_size: 100,
           empresa_id: empresa_id,
-          data_inicial: '2023-01-01',  // Ampliando a data inicial para garantir que todas as despesas sejam capturadas
+          data_inicial: '2023-01-01',
           data_final: '4030-09-23',
-          status: status === 'liquidada' ? 'finalizada' : 'pendente'  // Usar 'finalizada' ao alternar para 'liquidada'
+          status: status === 'liquidada' ? 'finalizada' : 'pendente'
         }
       });
-      
+  
       const despesasData = response.data.data;
   
-      // Agrupando as despesas
-      const groupedExpenses = despesasData.reduce((acc, curr) => {
-        const { id, despesa_pai, item, valor, categoria_despesa, dt_vencimento, criado } = curr;
-        const key = despesa_pai || curr.id;
-  
-        if (!acc[key]) {
-          acc[key] = {
-            id,
-            despesa_pai: key,
-            item,
-            categoria_despesa,
-            valor,
-            dt_vencimento,
-            criado,
-            situacao: status === 'pendente' ? 'Contas a pagar' : 'Liquidadas',  // Definindo o status corretamente
-            total: 0,
-          };
-        }
-  
-        acc[key].total += parseFloat(valor);
-  
-        return acc;
-      }, {});
-  
-      setExpenses(Object.values(groupedExpenses));
-      setFilteredExpenses(Object.values(groupedExpenses));
+      // Remover o agrupamento e setar diretamente as despesas
+      setExpenses(despesasData);
+      setFilteredExpenses(despesasData);
     } catch (error) {
       console.error("Erro ao buscar despesas: ", error);
     } finally {
       setLoading(false);
     }
   }, []);
+  
   
 
   const fetchCategories = async () => {
@@ -200,6 +178,14 @@ const ConsultExpense = ({ navigation }) => {
     return <ActivityIndicator size="large" color={COLORS.primary} />;
   }
 
+  const formatCurrency = (value) => {
+    if (!value) return '';
+    return parseFloat(value).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  };
+
   return (
     <View style={styles.container}>
       <View style={{ height: 50 }}>
@@ -259,30 +245,34 @@ const ConsultExpense = ({ navigation }) => {
 
       {/* Lista de despesas */}
       <ScrollView style={styles.expensesListContainer}>
-  {filteredExpenses.map(expenseGroup => (
+  {filteredExpenses.map(expense => (
     <TouchableOpacity
-      key={expenseGroup.despesa_pai}
+      key={expense.id}
       style={styles.expenseContainer}
       onPress={() => {
         if (toggleState === 'pendente') {
-          // Somente permite abrir detalhes na aba de "Contas a pagar"
-          goToExpenseDetails(expenseGroup);
+          goToExpenseDetails(expense);
         }
       }}
-      disabled={toggleState !== 'pendente'} // Desabilita o botão se estiver na aba de "liquidadas"
+      disabled={toggleState !== 'pendente'}
     >
       <View style={styles.expenseInfo}>
-        <Text style={styles.expenseName}>{expenseGroup.item}</Text>
-        <Text style={styles.expenseType}>{categories[expenseGroup.categoria_despesa] || 'Categoria desconhecida'}</Text>
-        <Text style={styles.expenseReference}>Referência: {getMonthReference(expenseGroup.dt_vencimento)}</Text>
-        <Text style={styles.expenseDueDate}>Data de vencimento:{'\n'}{formatDate(expenseGroup.dt_vencimento)}</Text>
-        <Text style={styles.expenseStatus}>Situação: <Text style={expenseGroup.situacao === 'Contas a pagar' ? styles.expenseStatusPending : styles.expenseStatusPaid}>{expenseGroup.situacao}</Text></Text>
+        <Text style={styles.expenseName}>{expense.item}</Text>
+        <Text style={styles.expenseType}>{categories[expense.categoria_despesa] || 'Categoria desconhecida'}</Text>
+        <Text style={styles.expenseReference}>Referência: {getMonthReference(expense.dt_vencimento)}</Text>
+        <Text style={styles.expenseDueDate}>Data de vencimento:{'\n'}{formatDate(expense.dt_vencimento)}</Text>
+        
+        {/* Verificação do campo status */}
+        <Text style={styles.expenseStatus}> 
+        Situação: <Text style={expense.status === 'finalizada' ? styles.expenseStatusPaid : styles.expenseStatusPending}> 
+            {expense.status === 'finalizada' ? 'Finalizada' : 'Pendente'}
+           </Text>
+        </Text>
       </View>
-      <Text style={styles.expenseAmount}>R${expenseGroup.total.toFixed(2)}</Text>
+      <Text style={styles.expenseAmount}>R${formatCurrency(expense.valor)}</Text>
     </TouchableOpacity>
   ))}
 </ScrollView>
-
 
       {!isSearching && (
         <TouchableOpacity

@@ -6,26 +6,25 @@ import CustomCalendar from '../../../../../../../components/CustomCalendar';
 import { COLORS } from '../../../../../../../constants';
 
 const formatCurrency = (value) => {
-  const number = value.replace(/\D/g, ''); // Remove tudo que não for número
-  const formatted = (number / 100).toFixed(2).replace('.', ','); // Formata o valor
-  return `R$ ${formatted.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`; // Adiciona ponto como separador de milhar
+  if (!value) return '';
+  const cleanedValue = value.replace(/\D/g, '');
+  const numericValue = (parseFloat(cleanedValue) / 100).toFixed(2);
+  return Number(numericValue).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
 };
 
 const PartialLiquidationModal = ({ visible, onClose, onConfirmPartialLiquidation }) => {
   const [paymentDate, setPaymentDate] = useState(new Date());
-  const [partialValue, setPartialValue] = useState('');
+  const [partialValue, setPartialValue] = useState(''); // Armazena o valor formatado como string
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
 
-    // Função para lidar com a entrada de texto e formatar como moeda
-    const handleValueChange = (text) => {
-      setPartialValue(formatCurrency(text));
-    };
-
-  // Garantir que o valor seja convertido para número corretamente
   const handlePartialLiquidation = () => {
-    const parsedValue = parseFloat(partialValue.replace(',', '.')); // Substitui vírgula por ponto, se houver
+    // Converte o valor formatado de volta para número
+    const parsedValue = parseFloat(partialValue.replace(/[^\d,-]/g, '').replace(',', '.'));
+    
     if (isNaN(parsedValue) || parsedValue <= 0) {
-      // Verifica se o valor é válido
       alert('Por favor, insira um valor parcial válido.');
       return;
     }
@@ -46,7 +45,6 @@ const PartialLiquidationModal = ({ visible, onClose, onConfirmPartialLiquidation
     <Modal visible={visible} onRequestClose={onClose} transparent={true}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          {/* Header com título e botão de fechar */}
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Quando esta despesa foi liquidada?</Text>
             <TouchableOpacity onPress={onClose}>
@@ -63,21 +61,20 @@ const PartialLiquidationModal = ({ visible, onClose, onConfirmPartialLiquidation
           </View>
 
           <CustomCalendar
-          visible={isCalendarVisible}
-          onClose={() => setIsCalendarVisible(false)}
-          onDayPress={handleDayPress}
+            visible={isCalendarVisible}
+            onClose={() => setIsCalendarVisible(false)}
+            onDayPress={handleDayPress}
           />
 
           {/* Campo para valor parcial */}
           <TextInput
             style={styles.input}
             placeholder="Valor a liquidar parcialmente"
-            value={partialValue}
-            onChangeText={handleValueChange} // Formata o valor em tempo real
+            value={partialValue} // Mostra o valor formatado como moeda
+            onChangeText={(text) => setPartialValue(formatCurrency(text))} // Usa a função formatCurrency diretamente
             keyboardType="numeric"
           />
 
-          {/* Botão de confirmação */}
           <TouchableOpacity style={styles.confirmButton} onPress={handlePartialLiquidation}>
             <Icon name="checkmark-circle" size={24} color="#000" />
             <Text style={styles.confirmButtonText}>Liquidar despesa parcialmente</Text>

@@ -116,6 +116,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.gray,
     marginTop: 2,
+    width: 250
   },
   expenseReference: {
     fontSize: 14,
@@ -144,6 +145,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     color: COLORS.black,
     marginTop: -95,
+
   },
   //toggle botão
   toggleContainer: {
