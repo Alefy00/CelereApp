@@ -56,7 +56,7 @@ const ExpenseDetails = ({ route, navigation }) => {
   const [isPartialModalVisible, setIsPartialModalVisible] = useState(false);
   const [isSecondPartialModalVisible, setIsSecondPartialModalVisible] = useState(false);
   const [partialAmount, setPartialAmount] = useState(0);
-  const [remainingAmount, setRemainingAmount] = useState(parseFloat(expense.valor));
+  const [remainingAmount, setRemainingAmount] = useState(parseFloat(expense.valor_a_pagar));
   const [isPostponeModalVisible, setIsPostponeModalVisible] = useState(false); // Controla o modal de adiamento
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); 
   const [selectedDate, setSelectedDate] = useState(null); // Para armazenar a data do modal
@@ -201,15 +201,17 @@ const ExpenseDetails = ({ route, navigation }) => {
     setPartialAmount(parsedAmount); // Define o valor parcial
     setSelectedDate(date); // Armazena a data de pagamento
   
-    // Calcula o valor restante
-    const newRemainingAmount = parseFloat(expense.valor) - parsedAmount;
+    // Calcula o valor restante corretamente a partir de `valor_a_pagar`
+    const newRemainingAmount = parseFloat(expense.valor_a_pagar) - parsedAmount;
     if (newRemainingAmount < 0) {
       Alert.alert('Erro', 'O valor parcial não pode ser maior que o valor total da despesa.');
       return;
     }
+  
     setRemainingAmount(newRemainingAmount.toFixed(2)); // Atualiza o valor restante
     setIsSecondPartialModalVisible(true); // Abre o segundo modal de confirmação
   };
+  
   
 
  // Confirmar a liquidação parcial e fechar o modal
@@ -248,10 +250,12 @@ const handleFinalConfirmation = async () => {
 
       // Atualiza o valor restante (valor_a_pagar)
       setRemainingAmount(updatedExpense.valor_a_pagar);
+
+      Alert.alert('Sucesso', 'Liquidação parcial realizada com sucesso!');
       setIsSecondPartialModalVisible(false);
 
       // Redirecionar ou atualizar a lista de despesas
-
+      navigation.goBack(); // Volta para a tela anterior
     } else {
       Alert.alert('Erro', 'Ocorreu um problema ao realizar a liquidação parcial.');
     }
@@ -299,7 +303,7 @@ const handleFinalConfirmation = async () => {
             <Text style={styles.expenseDueDate}>Data de vencimento:{'\n'}{formatDateToBrazilian(expense.dt_vencimento)}</Text>
             <Text style={styles.expenseStatus}>Situação: {expense.status}</Text>
           </View>
-          <Text style={styles.expenseValue}>{formatCurrency(remainingAmount)}</Text>
+          <Text style={styles.expenseValue}>{formatCurrency(expense.valor_a_pagar)}</Text>
         </View>
 
         {/* Botões de ações */}

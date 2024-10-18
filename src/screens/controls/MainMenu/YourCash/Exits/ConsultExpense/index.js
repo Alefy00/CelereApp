@@ -74,35 +74,43 @@ const ConsultExpense = ({ navigation }) => {
     }
   };
 
-  const fetchExpenses = useCallback(async (empresa_id, status = 'liquidada') => {  
-    if (!empresa_id) return;
-  
-    setLoading(true);
-    try {
-      const response = await axios.get(API_EXPENSES_URL, {
-        params: {
-          page: 1,
-          page_size: 100,
-          empresa_id: empresa_id,
-          data_inicial: '2023-01-01',
-          data_final: '4030-09-23',
-          status: status === 'liquidada' ? 'finalizada' : 'pendente'
-        }
-      });
-  
-      const despesasData = response.data.data;
-  
-      // Remover o agrupamento e setar diretamente as despesas
-      setExpenses(despesasData);
-      setFilteredExpenses(despesasData);
-    } catch (error) {
-      console.error("Erro ao buscar despesas: ", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-  
-  
+// Função para buscar todas as despesas
+const fetchExpenses = useCallback(async (empresa_id, status = 'liquidada') => {  
+  if (!empresa_id) return;
+
+  setLoading(true);
+  try {
+    const response = await axios.get(API_EXPENSES_URL, {
+      params: {
+        page: 1,
+        page_size: 100,
+        empresa_id: empresa_id,
+        data_inicial: '2023-01-01',
+        data_final: '4030-09-23',
+        status: status === 'liquidada' ? 'finalizada' : 'pendente'
+      }
+    });
+
+    const despesasData = response.data.data;
+
+    // Agora, para cada despesa, faça uma requisição adicional para buscar o valor_a_pagar
+    const despesasComValorAPagar = await Promise.all(despesasData.map(async (expense) => {
+      const detalhesDespesa = await axios.get(`${API_EXPENSES_URL}${expense.id}`);
+      return {
+        ...expense,
+        valor_a_pagar: detalhesDespesa.data.data.valor_a_pagar, // Inclui o valor_a_pagar na despesa
+      };
+    }));
+
+    setExpenses(despesasComValorAPagar);
+    setFilteredExpenses(despesasComValorAPagar);  // Define as despesas filtradas com valor_a_pagar
+  } catch (error) {
+    console.error("Erro ao buscar despesas: ", error);
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
 
   const fetchCategories = async () => {
     try {
@@ -269,10 +277,14 @@ const ConsultExpense = ({ navigation }) => {
            </Text>
         </Text>
       </View>
-      <Text style={styles.expenseAmount}>R${formatCurrency(expense.valor)}</Text>
+      {/* Exibe o valor_a_pagar se disponível, senão o valor original */}
+      <Text style={styles.expenseAmount}>
+        {formatCurrency(expense.valor_a_pagar)}
+      </Text>
     </TouchableOpacity>
   ))}
 </ScrollView>
+
 
       {!isSearching && (
         <TouchableOpacity
