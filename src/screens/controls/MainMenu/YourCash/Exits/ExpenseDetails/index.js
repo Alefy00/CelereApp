@@ -212,52 +212,62 @@ const ExpenseDetails = ({ route, navigation }) => {
   };
   
 
-  // Confirmar a liquidação parcial e fechar o modal
-  const handleFinalConfirmation = async () => {
-    if (!partialAmount || partialAmount <= 0) {
-      Alert.alert('Erro', 'Valor parcial inválido.');
-      return;
-    }
-  
-    if (!selectedDate) {
-      Alert.alert('Erro', 'Data de pagamento não selecionada.');
-      return;
-    }
-  
-    // Formatar a data no formato ISO (YYYY-MM-DD)
-    const formattedDate = formatDateToISO(selectedDate);
-  
-    try {
-      // Fazer a requisição PATCH para liquidar parcialmente a despesa
-      const response = await axios.patch(
-        `${API_URL}/${expense.id}/baixar_despesa_parcialmente/`,
-        {
-          dt_pagamento: formattedDate,
-          vlr_pagamento: partialAmount,
-        }
-      );
-  
-      if (response.status === 200 || response.data.status === 'success') {
-        Alert.alert('Sucesso', 'Liquidação parcial realizada com sucesso!');
-        setIsSecondPartialModalVisible(false);
-  
-        // Redirecionar ou atualizar a lista de despesas
-        navigation.goBack();
-      } else {
-        Alert.alert('Erro', 'Ocorreu um problema ao realizar a liquidação parcial.');
+ // Confirmar a liquidação parcial e fechar o modal
+const handleFinalConfirmation = async () => {
+  if (!partialAmount || partialAmount <= 0) {
+    Alert.alert('Erro', 'Valor parcial inválido.');
+    return;
+  }
+
+  if (!selectedDate) {
+    Alert.alert('Erro', 'Data de pagamento não selecionada.');
+    return;
+  }
+
+  const empresaId = await getEmpresaId(); // Obter o ID da empresa logada
+  if (!empresaId) {
+    Alert.alert('Erro', 'ID da empresa não encontrado.');
+    return;
+  }
+
+  // Formatar a data no formato ISO (YYYY-MM-DD)
+  const formattedDate = formatDateToISO(selectedDate);
+
+  try {
+    // Fazer a requisição PATCH para liquidar parcialmente a despesa
+    const response = await axios.patch(
+      `${API_URL}/${expense.id}/baixar_despesa_parcialmente/?empresa_id=${empresaId}`,
+      {
+        dt_pagamento: formattedDate,  // Data de pagamento
+        vlr_pagamento: partialAmount,  // Valor parcial
       }
-    } catch (error) {
-      console.error('Erro ao fazer requisição PATCH:', error);
-      if (error.response) {
-        const errorMessage = error.response.data.message || 'Erro ao realizar a liquidação parcial.';
-        Alert.alert('Erro', errorMessage);
-      } else if (error.request) {
-        Alert.alert('Erro', 'Não foi possível conectar-se ao servidor. Verifique sua conexão.');
-      } else {
-        Alert.alert('Erro', 'Ocorreu um erro inesperado. Tente novamente.');
-      }
+    );
+
+    if (response.status === 200 || response.data.status === 'success') {
+      const updatedExpense = response.data.data;  // Dados atualizados da despesa
+
+      // Atualiza o valor restante (valor_a_pagar)
+      setRemainingAmount(updatedExpense.valor_a_pagar);
+      setIsSecondPartialModalVisible(false);
+
+      // Redirecionar ou atualizar a lista de despesas
+
+    } else {
+      Alert.alert('Erro', 'Ocorreu um problema ao realizar a liquidação parcial.');
     }
-  };
+  } catch (error) {
+    console.error('Erro ao fazer requisição PATCH:', error);
+    if (error.response) {
+      const errorMessage = error.response.data.message || 'Erro ao realizar a liquidação parcial.';
+      Alert.alert('Erro', errorMessage);
+    } else if (error.request) {
+      Alert.alert('Erro', 'Não foi possível conectar-se ao servidor. Verifique sua conexão.');
+    } else {
+      Alert.alert('Erro', 'Ocorreu um erro inesperado. Tente novamente.');
+    }
+  }
+};
+
   const formatCurrency = (value) => {
     if (!value) return '';
     return parseFloat(value).toLocaleString('pt-BR', {
@@ -289,7 +299,7 @@ const ExpenseDetails = ({ route, navigation }) => {
             <Text style={styles.expenseDueDate}>Data de vencimento:{'\n'}{formatDateToBrazilian(expense.dt_vencimento)}</Text>
             <Text style={styles.expenseStatus}>Situação: {expense.status}</Text>
           </View>
-          <Text style={styles.expenseValue}>{formatCurrency(expense.valor)}</Text>
+          <Text style={styles.expenseValue}>{formatCurrency(remainingAmount)}</Text>
         </View>
 
         {/* Botões de ações */}

@@ -14,8 +14,6 @@ import axios from 'axios';
 import OpeningBalanceModal from './components/OpeningBalanceModal'; // Importe o modal
 import TaxModal from './components/TaxModal';
 
-const API_URL_SALDO = 'https://api.celereapp.com.br/cad/saldo_caixa_inicial/';
-
 const MainMenu = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false); // Visibilidade do OpeningBalanceModal
   const [isTaxModalVisible, setIsTaxModalVisible] = useState(false); // Estado para controlar a visibilidade do TaxModal
@@ -62,7 +60,6 @@ const MainMenu = ({ navigation }) => {
         }
       }
     } catch (error) {
-      console.error('Erro ao buscar o saldo de caixa:', error.message);
       setSaldoCaixa(0); // Define como 0 em caso de erro
     } finally {
       setLoading(false);

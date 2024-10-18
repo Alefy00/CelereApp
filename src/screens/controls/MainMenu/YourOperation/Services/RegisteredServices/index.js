@@ -8,6 +8,8 @@ import { COLORS } from '../../../../../../constants';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 // Constantes da API
 const BASE_API_URL = 'https://api.celereapp.com.br';
@@ -91,9 +93,12 @@ const RegisteredServices = ({ navigation }) => {
   }, [nome]);
   
 
-  useEffect(() => {
-    fetchServices(); // Chama a função ao carregar a tela
-  }, [fetchServices]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchServices(); // Chama a função para buscar os serviços quando a tela é focada
+    }, [fetchServices])
+  );
+  
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);

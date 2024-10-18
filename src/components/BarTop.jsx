@@ -3,9 +3,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import {useNavigation} from '@react-navigation/native';
 import {Platform} from 'react-native';
-
 import CalculatorIcon from '../assets/images/svg/iconCalculator.svg';
-import MailerIcon from '../assets/images/svg/iconMailer.svg';
 import RobotIcon from '../assets/images/svg/iconRobot.svg';
 import CalculatorModal from './CalculatorModal';
 
@@ -100,8 +98,6 @@ export default ({
   subtitulo,
   backColor,
   foreColor,
-  routeMailer,
-  routeCalculator,
 }) => {
   const navigation = useNavigation();
 

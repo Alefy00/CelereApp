@@ -61,6 +61,7 @@ const ActionButtons = ({navigation}) => {
   
   // Função para abrir o segundo modal de consulta
   const toggleSecondModal = () => {
+    setModalVisible(false)
     setSecondModalVisible(!secondModalVisible);
   };
 

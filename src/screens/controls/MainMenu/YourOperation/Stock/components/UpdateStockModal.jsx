@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, Image, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -11,20 +11,19 @@ const UpdateStockModal = ({ isVisible, onClose, product }) => {
   const [empresaId, setEmpresaId] = useState(null);
 
   // Função para buscar o ID da empresa do AsyncStorage
-  const getEmpresaId = async () => {
+  const getEmpresaId = useCallback(async () => {
     try {
       const storedEmpresaId = await AsyncStorage.getItem('empresaId');
       if (storedEmpresaId) {
-        return Number(storedEmpresaId);
+        setEmpresaId(Number(storedEmpresaId));
       } else {
-        Alert.alert('Erro', 'ID da empresa não encontrado.');
-        return null;
+        Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
       }
     } catch (error) {
-      console.error('Erro ao buscar o ID da empresa:', error);
-      return null;
+      console.error('Erro ao obter o ID da empresa do AsyncStorage:', error);
     }
-  };
+  }, []);
+
 
   // Função para adicionar mais quantidade
   const handleIncrease = () => {
@@ -66,7 +65,7 @@ const UpdateStockModal = ({ isVisible, onClose, product }) => {
   // Busca o ID da empresa ao montar o componente
   useEffect(() => {
     getEmpresaId();
-  }, []);
+  }, [getEmpresaId]);
 
   return (
     <Modal visible={isVisible} transparent={true} animationType="slide">

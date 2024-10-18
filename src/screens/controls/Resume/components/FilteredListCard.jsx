@@ -79,10 +79,12 @@ const processarVendas = async (vendas) => {
   return vendasProcessadas;
 };
 
-// Função para buscar todas as despesas finalizadas da empresa logada
-const fetchAllDespesas = async (empresaId) => {
+// Função para buscar todas as despesas finalizadas com filtragem por data
+const fetchAllDespesas = async (empresaId, dataInicial, dataFinal) => {
   try {
-    const response = await axios.get(`${API_URL_DESPESAS}?empresa_id=${empresaId}`);
+    const response = await axios.get(
+      `${API_URL_DESPESAS}?empresa_id=${empresaId}&data_inicial=${dataInicial}&data_final=${dataFinal}`
+    );
     const despesas = response.data.data.filter(despesa => despesa.status === 'finalizada');
     return despesas;
   } catch (error) {
@@ -90,6 +92,7 @@ const fetchAllDespesas = async (empresaId) => {
     return [];
   }
 };
+
 
 // Função para mapear os dados das despesas
 const mapExpenseData = (expenses) => {
@@ -102,12 +105,12 @@ const mapExpenseData = (expenses) => {
   }));
 };
 
-// Função para buscar todas as vendas finalizadas com paginação e filtragem correta
-const fetchAllVendas = async (empresaId) => {
+// Função para buscar todas as vendas finalizadas com filtragem por data
+const fetchAllVendas = async (empresaId, dataInicial, dataFinal) => {
   const fetchVendasPaginadas = async (url, vendasAcumuladas = []) => {
     try {
       const response = await axios.get(url);
-      const vendasPagina = response.data.results.data;
+      const vendasPagina = response.data.data; // Corrigido para acessar "data" diretamente
 
       // Filtramos as vendas pela empresa logada
       const vendasFiltradas = vendasPagina.filter(venda => venda.empresa === empresaId);
@@ -120,14 +123,14 @@ const fetchAllVendas = async (empresaId) => {
 
       return novasVendas;
     } catch (error) {
-      console.error("Erro ao buscar vendas:", error.message);
       return vendasAcumuladas; // Em caso de erro, retorna o acumulado até agora
     }
   };
 
-  // Inicia a busca pela primeira página
-  return await fetchVendasPaginadas(`${API_URL_VENDAS}?empresa_id=${empresaId}`);
+  // Inicia a busca pela primeira página com os parâmetros de data
+  return await fetchVendasPaginadas(`${API_URL_VENDAS}?empresa=${empresaId}&data_inicial=${dataInicial}&data_final=${dataFinal}`);
 };
+
 
 // Função para mapear os dados das vendas
 const mapSalesData = (sales) => {
@@ -196,12 +199,14 @@ const FilteredListCard = ({ selectedDate }) => {
     useCallback(() => {
       const loadSalesData = async () => {
         const empresaId = await getEmpresaId();
-        if (empresaId) {
-          const sales = await fetchAllVendas(empresaId);
+        if (empresaId && selectedDate) {
+          const { dt_ini, dt_end } = selectedDate;
+  
+          const sales = await fetchAllVendas(empresaId, dt_ini, dt_end);
           const vendasProcessadas = await processarVendas(sales);
           const mappedSales = mapSalesData(vendasProcessadas);
           setSalesData(mappedSales);
-  
+    
           // Soma o valor total das vendas finalizadas
           const total = mappedSales.reduce((sum, sale) => sum + sale.amount, 0);
           setSalesTotal(total);
@@ -210,8 +215,10 @@ const FilteredListCard = ({ selectedDate }) => {
   
       const loadExpenseData = async () => {
         const empresaId = await getEmpresaId();
-        if (empresaId) {
-          const despesas = await fetchAllDespesas(empresaId);
+        if (empresaId && selectedDate) {
+          const { dt_ini, dt_end } = selectedDate;
+  
+          const despesas = await fetchAllDespesas(empresaId, dt_ini, dt_end); // Passa as datas para a função de despesas
           const mappedExpenses = mapExpenseData(despesas);
           setExpenseData(mappedExpenses);
         }
@@ -220,8 +227,9 @@ const FilteredListCard = ({ selectedDate }) => {
       // Chama as funções para carregar as vendas e despesas
       loadSalesData();
       loadExpenseData();
-    }, [])
+    }, [selectedDate]) // Atualiza quando a data selecionada mudar
   );
+  
   
   const dataToShow = selectedTab === 'sales' ? salesData : expenseData;
   const filteredData = dataToShow.filter(item =>
