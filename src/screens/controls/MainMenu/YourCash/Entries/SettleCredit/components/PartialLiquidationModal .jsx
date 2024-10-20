@@ -78,7 +78,7 @@ const PartialLiquidationModal = ({ visible, onClose, onConfirmPartialLiquidation
         try {
             // Requisição à API para liquidar parcialmente a venda
             const response = await axios.patch(
-                `https://api.celereapp.com.br/cad/vendas/${saleId}/baixar_venda_parcialmente/`,
+                `https://api.celere.top/cad/vendas/${saleId}/baixar_venda_parcialmente/`,
                 {
                     dt_pagamento: formattedDate,
                     vlr_pagamento: amountToLiquidate,

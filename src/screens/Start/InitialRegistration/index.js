@@ -11,8 +11,8 @@ import LogoApp from '../../../assets/images/logo.svg';
 import ProgressBar from '../components/ProgressBar';
 import styles from './styles';
 
-const API_URL = 'https://api.celereapp.com.br/config/empreendedor/';
-const VERIFY_USER_URL = 'https://api.celereapp.com.br/config/empreendedor/';
+const API_URL = 'https://api.celere.top/config/empreendedor/';
+const VERIFY_USER_URL = 'https://api.celere.top/config/empreendedor/';
 
 const InitialRegistration = ({ navigation }) => {
   const [phoneData, setPhoneData] = useState({

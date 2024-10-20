@@ -9,9 +9,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 
-const API_URL = 'https://api.celereapp.com.br/cad/cliente/'; 
-const API_ORCAMENTO_URL = 'https://api.celereapp.com.br/cad/orcamento/';
-const API_ITENS_VENDA_ORCAMENTO_URL = 'https://api.celereapp.com.br/cad/itens_venda_orcamento/';
+const API_URL = 'https://api.celere.top/cad/cliente/'; 
+const API_ORCAMENTO_URL = 'https://api.celere.top/cad/orcamento/';
+const API_ITENS_VENDA_ORCAMENTO_URL = 'https://api.celere.top/cad/itens_venda_orcamento/';
 
 
 const DetailsBudgets = ({ navigation, route }) => {

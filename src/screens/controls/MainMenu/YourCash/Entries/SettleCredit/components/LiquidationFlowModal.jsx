@@ -8,13 +8,6 @@ import { StyleSheet } from 'react-native';
 import axios from 'axios';  // Para realizar a requisição
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Função para formatar a data no formato brasileiro
-const formatarDataBrasileira = (date) => {
-    const dia = date.getDate().toString().padStart(2, '0');
-    const mes = (date.getMonth() + 1).toString().padStart(2, '0');
-    const ano = date.getFullYear();
-    return `${dia}/${mes}/${ano}`;
-  };
   
   const LiquidationFlowModal = ({ visible, onClose, onConfirmLiquidation, saleId }) => {
     const [newDueDate, setNewDueDate] = useState(new Date());
@@ -91,7 +84,7 @@ const formatarDataBrasileira = (date) => {
       
           // Enviando os dados para a API
           const response = await axios.post(
-            `https://api.celereapp.com.br/cad/vendas/${saleId}/baixar_venda/`,
+            `https://api.celere.top/cad/vendas/${saleId}/baixar_venda/`,
             { dt_pagamento: formattedDate }  // Data de pagamento
           );
       

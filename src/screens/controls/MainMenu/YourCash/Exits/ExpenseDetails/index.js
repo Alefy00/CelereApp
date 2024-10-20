@@ -15,8 +15,8 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Constante para o link da API
-const API_URL = 'https://api.celereapp.com.br/cad/despesa';
-const CANCEL_EXPENSE_API = 'https://api.celereapp.com.br/cad/despesa';
+const API_URL = 'https://api.celere.top/cad/despesa';
+const CANCEL_EXPENSE_API = 'https://api.celere.top/cad/despesa';
 
 // Função para formatar as datas no formato brasileiro
 const formatDateToBrazilian = (dateString) => {

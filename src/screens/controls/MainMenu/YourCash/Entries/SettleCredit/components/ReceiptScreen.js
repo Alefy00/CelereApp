@@ -44,7 +44,7 @@ const fetchReceipt = useCallback(async () => {
         }
 
         // Requisição para obter a URL do PDF com is_pdf_file=True
-        const response = await axios.get(`https://api.celereapp.com.br/cad/vendas/gerar_recibo_venda/`, {
+        const response = await axios.get(`https://api.celere.top/cad/vendas/gerar_recibo_venda/`, {
             params: {
                 empresa_id: empresaId,
                 venda_id: saleId,

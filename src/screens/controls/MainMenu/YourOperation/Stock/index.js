@@ -9,10 +9,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import UpdateStockModal from './components/UpdateStockModal';
 
-const SLIDER_WIDTH = Dimensions.get('window').width;
-
 // Constantes para a API
-const API_BASE_URL = 'https://api.celereapp.com.br';
+const API_BASE_URL = 'https://api.celere.top';
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
 

@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 
-const API_URL = 'https://api.celereapp.com.br/cad/cliente/';  // URL da API
+const API_URL = 'https://api.celere.top/cad/cliente/';  // URL da API
 
 const ServiceDetails = ({ navigation, route}) => {
   const { services, products = [] } = route.params; // Recebe serviços e produtos via rota

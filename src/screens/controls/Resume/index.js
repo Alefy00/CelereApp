@@ -43,7 +43,7 @@ const MainMenu = ({ navigation }) => {
         const { dt_ini, dt_end } = selectedDate;
 
         const response = await axios.get(
-          `https://api.celereapp.com.br/api/composite/get/?empresa_id=${empresaId}&dt_ini=${dt_ini}&dt_end=${dt_end}`
+          `https://api.celere.top/api/composite/get/?empresa_id=${empresaId}&dt_ini=${dt_ini}&dt_end=${dt_end}`
         );
 
         if (response.status === 200 && response.data.status === 'success') {

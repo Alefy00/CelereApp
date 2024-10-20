@@ -46,7 +46,7 @@ const TaxModal = ({ visible, onClose, onSuccess }) => {
       };
 
       // Fazer a requisição POST para registrar o regime tributário
-      const response = await axios.post('https://api.celereapp.com.br/api/regimetributario/', body);
+      const response = await axios.post('https://api.celere.top/api/regimetributario/', body);
 
       if (response.status === 201) {
         Alert.alert('Sucesso', 'Tributo registrado com sucesso!');

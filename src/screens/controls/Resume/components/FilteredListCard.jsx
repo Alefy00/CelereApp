@@ -10,9 +10,9 @@ import axios from 'axios';
 import styles from './stylesFilterListCard';
 import { useFocusEffect } from '@react-navigation/native';
 
-const API_URL_VENDAS = 'https://api.celereapp.com.br/cad/vendas/';
-const API_ITENS_VENDA = 'https://api.celereapp.com.br/cad/itens_venda/';
-const API_URL_DESPESAS = 'https://api.celereapp.com.br/cad/despesa/';
+const API_URL_VENDAS = 'https://api.celere.top/cad/vendas/';
+const API_ITENS_VENDA = 'https://api.celere.top/cad/itens_venda/';
+const API_URL_DESPESAS = 'https://api.celere.top/cad/despesa/';
 
 // Função para buscar o ID da empresa logada
 const getEmpresaId = async () => {

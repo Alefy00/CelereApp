@@ -28,8 +28,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import CustomCalendar from '../../../../../../components/CustomCalendar';
 
 // Constantes para os endpoints da API
-const CATEGORIES_API = 'https://api.celereapp.com.br/mnt/categoriasdespesa/?page=1&page_size=30';
-const SAVE_EXPENSE_API = 'https://api.celereapp.com.br/cad/despesa/';
+const CATEGORIES_API = 'https://api.celere.top/mnt/categoriasdespesa/?page=1&page_size=30';
+const SAVE_EXPENSE_API = 'https://api.celere.top/cad/despesa/';
 
 const categoryIcons = {
   1: IconFornecedor, // Fornecedores de matéria-prima, produtos ou suprimentos
@@ -135,7 +135,7 @@ const fetchSuppliers = useCallback(async () => {
     }
 
     // Endpoint dinâmico usando o ID da empresa
-    const suppliersApiUrl = `https://api.celereapp.com.br/cad/fornecedor/?empresa_id=${empresaId}&page=1&page_size=50`;
+    const suppliersApiUrl = `https://api.celere.top/cad/fornecedor/?empresa_id=${empresaId}&page=1&page_size=50`;
     const response = await axios.get(suppliersApiUrl);
     const data = response.data;
 

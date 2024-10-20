@@ -8,7 +8,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import styles from './styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const BASE_API_URL = 'https://api.celereapp.com.br';
+const BASE_API_URL = 'https://api.celere.top';
 const LOAN_API_ENDPOINT = `${BASE_API_URL}/cad/emprestimos/`;
 
 const Loan = ({ navigation }) => {

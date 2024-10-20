@@ -9,9 +9,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import { COLORS } from ' ../../../../../../constants';
 
-const EXPENSES_API = 'https://api.celereapp.com.br/cad/despesa/';
-const CATEGORIES_API = 'https://api.celereapp.com.br/mnt/categoriasdespesa/?page=1&page_size=30';
-const SUPPLIERS_API = 'https://api.celereapp.com.br/cad/fornecedor/?empresa_id=1&page=1&page_size=50';
+const EXPENSES_API = 'https://api.celere.top/cad/despesa/';
+const CATEGORIES_API = 'https://api.celere.top/mnt/categoriasdespesa/?page=1&page_size=30';
+const SUPPLIERS_API = 'https://api.celere.top/cad/fornecedor/?empresa_id=1&page=1&page_size=50';
 
 const LiquidateExpense = ({ navigation }) => {
   const [expenses, setExpenses] = useState([]);

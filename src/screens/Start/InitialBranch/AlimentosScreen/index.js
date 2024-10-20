@@ -12,7 +12,7 @@ import DeliveryIcon from '../../../../assets/images/svg/InitialBranch/DeliveryIc
 import FoodTruckIcon from '../../../../assets/images/svg/InitialBranch/FoodTruckIcon.svg';
 import HomeIcon from '../../../../assets/images/svg/InitialBranch/HomeIcon.svg';
 
-const API_URL_ASSOCIAR_RAMO = 'https://api.celereapp.com.br/cad/associar_ramo_atividade/';
+const API_URL_ASSOCIAR_RAMO = 'https://api.celere.top/cad/associar_ramo_atividade/';
 
 const AlimentosScreen = ({ route, navigation }) => {
   const { subcategories, userData } = route.params;

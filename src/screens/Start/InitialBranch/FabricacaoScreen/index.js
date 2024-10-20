@@ -12,7 +12,7 @@ import PaesIcon from '../../../../assets/images/svg/InitialBranch/PaesIcon.svg';
 import ArtesenatoIcon from '../../../../assets/images/svg/InitialBranch/ArtesanatoIcon.svg';
 import Outros from '../../../../assets/images/svg/InitialBranch/Outros.svg';
 
-const API_URL_ASSOCIAR_RAMO = 'https://api.celereapp.com.br/cad/associar_ramo_atividade/';
+const API_URL_ASSOCIAR_RAMO = 'https://api.celere.top/cad/associar_ramo_atividade/';
 
 const FabricacaoScreen = ({ route, navigation }) => {
   const { subcategories, userData } = route.params;

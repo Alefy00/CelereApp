@@ -10,7 +10,7 @@ import RenderProduct from './components/RenderProduct.jsx'; // Componente para e
 import styles from "./styles";
 import { useFocusEffect } from "@react-navigation/native";
 
-const API_BASE_URL = 'https://api.celereapp.com.br';
+const API_BASE_URL = 'https://api.celere.top';
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
 const SERVICES_API = `${API_BASE_URL}/cad/servicos/`;
@@ -309,7 +309,7 @@ useFocusEffect(
             </TouchableOpacity>
           </View>
         )}
-        <TouchableOpacity style={styles.barcodeButton}>
+        <TouchableOpacity style={styles.barcodeButton} disabled={true}>
           <Icon name="barcode" size={30} color={COLORS.black} />
         </TouchableOpacity>
       </>

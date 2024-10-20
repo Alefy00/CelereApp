@@ -9,8 +9,8 @@ import axios from "axios";
 import CustomCalendar from "../../../../../../../../components/CustomCalendar";
 
 // Constantes com as URLs das APIs
-const API_VENDAS = 'https://api.celereapp.com.br/cad/vendas/';
-const API_ITENS_VENDA = 'https://api.celereapp.com.br/cad/itens_venda/';
+const API_VENDAS = 'https://api.celere.top/cad/vendas/';
+const API_ITENS_VENDA = 'https://api.celere.top/cad/itens_venda/';
 
 const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
   const [paymentMethod, setPaymentMethod] = useState('Boleto');

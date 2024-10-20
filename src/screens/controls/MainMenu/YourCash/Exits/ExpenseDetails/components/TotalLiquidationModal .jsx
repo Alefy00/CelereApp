@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Modal,StyleSheet } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { COLORS } from '../../../../../../../constants';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CustomCalendar from '../../../../../../../components/CustomCalendar';

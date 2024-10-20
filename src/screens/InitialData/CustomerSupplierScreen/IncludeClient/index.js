@@ -138,7 +138,7 @@ const IncludeClient = ({ navigation }) => {
     const formattedPhone = formatPhoneNumber(clientPhone);  // Formata o número de telefone
 
     try {
-      const response = await axios.post('https://api.celereapp.com.br/cad/cliente/', {
+      const response = await axios.post('https://api.celere.top/cad/cliente/', {
         nome: clientName,
         celular: formattedPhone || null,  // Se não houver telefone, passa null
         empresa: empresaId,

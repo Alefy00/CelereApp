@@ -11,7 +11,7 @@ import FilterModal from "../../Entries/SettleCredit/components/FilterModal";
 import { useFocusEffect } from '@react-navigation/native'; 
 
 // Constantes para URLs de API
-const API_BASE_URL = "https://api.celereapp.com.br";
+const API_BASE_URL = "https://api.celere.top";
 const API_CATEGORIES_URL = `${API_BASE_URL}/mnt/categoriasdespesa/?page=1&page_size=30`;
 const API_EXPENSES_URL = `${API_BASE_URL}/cad/despesa/`; // Ajustado para não incluir parâmetros fixos
 

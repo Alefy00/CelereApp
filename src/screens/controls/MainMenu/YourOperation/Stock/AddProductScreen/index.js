@@ -14,7 +14,7 @@ import { launchCamera } from 'react-native-image-picker'; // Para capturar a fot
 import { launchImageLibrary } from 'react-native-image-picker';
 
 // ** Constantes para URLs e Headers **
-const API_BASE_URL = 'https://api.celereapp.com.br';
+const API_BASE_URL = 'https://api.celere.top';
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
 const IMAGE_UPLOAD_API = `${API_BASE_URL}/mnt/imagensproduto/`;
@@ -50,25 +50,6 @@ const AddProductScreen = ({ navigation }) => {
     }
   };
 
-  // Função para pedir permissão no Android
-  const requestCameraPermission = async () => {
-    if (Platform.OS === 'android') {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        {
-          title: 'Permissão para usar a câmera',
-          message: 'Precisamos de acesso à sua câmera para tirar fotos do produto.',
-          buttonNeutral: 'Perguntar depois',
-          buttonNegative: 'Cancelar',
-          buttonPositive: 'OK',
-        }
-      );
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    }
-    return true; // No iOS, as permissões são tratadas no Info.plist
-  };
-
-
 // Função para selecionar imagem da galeria
 const handleSelectImage = async () => {
   launchImageLibrary({ mediaType: 'photo', includeBase64: false }, (response) => {
@@ -80,11 +61,6 @@ const handleSelectImage = async () => {
       const selectedPhoto = response.assets[0];
       console.log('Imagem capturada:', selectedPhoto);  // Log da imagem capturada
 
-      // Adicionando mais logs para conferir o conteúdo
-      console.log('Imagem URI:', selectedPhoto.uri);
-      console.log('Imagem Tipo:', selectedPhoto.type);
-      console.log('Imagem Nome:', selectedPhoto.fileName);
-
       setPhoto({
         uri: selectedPhoto.uri,
         type: selectedPhoto.type || 'image/jpeg',  // Define o tipo como 'image/jpeg' por padrão, caso não esteja presente
@@ -94,7 +70,6 @@ const handleSelectImage = async () => {
   });
 };
 
-  
   // Função para buscar categorias, agora memoizada com useCallback
   const fetchCategories = useCallback(async () => {
     try {

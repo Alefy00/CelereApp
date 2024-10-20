@@ -14,7 +14,7 @@ import TransporteIcon from '../../../../assets/images/svg/InitialBranch/Transpor
 import RepresentacaoIcon from '../../../../assets/images/svg/InitialBranch/RepresentacaoIcon.svg';
 import OutrosIcon from '../../../../assets/images/svg/InitialBranch/OutrosIcon.svg';
 
-const API_URL_ASSOCIAR_RAMO = 'https://api.celereapp.com.br/cad/associar_ramo_atividade/';
+const API_URL_ASSOCIAR_RAMO = 'https://api.celere.top/cad/associar_ramo_atividade/';
 
 const ServicosScreen = ({ route, navigation }) => {
   const { subcategories, userData } = route.params;

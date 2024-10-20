@@ -11,7 +11,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
-const API_BASE_URL = 'https://api.celereapp.com.br';
+const API_BASE_URL = 'https://api.celere.top';
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
 const SERVICES_API = `${API_BASE_URL}/cad/servicos/`;

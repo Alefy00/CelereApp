@@ -45,7 +45,7 @@ const UpdateStockModal = ({ isVisible, onClose, product }) => {
         return;
       }
       // Faz a requisição PATCH para atualizar o estoque
-      const response = await axios.patch(`https://api.celereapp.com.br/cad/produtos/${product.id}/?empresa=${empresaId}&produto=${product.id}`, {
+      const response = await axios.patch(`https://api.celere.top/cad/produtos/${product.id}/?empresa=${empresaId}&produto=${product.id}`, {
         qtd_estoque: newQuantity,
       });
 

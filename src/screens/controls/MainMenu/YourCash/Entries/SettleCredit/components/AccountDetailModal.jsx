@@ -9,7 +9,7 @@ import LiquidationFlowModal from "./LiquidationFlowModal";
 import PartialLiquidationModal from "./PartialLiquidationModal ";
 import axios from "axios";
 
-const API_SERVICOS = 'https://api.celereapp.com.br/cad/servicos/';
+const API_SERVICOS = 'https://api.celere.top/cad/servicos/';
 
 const AccountDetailModal = ({ visible, onClose,  account, onSaleCanceled }) => {
   const [isFirstModalVisible, setFirstModalVisible] = useState(visible);

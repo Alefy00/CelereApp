@@ -12,7 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 
 // Constantes da API
-const BASE_API_URL = 'https://api.celereapp.com.br';
+const BASE_API_URL = 'https://api.celere.top';
 const REGISTERED_SERVICES_API = `${BASE_API_URL}/cad/servicos/`;
 
 const RegisteredServices = ({ navigation }) => {

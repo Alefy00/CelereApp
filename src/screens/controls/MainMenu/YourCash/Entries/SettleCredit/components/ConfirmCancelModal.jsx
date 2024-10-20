@@ -26,7 +26,7 @@ const ConfirmCancelModal = ({ visible, onClose, saleId, onSaleCanceled }) => {
             const currentDate = getCurrentDate(); // Obter a data atual do dispositivo
 
             // Requisição para cancelar a venda
-            const response = await axios.patch(`https://api.celereapp.com.br/cad/vendas/${saleId}/cancelar_venda/`, {
+            const response = await axios.patch(`https://api.celere.top/cad/vendas/${saleId}/cancelar_venda/`, {
                 dt_cancelamento: currentDate,
                 motivo_cancelamento: "Venda cancelada"
             });

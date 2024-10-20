@@ -10,8 +10,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../constants';
 import styles from './styles';
 
-const API_URL_CARGOS = 'https://api.celereapp.com.br/api/cargos_negocio/';
-const API_URL_CLASSIFICAR = 'https://api.celereapp.com.br/config/empreendedor/atualizar-por-id/';
+const API_URL_CARGOS = 'https://api.celere.top/api/cargos_negocio/';
+const API_URL_CLASSIFICAR = 'https://api.celere.top/config/empreendedor/atualizar-por-id/';
 
 const BusinessInfoScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);

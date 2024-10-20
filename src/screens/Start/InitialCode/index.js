@@ -9,7 +9,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../constants';
 import styles from './styles';
 
-const API_URL = 'https://api.celereapp.com.br/config/ativar-empreendedor/';
+const API_URL = 'https://api.celere.top/config/ativar-empreendedor/';
 
 const InitialCode = ({ navigation }) => {
   const [userData, setUserData] = useState(null);

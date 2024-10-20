@@ -11,8 +11,8 @@ import FilterModal from '../../../YourCash/Entries/SettleCredit/components/Filte
 import { useFocusEffect } from '@react-navigation/native';
 
 
-const API_URL_CLIENTES = 'https://api.celereapp.com.br/cad/cliente/';
-const API_URL_ORCAMENTOS = 'https://api.celereapp.com.br/cad/orcamento/';
+const API_URL_CLIENTES = 'https://api.celere.top/cad/cliente/';
+const API_URL_ORCAMENTOS = 'https://api.celere.top/cad/orcamento/';
 
 const Budget = ({ navigation }) => {
   const [budgets, setBudgets] = useState([]);

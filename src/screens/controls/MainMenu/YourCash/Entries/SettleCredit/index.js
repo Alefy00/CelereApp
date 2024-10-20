@@ -12,9 +12,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useFocusEffect } from '@react-navigation/native';
 
-const API_VENDAS = 'https://api.celereapp.com.br/cad/vendas/';
-const API_CLIENTES = 'https://api.celereapp.com.br/cad/cliente/';
-const API_SERVICOS = 'https://api.celereapp.com.br/cad/servicos/';
+const API_VENDAS = 'https://api.celere.top/cad/vendas/';
+const API_CLIENTES = 'https://api.celere.top/cad/cliente/';
+const API_SERVICOS = 'https://api.celere.top/cad/servicos/';
 
 
 const SettleCredit = ({ navigation }) => {

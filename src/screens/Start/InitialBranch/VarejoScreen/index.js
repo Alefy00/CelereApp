@@ -14,7 +14,7 @@ import InternetIcon from '../../../../assets/images/svg/InitialBranch/InternetIc
 import PortaPortaIcon from '../../../../assets/images/svg/InitialBranch/PortaPortaIcon.svg';
 import ResidenciaIcon from '../../../../assets/images/svg/InitialBranch/ResidenciaIcon.svg';
 
-const API_URL_ASSOCIAR_RAMO = 'https://api.celereapp.com.br/cad/associar_ramo_atividade/';
+const API_URL_ASSOCIAR_RAMO = 'https://api.celere.top/cad/associar_ramo_atividade/';
 
 const VarejoScreen = ({ route, navigation }) => {
     const { subcategories, userData } = route.params;

@@ -11,9 +11,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { COLORS } from '../../../../../../../../constants';
 import axios from 'axios';
 
-const PAYMENT_METHODS_API = 'https://api.celereapp.com.br/cad/metodos_pagamentos/';
-const REGISTER_SALE_API = 'https://api.celereapp.com.br/cad/vendas/';
-const REGISTER_ITEM_SALE_API = 'https://api.celereapp.com.br/cad/itens_venda/';
+const PAYMENT_METHODS_API = 'https://api.celere.top/cad/metodos_pagamentos/';
+const REGISTER_SALE_API = 'https://api.celere.top/cad/vendas/';
+const REGISTER_ITEM_SALE_API = 'https://api.celere.top/cad/itens_venda/';
 
 const LiquidateNow = ({ navigation, route, clients }) => {
   const { services: receivedServices = [], products: receivedProducts = [], totalPrice: initialTotalPrice } = route.params;

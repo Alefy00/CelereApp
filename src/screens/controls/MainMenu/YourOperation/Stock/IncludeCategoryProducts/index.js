@@ -60,7 +60,7 @@ const IncludeCategoryProducts = ({ navigation }) => {
 
     try {
       const response = await axios.post(
-        'https://api.celereapp.com.br/mnt/categoriasprodutos/',
+        'https://api.celere.top/mnt/categoriasprodutos/',
         categoryData,
         { headers: { 'Content-Type': 'application/json' } }
       );

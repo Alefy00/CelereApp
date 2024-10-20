@@ -10,7 +10,7 @@ import axios from "axios";  // Biblioteca para requisição HTTP
 import AsyncStorage from "@react-native-async-storage/async-storage";  // Para acessar o ID da empresa
 import { useFocusEffect } from '@react-navigation/native';  // Para recarregar a lista quando a tela ganha foco
 
-const API_URL = 'https://api.celereapp.com.br/cad/cliente/';  // URL da API
+const API_URL = 'https://api.celere.top/cad/cliente/';  // URL da API
 
 const SaleDetails = ({ navigation, route }) => {
   const { products, totalPrice, clearCart } = route.params;

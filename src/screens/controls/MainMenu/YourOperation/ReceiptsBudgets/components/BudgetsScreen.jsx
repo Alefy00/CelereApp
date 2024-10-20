@@ -44,7 +44,7 @@ const fetchReceipt = useCallback(async () => {
         }
 
         // Requisição para obter a URL do PDF com orcamento_id em vez de venda_id
-        const response = await axios.get(`https://api.celereapp.com.br/cad/orcamento/gerar_recibo_orcamento/`, {
+        const response = await axios.get(`https://api.celere.top/cad/orcamento/gerar_recibo_orcamento/`, {
             params: {
                 empresa_id: empresaId,
                 orcamento_id: saleId,  // Alterado para orcamento_id

@@ -14,7 +14,7 @@ const CategoriesScreen = ({ navigation }) => {
     const [error, setError] = useState(null); // Estado de erro
 
     // Constante com o link da API
-    const API_URL = 'https://api.celereapp.com.br/mnt/categoriasdespesa/?page=1&page_size=30';
+    const API_URL = 'https://api.celere.top/mnt/categoriasdespesa/?page=1&page_size=30';
 
     // Função para buscar categorias da API
     const fetchCategories = async () => {

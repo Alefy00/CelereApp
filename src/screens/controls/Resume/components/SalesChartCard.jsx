@@ -10,7 +10,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './stylesChartCard';
 import { useFocusEffect } from '@react-navigation/native';
 
-const API_URL = 'https://api.celereapp.com.br/api/composite/get/';
+const API_URL = 'https://api.celere.top/api/composite/get/';
 
 const SalesChartCard = ({ selectedDate }) => {
   const [chartData, setChartData] = useState([]);

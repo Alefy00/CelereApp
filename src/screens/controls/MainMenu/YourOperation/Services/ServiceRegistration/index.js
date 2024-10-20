@@ -9,7 +9,7 @@ import { COLORS } from '../../../../../../constants';
 import styles from './styles';
 import axios from 'axios';
 
-const BASE_API_URL = 'https://api.celereapp.com.br';
+const BASE_API_URL = 'https://api.celere.top';
 const UNIT_MEASURE_API_ENDPOINT = `${BASE_API_URL}/api/und_medida_servico/?page=1&page_size=100`;
 const REGISTER_SERVICE_API_ENDPOINT = `${BASE_API_URL}/cad/servicos/`;
 const IMAGE_UPLOAD_API = `${BASE_API_URL}/mnt/imagensservico/`;

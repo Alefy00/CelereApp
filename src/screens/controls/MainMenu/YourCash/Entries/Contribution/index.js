@@ -9,7 +9,7 @@ import { Picker } from "@react-native-picker/picker";  // Import do Picker
 import styles from './styles';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const BASE_API_URL = 'https://api.celereapp.com.br';
+const BASE_API_URL = 'https://api.celere.top';
 const CONTRIBUTE_API_ENDPOINT = `${BASE_API_URL}/cad/aporte/`;
 const ORIGEM_API_ENDPOINT = `${BASE_API_URL}/config/origem_aporte/?page_size=100&max_page_size=100`;
 

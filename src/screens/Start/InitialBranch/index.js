@@ -12,7 +12,7 @@ import AlimentosIcon from '../../../assets/images/svg/initial/food.svg';
 import ServicosIcon from '../../../assets/images/svg/initial/service.svg';
 import FabricacaoIcon from '../../../assets/images/svg/initial/fabrication.svg';
 
-const API_URL_RAMO_ATIVIDADE = 'https://api.celereapp.com.br/cad/ramosatividades/';
+const API_URL_RAMO_ATIVIDADE = 'https://api.celere.top/cad/ramosatividades/';
 
 
 const subcategories = {

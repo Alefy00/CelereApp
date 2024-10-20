@@ -8,7 +8,7 @@ import { COLORS } from '../../../../constants';
 import styles from '../styles'; // Adapte seus estilos ao design enviado
 import TimeIcon from '../../../../assets/images/svg/MainMenu/timeIcon.svg';
 
-const API_URL_SALDO = 'https://api.celereapp.com.br/cad/saldo_caixa_inicial/';
+const API_URL_SALDO = 'https://api.celere.top/cad/saldo_caixa_inicial/';
 
 const OpeningBalanceModal = ({ visible, onClose }) => {
   const [empresaId, setEmpresaId] = useState(null);
