@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import OpeningBalanceModal from './components/OpeningBalanceModal';
 import TaxModal from './components/TaxModal';
+import { useFocusEffect } from '@react-navigation/native';
 
 const MainMenu = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false); // Visibilidade do OpeningBalanceModal
@@ -69,6 +70,14 @@ const MainMenu = ({ navigation }) => {
   useEffect(() => {
     getEmpresaId(); // Obtém o ID da empresa ao montar o componente
   }, [getEmpresaId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (selectedDate) {
+        fetchSaldoCaixa(); // Atualiza o saldo de caixa toda vez que a tela ganhar foco
+      }
+    }, [selectedDate, fetchSaldoCaixa])
+  );
 
   useEffect(() => {
     if (selectedDate) {
