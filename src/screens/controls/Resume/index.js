@@ -11,7 +11,7 @@ import FilteredListCard from './components/FilteredListCard';
 import ActionButtons from './components/ActionButtons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
-import OpeningBalanceModal from './components/OpeningBalanceModal'; // Importe o modal
+import OpeningBalanceModal from './components/OpeningBalanceModal';
 import TaxModal from './components/TaxModal';
 
 const MainMenu = ({ navigation }) => {
@@ -50,7 +50,7 @@ const MainMenu = ({ navigation }) => {
           const saldoData = response.data.data.find(item => item.item === "Saldo Caixa");
           if (saldoData) {
             const saldoTotal = parseFloat(saldoData.valor.replace(/\./g, '').replace(',', '.'));
-            setSaldoCaixa(saldoTotal); // Atualiza o estado apenas uma vez
+            setSaldoCaixa(saldoTotal); // Atualiza o estado
           } else {
             setSaldoCaixa(0); // Define como 0 se não houver saldo
           }
@@ -76,17 +76,28 @@ const MainMenu = ({ navigation }) => {
     }
   }, [selectedDate, fetchSaldoCaixa]); // Depende da data selecionada e da função memoizada
 
-  // Função para fechar o OpeningBalanceModal e atualizar o saldo
-  const handleCloseModal = async () => {
-    setIsModalVisible(false);
-  };
+  // Função para verificar se o saldo inicial e as informações de tributo foram preenchidas
+  useEffect(() => {
+    const checkModals = async () => {
+      const initialBalanceAdded = await AsyncStorage.getItem('initialBalanceAdded');
+      const taxInfoAdded = await AsyncStorage.getItem('taxInfoAdded');
+      
+      if (!initialBalanceAdded) {
+        setIsModalVisible(true); // Exibe o OpeningBalanceModal se não houver saldo
+      } else if (!taxInfoAdded) {
+        setIsTaxModalVisible(true); // Exibe o TaxModal se o imposto não tiver sido adicionado
+      }
+    };
 
-  // Função para salvar o saldo inicial
+    checkModals(); // Verifica os estados ao carregar a tela
+  }, [saldoCaixa]); // Depende do saldoCaixa para saber se já foi recuperado
+
+  // Função para fechar o OpeningBalanceModal e abrir o TaxModal após o saldo ser adicionado
   const handleBalanceSave = async (saldo) => {
     if (saldo > 0) {
       await AsyncStorage.setItem('initialBalanceAdded', 'true'); // Marca que o saldo foi adicionado
-      setIsModalVisible(false); // Fecha o modal de saldo
-      await fetchSaldoCaixa(); // Atualiza o saldo
+      setIsModalVisible(false); // Fecha o OpeningBalanceModal
+      setIsTaxModalVisible(true); // Abre o TaxModal após o saldo ser adicionado
     } else {
       Alert.alert('Erro', 'Por favor, preencha o saldo inicial antes de continuar.');
     }
@@ -94,8 +105,8 @@ const MainMenu = ({ navigation }) => {
 
   // Função para fechar o TaxModal após preenchido
   const handleTaxModalSuccess = async () => {
+    await AsyncStorage.setItem('taxInfoAdded', 'true'); // Marca que o imposto foi adicionado
     setIsTaxModalVisible(false); // Fecha o TaxModal
-    await AsyncStorage.setItem('taxInfoAdded', 'true'); // Armazena que o TaxModal foi preenchido
   };
 
   // Função para abrir o modal de saldo ao clicar em "Saldo Caixa"
@@ -173,7 +184,7 @@ const MainMenu = ({ navigation }) => {
           </View>
         </View>
 
-        <OpeningBalanceModal visible={isModalVisible} onClose={handleCloseModal} onSave={handleBalanceSave} />
+        <OpeningBalanceModal visible={isModalVisible} onClose={() => setIsModalVisible(false)} onSave={handleBalanceSave} />
         <TaxModal visible={isTaxModalVisible} onClose={() => setIsTaxModalVisible(false)} onSuccess={handleTaxModalSuccess} />
       </ScrollView>
 
