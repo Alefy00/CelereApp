@@ -5,6 +5,7 @@ import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../../../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '../../../../../../services/apiConfig';
 
 const UpdateStockModal = ({ isVisible, onClose, product }) => {
   const [newQuantity, setNewQuantity] = useState(product.qtd_estoque);
@@ -45,7 +46,7 @@ const UpdateStockModal = ({ isVisible, onClose, product }) => {
         return;
       }
       // Faz a requisição PATCH para atualizar o estoque
-      const response = await axios.patch(`https://api.celere.top/cad/produtos/${product.id}/?empresa=${empresaId}&produto=${product.id}`, {
+      const response = await axios.patch(`${API_BASE_URL}/cad/produtos/${product.id}/?empresa=${empresaId}&produto=${product.id}`, {
         qtd_estoque: newQuantity,
       });
 

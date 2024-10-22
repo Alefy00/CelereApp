@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, ActivityIndicator, Alert, Modal, FlatList } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Modal, FlatList } from 'react-native';
 import IconAluguel from '../../../../../../../assets/images/svg/NewExpense/IconAluguel.svg';
 import IconDespesas from '../../../../../../../assets/images/svg/NewExpense/IconDespesas.svg';
 import IconFornecedor from '../../../../../../../assets/images/svg/NewExpense/IconFornecedor.svg';
@@ -25,10 +25,7 @@ import styles from '../styles';
 import RecurrenceField from './RecurrenceField';
 import SupplierDropdown from './SupplierDropdown';
 import CustomCalendar from '../../../../../../../components/CustomCalendar';
-
-// Constantes para os endpoints da API
-const CATEGORIES_API = 'https://api.celere.top/mnt/categoriasdespesa/?page=1&page_size=30';
-const SAVE_EXPENSE_API = 'https://api.celere.top/cad/despesa/';
+import { API_BASE_URL } from '../../../../../../../services/apiConfig';
 
 const categoryIcons = {
   1: IconFornecedor, // Fornecedores de matéria-prima, produtos ou suprimentos
@@ -101,7 +98,7 @@ const AccountsPayable = ({ navigation }) => {
   const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get(CATEGORIES_API);
+      const response = await axios.get(`${API_BASE_URL}/mnt/categoriasdespesa/?page=1&page_size=30`);
       const data = response.data;
       if (data.results && data.results.data) {
         const fetchedCategories = data.results.data.map((item) => ({
@@ -134,7 +131,7 @@ const fetchSuppliers = useCallback(async () => {
     }
 
     // Endpoint dinâmico usando o ID da empresa
-    const suppliersApiUrl = `https://api.celere.top/cad/fornecedor/?empresa_id=${empresa_id}&page=1&page_size=50`;
+    const suppliersApiUrl = `${API_BASE_URL}/cad/fornecedor/?empresa_id=${empresa_id}&page=1&page_size=50`;
 
     const response = await axios.get(suppliersApiUrl);
     const data = response.data;
@@ -261,7 +258,7 @@ useEffect(() => {
     }
   
     try {
-      const response = await axios.post(SAVE_EXPENSE_API, expenseData, {
+      const response = await axios.post(`${API_BASE_URL}/cad/despesa/`, expenseData, {
         headers: {
           'Content-Type': 'application/json',
         },

@@ -5,8 +5,7 @@ import CheckBox from '@react-native-community/checkbox';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../../../../constants';
 import axios from 'axios';
-
-const FREQUENCY_API = 'https://api.celere.top/api/frequenciarecorrencia/';
+import { API_BASE_URL } from '../../../../../../../services/apiConfig';
 
 const RecurrenceField = ({
   setSelectedFrequencyId,
@@ -39,7 +38,7 @@ const RecurrenceField = ({
   const fetchFrequencies = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(FREQUENCY_API);
+      const response = await axios.get(`${API_BASE_URL}/api/frequenciarecorrencia/`);
       const data = response.data.data;
       setFrequencies(data);
     } catch (error) {

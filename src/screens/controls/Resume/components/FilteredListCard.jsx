@@ -9,10 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import styles from './stylesFilterListCard';
 import { useFocusEffect } from '@react-navigation/native';
-
-const API_URL_VENDAS = 'https://api.celere.top/cad/vendas/';
-const API_ITENS_VENDA = 'https://api.celere.top/cad/itens_venda/';
-const API_URL_DESPESAS = 'https://api.celere.top/cad/despesa/';
+import { API_BASE_URL } from '../../../../services/apiConfig';
 
 // Função para buscar o ID da empresa logada
 const getEmpresaId = async () => {
@@ -46,7 +43,7 @@ const fetchItemById = async (item) => {
       return item.nome;
     }
 
-    const response = await axios.get(`${API_ITENS_VENDA}${item.id}/`);
+    const response = await axios.get(`${API_BASE_URL}/cad/itens_venda/${item.id}/`);
     const itemData = response.data;
 
     // Verificamos se o nome está no campo "produto" ou "serviço"
@@ -83,7 +80,7 @@ const processarVendas = async (vendas) => {
 const fetchAllDespesas = async (empresaId, dataInicial, dataFinal) => {
   try {
     const response = await axios.get(
-      `${API_URL_DESPESAS}?empresa_id=${empresaId}&data_inicial=${dataInicial}&data_final=${dataFinal}`
+      `${API_BASE_URL}/cad/despesa/?empresa_id=${empresaId}&data_inicial=${dataInicial}&data_final=${dataFinal}`
     );
     const despesas = response.data.data.filter(despesa => despesa.status === 'finalizada');
     return despesas;
@@ -128,7 +125,7 @@ const fetchAllVendas = async (empresaId, dataInicial, dataFinal) => {
   };
 
   // Inicia a busca pela primeira página com os parâmetros de data
-  return await fetchVendasPaginadas(`${API_URL_VENDAS}?empresa=${empresaId}&data_inicial=${dataInicial}&data_final=${dataFinal}`);
+  return await fetchVendasPaginadas(`${API_BASE_URL}/cad/vendas/?empresa=${empresaId}&data_inicial=${dataInicial}&data_final=${dataFinal}`);
 };
 
 

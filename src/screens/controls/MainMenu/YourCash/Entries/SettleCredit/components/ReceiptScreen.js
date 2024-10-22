@@ -9,6 +9,7 @@ import { COLORS } from '../../../../../../../constants';
 import styles from './stylesReceip';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BarTop2 from '../../../../../../../components/BarTop2';
+import { API_BASE_URL } from '../../../../../../../services/apiConfig';
 
 const ReceiptScreen = ({ navigation, route }) => {
     const { saleId, fromLiquidateNow, fromLiquidateAgora, fromLiquidateNowService } = route.params; 
@@ -44,7 +45,7 @@ const fetchReceipt = useCallback(async () => {
         }
 
         // Requisição para obter a URL do PDF com is_pdf_file=True
-        const response = await axios.get(`https://api.celere.top/cad/vendas/gerar_recibo_venda/`, {
+        const response = await axios.get(`${API_BASE_URL}/cad/vendas/gerar_recibo_venda/`, {
             params: {
                 empresa_id: empresaId,
                 venda_id: saleId,
@@ -110,7 +111,6 @@ const fetchReceipt = useCallback(async () => {
           navigation.goBack();
         }
       };
-      
 
     return (
         <View style={styles.container}>

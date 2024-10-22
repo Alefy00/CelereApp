@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, FlatList, Modal, Alert } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from '../styles';
 import PixIcon from "../../../../../../../../assets/images/svg/iconPix.svg";
@@ -11,6 +10,7 @@ import DebitCardIcon from "../../../../../../../../assets/images/svg/iconCard.sv
 import { COLORS } from '../../../../../../../../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { API_BASE_URL } from '../../../../../../../../services/apiConfig';
 
 // Função para mostrar alertas
 const showAlert = (title, message) => {
@@ -53,7 +53,7 @@ const LiquidarAgora = ({ navigation }) => {
  // Função para buscar os métodos de pagamento
  const fetchPaymentMethods = async () => {
   try {
-    const response = await fetch('https://api.celere.top/cad/metodos_pagamentos/');
+    const response = await fetch(`${API_BASE_URL}/cad/metodos_pagamentos/`);
     const jsonResponse = await response.json();
 
     if (jsonResponse.results.status === 'success') {
@@ -61,7 +61,7 @@ const LiquidarAgora = ({ navigation }) => {
         let icon = null;
         switch (method.nome) {
           case 'PIX':
-            icon = <PixIcon width={20} height={20} />;
+            icon = <PixIcon width={20} height={20} />
             break;
           case 'Dinheiro':
             icon = <CashIcon width={20} height={20} />;
@@ -95,7 +95,7 @@ useEffect(() => {
 // Função para buscar os clientes da empresa
 const fetchClientes = async (empresaId) => {
   try {
-    const response = await fetch(`https://api.celere.top/cad/cliente/?empresa=${empresaId}`);
+    const response = await fetch(`${API_BASE_URL}/cad/cliente/?empresa=${empresaId}`);
     const jsonResponse = await response.json();
 
     if (jsonResponse.results.status === 'success') {
@@ -158,7 +158,6 @@ useEffect(() => {
   calculateTotals();
 }, [cartItems, discountValue, discountType, calculateTotals]);
 
-
   // Função para registrar a venda
   const registerSale = async () => {
     try {
@@ -189,9 +188,7 @@ useEffect(() => {
 
       console.log('Dados da venda a serem enviados:', vendaData);
 
-      
-
-      const response = await axios.post('https://api.celere.top/cad/vendas/', vendaData);
+      const response = await axios.post(`${API_BASE_URL}/cad/vendas/`, vendaData);
       if (response.data && response.data.status === 'success') {
         const vendaId = response.data.data.id;
         console.log('Venda registrada, ID:', vendaId);
@@ -251,7 +248,7 @@ useEffect(() => {
       console.log('Itens de venda a serem enviados:', productItems);
   
       const productPromises = productItems.map(item => 
-        axios.post('https://api.celere.top/cad/itens_venda/', item)
+        axios.post(`${API_BASE_URL}/cad/itens_venda/`, item)
       );
   
       const responses = await Promise.all(productPromises);
@@ -261,7 +258,6 @@ useEffect(() => {
         console.log('Resposta da API para item de venda:', response.data);
       });
 
-  
     } catch (error) {
       // Log detalhado do erro
       if (error.response) {
@@ -272,7 +268,6 @@ useEffect(() => {
       showAlert('Erro', 'Ocorreu um erro ao registrar os itens da venda.');
     }
   };
-  
 
 // Funções auxiliares de UI
 const toggleDropdown = () => {
@@ -307,7 +302,6 @@ const formatCurrency = (value) => {
   }).format(value);
 };
 
-
 const handleNewRegistered = () => {
   setIsModalVisible(false);
   navigation.navigate('SingleSale');
@@ -317,7 +311,6 @@ const handleOpenInvoiceModal = () => {
   setIsModalVisible(false);
   setIsInvoiceModalVisible(true);
 };
-
 
 const handleCloseInvoiceModal = () => {
   setIsInvoiceModalVisible(false);
@@ -336,16 +329,12 @@ const handleCloseModal = () => {
   navigation.navigate('MainTab')
 };
 
-
-
 const updatePrice = (index, value, field) => {
   const numericValue = parseFloat(value.replace(/[^\d]/g, '')) / 100; // Remove todos os caracteres não numéricos e divide por 100 para manter precisão
   const updatedItems = [...cartItems];
   updatedItems[index][field] = isNaN(numericValue) ? 0 : numericValue; // Atualiza o estado com o valor numérico
   setCartItems(updatedItems);
 };
-
-
 
 const updateQuantity = (id, increment) => {
   const updatedItems = cartItems.map((item) => {
@@ -368,7 +357,6 @@ const togglePaymentDropdown = () => {
    await registerSale();
    
 };
-
 
 return (
   <ScrollView>

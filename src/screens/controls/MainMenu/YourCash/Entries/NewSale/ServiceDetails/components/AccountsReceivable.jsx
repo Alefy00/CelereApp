@@ -7,9 +7,8 @@ import { COLORS } from '../../../../../../../../constants';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomCalendar from '../../../../../../../../components/CustomCalendar';
+import { API_BASE_URL } from '../../../../../../../../services/apiConfig';
 
-// Definindo as constantes de URLs das APIs
-const API_BASE_URL = 'https://api.celere.top';
 const API_VENDAS = `${API_BASE_URL}/cad/vendas/`;
 const API_ITENS_VENDA = `${API_BASE_URL}/cad/itens_venda/`;
 

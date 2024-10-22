@@ -10,10 +10,7 @@ import CashIcon from "../../../../../../../../assets/images/svg/iconMoney.svg";
 import CreditCardIcon from "../../../../../../../../assets/images/svg/iconCard.svg";
 import DebitCardIcon from "../../../../../../../../assets/images/svg/iconCard.svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const PAYMENT_METHODS_API = 'https://api.celere.top/cad/metodos_pagamentos/';
-const API_VENDAS = 'https://api.celere.top/cad/vendas/';
-const API_ITENS_VENDA = 'https://api.celere.top/cad/itens_venda/';
+import { API_BASE_URL } from "../../../../../../../../services/apiConfig";
 
 const LiquidateNow = ({ products, totalPrice, clients, navigation, route }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -55,7 +52,7 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route }) => {
 
   const fetchPaymentMethods = useCallback(async () => {
     try {
-      const response = await axios.get(`${PAYMENT_METHODS_API}?empresa=1`);
+      const response = await axios.get(`${API_BASE_URL}/cad/metodos_pagamentos/?empresa=1`);
       if (response.data && response.data.results && response.data.results.data) {
         setPaymentMethods(response.data.results.data);
       } else {
@@ -138,7 +135,7 @@ const handleRegisterSale = async () => {
     // Log do payload da requisição
     console.log('Payload da requisição:', vendaData);
 
-    const vendaResponse = await axios.post(API_VENDAS, vendaData);
+    const vendaResponse = await axios.post(`${API_BASE_URL}/cad/vendas/`, vendaData);
 
     // Log da resposta da requisição
     console.log('Resposta da requisição:', vendaResponse.data);
@@ -159,7 +156,7 @@ const handleRegisterSale = async () => {
     console.log('Itens da venda:', saleItems);
 
     const responsePromises = saleItems.map(item =>
-      axios.post(API_ITENS_VENDA, item)
+      axios.post(`${API_BASE_URL}/cad/itens_venda/`, item)
     );
 
     await Promise.all(responsePromises);

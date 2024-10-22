@@ -8,6 +8,7 @@ import { COLORS } from '../../../../../../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
+import { API_BASE_URL } from '../../../../../../services/apiConfig';
 
 const API_URL = 'https://api.celere.top/cad/cliente/'; 
 const API_ORCAMENTO_URL = 'https://api.celere.top/cad/orcamento/';
@@ -90,7 +91,7 @@ const DetailsBudgets = ({ navigation, route }) => {
       };
       console.log('Dados enviados para criar orçamento: ', data);
 
-      const response = await axios.post(API_ORCAMENTO_URL, data);
+      const response = await axios.post(`${API_BASE_URL}/cad/orcamento/`, data);
 
       const id = response.data.data.id;
       setOrcamentoId(id);
@@ -124,7 +125,7 @@ const registerItemsVendaOrcamento = async (empresaId, orcamentoId, items) => {
       };
       console.log('Dados enviados para registrar item de venda: ', data);
 
-      return axios.post(API_ITENS_VENDA_ORCAMENTO_URL, data);
+      return axios.post(`${API_BASE_URL}/cad/itens_venda_orcamento/`, data);
     });
 
     await Promise.allSettled(requests);
@@ -156,7 +157,7 @@ const registerServicesOrcamento = async (empresaId, orcamentoId, services) => {
       };
       console.log('Dados enviados para registrar serviço: ', data);
 
-      return axios.post(API_ITENS_VENDA_ORCAMENTO_URL, data);
+      return axios.post(`${API_BASE_URL}/cad/itens_venda_orcamento/`, data);
     });
 
     await Promise.allSettled(requests);
@@ -222,7 +223,7 @@ const registerServicesOrcamento = async (empresaId, orcamentoId, services) => {
     try {
       const empresaId = await getEmpresaId();
       if (empresaId) {
-        const response = await axios.get(`${API_URL}?empresa=${empresaId}`);
+        const response = await axios.get(`${API_BASE_URL}/cad/cliente/?empresa=${empresaId}`);
         if (response.data && response.data.results && response.data.results.data) {
           setClients(response.data.results.data);
         } else {

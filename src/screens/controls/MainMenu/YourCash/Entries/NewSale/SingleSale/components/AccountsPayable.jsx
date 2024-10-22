@@ -7,6 +7,7 @@ import { COLORS } from '../../../../../../../../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import CustomCalendar from '../../../../../../../../components/CustomCalendar';
+import { API_BASE_URL } from '../../../../../../../../services/apiConfig';
 
 // Função para mostrar alertas
 const showAlert = (title, message) => {
@@ -47,7 +48,7 @@ const AccountsPayable = ({  navigation }) => {
   // Função para buscar os clientes da empresa
 const fetchClientes = async (empresaId) => {
   try {
-    const response = await fetch(`https://api.celere.top/cad/cliente/?empresa=${empresaId}`);
+    const response = await fetch(`${API_BASE_URL}/cad/cliente/?empresa=${empresaId}`);
     const jsonResponse = await response.json();
 
     if (jsonResponse.results.status === 'success') {
@@ -163,7 +164,7 @@ const registerSale = async () => {
 
     console.log('Dados da venda a serem enviados:', vendaData);
 
-    const response = await axios.post('https://api.celere.top/cad/vendas/', vendaData);
+    const response = await axios.post(`${API_BASE_URL}/cad/vendas/`, vendaData);
     if (response.data && response.data.status === 'success') {
       const vendaId = response.data.data.id;
       console.log('Venda registrada, ID:', vendaId);
@@ -223,7 +224,7 @@ const registerSale = async () => {
       console.log('Itens de venda a serem enviados:', productItems);
   
       const productPromises = productItems.map(item => 
-        axios.post('https://api.celere.top/cad/itens_venda/', item)
+        axios.post(`${API_BASE_URL}/cad/itens_venda/`, item)
       );
   
       const responses = await Promise.all(productPromises);

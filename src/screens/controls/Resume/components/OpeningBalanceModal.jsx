@@ -7,8 +7,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../constants';
 import styles from '../styles'; // Adapte seus estilos ao design enviado
 import TimeIcon from '../../../../assets/images/svg/MainMenu/timeIcon.svg';
-
-const API_URL_SALDO = 'https://api.celere.top/cad/saldo_caixa_inicial/';
+import { API_BASE_URL } from '../../../../services/apiConfig';
 
 const OpeningBalanceModal = ({ visible, onClose }) => {
   const [empresaId, setEmpresaId] = useState(null);
@@ -17,7 +16,6 @@ const OpeningBalanceModal = ({ visible, onClose }) => {
   const [totalBalance, setTotalBalance] = useState(0);
   const [loading, setLoading] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false); // Adiciona o estado do modal de sucesso
-
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
@@ -93,7 +91,7 @@ const OpeningBalanceModal = ({ visible, onClose }) => {
     setLoading(true);
 
     try {
-      const response = await axios.post(API_URL_SALDO, {
+      const response = await axios.post(`${API_BASE_URL}/cad/saldo_caixa_inicial/`, {
         empresa_id: empresaId,
         valor_especie: cash.replace(/\./g, '').replace(',', '.'),
         saldo_banco: bank.replace(/\./g, '').replace(',', '.'),

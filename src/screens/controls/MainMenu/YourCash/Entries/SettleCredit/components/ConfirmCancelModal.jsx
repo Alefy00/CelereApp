@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS } from '../../../../../../../constants';
+import { API_BASE_URL } from '../../../../../../../services/apiConfig';
 
 // Função para obter a data atual no formato AAAA-MM-DD
 const getCurrentDate = () => {
@@ -26,7 +27,7 @@ const ConfirmCancelModal = ({ visible, onClose, saleId, onSaleCanceled }) => {
             const currentDate = getCurrentDate(); // Obter a data atual do dispositivo
 
             // Requisição para cancelar a venda
-            const response = await axios.patch(`https://api.celere.top/cad/vendas/${saleId}/cancelar_venda/`, {
+            const response = await axios.patch(`${API_BASE_URL}/cad/vendas/${saleId}/cancelar_venda/`, {
                 dt_cancelamento: currentDate,
                 motivo_cancelamento: "Venda cancelada"
             });

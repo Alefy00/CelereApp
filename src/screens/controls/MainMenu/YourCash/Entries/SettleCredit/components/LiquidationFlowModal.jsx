@@ -7,6 +7,7 @@ import { COLORS } from '../../../../../../../constants'; // Supondo que já temo
 import { StyleSheet } from 'react-native';
 import axios from 'axios';  // Para realizar a requisição
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '../../../../../../../services/apiConfig';
 
   
   const LiquidationFlowModal = ({ visible, onClose, onConfirmLiquidation, saleId }) => {
@@ -84,7 +85,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
       
           // Enviando os dados para a API
           const response = await axios.post(
-            `https://api.celere.top/cad/vendas/${saleId}/baixar_venda/`,
+            `${API_BASE_URL}/cad/vendas/${saleId}/baixar_venda/`,
             { dt_pagamento: formattedDate }  // Data de pagamento
           );
       

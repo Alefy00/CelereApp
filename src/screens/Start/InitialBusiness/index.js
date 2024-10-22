@@ -9,9 +9,7 @@ import BarTop3 from '../../../components/BarTop3'; // Importando o BarTop3
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../constants';
 import styles from './styles';
-
-const API_URL_CARGOS = 'https://api.celere.top/api/cargos_negocio/';
-const API_URL_CLASSIFICAR = 'https://api.celere.top/config/empreendedor/atualizar-por-id/';
+import { API_BASE_URL } from '../../../services/apiConfig';
 
 const BusinessInfoScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
@@ -45,7 +43,7 @@ const BusinessInfoScreen = ({ navigation }) => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await axios.get(`${API_URL_CARGOS}?page_size=100&max_page_size=100`);
+        const response = await axios.get(`${API_BASE_URL}/api/cargos_negocio/?page_size=100&max_page_size=100`);
         setRolesList(response.data.data);
       } catch (error) {
         setErrorMessage('Não foi possível carregar a lista de cargos. Tente novamente.');
@@ -100,7 +98,7 @@ const BusinessInfoScreen = ({ navigation }) => {
         cnpj: cnpj || null, // CNPJ é opcional
       };
 
-      const response = await axios.patch(`${API_URL_CLASSIFICAR}${userData.id}/`, dataToSend);
+      const response = await axios.patch(`${API_BASE_URL}/config/empreendedor/atualizar-por-id/${userData.id}/`, dataToSend);
 
       if (response.status === 200 && response.data.status === 'success') {
   

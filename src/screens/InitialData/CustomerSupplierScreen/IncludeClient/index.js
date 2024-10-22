@@ -21,6 +21,7 @@ import { COLORS } from '../../../../constants';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Contacts from 'react-native-contacts';  // Biblioteca para acessar contatos
+import { API_BASE_URL } from '../../../../services/apiConfig';
 
 const IncludeClient = ({ navigation }) => {
   const [clientName, setClientName] = useState('');
@@ -138,7 +139,7 @@ const IncludeClient = ({ navigation }) => {
     const formattedPhone = formatPhoneNumber(clientPhone);  // Formata o número de telefone
 
     try {
-      const response = await axios.post('https://api.celere.top/cad/cliente/', {
+      const response = await axios.post(`${API_BASE_URL}/cad/cliente/`, {
         nome: clientName,
         celular: formattedPhone || null,  // Se não houver telefone, passa null
         empresa: empresaId,

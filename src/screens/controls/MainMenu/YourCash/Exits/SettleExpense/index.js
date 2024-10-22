@@ -8,10 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import { COLORS } from ' ../../../../../../constants';
-
-const EXPENSES_API = 'https://api.celere.top/cad/despesa/';
-const CATEGORIES_API = 'https://api.celere.top/mnt/categoriasdespesa/?page=1&page_size=30';
-const SUPPLIERS_API = 'https://api.celere.top/cad/fornecedor/?empresa_id=1&page=1&page_size=50';
+import { API_BASE_URL } from "../../../../../../services/apiConfig";
 
 const LiquidateExpense = ({ navigation }) => {
   const [expenses, setExpenses] = useState([]);
@@ -39,7 +36,7 @@ const LiquidateExpense = ({ navigation }) => {
 
     setLoading(true);
     try {
-      const response = await axios.get(EXPENSES_API, {
+      const response = await axios.get(`${API_BASE_URL}/cad/despesa/`, {
         params: {
           page: 1,
           page_size: 100,
@@ -67,7 +64,7 @@ const LiquidateExpense = ({ navigation }) => {
   // Carregar categorias
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await axios.get(CATEGORIES_API);
+      const response = await axios.get(`${API_BASE_URL}/mnt/categoriasdespesa/?page=1&page_size=30`);
       if (response.data.results && response.data.results.data) {
         setCategories(response.data.results.data);
       } else {
@@ -83,7 +80,7 @@ const LiquidateExpense = ({ navigation }) => {
   // Função para buscar fornecedores da API
   const fetchSuppliers = useCallback(async () => {
     try {
-      const response = await axios.get(SUPPLIERS_API);
+      const response = await axios.get(`${API_BASE_URL}/cad/fornecedor/?empresa_id=1&page=1&page_size=50`);
       if (response.data.results && response.data.results.data) {
         setFornecedores(response.data.results.data); // Armazena os fornecedores no estado
       } else {

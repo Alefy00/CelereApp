@@ -9,6 +9,7 @@ import ReceivableDetails from "./components/ReceivableDetails";
 import axios from "axios";  // Biblioteca para requisição HTTP
 import AsyncStorage from "@react-native-async-storage/async-storage";  // Para acessar o ID da empresa
 import { useFocusEffect } from '@react-navigation/native';  // Para recarregar a lista quando a tela ganha foco
+import { API_BASE_URL } from "../../../../../../../services/apiConfig";
 
 const API_URL = 'https://api.celere.top/cad/cliente/';  // URL da API
 
@@ -40,7 +41,7 @@ const SaleDetails = ({ navigation, route }) => {
     try {
       const empresaId = await getEmpresaId();
       if (empresaId) {
-        const response = await axios.get(`${API_URL}?empresa=${empresaId}`);
+        const response = await axios.get(`${API_BASE_URL}/cad/cliente/?empresa=${empresaId}`);
         if (response.data && response.data.results && response.data.results.data) {
           setClients(response.data.results.data);  // Armazena a lista de clientes no estado
         } else {
@@ -54,7 +55,6 @@ const SaleDetails = ({ navigation, route }) => {
       setLoading(false);  // Oculta o carregamento
     }
   }, []);
-
 
   // Chamada sempre que a tela ganha foco
   useFocusEffect(
@@ -73,7 +73,6 @@ const SaleDetails = ({ navigation, route }) => {
       clearCart: clearCart, // Defina clearCart nas opções
     });
   }, [navigation, clearCart]);
-
 
   return (
     <KeyboardAvoidingView

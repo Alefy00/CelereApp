@@ -7,6 +7,7 @@ import BarTop3 from '../../../../../../components/BarTop3';
 import { COLORS } from '../../../../../../constants';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '../../../../../../services/apiConfig';
 
 // Função para buscar o ID da empresa logada
 const getEmpresaId = async () => {
@@ -60,7 +61,7 @@ const IncludeCategoryProducts = ({ navigation }) => {
 
     try {
       const response = await axios.post(
-        'https://api.celere.top/mnt/categoriasprodutos/',
+        `${API_BASE_URL}/mnt/categoriasprodutos/`,
         categoryData,
         { headers: { 'Content-Type': 'application/json' } }
       );

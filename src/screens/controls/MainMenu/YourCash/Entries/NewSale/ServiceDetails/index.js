@@ -10,8 +10,7 @@ import AccountsReceivable from './components/AccountsReceivable';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
-
-const API_URL = 'https://api.celere.top/cad/cliente/';  // URL da API
+import { API_BASE_URL } from '../../../../../../../services/apiConfig';
 
 const ServiceDetails = ({ navigation, route}) => {
   const { services, products = [] } = route.params; // Recebe serviços e produtos via rota
@@ -42,7 +41,7 @@ const fetchClients = useCallback(async () => {
   try {
     const empresaId = await getEmpresaId();
     if (empresaId) {
-      const response = await axios.get(`${API_URL}?empresa=${empresaId}`);
+      const response = await axios.get(`${API_BASE_URL}/cad/cliente/?empresa=${empresaId}`);
       if (response.data && response.data.results && response.data.results.data) {
         setClients(response.data.results.data);  // Armazena a lista de clientes no estado
       } else {

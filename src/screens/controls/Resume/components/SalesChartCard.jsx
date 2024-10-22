@@ -9,6 +9,7 @@ import { COLORS } from '../../../../constants';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './stylesChartCard';
 import { useFocusEffect } from '@react-navigation/native';
+import { API_BASE_URL } from '../../../../services/apiConfig';
 
 const API_URL = 'https://api.celere.top/api/composite/get/';
 
@@ -51,7 +52,7 @@ const SalesChartCard = ({ selectedDate }) => {
 
       const { dt_ini, dt_end } = selectedDate;
       console.log(`Data selecionada: de ${dt_ini} até ${dt_end}`);
-      const response = await axios.get(`${API_URL}?empresa_id=${empresaId}&dt_ini=${dt_ini}&dt_end=${dt_end}`);
+      const response = await axios.get(`${API_BASE_URL}/api/composite/get/?empresa_id=${empresaId}&dt_ini=${dt_ini}&dt_end=${dt_end}`);
       
       if (response.status === 200 && response.data.status === 'success') {
         const data = response.data.data;

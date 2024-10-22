@@ -11,9 +11,7 @@ import VarejoIcon from '../../../assets/images/svg/initial/Varejo.svg'; // Impor
 import AlimentosIcon from '../../../assets/images/svg/initial/food.svg';
 import ServicosIcon from '../../../assets/images/svg/initial/service.svg';
 import FabricacaoIcon from '../../../assets/images/svg/initial/fabrication.svg';
-
-const API_URL_RAMO_ATIVIDADE = 'https://api.celere.top/cad/ramosatividades/';
-
+import { API_BASE_URL } from '../../../services/apiConfig';
 
 const subcategories = {
   varejo: 'V',
@@ -57,7 +55,7 @@ const InitialBranch = ({ navigation }) => {
   
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL_RAMO_ATIVIDADE}?page_size=100&max_page_size=100&tipo=${tipo}`);
+      const response = await axios.get(`${API_BASE_URL}/cad/ramosatividades/?page_size=100&max_page_size=100&tipo=${tipo}`);
       const subcategoriesData = response.data.data;
   
       // Navegar dinamicamente para a tela correspondente com base na categoria

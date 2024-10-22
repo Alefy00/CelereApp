@@ -10,10 +10,7 @@ import DebitCardIcon from "../../../../../../../../assets/images/svg/iconCard.sv
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { COLORS } from '../../../../../../../../constants';
 import axios from 'axios';
-
-const PAYMENT_METHODS_API = 'https://api.celere.top/cad/metodos_pagamentos/';
-const REGISTER_SALE_API = 'https://api.celere.top/cad/vendas/';
-const REGISTER_ITEM_SALE_API = 'https://api.celere.top/cad/itens_venda/';
+import { API_BASE_URL } from '../../../../../../../../services/apiConfig';
 
 const LiquidateNow = ({ navigation, route, clients }) => {
   const { services: receivedServices = [], products: receivedProducts = [], totalPrice: initialTotalPrice } = route.params;
@@ -70,7 +67,7 @@ const LiquidateNow = ({ navigation, route, clients }) => {
   
       const fetchPaymentMethods = useCallback(async () => {
         try {
-          const response = await axios.get(`${PAYMENT_METHODS_API}?empresa=1`);
+          const response = await axios.get(`${API_BASE_URL}/cad/metodos_pagamentos/?empresa=1`);
           if (response.data && response.data.results && response.data.results.data) {
             setPaymentMethods(response.data.results.data);
           } else {
@@ -202,7 +199,7 @@ const handleRegisterSale = async () => {
     console.log('Payload da venda a ser enviada:', vendaData);
 
     // Registrar a venda
-    const vendaResponse = await axios.post(REGISTER_SALE_API, vendaData);
+    const vendaResponse = await axios.post(`${API_BASE_URL}/cad/vendas/`, vendaData);
     const vendaId = vendaResponse.data.data.id;
     console.log('Venda registrada com sucesso, ID da venda:', vendaId);
     setSaleId(vendaId);
@@ -212,9 +209,9 @@ const handleRegisterSale = async () => {
     const updatedProductItems = productItems.map(item => ({ ...item, venda_id: vendaId }));
 
     // Registrar os itens de serviço
-    const servicePromises = updatedServiceItems.map(item => axios.post(REGISTER_ITEM_SALE_API, item));
+    const servicePromises = updatedServiceItems.map(item => axios.post(`${API_BASE_URL}/cad/itens_venda/`, item));
     // Registrar os itens de produto
-    const productPromises = updatedProductItems.map(item => axios.post(REGISTER_ITEM_SALE_API, item));
+    const productPromises = updatedProductItems.map(item => axios.post(`${API_BASE_URL}/cad/itens_venda/`, item));
 
     // Aguardar todas as requisições
     await Promise.all([...servicePromises, ...productPromises]);

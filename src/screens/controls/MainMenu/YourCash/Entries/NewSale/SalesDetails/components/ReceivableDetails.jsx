@@ -7,10 +7,7 @@ import { COLORS } from "../../../../../../../../constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import CustomCalendar from "../../../../../../../../components/CustomCalendar";
-
-// Constantes com as URLs das APIs
-const API_VENDAS = 'https://api.celere.top/cad/vendas/';
-const API_ITENS_VENDA = 'https://api.celere.top/cad/itens_venda/';
+import { API_BASE_URL } from "../../../../../../../../services/apiConfig";
 
 const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
   const [paymentMethod, setPaymentMethod] = useState('Boleto');
@@ -116,7 +113,7 @@ const handleRegisterSale = async () => {
     };
 
     // Envia os dados da venda para a API
-    const vendaResponse = await axios.post(API_VENDAS, vendaData);
+    const vendaResponse = await axios.post(`${API_BASE_URL}/cad/vendas/`, vendaData);
     const vendaId = vendaResponse.data.data.id; // Pega o ID da venda registrada
     console.log('Venda registrada:', vendaResponse.data);
 
@@ -132,7 +129,7 @@ const handleRegisterSale = async () => {
 
     // Faz a requisição para registrar os itens da venda
     const responsePromises = saleItems.map(item =>
-      axios.post(API_ITENS_VENDA, item)
+      axios.post(`${API_BASE_URL}/cad/itens_venda/`, item)
     );
     await Promise.all(responsePromises);
 

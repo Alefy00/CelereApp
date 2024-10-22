@@ -9,14 +9,11 @@ import RenderProduct from "../../../YourCash/Entries/NewSale/NewRegisteredSale/c
 import styles from "./styles";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_BASE_URL } from "../../../../../../services/apiConfig.js";
 
-
-const API_BASE_URL = 'https://api.celere.top';
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
 const SERVICES_API = `${API_BASE_URL}/cad/servicos/`;
-
-
 
 const NewBudgets = ({ navigation, route }) => {
   const [search, setSearch] = useState('');

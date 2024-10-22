@@ -8,8 +8,7 @@ import ConfirmCancelModal from "./ConfirmCancelModal";
 import LiquidationFlowModal from "./LiquidationFlowModal";
 import PartialLiquidationModal from "./PartialLiquidationModal ";
 import axios from "axios";
-
-const API_SERVICOS = 'https://api.celere.top/cad/servicos/';
+import { API_BASE_URL } from "../../../../../../../services/apiConfig";
 
 const AccountDetailModal = ({ visible, onClose,  account, onSaleCanceled }) => {
   const [isFirstModalVisible, setFirstModalVisible] = useState(visible);
@@ -21,7 +20,7 @@ const AccountDetailModal = ({ visible, onClose,  account, onSaleCanceled }) => {
     // Função para buscar o nome de um serviço pelo seu ID
     const fetchServicoById = async (id) => {
       try {
-        const response = await axios.get(`${API_SERVICOS}${id}/`);
+        const response = await axios.get(`${API_BASE_URL}/cad/servicos/${id}/`);
         return response.data.nome; // Supondo que o nome do serviço está na chave 'nome'
       } catch (error) {
         console.error(`Erro ao buscar o serviço com ID ${id}:`, error);
@@ -86,7 +85,6 @@ const AccountDetailModal = ({ visible, onClose,  account, onSaleCanceled }) => {
     setFirstModalVisible(true); // Reabre o modal principal
   };
 
-
   // Função para fechar o modal de liquidação
   const closeLiquidationModal = () => {
     setLiquidationModalVisible(false);
@@ -107,7 +105,6 @@ const AccountDetailModal = ({ visible, onClose,  account, onSaleCanceled }) => {
     onSaleCanceled(); // Atualiza a lista de vendas no componente pai
     closeFirstModal(); // Fecha o modal automaticamente
   };
-
 
    // Função para format ara exibição do produto ou serviço
    const renderItem = ({ item }) => {

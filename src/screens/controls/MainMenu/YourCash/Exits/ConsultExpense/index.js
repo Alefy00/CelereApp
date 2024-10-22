@@ -8,10 +8,9 @@ import styles from './styles';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Importando AsyncStorage
 import FilterModal from "../../Entries/SettleCredit/components/FilterModal";
-import { useFocusEffect } from '@react-navigation/native'; 
+import { useFocusEffect } from '@react-navigation/native';
+import { API_BASE_URL } from "../../../../../../services/apiConfig";
 
-// Constantes para URLs de API
-const API_BASE_URL = "https://api.celere.top";
 const API_CATEGORIES_URL = `${API_BASE_URL}/mnt/categoriasdespesa/?page=1&page_size=30`;
 const API_EXPENSES_URL = `${API_BASE_URL}/cad/despesa/`; // Ajustado para não incluir parâmetros fixos
 

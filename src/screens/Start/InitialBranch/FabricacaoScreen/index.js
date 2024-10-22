@@ -5,14 +5,11 @@ import axios from 'axios';
 import styles from './styles'; // Certifique-se de ajustar o arquivo de estilos
 import BarTop3 from '../../../../components/BarTop3';
 import { COLORS } from '../../../../constants';
-
-// Ícones para as subcategorias de Fabricação
 import IndustriaIcon from '../../../../assets/images/svg/InitialBranch/IndustriaIcon.svg';
 import PaesIcon from '../../../../assets/images/svg/InitialBranch/PaesIcon.svg';
 import ArtesenatoIcon from '../../../../assets/images/svg/InitialBranch/ArtesanatoIcon.svg';
 import Outros from '../../../../assets/images/svg/InitialBranch/Outros.svg';
-
-const API_URL_ASSOCIAR_RAMO = 'https://api.celere.top/cad/associar_ramo_atividade/';
+import { API_BASE_URL } from '../../../../services/apiConfig';
 
 const FabricacaoScreen = ({ route, navigation }) => {
   const { subcategories, userData } = route.params;
@@ -38,7 +35,7 @@ const FabricacaoScreen = ({ route, navigation }) => {
       
       // Enviando a requisição para associar o ramo de atividade
       const response = await axios.post(
-        API_URL_ASSOCIAR_RAMO,
+        `${API_BASE_URL}/cad/associar_ramo_atividade/`,
         {
           empresa_id: userData.id,
           ramo_atividade_id: subcategoryId,

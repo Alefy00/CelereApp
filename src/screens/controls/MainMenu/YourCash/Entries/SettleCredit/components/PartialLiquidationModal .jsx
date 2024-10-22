@@ -6,6 +6,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import axios from "axios";
 import styles from './stylesPartial';
 import { COLORS } from "../../../../../../../constants";
+import { API_BASE_URL } from "../../../../../../../services/apiConfig";
 
 const PartialLiquidationModal = ({ visible, onClose, onConfirmPartialLiquidation, saleId, totalSaleAmount, totalPayments }) => {
     const [liquidationDate, setLiquidationDate] = useState(new Date());
@@ -78,7 +79,7 @@ const PartialLiquidationModal = ({ visible, onClose, onConfirmPartialLiquidation
         try {
             // Requisição à API para liquidar parcialmente a venda
             const response = await axios.patch(
-                `https://api.celere.top/cad/vendas/${saleId}/baixar_venda_parcialmente/`,
+                `${API_BASE_URL}/cad/vendas/${saleId}/baixar_venda_parcialmente/`,
                 {
                     dt_pagamento: formattedDate,
                     vlr_pagamento: amountToLiquidate,

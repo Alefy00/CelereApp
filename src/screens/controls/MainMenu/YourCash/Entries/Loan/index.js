@@ -7,9 +7,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import styles from './styles';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { API_BASE_URL } from "../../../../../../services/apiConfig";
 
-const BASE_API_URL = 'https://api.celere.top';
-const LOAN_API_ENDPOINT = `${BASE_API_URL}/cad/emprestimos/`;
+const LOAN_API_ENDPOINT = `${API_BASE_URL}/cad/emprestimos/`;
 
 const Loan = ({ navigation }) => {
   const [valorEmprestimo, setValorEmprestimo] = useState('');

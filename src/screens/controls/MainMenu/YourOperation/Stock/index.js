@@ -8,13 +8,10 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import UpdateStockModal from './components/UpdateStockModal';
+import { API_BASE_URL } from '../../../../../services/apiConfig';
 
-// Constantes para a API
-const API_BASE_URL = 'https://api.celere.top';
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
-
-// Novo endpoint para buscar imagens
 const IMAGE_API = `${API_BASE_URL}/mnt/imagensproduto/getImagemProd/`;
 
 const StockInfo = ({ navigation }) => {
@@ -164,7 +161,6 @@ const StockInfo = ({ navigation }) => {
     console.log('Modal visível?', isModalVisible);  // Verifica o estado do modal
   };
 
-  
   const renderFilterItem = ({ item }) => (
     <TouchableOpacity
       style={activeFilter === item.id ? styles.filterButtonActive : styles.filterButton}

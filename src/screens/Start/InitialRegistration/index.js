@@ -10,9 +10,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import LogoApp from '../../../assets/images/logo.svg';
 import ProgressBar from '../components/ProgressBar';
 import styles from './styles';
-
-const API_URL = 'https://api.celere.top/config/empreendedor/';
-const VERIFY_USER_URL = 'https://api.celere.top/config/empreendedor/';
+import { API_BASE_URL } from '../../../services/apiConfig';
 
 const InitialRegistration = ({ navigation }) => {
   const [phoneData, setPhoneData] = useState({
@@ -92,7 +90,7 @@ const InitialRegistration = ({ navigation }) => {
 
   const checkUserExists = useCallback(async () => {
     try {
-      const response = await axios.get(VERIFY_USER_URL, {
+      const response = await axios.get(`${API_BASE_URL}/config/empreendedor/`, {
         params: {
           ddi: phoneData.ddi,
           ddd: phoneData.ddd,
@@ -139,7 +137,7 @@ const InitialRegistration = ({ navigation }) => {
     if (userExists) return;
 
     try {
-      const response = await axios.post(API_URL, {
+      const response = await axios.post(`${API_BASE_URL}/config/empreendedor/`, {
         ddi: phoneData.ddi,
         ddd: phoneData.ddd,
         celular: phoneData.number,

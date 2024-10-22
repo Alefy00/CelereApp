@@ -10,12 +10,7 @@ import AccountDetailModal from "./components/AccountDetailModal"; // Importando 
 import LiquidatedDetailModal from "./components/LiquidatedDetailModal"; // Importando o modal para liquidadas
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { useFocusEffect } from '@react-navigation/native';
-
-const API_VENDAS = 'https://api.celere.top/cad/vendas/';
-const API_CLIENTES = 'https://api.celere.top/cad/cliente/';
-const API_SERVICOS = 'https://api.celere.top/cad/servicos/';
-
+import { API_BASE_URL } from "../../../../../../services/apiConfig";
 
 const SettleCredit = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('open'); // Aba atual: "open" para liquidadas, "settled" para contas a receber
@@ -47,7 +42,7 @@ const SettleCredit = ({ navigation }) => {
 
   const fetchClientes = useCallback(async (empresaId) => {
     try {
-      const response = await axios.get(`${API_CLIENTES}?empresa=${empresaId}`);
+      const response = await axios.get(`${API_BASE_URL}/cad/cliente/?empresa=${empresaId}`);
       const clientesData = response.data.results.data;
 
       if (clientesData && Array.isArray(clientesData)) {
@@ -67,7 +62,7 @@ const SettleCredit = ({ navigation }) => {
 
   const fetchServicoById = async (id) => {
     try {
-      const response = await axios.get(`${API_SERVICOS}${id}/`);
+      const response = await axios.get(`${API_BASE_URL}/cad/servicos/${id}/`);
       return response.data.nome;
     } catch (error) {
       console.error(`Erro ao buscar o serviço com ID ${id}:`, error);
@@ -100,7 +95,7 @@ const SettleCredit = ({ navigation }) => {
         return novasVendas;
       };
 
-      const vendas = await fetchAllVendas(`${API_VENDAS}?empresa_id=${empresaId}`);
+      const vendas = await fetchAllVendas(`${API_BASE_URL}/cad/vendas/?empresa_id=${empresaId}`);
 
       if (vendas && Array.isArray(vendas)) {
         const liquidadas = vendas.filter(venda => venda.status === 'finalizada');
@@ -136,8 +131,6 @@ const SettleCredit = ({ navigation }) => {
     fetchVendas();
   }, [fetchVendas]);
 
-      
-
   // Função para abrir o modal de contas a receber (AccountDetailModal)
   const openAccountDetailModal = (account) => {
     setSelectedAccount(account);
@@ -167,7 +160,6 @@ const SettleCredit = ({ navigation }) => {
     setFilterModalVisible(true);
   };
 
-
   // Função para alternar entre "Liquidadas" e "Contas a Receber"
   const toggleTab = (tab) => {
     setSelectedTab(tab);
@@ -189,8 +181,6 @@ useEffect(() => {
 
   return unsubscribe;
 }, [navigation, fetchVendas]);
-
-
 
 const renderItem = ({ item }) => {
   const quantidadeProdutos = item.itens.filter(i => i.produto !== null).length; // Quantidade de produtos

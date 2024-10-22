@@ -5,8 +5,6 @@ import BarTop2 from '../../../../../components/BarTop2';
 import styles from './styles';
 import { COLORS } from '../../../../../constants';
 import Icon from 'react-native-vector-icons/Ionicons';
-
-// Importação correta dos ícones
 import IconProduct from '../../../../../assets/images/svg/Service/ProductIcon.svg';
 import IconService from '../../../../../assets/images/svg/Service/ProductIcon.svg';
 import IconCategories from '../../../../../assets/images/svg/Service/CategoryIcon.svg';
@@ -18,7 +16,6 @@ import IconReports from '../../../../../assets/images/svg/Service/ReportIcon.svg
 
 const ServicesMenu = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-
 
   const menuItems = [
     { title: 'Produtos', screen: 'AddProductScreen', description: 'Consulte ou cadastre um novo produto', icon: <IconProduct width={40} height={40} /> },

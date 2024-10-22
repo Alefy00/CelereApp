@@ -8,10 +8,10 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";  // Import do Picker
 import styles from './styles';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { API_BASE_URL } from "../../../../../../services/apiConfig";
 
-const BASE_API_URL = 'https://api.celere.top';
-const CONTRIBUTE_API_ENDPOINT = `${BASE_API_URL}/cad/aporte/`;
-const ORIGEM_API_ENDPOINT = `${BASE_API_URL}/config/origem_aporte/?page_size=100&max_page_size=100`;
+const CONTRIBUTE_API_ENDPOINT = `${API_BASE_URL}/cad/aporte/`;
+const ORIGEM_API_ENDPOINT = `${API_BASE_URL}/config/origem_aporte/?page_size=100&max_page_size=100`;
 
 const Contribution = ({ navigation }) => {
   const [dataAporte, setDataAporte] = useState(null);  // Inicializando como null para o placeholder

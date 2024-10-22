@@ -9,11 +9,9 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { API_BASE_URL } from '../../../../../../services/apiConfig';
 
-
-// Constantes da API
-const BASE_API_URL = 'https://api.celere.top';
-const REGISTERED_SERVICES_API = `${BASE_API_URL}/cad/servicos/`;
+const REGISTERED_SERVICES_API = `${API_BASE_URL}/cad/servicos/`;
 
 const RegisteredServices = ({ navigation }) => {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
@@ -43,10 +41,10 @@ const RegisteredServices = ({ navigation }) => {
   const fetchServiceImage = async (empresaId, serviceId) => {
     try {
       const response = await axios.get(
-        `${BASE_API_URL}/mnt/imagensservico/getImagemServ/?empresa=${empresaId}&servico=${serviceId}`
+        `${API_BASE_URL}/mnt/imagensservico/getImagemServ/?empresa=${empresaId}&servico=${serviceId}`
       );
       if (response.data && response.data.status === 'success') {
-        return `${BASE_API_URL}${response.data.data.imagem}`;  // URL completa da imagem
+        return `${API_BASE_URL}${response.data.data.imagem}`;  // URL completa da imagem
       } else {
         return null;  // Retorna null se não houver imagem
       }

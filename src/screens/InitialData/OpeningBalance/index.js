@@ -7,8 +7,9 @@ import styles from './styles';
 import BarTop3 from '../../../components/BarTop3';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../constants';
+import { API_BASE_URL } from '../../../services/apiConfig';
 
-const API_URL_SALDO = 'https://api.celere.top/cad/saldo_caixa_inicial/';
+const API_URL_SALDO = `${API_BASE_URL}/cad/saldo_caixa_inicial/`;
 
 const OpeningBalance = ({ navigation }) => {
   const [userData, setUserData] = useState(null);

@@ -58,7 +58,6 @@ const ActionButtons = ({navigation}) => {
     }
   };
 
-  
   // Função para abrir o segundo modal de consulta
   const toggleSecondModal = () => {
     setModalVisible(false)
@@ -94,7 +93,6 @@ const ActionButtons = ({navigation}) => {
       });
     }
   };
-
 
   // Função para abrir o quarto modal de "Cadastrar Produtos ou Serviços"
   const toggleFourthModal = () => {
@@ -149,15 +147,6 @@ const ActionButtons = ({navigation}) => {
   const handleConsultExpense = () => {
     setSecondModalVisible(false);
     navigation.navigate('ConsultExpense');
-  };
-  const handleBudget2 = () => {
-    setSecondModalVisible(false);
-    navigation.navigate('Budget');
-  };
-
-  const handleBudget = () => {
-    setModalVisible(false);
-    navigation.navigate('NewBudgets');
   };
 
   const handleSingleSale = () => {

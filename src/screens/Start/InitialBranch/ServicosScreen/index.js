@@ -5,21 +5,17 @@ import axios from 'axios';
 import styles from './styles'; // Certifique-se de ajustar o arquivo de estilos
 import BarTop3 from '../../../../components/BarTop3';
 import { COLORS } from '../../../../constants';
-
-// Ícones para as subcategorias de Serviços
 import ObrasIcon from '../../../../assets/images/svg/InitialBranch/Obras.svg';
 import InstalacaoIcon from '../../../../assets/images/svg/InitialBranch/InstalacaoIcon.svg';
 import BelezaIcon from '../../../../assets/images/svg/InitialBranch/BelezaIcon.svg';
 import TransporteIcon from '../../../../assets/images/svg/InitialBranch/TransporteIcon.svg';
 import RepresentacaoIcon from '../../../../assets/images/svg/InitialBranch/RepresentacaoIcon.svg';
 import OutrosIcon from '../../../../assets/images/svg/InitialBranch/OutrosIcon.svg';
-
-const API_URL_ASSOCIAR_RAMO = 'https://api.celere.top/cad/associar_ramo_atividade/';
+import { API_BASE_URL } from '../../../../services/apiConfig';
 
 const ServicosScreen = ({ route, navigation }) => {
   const { subcategories, userData } = route.params;
   const [loading, setLoading] = useState(false);
-
 
   // Mapeamento de ícones dinâmicos com base no nome da subcategoria
   const iconMapping = {
@@ -43,7 +39,7 @@ const ServicosScreen = ({ route, navigation }) => {
       
       // Enviando a requisição para associar o ramo de atividade
       const response = await axios.post(
-        API_URL_ASSOCIAR_RAMO,
+        `${API_BASE_URL}/cad/associar_ramo_atividade/`,
         {
           empresa_id: userData.id,
           ramo_atividade_id: subcategoryId,

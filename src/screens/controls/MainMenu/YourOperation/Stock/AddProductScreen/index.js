@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useRef, useCallback } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView, Modal, Alert, Image, ActivityIndicator, PermissionsAndroid, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, Modal, Alert, Image } from 'react-native';
 import styles from './styles';
 import BarTop2 from '../../../../../../components/BarTop2';
 import { COLORS } from '../../../../../../constants';
@@ -10,11 +10,9 @@ import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { launchCamera } from 'react-native-image-picker'; // Para capturar a foto
 import { launchImageLibrary } from 'react-native-image-picker';
+import { API_BASE_URL } from '../../../../../../services/apiConfig';
 
-// ** Constantes para URLs e Headers **
-const API_BASE_URL = 'https://api.celere.top';
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
 const IMAGE_UPLOAD_API = `${API_BASE_URL}/mnt/imagensproduto/`;

@@ -14,6 +14,7 @@ import axios from 'axios';
 import OpeningBalanceModal from './components/OpeningBalanceModal';
 import TaxModal from './components/TaxModal';
 import { useFocusEffect } from '@react-navigation/native';
+import { API_BASE_URL } from '../../../services/apiConfig';
 
 const MainMenu = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false); // Visibilidade do OpeningBalanceModal
@@ -37,47 +38,63 @@ const MainMenu = ({ navigation }) => {
     }
   }, []);
 
-  // Função para recuperar o saldo de caixa com base no ID da empresa logada e na data selecionada
-  const fetchSaldoCaixa = useCallback(async () => {
-    try {
-      if (empresaId && selectedDate) {
-        const { dt_ini, dt_end } = selectedDate;
+// Função para recuperar o saldo de caixa com base no ID da empresa logada e na data selecionada
+const fetchSaldoCaixa = useCallback(async () => {
+  try {
+    if (empresaId && selectedDate) {
+      const { dt_ini, dt_end } = selectedDate;
 
-        const response = await axios.get(
-          `https://api.celere.top/api/composite/get/?empresa_id=${empresaId}&dt_ini=${dt_ini}&dt_end=${dt_end}`
-        );
+      // Logs para verificar os valores de data e ID da empresa
+      console.log('Recuperando saldo para:', { empresaId, dt_ini, dt_end });
 
-        if (response.status === 200 && response.data.status === 'success') {
-          const saldoData = response.data.data.find(item => item.item === "Saldo Caixa");
-          if (saldoData) {
-            const saldoTotal = parseFloat(saldoData.valor.replace(/\./g, '').replace(',', '.'));
-            setSaldoCaixa(saldoTotal); // Atualiza o estado
-          } else {
-            setSaldoCaixa(0); // Define como 0 se não houver saldo
-          }
+      const response = await axios.get(
+         `${API_BASE_URL}/api/composite/get/?empresa_id=${empresaId}&dt_ini=${dt_ini}&dt_end=${dt_end}`
+      );
+
+      console.log('Resposta da API:', response.data); // Verifique se a resposta está correta
+
+      if (response.status === 200 && response.data.status === 'success') {
+        const saldoData = response.data.data.find(item => item.item === "Saldo Caixa");
+
+        // Verificação adicional
+        console.log('Dados de saldo:', saldoData);
+
+        if (saldoData) {
+          const saldoTotal = parseFloat(saldoData.valor.replace(/\./g, '').replace(',', '.'));
+          setSaldoCaixa(saldoTotal); // Atualiza o estado
         } else {
-          Alert.alert('Erro', 'Não foi possível recuperar o saldo de caixa.');
-          setSaldoCaixa(0); // Define como 0 em caso de erro
+          setSaldoCaixa(0); // Define como 0 se não houver saldo
         }
+      } else {
+        Alert.alert('Erro', 'Não foi possível recuperar o saldo de caixa.');
+        setSaldoCaixa(0); // Define como 0 em caso de erro
       }
-    } catch (error) {
-      setSaldoCaixa(0); // Define como 0 em caso de erro
-    } finally {
-      setLoading(false);
     }
-  }, [empresaId, selectedDate]); // Depende de empresaId e selectedDate
+  } catch (error) {
+    console.error('Erro ao buscar saldo:', error); // Log para verificar se houve erro
+    setSaldoCaixa(0); // Define como 0 em caso de erro
+  } finally {
+    setLoading(false);
+  }
+}, [empresaId, selectedDate]); // Depende de empresaId e selectedDate
 
-  useEffect(() => {
-    getEmpresaId(); // Obtém o ID da empresa ao montar o componente
-  }, [getEmpresaId]);
 
-  useFocusEffect(
-    useCallback(() => {
+useFocusEffect(
+  useCallback(() => {
+    const updateSaldoOnFocus = async () => {
+      await getEmpresaId();
       if (selectedDate) {
-        fetchSaldoCaixa(); // Atualiza o saldo de caixa toda vez que a tela ganhar foco
+        setLoading(true);
+        await fetchSaldoCaixa();
       }
-    }, [selectedDate, fetchSaldoCaixa])
-  );
+    };
+    updateSaldoOnFocus();
+  }, [selectedDate, fetchSaldoCaixa, getEmpresaId])
+);
+
+useEffect(() => {
+  initializeDateFilter(); // Inicializa a data com o dia atual
+}, []);
 
   useEffect(() => {
     if (selectedDate) {

@@ -16,9 +16,9 @@ import styles from './styles';
 import BarTop3 from '../../../../components/BarTop3';
 import { COLORS } from '../../../../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '../../../../services/apiConfig';
 
-const BASE_API_URL = 'https://api.celere.top/';
-const REGISTER_SUPPLIER_API_ENDPOINT = `${BASE_API_URL}/cad/fornecedor/`;
+const REGISTER_SUPPLIER_API_ENDPOINT = `${API_BASE_URL}/cad/fornecedor/`;
 
 const IncludeSupplier = ({ navigation }) => {
   const [supplierName, setSupplierName] = useState('');

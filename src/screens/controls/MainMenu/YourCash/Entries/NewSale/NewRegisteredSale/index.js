@@ -9,12 +9,11 @@ import { COLORS } from "../../../../../../../constants";
 import RenderProduct from './components/RenderProduct.jsx'; // Componente para exibir produtos/serviços
 import styles from "./styles";
 import { useFocusEffect } from "@react-navigation/native";
+import { API_BASE_URL } from "../../../../../../../services/apiConfig.js";
 
-const API_BASE_URL = 'https://api.celere.top';
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
 const SERVICES_API = `${API_BASE_URL}/cad/servicos/`;
-
 
 const NewRegisteredSale = ({ navigation, route }) => {
   const [search, setSearch] = useState('');
@@ -232,7 +231,6 @@ useFocusEffect(
   }, [route.params?.clearCart, fetchProductsAndServices])
 );
 
-
   // Função para atualizar a quantidade dos produtos/serviços
   const handleQuantityChange = (id, delta) => {
     const product = products.find(p => p.id.toString() === id);
@@ -315,7 +313,6 @@ useFocusEffect(
       </>
     );
   };
-  
 
   const toggleFourthModal = () => setFourthModalVisible(!fourthModalVisible);
     // Certifique-se de que o modal é fechado corretamente

@@ -9,6 +9,7 @@ import { COLORS } from '../../../../../../constants';
 import styles from '../../../YourCash/Entries/SettleCredit/components/stylesReceip';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BarTop2 from '../../../../../../components/BarTop2';
+import { API_BASE_URL } from '../../../../../../services/apiConfig';
 
 const BudgetsScreen = ({ navigation, route }) => {
     const { saleId } = route.params;  // ID do orçamento passado para a tela
@@ -44,7 +45,7 @@ const fetchReceipt = useCallback(async () => {
         }
 
         // Requisição para obter a URL do PDF com orcamento_id em vez de venda_id
-        const response = await axios.get(`https://api.celere.top/cad/orcamento/gerar_recibo_orcamento/`, {
+        const response = await axios.get(`${API_BASE_URL}/cad/orcamento/gerar_recibo_orcamento/`, {
             params: {
                 empresa_id: empresaId,
                 orcamento_id: saleId,  // Alterado para orcamento_id

@@ -8,11 +8,11 @@ import BarTop2 from '../../../../../../components/BarTop2';
 import { COLORS } from '../../../../../../constants';
 import styles from './styles';
 import axios from 'axios';
+import { API_BASE_URL } from '../../../../../../services/apiConfig';
 
-const BASE_API_URL = 'https://api.celere.top';
-const UNIT_MEASURE_API_ENDPOINT = `${BASE_API_URL}/api/und_medida_servico/?page=1&page_size=100`;
-const REGISTER_SERVICE_API_ENDPOINT = `${BASE_API_URL}/cad/servicos/`;
-const IMAGE_UPLOAD_API = `${BASE_API_URL}/mnt/imagensservico/`;
+const UNIT_MEASURE_API_ENDPOINT = `${API_BASE_URL}/api/und_medida_servico/?page=1&page_size=100`;
+const REGISTER_SERVICE_API_ENDPOINT = `${API_BASE_URL}/cad/servicos/`;
+const IMAGE_UPLOAD_API = `${API_BASE_URL}/mnt/imagensservico/`;
 
 const AddService = ({ navigation }) => {
   const [barcode, setBarcode] = useState('');
@@ -27,7 +27,6 @@ const AddService = ({ navigation }) => {
   const [photo, setPhoto] = useState(null);  // Estado para armazenar a foto selecionada
   const [modalVisible, setModalVisible] = useState(false); // Estado para controlar o modal de sucesso
   const defaultImageUrl = require('../../../../../../assets/images/png/placeholder.png'); // URL da imagem padrão
-  
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {

@@ -8,6 +8,7 @@ import BarTop3 from '../../../components/BarTop3';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../constants';
 import styles from './styles';
+import { API_BASE_URL } from '../../../services/apiConfig';
 
 const API_URL = 'https://api.celere.top/config/ativar-empreendedor/';
 
@@ -59,7 +60,7 @@ const InitialCode = ({ navigation }) => {
     setLoading(true);
     const codigoAtivacao = `${codigoAtivacao1}${codigoAtivacao2}`;
     try {
-      const response = await axios.patch(`${API_URL}${userData.id}/`, {
+      const response = await axios.patch(`${API_BASE_URL}/config/ativar-empreendedor/${userData.id}/`, {
         codigo_ativacao: codigoAtivacao,
       });
 

@@ -4,8 +4,6 @@ import { Text, TouchableOpacity, View, Image } from "react-native";
 import BarTop2 from "../../../../../components/BarTop2";
 import { COLORS } from "../../../../../constants";
 import styles from './styles';
-
-// Importe os ícones do projeto
 import IconConsultar from "../../../../../assets/images/svg/Exits/IconConsultar.svg";
 import IconCadastrar from "../../../../../assets/images/svg/Exits/IconConsultar.svg";
 import IconCategorias from "../../../../../assets/images/svg/Exits/IconCategorias.svg";

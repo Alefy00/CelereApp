@@ -13,10 +13,7 @@ import DeleteExpenseModal from './components/DeleteExpenseModal';
 import styles from './styles';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// Constante para o link da API
-const API_URL = 'https://api.celere.top/cad/despesa';
-const CANCEL_EXPENSE_API = 'https://api.celere.top/cad/despesa';
+import { API_BASE_URL } from '../../../../../../services/apiConfig';
 
 // Função para formatar as datas no formato brasileiro
 const formatDateToBrazilian = (dateString) => {
@@ -48,7 +45,6 @@ const getEmpresaId = async () => {
   }
 };
 
-
 const ExpenseDetails = ({ route, navigation }) => {
   const { expense, categories } = route.params;
   const [isDateModalVisible, setIsDateModalVisible] = useState(false);
@@ -61,7 +57,6 @@ const ExpenseDetails = ({ route, navigation }) => {
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); 
   const [selectedDate, setSelectedDate] = useState(null); // Para armazenar a data do modal
   const [empresaId, setEmpresaId] = useState(null); // Estado para armazenar o ID da empresa logada
-
 
   // Obter o ID da empresa ao montar o componente
   useEffect(() => {
@@ -105,7 +100,7 @@ const ExpenseDetails = ({ route, navigation }) => {
   
       try {
         const response = await axios.put(
-          `${CANCEL_EXPENSE_API}/${expense.id}/cancelardespesa/`,
+          `${API_BASE_URL}/cad/despesa/${expense.id}/cancelardespesa/`,
           {
             empresa_id: empresaId,
             motivo_cancelamento: "Desistiu da despesa"
@@ -154,7 +149,7 @@ const ExpenseDetails = ({ route, navigation }) => {
     try {
       // Fazer a requisição PATCH para liquidar a despesa
       const response = await axios.patch(
-        `${API_URL}/${expense.id}/baixardespesa/`,  // URL correta para o PATCH
+        `${API_BASE_URL}/cad/despesa/${expense.id}/baixardespesa/`,  // URL correta para o PATCH
         {
           empresa_id: empresaId,  // ID da empresa logada
           dt_pagamento: formattedDate,  // Data de pagamento
@@ -211,8 +206,6 @@ const ExpenseDetails = ({ route, navigation }) => {
     setRemainingAmount(newRemainingAmount.toFixed(2)); // Atualiza o valor restante
     setIsSecondPartialModalVisible(true); // Abre o segundo modal de confirmação
   };
-  
-  
 
  // Confirmar a liquidação parcial e fechar o modal
 const handleFinalConfirmation = async () => {
@@ -238,7 +231,7 @@ const handleFinalConfirmation = async () => {
   try {
     // Fazer a requisição PATCH para liquidar parcialmente a despesa
     const response = await axios.patch(
-      `${API_URL}/${expense.id}/baixar_despesa_parcialmente/?empresa_id=${empresaId}`,
+      `${API_BASE_URL}/cad/despesa/${expense.id}/baixar_despesa_parcialmente/?empresa_id=${empresaId}`,
       {
         dt_pagamento: formattedDate,  // Data de pagamento
         vlr_pagamento: partialAmount,  // Valor parcial

@@ -5,14 +5,11 @@ import axios from 'axios';
 import styles from './styles'; // Certifique-se de ajustar o arquivo de estilos
 import BarTop3 from '../../../../components/BarTop3';
 import { COLORS } from '../../../../constants';
-
-// Importar todos os ícones possíveis
 import RestauranteIcon from '../../../../assets/images/svg/InitialBranch/RestauranteIcon.svg';
 import DeliveryIcon from '../../../../assets/images/svg/InitialBranch/DeliveryIcon.svg';
 import FoodTruckIcon from '../../../../assets/images/svg/InitialBranch/FoodTruckIcon.svg';
 import HomeIcon from '../../../../assets/images/svg/InitialBranch/HomeIcon.svg';
-
-const API_URL_ASSOCIAR_RAMO = 'https://api.celere.top/cad/associar_ramo_atividade/';
+import { API_BASE_URL } from '../../../../services/apiConfig';
 
 const AlimentosScreen = ({ route, navigation }) => {
   const { subcategories, userData } = route.params;
@@ -38,7 +35,7 @@ const AlimentosScreen = ({ route, navigation }) => {
       
       // Enviando a requisição para associar o ramo de atividade
       const response = await axios.post(
-        API_URL_ASSOCIAR_RAMO,
+        `${API_BASE_URL}/cad/associar_ramo_atividade/`,
         {
           empresa_id: userData.id,
           ramo_atividade_id: subcategoryId,

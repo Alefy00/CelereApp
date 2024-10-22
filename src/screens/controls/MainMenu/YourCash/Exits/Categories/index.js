@@ -5,6 +5,9 @@ import BarTop2 from '../../../../../../components/BarTop2';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles'; // Arquivo de estilos
 import { COLORS } from '../../../../../../constants';
+import { API_BASE_URL } from '../../../../../../services/apiConfig';
+
+const API_URL = `${API_BASE_URL}/mnt/categoriasdespesa/?page=1&page_size=30`;
 
 const CategoriesScreen = ({ navigation }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -12,9 +15,6 @@ const CategoriesScreen = ({ navigation }) => {
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [loading, setLoading] = useState(true); // Estado de loading
     const [error, setError] = useState(null); // Estado de erro
-
-    // Constante com o link da API
-    const API_URL = 'https://api.celere.top/mnt/categoriasdespesa/?page=1&page_size=30';
 
     // Função para buscar categorias da API
     const fetchCategories = async () => {
@@ -38,7 +38,6 @@ const CategoriesScreen = ({ navigation }) => {
           setLoading(false);
       }
   };
-  
   
     useEffect(() => {
         fetchCategories(); // Chama a API quando o componente é montado
@@ -73,7 +72,6 @@ const CategoriesScreen = ({ navigation }) => {
           </TouchableOpacity>
       );
   };
-  
 
     // Renderizar a lista de categorias ou um indicador de loading
     return (
@@ -88,10 +86,8 @@ const CategoriesScreen = ({ navigation }) => {
                   style={{ height: 50 }}
               />
           </View>
-  
           <Text style={styles.title}>Categorias de Despesas</Text>
           <Text style={styles.subtitle}>Veja e cadastre suas categorias de despesas.</Text>
-  
           <View style={styles.contentContainer}>
               <View style={styles.searchContainer}>
                   <TextInput
@@ -105,7 +101,6 @@ const CategoriesScreen = ({ navigation }) => {
                       <Icon name="search-outline" size={20} color={COLORS.lightGray} />
                   </TouchableOpacity>
               </View>
-  
               {/* Exibe erro genérico se houver erro, caso contrário exibe a lista */}
               {loading ? (
                   <ActivityIndicator size="large" color={COLORS.primary} />
@@ -119,13 +114,11 @@ const CategoriesScreen = ({ navigation }) => {
                       style={styles.categoryList}
                   />
               )}
-  
               <TouchableOpacity style={styles.deleteButton} disabled={selectedCategories.length === 0}>
                   <Icon name="close" size={24} color="#000" />
                   <Text style={styles.deleteButtonText}>Excluir selecionados</Text>
               </TouchableOpacity>
           </View>
-  
           <View style={styles.addButtonContainer}>
               <TouchableOpacity style={styles.addButton}>
                   <Icon name="add" size={24} color="#000" />

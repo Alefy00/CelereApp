@@ -9,10 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
 import FilterModal from '../../../YourCash/Entries/SettleCredit/components/FilterModal';
 import { useFocusEffect } from '@react-navigation/native';
-
-
-const API_URL_CLIENTES = 'https://api.celere.top/cad/cliente/';
-const API_URL_ORCAMENTOS = 'https://api.celere.top/cad/orcamento/';
+import { API_BASE_URL } from '../../../../../../services/apiConfig';
 
 const Budget = ({ navigation }) => {
   const [budgets, setBudgets] = useState([]);
@@ -54,7 +51,7 @@ const Budget = ({ navigation }) => {
   const fetchBudgets = useCallback(async (empresaId) => {
     try {
       let allBudgets = [];
-      let nextPage = `${API_URL_ORCAMENTOS}?empresa_id=${empresaId}`;
+      let nextPage = `${API_BASE_URL}/cad/orcamento/?empresa_id=${empresaId}`;
       
       while (nextPage) {
         const response = await axios.get(nextPage);
@@ -65,7 +62,7 @@ const Budget = ({ navigation }) => {
               // Buscar nome do cliente
               let clientName = 'Cliente não encontrado';
               if (!clientCache[budget.cliente]) {
-                const clientResponse = await axios.get(`${API_URL_CLIENTES}${budget.cliente}/`);
+                const clientResponse = await axios.get(`${API_BASE_URL}/cad/cliente/${budget.cliente}/`);
                 clientName = clientResponse.data.nome || 'Cliente não encontrado';
                 setClientCache((prevCache) => ({ ...prevCache, [budget.cliente]: clientName }));
               } else {
@@ -134,7 +131,7 @@ const Budget = ({ navigation }) => {
     const deleteBudget = async (budgetId) => {
       try {
         setLoading(true);
-        await axios.delete(`${API_URL_ORCAMENTOS}${budgetId}/`);
+        await axios.delete(`${API_BASE_URL}/cad/orcamento/${budgetId}/`);
         Alert.alert('Sucesso', 'Orçamento excluído com sucesso.');
         setModalVisible(false);
         loadBudgets(); // Atualizar lista após a exclusão
