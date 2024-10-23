@@ -15,6 +15,7 @@ import OpeningBalanceModal from './components/OpeningBalanceModal';
 import TaxModal from './components/TaxModal';
 import { useFocusEffect } from '@react-navigation/native';
 import { API_BASE_URL } from '../../../services/apiConfig';
+import mixpanel from '../../../services/mixpanelClient';
 
 const MainMenu = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false); // Visibilidade do OpeningBalanceModal
@@ -179,6 +180,12 @@ useEffect(() => {
       dt_end: endDate,
     });
   }, []);
+
+  useEffect(() => {
+    // Exemplo de rastreamento de evento de interação do usuário
+    mixpanel.track('Tela de Vendas Acessada');
+  }, []);
+
 
   return (
     <KeyboardAvoidingView behavior="position" enabled>
