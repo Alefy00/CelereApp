@@ -123,10 +123,19 @@ useEffect(() => {
     if (saldo > 0) {
       await AsyncStorage.setItem('initialBalanceAdded', 'true'); // Marca que o saldo foi adicionado
       setIsModalVisible(false); // Fecha o OpeningBalanceModal
-      setIsTaxModalVisible(true); // Abre o TaxModal após o saldo ser adicionado
-    } else {
-      Alert.alert('Erro', 'Por favor, preencha o saldo inicial antes de continuar.');
+
+    // Atualiza o saldo de caixa após fechar o modal
+    await fetchSaldoCaixa();
+    // Verifica se as informações de tributo foram preenchidas
+    const taxInfoAdded = await AsyncStorage.getItem('taxInfoAdded');
+    
+    if (!taxInfoAdded) {
+      // Abre o TaxModal após o saldo ser atualizado
+      setIsTaxModalVisible(true);
     }
+  } else {
+    Alert.alert('Erro', 'Por favor, preencha o saldo inicial antes de continuar.');
+  }
   };
 
   // Função para fechar o TaxModal após preenchido

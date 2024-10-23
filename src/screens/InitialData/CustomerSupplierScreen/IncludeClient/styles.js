@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContainer: {
-    width: '100%',
+    width: '90%',
     backgroundColor: COLORS.white,
     borderRadius: 10,
     padding: 20,

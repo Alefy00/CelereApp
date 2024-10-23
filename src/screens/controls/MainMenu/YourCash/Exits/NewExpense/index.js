@@ -367,16 +367,14 @@ useFocusEffect(
             {/* Date Picker para Data de Pagamento */}
             <View style={styles.datePickerContainer}>
               <Text style={styles.dateLabel}>Data de pagamento</Text>
-              <View style={styles.datePickerRow}>
+              <TouchableOpacity style={styles.datePickerRow} onPress={handleShowCalendar}>
                 <TextInput
                   style={styles.dateInput}
                   value={format(date, 'dd/MM/yyyy', { locale: ptBR })} // Formata a data de pagamento
                   editable={false} // Campo não editável diretamente
                 />
-                <TouchableOpacity onPress={handleShowCalendar}>
                   <Icon name="calendar" size={20} color={COLORS.gray} />
-                </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
             </View>
 
             {/* Campo de Código de Barras */}

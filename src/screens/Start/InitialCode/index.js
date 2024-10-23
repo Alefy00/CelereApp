@@ -89,7 +89,7 @@ const InitialCode = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.barTopContainer}>
         <BarTop3
-          titulo={'Voltar'}
+       
           backColor={COLORS.primary}
           foreColor={COLORS.black}
           routeMailer={''}

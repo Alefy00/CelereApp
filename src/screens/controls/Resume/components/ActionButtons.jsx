@@ -102,6 +102,7 @@ const ActionButtons = ({navigation}) => {
 
     // Função para abrir o quinto modal de "orçamento ou PMOC"
     const toggleFiveModal = () => {
+      setModalVisible(false)
       setFiveModalVisible(!FiveModalVisible);
     };
 

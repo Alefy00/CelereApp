@@ -95,7 +95,7 @@ const SettleCredit = ({ navigation }) => {
         return novasVendas;
       };
 
-      const vendas = await fetchAllVendas(`${API_BASE_URL}/cad/vendas/?empresa_id=${empresaId}`);
+      const vendas = await fetchAllVendas(`${API_BASE_URL}/cad/vendas/?empresa=${empresaId}`);
 
       if (vendas && Array.isArray(vendas)) {
         const liquidadas = vendas.filter(venda => venda.status === 'finalizada');

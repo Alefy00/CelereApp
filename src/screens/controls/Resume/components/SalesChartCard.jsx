@@ -206,7 +206,7 @@ const SalesChartCard = ({ selectedDate }) => {
         <View style={styles.detailItem}>
           <View style={styles.colorIndicatorRed} />
           <Text style={styles.detailText}>Custos diretos das vendas</Text>
-          <Text style={styles.detailValueRed}>R$ {formatCurrency(custosVendas)}</Text>
+          <Text style={styles.detailValueRed}>{formatCurrency(custosVendas)}</Text>
         </View>
       </View>
     </View>
