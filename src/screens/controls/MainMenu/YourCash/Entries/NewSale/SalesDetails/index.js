@@ -98,7 +98,7 @@ const SaleDetails = ({ navigation, route }) => {
             onPress={() => toggleViewMode('Liquidar agora')}
           >
             <Text style={viewMode === 'Liquidar agora' ? styles.activeButtonText : styles.inactiveButtonText}>
-              Liquidar agora
+              Pagar agora
             </Text>
           </TouchableOpacity>
           <TouchableOpacity

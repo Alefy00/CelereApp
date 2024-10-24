@@ -11,6 +11,7 @@ import LiquidatedDetailModal from "./components/LiquidatedDetailModal"; // Impor
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { API_BASE_URL } from "../../../../../../services/apiConfig";
+import mixpanel from "../../../../../../services/mixpanelClient";
 
 const SettleCredit = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('open'); // Aba atual: "open" para liquidadas, "settled" para contas a receber
@@ -78,29 +79,34 @@ const SettleCredit = ({ navigation }) => {
         setLoading(false);
         return;
       }
-
+  
       await fetchClientes(empresaId); // Busca os clientes da empresa
-
+  
+      // Definindo datas padrão para o filtro de vendas
+      const dataInicial = "2024-10-01";
+      const dataFinal = "2030-10-24";
+  
       const fetchAllVendas = async (url, vendasAcumuladas = []) => {
         const response = await axios.get(url);
-        const vendasPagina = response.data.results.data;
-
+        const vendasPagina = response.data.data;
+  
+        // Filtrando vendas da empresa atual
         const vendasFiltradas = vendasPagina.filter(venda => venda.empresa === empresaId);
         const novasVendas = [...vendasAcumuladas, ...vendasFiltradas];
-
+  
         if (response.data.next) {
           return fetchAllVendas(response.data.next, novasVendas);
         }
-
+  
         return novasVendas;
       };
-
-      const vendas = await fetchAllVendas(`${API_BASE_URL}/cad/vendas/?empresa=${empresaId}`);
-
+  
+      const vendas = await fetchAllVendas(`${API_BASE_URL}/cad/vendas/?empresa=${empresaId}&data_inicial=${dataInicial}&data_final=${dataFinal}`);
+  
       if (vendas && Array.isArray(vendas)) {
         const liquidadas = vendas.filter(venda => venda.status === 'finalizada');
         const contasReceber = vendas.filter(venda => venda.status === 'pendente');
-
+  
         // Buscar os nomes dos serviços para as vendas liquidadas
         const novosNomesServicos = {};
         for (const venda of liquidadas) {
@@ -112,13 +118,13 @@ const SettleCredit = ({ navigation }) => {
           }
         }
         setServicoNomes(novosNomesServicos);
-
+  
         setContas(liquidadas);
         setContas2(contasReceber);
       } else {
         showAlert("Erro", "A resposta da API de vendas não contém os dados esperados.");
       }
-
+  
       setLoading(false);
     } catch (error) {
       console.error("Erro ao buscar vendas:", error);
@@ -126,6 +132,8 @@ const SettleCredit = ({ navigation }) => {
       setLoading(false);
     }
   }, [getEmpresaId, fetchClientes]);
+  
+  
 
   useEffect(() => {
     fetchVendas();
@@ -135,34 +143,54 @@ const SettleCredit = ({ navigation }) => {
   const openAccountDetailModal = (account) => {
     setSelectedAccount(account);
     setModalVisible(true);
+  // Evento Mixpanel - Captura a abertura do modal de contas a receber
+  mixpanel.track('Modal de Contas a Receber Aberto', {
+    contaId: account.id,
+    cliente: clientes[account.cliente] || 'Cliente não encontrado',
+  });
   };
 
   // Função para abrir o modal de vendas liquidadas (LiquidatedDetailModal)
   const openLiquidatedDetailModal = (account) => {
     setSelectedAccount(account);
     setLiquidatedModalVisible(true);
+  // Evento Mixpanel - Captura a abertura do modal de vendas liquidadas
+  mixpanel.track('Modal de Vendas Liquidadas Aberto', {
+    contaId: account.id,
+    cliente: clientes[account.cliente] || 'Cliente não encontrado',
+  });
   };
 
   // Função para fechar o modal de contas a receber
   const closeAccountDetailModal = () => {
     setModalVisible(false);
     setSelectedAccount(null);
+  // Evento Mixpanel - Captura o fechamento do modal de contas a receber
+  mixpanel.track('Modal de Contas a Receber Fechado');
   };
 
   // Função para fechar o modal de vendas liquidadas
   const closeLiquidatedDetailModal = () => {
     setLiquidatedModalVisible(false);
     setSelectedAccount(null);
+  // Evento Mixpanel - Captura o fechamento do modal de vendas liquidadas
+  mixpanel.track('Modal de Vendas Liquidadas Fechado');
   };
 
   // Função para abrir o modal de filtro
   const openFilterModal = () => {
     setFilterModalVisible(true);
+  // Evento Mixpanel - Captura a abertura do modal de filtro
+  mixpanel.track('Filtro Aberto');
   };
 
   // Função para alternar entre "Liquidadas" e "Contas a Receber"
   const toggleTab = (tab) => {
     setSelectedTab(tab);
+      // Evento Mixpanel - Captura a troca de aba
+  mixpanel.track('Aba Trocada', {
+    abaSelecionada: tab === 'open' ? 'Pagas' : 'Contas a Receber',
+  });
   };
 
   const handleSaleCanceled = () => {

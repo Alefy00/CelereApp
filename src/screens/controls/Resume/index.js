@@ -31,6 +31,8 @@ const MainMenu = ({ navigation }) => {
       const storedEmpresaId = await AsyncStorage.getItem('empresaId');
       if (storedEmpresaId) {
         setEmpresaId(Number(storedEmpresaId));
+        // Identificar o usuário no Mixpanel ao carregar o ID da empresa
+        mixpanel.identify(storedEmpresaId);
       } else {
         Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
       }
@@ -49,7 +51,7 @@ const fetchSaldoCaixa = useCallback(async () => {
       console.log('Recuperando saldo para:', { empresaId, dt_ini, dt_end });
 
       const response = await axios.get(
-         `${API_BASE_URL}/api/composite/get/?empresa_id=${empresaId}&dt_ini=${dt_ini}&dt_end=${dt_end}`
+         `${API_BASE_URL}/api/ms_datainf/composite/?empresa_id=${empresaId}&dt_ini=${dt_ini}&dt_end=${dt_end}`
       );
 
       console.log('Resposta da API:', response.data); // Verifique se a resposta está correta
@@ -119,25 +121,36 @@ useEffect(() => {
     checkModals(); // Verifica os estados ao carregar a tela
   }, [saldoCaixa]); // Depende do saldoCaixa para saber se já foi recuperado
 
-  // Função para fechar o OpeningBalanceModal e abrir o TaxModal após o saldo ser adicionado
   const handleBalanceSave = async (saldo) => {
     if (saldo > 0) {
       await AsyncStorage.setItem('initialBalanceAdded', 'true'); // Marca que o saldo foi adicionado
       setIsModalVisible(false); // Fecha o OpeningBalanceModal
-
-    // Atualiza o saldo de caixa após fechar o modal
-    await fetchSaldoCaixa();
-    // Verifica se as informações de tributo foram preenchidas
-    const taxInfoAdded = await AsyncStorage.getItem('taxInfoAdded');
-    
-    if (!taxInfoAdded) {
-      // Abre o TaxModal após o saldo ser atualizado
-      setIsTaxModalVisible(true);
+  
+      console.log('Saldo inserido:', saldo);
+  
+      // Atualiza o saldo de caixa após fechar o modal
+      try {
+        console.log('Chamando fetchSaldoCaixa() para atualizar o saldo...');
+        await fetchSaldoCaixa(); // Faz a requisição para buscar o saldo atualizado
+  
+        console.log('Saldo atualizado com sucesso.');
+      } catch (error) {
+        console.error('Erro ao atualizar saldo:', error);
+      }
+  
+      // Verifica se as informações de tributo foram preenchidas
+      const taxInfoAdded = await AsyncStorage.getItem('taxInfoAdded');
+      
+      if (!taxInfoAdded) {
+        console.log('Exibindo TaxModal...');
+        // Abre o TaxModal após o saldo ser atualizado
+        setIsTaxModalVisible(true);
+      }
+    } else {
+      Alert.alert('Erro', 'Por favor, preencha o saldo inicial antes de continuar.');
     }
-  } else {
-    Alert.alert('Erro', 'Por favor, preencha o saldo inicial antes de continuar.');
-  }
   };
+  
 
   // Função para fechar o TaxModal após preenchido
   const handleTaxModalSuccess = async () => {
@@ -183,9 +196,8 @@ useEffect(() => {
 
   useEffect(() => {
     // Exemplo de rastreamento de evento de interação do usuário
-    mixpanel.track('Tela de Vendas Acessada');
+    mixpanel.track('Tela principal Exibida');
   }, []);
-
 
   return (
     <KeyboardAvoidingView behavior="position" enabled>

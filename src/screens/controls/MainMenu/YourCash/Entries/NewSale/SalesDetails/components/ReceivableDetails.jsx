@@ -66,7 +66,8 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
   };
 
   const handleConfirm = () => {
-    setIsModalVisible(true);
+        // Navega ou limpa o carrinho após o registro
+    navigation.navigate('NewRegisteredSale', { clearCart: true });
   };
 
   const handleShowCalendar = () => {
@@ -132,9 +133,7 @@ const handleRegisterSale = async () => {
       axios.post(`${API_BASE_URL}/cad/itens_venda/`, item)
     );
     await Promise.all(responsePromises);
-
-    // Navega ou limpa o carrinho após o registro
-    navigation.navigate('NewRegisteredSale', { clearCart: true });
+    setIsModalVisible(true);
 
   } catch (error) {
     console.error('Erro ao registrar venda:', error);
@@ -294,7 +293,7 @@ const handleRegisterSale = async () => {
           <Text style={styles.totalValue}>{formatCurrency(liquidValue)}</Text>
         </View>
 
-        <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
+        <TouchableOpacity style={styles.confirmButton} onPress={handleRegisterSale}>
           <Icon name="checkmark-circle" size={25} color={COLORS.black} />
           <Text style={styles.confirmButtonText}>Concluir esta venda</Text>
         </TouchableOpacity>
@@ -310,7 +309,7 @@ const handleRegisterSale = async () => {
           <View style={styles.modalContent}>
             <Icon name="checkmark-circle" size={100} color={COLORS.green} />
             <Text style={styles.modalText}>Sua venda foi concluída</Text>
-            <TouchableOpacity style={styles.modalPrimaryButton} onPress={handleRegisterSale}>
+            <TouchableOpacity style={styles.modalPrimaryButton} onPress={handleConfirm}>
               <Icon name="cart" size={20} color={COLORS.black} />
               <Text style={styles.modalPrimaryButtonText}>Registrar outra venda</Text>
             </TouchableOpacity>

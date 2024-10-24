@@ -11,6 +11,7 @@ import { COLORS } from '../../../../../../../../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '../../../../../../../../services/apiConfig';
+import mixpanel from '../../../../../../../../services/mixpanelClient';
 
 // Função para mostrar alertas
 const showAlert = (title, message) => {
@@ -130,12 +131,20 @@ const updateCartItem = (index, field, value) => {
 const addNewCartItem = () => {
   const newCartItem = { id: cartItems.length + 1, name: '', priceVenda: 0, quantity: 1 };
   setCartItems([...cartItems, newCartItem]);
+  // Evento Mixpanel - Captura a adição de um item no carrinho
+  mixpanel.track('Item Adicionado ao Carrinho', {
+    itemId: newCartItem.id,
+  });
 };
 
 // Função para remover um item do carrinho
 const removeCartItem = (id) => {
   const updatedItems = cartItems.filter((item) => item.id !== id);
   setCartItems(updatedItems);
+  // Evento Mixpanel - Captura a remoção de um item do carrinho
+  mixpanel.track('Item Removido do Carrinho', {
+    itemId: id,
+  });
 };
 
 // Função para calcular o total bruto e líquido
@@ -197,6 +206,12 @@ useEffect(() => {
         await registerSaleItems(vendaId);
         setSaleId(vendaId);
         setIsModalVisible(true);
+      // Evento Mixpanel - Captura a conclusão da venda
+      mixpanel.track('Venda Concluída', {
+        vendaId: vendaId,
+        valorTotal: totalLiquido,
+        metodoPagamento: selectedPaymentMethod,
+      });
       } else {
         showAlert('Erro', 'Falha ao registrar a venda. Verifique os dados e tente novamente.');
         console.error('Erro ao registrar venda:', response.data);
@@ -277,6 +292,11 @@ const toggleDropdown = () => {
 const selectClient = (client) => {
   setSelectedClient(client);
   setDropdownVisible(false);
+    // Evento Mixpanel - Captura a seleção do cliente
+  mixpanel.track('Cliente Selecionado', {
+    clienteId: client.id,
+    clienteNome: client.nome,
+  });
 };
 
 const navigateToAddClient = () => {
@@ -305,6 +325,8 @@ const formatCurrency = (value) => {
 const handleNewRegistered = () => {
   setIsModalVisible(false);
   navigation.navigate('SingleSale');
+
+  mixpanel.track('Registrar Outra Venda');
 };
 
 const handleOpenInvoiceModal = () => {
@@ -347,6 +369,12 @@ const updateQuantity = (id, increment) => {
     return item;
   });
   setCartItems(updatedItems);
+
+    // Evento Mixpanel - Captura a atualização da quantidade do item
+    mixpanel.track('Quantidade Atualizada', {
+      itemId: id,
+      novaQuantidade: updatedItems.find(item => item.id === id)?.quantity,
+    });
 };
 
 const togglePaymentDropdown = () => {

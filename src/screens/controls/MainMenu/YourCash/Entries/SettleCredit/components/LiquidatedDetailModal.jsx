@@ -95,7 +95,7 @@ const calculateTotalAmount = useCallback(() => {
 
                   <View style={styles.containerTitle}>
                       <Text style={styles.sectionTitle}>Situação:</Text>
-                      <Text style={styles.sectionTitleGreen}>Liquidada</Text>
+                      <Text style={styles.sectionTitleGreen}>Pagas</Text>
                   </View>
 
                   {/* Lista de produtos e serviços */}

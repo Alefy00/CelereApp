@@ -8,6 +8,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomCalendar from '../../../../../../../../components/CustomCalendar';
 import { API_BASE_URL } from '../../../../../../../../services/apiConfig';
+import mixpanel from '../../../../../../../../services/mixpanelClient';
 
 const API_VENDAS = `${API_BASE_URL}/cad/vendas/`;
 const API_ITENS_VENDA = `${API_BASE_URL}/cad/itens_venda/`;
@@ -92,6 +93,11 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
     const selectClient = (client) => {
         setSelectedClient(client);
         setDropdownVisible(false); // Fecha o dropdown após a seleção
+          // Rastrear evento no Mixpanel
+  mixpanel.track('Cliente Selecionado', {
+    clienteId: client.id,
+    clienteNome: client.nome,
+  });
     };
 
     const navigateToAddClient = () => {
@@ -195,6 +201,13 @@ const handleRegisterSale = async () => {
 
       // Executa todas as promessas de registro de serviços e produtos
       await Promise.all([...servicePromises, ...productPromises]);
+    // Rastrear a conclusão da venda no Mixpanel
+    mixpanel.track('Venda Concluída', {
+      vendaId,
+      totalPreco: totalValue,
+      descontoAplicado: discount,
+      formaPagamento: selectedPayment,
+    });
 
       resetCart(); // Limpa o carrinho após registrar a venda
 

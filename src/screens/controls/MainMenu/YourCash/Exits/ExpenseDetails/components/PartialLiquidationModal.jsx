@@ -53,12 +53,12 @@ const PartialLiquidationModal = ({ visible, onClose, onConfirmPartialLiquidation
           </View>
 
           {/* Data de Pagamento */}
-          <View style={styles.datePickerContainer}>
+          <TouchableOpacity style={styles.datePickerContainer}  onPress={handleShowCalendar}>
             <Text style={styles.dateLabel}>Hoje, {paymentDate.toLocaleDateString('pt-BR')}</Text>
-            <TouchableOpacity onPress={handleShowCalendar} style={styles.datePickerButton}>
+            <TouchableOpacity style={styles.datePickerButton}>
               <Icon name="calendar" size={20} color={COLORS.lightGray} />
             </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
 
           <CustomCalendar
             visible={isCalendarVisible}

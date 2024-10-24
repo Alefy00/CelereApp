@@ -354,7 +354,7 @@ useFocusEffect(
                 style={[styles.toggleButton, isLiquidateNow && styles.toggleButtonActive]}
                 onPress={toggleExpenseType}
               >
-                <Text style={styles.toggleButtonText}>Liquidar agora</Text>
+                <Text style={styles.toggleButtonText}>Pagar agora</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.toggleButton, !isLiquidateNow && styles.toggleButtonActive]}

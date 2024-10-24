@@ -36,7 +36,7 @@ const SingleSale = ({ navigation }) => {
               style={[styles.toggleButton, activeTab === 'Liquidar agora' && styles.activeToggleButton]}
               onPress={() => setActiveTab('Liquidar agora')}
             >
-              <Text style={styles.toggleButtonText}>Liquidar agora</Text>
+              <Text style={styles.toggleButtonText}>Pagar agora</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.toggleButton, activeTab === 'Contas a Pagar' && styles.activeToggleButton]}

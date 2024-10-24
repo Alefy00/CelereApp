@@ -73,42 +73,82 @@ const ConsultExpense = ({ navigation }) => {
     }
   };
 
-// Função para buscar todas as despesas
-const fetchExpenses = useCallback(async (empresa_id, status = 'liquidada') => {  
+// Função para buscar todas as despesas, separadas por status
+const fetchExpenses = useCallback(async (empresa_id) => {
   if (!empresa_id) return;
 
   setLoading(true);
   try {
-    const response = await axios.get(API_EXPENSES_URL, {
+    // Buscar despesas com status 'pendente' (para a aba 'Contas a pagar')
+    const responsePendentes = await axios.get(API_EXPENSES_URL, {
       params: {
         page: 1,
         page_size: 100,
         empresa_id: empresa_id,
         data_inicial: '2023-01-01',
         data_final: '4030-09-23',
-        status: status === 'liquidada' ? 'finalizada' : 'pendente'
+        status: 'pendente'
       }
     });
 
-    const despesasData = response.data.data;
+    // Buscar despesas com status 'finalizada' (para a aba 'Pagas')
+    const responseFinalizadas = await axios.get(API_EXPENSES_URL, {
+      params: {
+        page: 1,
+        page_size: 100,
+        empresa_id: empresa_id,
+        data_inicial: '2023-01-01',
+        data_final: '4030-09-23',
+        status: 'finalizada'
+      }
+    });
 
-    // Agora, para cada despesa, faça uma requisição adicional para buscar o valor_a_pagar
-    const despesasComValorAPagar = await Promise.all(despesasData.map(async (expense) => {
+    // Inclui despesas recorrentes junto com as despesas principais
+    const todasDespesasPendentes = responsePendentes.data.data.flatMap(despesa => {
+      const recorrencias = responsePendentes.data.data.filter(d => d.despesa_pai === despesa.id);
+      return [despesa, ...recorrencias];
+    });
+
+    const todasDespesasFinalizadas = responseFinalizadas.data.data.flatMap(despesa => {
+      const recorrencias = responseFinalizadas.data.data.filter(d => d.despesa_pai === despesa.id);
+      return [despesa, ...recorrencias];
+    });
+
+    // Atualiza as despesas pendentes e finalizadas separadamente
+    const despesasComValorAPagarPendentes = await Promise.all(todasDespesasPendentes.map(async (expense) => {
       const detalhesDespesa = await axios.get(`${API_EXPENSES_URL}${expense.id}`);
       return {
         ...expense,
-        valor_a_pagar: detalhesDespesa.data.data.valor_a_pagar, // Inclui o valor_a_pagar na despesa
+        valor_a_pagar: detalhesDespesa.data.data.valor_a_pagar,
       };
     }));
 
-    setExpenses(despesasComValorAPagar);
-    setFilteredExpenses(despesasComValorAPagar);  // Define as despesas filtradas com valor_a_pagar
+    const despesasComValorAPagarFinalizadas = await Promise.all(todasDespesasFinalizadas.map(async (expense) => {
+      const detalhesDespesa = await axios.get(`${API_EXPENSES_URL}${expense.id}`);
+      return {
+        ...expense,
+        valor_a_pagar: detalhesDespesa.data.data.valor_a_pagar,
+      };
+    }));
+
+    // Atualiza a lista de despesas pendentes e finalizadas
+    if (toggleState === 'pendente') {
+      // Exibe todas as despesas pendentes e suas recorrências
+      setExpenses(despesasComValorAPagarPendentes);
+      setFilteredExpenses(despesasComValorAPagarPendentes);
+    } else if (toggleState === 'liquidada') {
+      // Exibe todas as despesas finalizadas e suas recorrências
+      setExpenses(despesasComValorAPagarFinalizadas);
+      setFilteredExpenses(despesasComValorAPagarFinalizadas);
+    }
+
   } catch (error) {
     console.error("Erro ao buscar despesas: ", error);
   } finally {
     setLoading(false);
   }
-}, []);
+}, [toggleState]);
+
 
 
   const fetchCategories = async () => {
@@ -276,14 +316,12 @@ const fetchExpenses = useCallback(async (empresa_id, status = 'liquidada') => {
            </Text>
         </Text>
       </View>
-      {/* Exibe o valor_a_pagar se disponível, senão o valor original */}
       <Text style={styles.expenseAmount}>
         {formatCurrency(expense.valor_a_pagar)}
       </Text>
     </TouchableOpacity>
   ))}
 </ScrollView>
-
 
       {!isSearching && (
         <TouchableOpacity

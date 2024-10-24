@@ -11,6 +11,7 @@ import CreditCardIcon from "../../../../../../../../assets/images/svg/iconCard.s
 import DebitCardIcon from "../../../../../../../../assets/images/svg/iconCard.svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_BASE_URL } from "../../../../../../../../services/apiConfig";
+import mixpanel from "../../../../../../../../services/mixpanelClient";
 
 const LiquidateNow = ({ products, totalPrice, clients, navigation, route }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -107,6 +108,7 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route }) => {
     setInstallments(parseInt(option));  // Define o número de parcelas com base na escolha
     setIsPaymentDropdownVisible(false);
   };
+
 // Função de registrar venda e itens
 const handleRegisterSale = async () => {
   try {
@@ -163,6 +165,14 @@ const handleRegisterSale = async () => {
 
     setSaleId(vendaId);
     setIsModalVisible(true);
+    // Rastrear a venda concluída no Mixpanel
+    mixpanel.track('Venda Concluída', {
+      vendaId: vendaId,
+      totalPreco: totalValue,
+      desconto: discountValue,
+      parcelas: installments,
+      metodoPagamento: selectedPaymentMethod,
+    });
   } catch (error) {
     // Log do erro, se a requisição falhar
     console.error('Erro ao registrar venda:', error.response ? error.response.data : error.message);
@@ -176,6 +186,13 @@ const handleRegisterSale = async () => {
   const selectClient = (client) => {
     setSelectedClient(client);
     setDropdownVisible(false);
+
+      // Rastrear no Mixpanel a seleção de cliente
+  mixpanel.track('Cliente Selecionado', {
+    clienteId: client.id,
+    clienteNome: client.nome,
+  });
+
   };
 
   const navigateToAddClient = () => {

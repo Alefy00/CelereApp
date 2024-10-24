@@ -11,6 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { COLORS } from '../../../../../../../../constants';
 import axios from 'axios';
 import { API_BASE_URL } from '../../../../../../../../services/apiConfig';
+import mixpanel from '../../../../../../../../services/mixpanelClient';
 
 const LiquidateNow = ({ navigation, route, clients }) => {
   const { services: receivedServices = [], products: receivedProducts = [], totalPrice: initialTotalPrice } = route.params;
@@ -216,6 +217,13 @@ const handleRegisterSale = async () => {
     // Aguardar todas as requisições
     await Promise.all([...servicePromises, ...productPromises]);
 
+      // Evento Mixpanel - Captura a finalização da venda
+  mixpanel.track('Venda Finalizada', {
+    valorTotal: liquidValue,
+    metodoPagamento: selectedPaymentMethod,
+    numeroParcelas: installments,
+  });
+
     setIsModalVisible(true);
   } catch (error) {
     console.error('Erro ao registrar venda:', error.response ? error.response.data : error);
@@ -230,6 +238,11 @@ const handleRegisterSale = async () => {
   const selectClient = (client) => {
       setSelectedClient(client);
       setDropdownVisible(false);
+  // Rastrear evento no Mixpanel
+  mixpanel.track('Cliente Selecionado', {
+    clienteId: client.id,
+    clienteNome: client.nome,
+  });
   };
 
   const navigateToAddClient = () => {
@@ -244,6 +257,10 @@ const handleRegisterSale = async () => {
     setPaymentType(option);
     setInstallments(parseInt(option));  // Define o número de parcelas com base na escolha
     setIsPaymentDropdownVisible(false);
+      // Evento Mixpanel - Captura a escolha de parcelas
+  mixpanel.track('Pagamento Parcelado Selecionado', {
+    numeroParcelas: option,
+  });
   };
 
 // Função para calcular o total dos produtos e serviços, com aplicação do desconto
@@ -296,6 +313,8 @@ useEffect(() => {
 
   const handleAddProduct = () => {
       navigation.navigate('NewRegisteredSale');
+
+      mixpanel.track('Adicionar Produtos');
   };
 
   const handleOpenInvoiceModal = () => {

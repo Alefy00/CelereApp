@@ -11,8 +11,6 @@ import styles from './stylesChartCard';
 import { useFocusEffect } from '@react-navigation/native';
 import { API_BASE_URL } from '../../../../services/apiConfig';
 
-const API_URL = 'https://api.celere.top/api/composite/get/';
-
 const SalesChartCard = ({ selectedDate }) => {
   const [chartData, setChartData] = useState([]);
   const [lucroBruto, setLucroBruto] = useState('0,00');
@@ -52,7 +50,7 @@ const SalesChartCard = ({ selectedDate }) => {
 
       const { dt_ini, dt_end } = selectedDate;
       console.log(`Data selecionada: de ${dt_ini} até ${dt_end}`);
-      const response = await axios.get(`${API_BASE_URL}/api/composite/get/?empresa_id=${empresaId}&dt_ini=${dt_ini}&dt_end=${dt_end}`);
+      const response = await axios.get(`${API_BASE_URL}/api/ms_datainf/composite/?empresa_id=${empresaId}&dt_ini=${dt_ini}&dt_end=${dt_end}`);
       
       if (response.status === 200 && response.data.status === 'success') {
         const data = response.data.data;
@@ -61,7 +59,7 @@ const SalesChartCard = ({ selectedDate }) => {
         const lucroBrutoData = data.find(item => item.item === 'Lucro Bruto');
         const margemBrutaData = data.find(item => item.item === 'Margem Bruta');
         const vendasLiquidadasData = data.find(item => item.item === 'Vendas Liquidadas');
-        const custosVendasData = data.find(item => item.item === 'Custos diretos de vendas');
+        const custosVendasData = data.find(item => item.item === 'Custos Diretos das Vendas (CDV)');
 
         console.log('Dados retornados da API:', {
           lucroBrutoData,
@@ -206,7 +204,7 @@ const SalesChartCard = ({ selectedDate }) => {
         <View style={styles.detailItem}>
           <View style={styles.colorIndicatorRed} />
           <Text style={styles.detailText}>Custos diretos das vendas</Text>
-          <Text style={styles.detailValueRed}>{formatCurrency(custosVendas)}</Text>
+          <Text style={styles.detailValueRed}>R$ {custosVendas}</Text>
         </View>
       </View>
     </View>

@@ -203,12 +203,12 @@ const calculateTotalAmount = useCallback(() => {
           </View>
 
             <TouchableOpacity style={styles.partialButton} onPress={openPartialLiquidationModal}>
-              <Text style={styles.buttonText}>Liquidar Parcialmente</Text>
+              <Text style={styles.buttonText}>Pagar Parcialmente</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.totalButton} onPress={openLiquidationModal}>
               <Icon name="checkmark-circle" size={24} color="black" />
-              <Text style={styles.buttonText}>Liquidar</Text>
+              <Text style={styles.buttonText}>Pagar total</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.reminderButton}  disabled={true}>

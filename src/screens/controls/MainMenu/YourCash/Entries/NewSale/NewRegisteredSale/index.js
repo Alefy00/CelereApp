@@ -10,6 +10,7 @@ import RenderProduct from './components/RenderProduct.jsx'; // Componente para e
 import styles from "./styles";
 import { useFocusEffect } from "@react-navigation/native";
 import { API_BASE_URL } from "../../../../../../../services/apiConfig.js";
+import mixpanel from "../../../../../../../services/mixpanelClient.js";
 
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
@@ -81,27 +82,23 @@ const NewRegisteredSale = ({ navigation, route }) => {
   };
 
 
-  // Função para buscar produtos e serviços com suas imagens
+  // Função de busca de produtos e serviços
   const fetchProductsAndServices = useCallback(async () => {
     setLoading(true);
     try {
       const empresaId = await getEmpresaId();
       if (empresaId) {
-        // Busca produtos
         const productResponse = await axios.get(`${PRODUCTS_API}?page_size=100&empresa=${empresaId}`);
         const fetchedProducts = productResponse.data.data;
 
-        // Busca serviços
         const serviceResponse = await axios.get(`${SERVICES_API}?page_size=100&empresa_id=${empresaId}`);
         const fetchedServices = serviceResponse.data.results.data;
 
-        // Filtrar apenas os serviços que pertencem à empresa logada
         const filteredServices = fetchedServices.filter(service => service.empresa.id === empresaId);
 
-        // Buscar imagens para produtos e serviços
         const productsWithImages = await Promise.all(fetchedProducts.map(async (product) => {
           const imageUrl = await fetchProductImage(empresaId, product.id);
-          return { ...product, image_url: imageUrl };  // Adiciona o campo image_url com a imagem recuperada
+          return { ...product, image_url: imageUrl };
         }));
 
         const servicesWithImages = await Promise.all(filteredServices.map(async (service) => {
@@ -110,20 +107,29 @@ const NewRegisteredSale = ({ navigation, route }) => {
             ...service,
             categoria: 'Serviços',
             qtd_estoque: null,
-            image_url: imageUrl,  // Adiciona o campo image_url com a imagem recuperada
+            image_url: imageUrl,
           };
         }));
 
-        // Combina produtos e serviços
         setProducts([...productsWithImages, ...servicesWithImages]);
         setFilteredProducts([...productsWithImages, ...servicesWithImages]);
+
+        // Evento Mixpanel para rastrear a busca de produtos e serviços
+        mixpanel.track('Produtos e Serviços Carregados', {
+          totalProdutos: productsWithImages.length,
+          totalServicos: servicesWithImages.length,
+          empresaId: empresaId,
+        });
       }
     } catch (error) {
       showAlert("Erro", "Erro ao conectar à API.");
+      // Evento Mixpanel para erro
+      mixpanel.track('Erro ao carregar Produtos/Serviços', { erro: error.message });
     } finally {
       setLoading(false);
     }
   }, [getEmpresaId]);
+
 
   // Recarregar produtos e serviços ao voltar para a tela
   useFocusEffect(
@@ -190,6 +196,13 @@ const NewRegisteredSale = ({ navigation, route }) => {
     }
 
     setFilteredProducts(filtered); // Atualiza a lista de produtos filtrados
+        // Evento Mixpanel para rastrear a aplicação de filtros
+        mixpanel.track('Filtros Aplicados', {
+          filtroGeral: generalFilter,
+          categoriaSelecionada: selectedCategory,
+          termoBusca: search,
+          totalProdutosFiltrados: filtered.length,
+        });
   }, [generalFilter, selectedCategory, search, products]);
 
   useEffect(() => {
@@ -284,15 +297,21 @@ useFocusEffect(
   
     // Calcular o preço total, incluindo os serviços com preço 0
     const totalPrice = allSelectedItems.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
-  
     const services = allSelectedItems.filter(item => item.categoria === 'Serviços');
     const nonServices = allSelectedItems.filter(item => item.categoria !== 'Serviços');
+
+        // Evento Mixpanel para rastrear a confirmação da venda
+        mixpanel.track('Venda Confirmada', {
+          totalItens: allSelectedItems.length,
+          totalPreco: totalPrice,
+          produtos: nonServices.map(item => item.nome),
+          servicos: services.map(item => item.nome),
+        });
   
     // Navegar para a próxima tela, passando os dados dos produtos/serviços e o preço total
     navigateToNextScreen(services, nonServices, allSelectedItems, totalPrice);
   };
-  
-  
+
   const renderFooter = () => {
     const hasItemsInCart = Object.keys(quantities).length > 0; // Verifica se há itens no carrinho
   
