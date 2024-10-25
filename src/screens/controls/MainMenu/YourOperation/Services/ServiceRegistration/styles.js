@@ -77,6 +77,22 @@ const styles = StyleSheet.create({
     elevation: 2,
     marginHorizontal: 20,
   },
+  //custo
+  halfWidthInput: {
+    width: '48%',
+    marginRight: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  costSectionTitle: {
+    marginTop: 20,
+    fontSize: 16,
+    color: COLORS.black,
+    fontWeight: 'bold',
+  },
+  
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -95,8 +111,9 @@ const styles = StyleSheet.create({
     borderColor: COLORS.black,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 20,
+    marginBottom: 10,
     borderBottomWidth: 1,
+    flexDirection: 'row',
   },
   textArea: {
     height: 100,
@@ -106,10 +123,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingTop: 10,
     textAlignVertical: 'top',
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
   },
   dropdown: {
     flex: 1,
@@ -184,9 +197,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: COLORS.black,
   },
-  clientText: {
+  MedidaText: {
     fontSize: 16,
     color: COLORS.lightGray,
+    marginTop: 10
   },
   addClientButton: {
     backgroundColor: COLORS.primary,
@@ -196,11 +210,10 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     backgroundColor: COLORS.white,
-    borderRadius: 5,
-    maxHeight: 150, // Limita a altura do dropdown
-    marginTop: -25,
-    elevation: 2,
-    width: '100%', // Certifica-se que o dropdown tenha a largura completa
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
+    marginTop: 5,  // Ajusta a posição do dropdown para aparecer logo abaixo do campo
   },
   dropdownContainerPag: {
     backgroundColor: COLORS.white,

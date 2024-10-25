@@ -9,7 +9,7 @@ import styles from '../styles'; // Adapte seus estilos ao design enviado
 import TimeIcon from '../../../../assets/images/svg/MainMenu/timeIcon.svg';
 import { API_BASE_URL } from '../../../../services/apiConfig';
 
-const OpeningBalanceModal = ({ visible, onClose }) => {
+const OpeningBalanceModal = ({ visible, onClose, onBalanceSaved }) => {
   const [empresaId, setEmpresaId] = useState(null);
   const [cash, setCash] = useState('');
   const [bank, setBank] = useState('');
@@ -100,6 +100,7 @@ const OpeningBalanceModal = ({ visible, onClose }) => {
       if (response.status === 201 && response.data.status === 'success') {
         await AsyncStorage.setItem('initialBalanceAdded', 'true');
         setSuccessModalVisible(true); // Exibe o modal de sucesso
+        onBalanceSaved();
       } else {
         Alert.alert('Erro', response.data.message || 'Erro ao salvar o saldo inicial.');
       }
@@ -173,7 +174,6 @@ const OpeningBalanceModal = ({ visible, onClose }) => {
               </View>
             </View>
           </Modal>
-
         </View>
       </View>
     </Modal>

@@ -87,6 +87,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 10,
         elevation: 1,
+        paddingVertical:30,
     },
     actionButtonTextFull: {
         color: COLORS.black,
@@ -116,6 +117,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: COLORS.black,
         elevation: 1,
+        paddingVertical:30,
     },
     actionButton2: {
         backgroundColor: COLORS.white,
@@ -126,6 +128,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 10,
         elevation: 1,
+        paddingVertical:30,
     },
     actionButtonText: {
         color: COLORS.black,
@@ -140,6 +143,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 1,
+        paddingVertical:30,
+        marginBottom: 10,
     },
     actionButtonTextDelete: {
         color: COLORS.black,

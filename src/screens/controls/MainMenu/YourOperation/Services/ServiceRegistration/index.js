@@ -26,6 +26,7 @@ const AddService = ({ navigation }) => {
   const [isPriceDisabled, setIsPriceDisabled] = useState(false); // Estado para controlar o checkbox
   const [photo, setPhoto] = useState(null);  // Estado para armazenar a foto selecionada
   const [modalVisible, setModalVisible] = useState(false); // Estado para controlar o modal de sucesso
+  const [cost, setCost] = useState('');  // Novo estado para o valor dos custos
   const defaultImageUrl = require('../../../../../../assets/images/png/placeholder.png'); // URL da imagem padrão
 
   // Função para buscar o ID da empresa logada
@@ -74,7 +75,7 @@ const AddService = ({ navigation }) => {
   }, []);
 
   const handleSave = async () => {
-    if (!name || (!price && !isPriceDisabled) || !unitMeasure) {
+    if (!name || (!price && !isPriceDisabled) || !unitMeasure || !cost) {
       Alert.alert('Erro', 'Todos os campos obrigatórios devem ser preenchidos.');
       return;
     }
@@ -86,15 +87,18 @@ const AddService = ({ navigation }) => {
   
     const currentDate = new Date().toISOString().split('T')[0];
     const finalPrice = isPriceDisabled ? 0 : removeCurrencyFormatting(price);
+    const finalCost = removeCurrencyFormatting(cost);  // Adiciona o valor do custo
   
     const serviceData = {
       empresa_id: empresaId,
       dt_servico: currentDate,
       nome: name,
       descricao: description || null,
+      custo_servico: finalCost,  // Custo do serviço adicionado
       preco_venda: finalPrice,
       status: 'ativo',
       unidade_medida: unitMeasure,
+      is_cobrar_na_hora_da_venda: true,  // Valor fixo
       ean: barcode || null,
     };
   
@@ -112,9 +116,8 @@ const AddService = ({ navigation }) => {
   
       if (response.ok) {
         const serviceId = result.data.id;  // Obtém o ID do serviço recém-cadastrado
-        // Se houver uma foto, faz o upload
         if (photo) {
-          await uploadServiceImage(serviceId, empresaId);  // Faz o upload da imagem
+          await uploadServiceImage(serviceId, empresaId);  // Faz o upload da imagem, se houver
         }
         setModalVisible(true);  // Exibe o modal de sucesso
         clearForm();  // Limpa o formulário
@@ -126,6 +129,7 @@ const AddService = ({ navigation }) => {
       Alert.alert('Erro', 'Não foi possível registrar o serviço. Verifique sua conexão e tente novamente.');
     }
   };
+  
   
 // Função para enviar a imagem do produto
 const uploadServiceImage = async (serviceId, empresaId) => {
@@ -168,13 +172,6 @@ const handleSelectImage = async () => {
       console.error('Erro ao selecionar imagem:', response.errorMessage);
     } else if (response.assets && response.assets.length > 0) {
       const selectedPhoto = response.assets[0];
-      console.log('Imagem capturada:', selectedPhoto);  // Log da imagem capturada
-
-      // Adicionando mais logs para conferir o conteúdo
-      console.log('Imagem URI:', selectedPhoto.uri);
-      console.log('Imagem Tipo:', selectedPhoto.type);
-      console.log('Imagem Nome:', selectedPhoto.fileName);
-
       setPhoto({
         uri: selectedPhoto.uri,
         type: selectedPhoto.type || 'image/jpeg',  // Define o tipo como 'image/jpeg' por padrão, caso não esteja presente
@@ -192,6 +189,7 @@ const handleSelectImage = async () => {
     setDescription('');
     setIsPriceDisabled(false);
     setPhoto(null);  // Limpa a imagem
+    setCost('')
   };
 
   const toggleUnitMeasureDropdown = () => {
@@ -241,6 +239,12 @@ const handleSelectImage = async () => {
     setPrice(formattedValue);
   };
 
+  const handleCostChange = (text) => {
+    const formattedValue = formatPriceToBRL(text);
+    setCost(formattedValue);
+  };
+  
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -272,7 +276,7 @@ const handleSelectImage = async () => {
               value={barcode}
               onChangeText={setBarcode}
               keyboardType="numeric"
-            />
+              />
           </View>
           <Text style={styles.imageLabel}>  Imagem{"\n"}do serviço</Text>
         </View>
@@ -283,53 +287,67 @@ const handleSelectImage = async () => {
             placeholder="Nome do serviço"
             value={name}
             onChangeText={setName}
-          />
+            />
           <TextInput
             style={styles.textArea}
             placeholder="Descrição do Serviço"
             value={description}
             onChangeText={setDescription}
             multiline
-          />
+            />
         </View>
+            {/*
+              <View style={styles.checkboxContainer}>
+                <TouchableOpacity onPress={handlePriceCheckboxChange} style={styles.checkbox}>
+                  <Icon name={isPriceDisabled ? 'checkbox' : 'square-outline'} size={24} color={COLORS.black} />
+                </TouchableOpacity>
+                <Text style={styles.checkboxLabel}>Não inserir preço neste momento</Text>
+              </View>*/}
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Valores do Serviço</Text>
+<View style={styles.section}>
+  <Text style={styles.sectionTitle}>Valores do Serviço</Text>
 
-          <View style={styles.checkboxContainer}>
-            <TouchableOpacity onPress={handlePriceCheckboxChange} style={styles.checkbox}>
-              <Icon name={isPriceDisabled ? 'checkbox' : 'square-outline'} size={24} color={COLORS.black} />
-            </TouchableOpacity>
-            <Text style={styles.checkboxLabel}>Não inserir preço neste momento</Text>
-          </View>
+  <View style={styles.row}>
+    {/* Preço de Venda */}
+    <TextInput
+      style={[styles.input, styles.halfWidthInput]}
+      placeholder="Preço de Venda (R$)"
+      value={price}
+      onChangeText={handlePriceChange}
+      keyboardType="numeric"
+    />
 
-          <TextInput
-            style={[styles.input, isPriceDisabled && { backgroundColor: COLORS.lightGray }]}
-            placeholder="Preço de Venda (R$)"
-            value={price}
-            onChangeText={handlePriceChange}
-            editable={!isPriceDisabled}
-            keyboardType="numeric"
-          />
+    {/* Unidade de Medida */}
+    <TouchableOpacity style={[styles.input, styles.halfWidthInput]} onPress={toggleUnitMeasureDropdown}>
+      <Text style={styles.MedidaText}>{unitMeasure || 'Un. de Medida'}</Text>
+      <Icon name={isUnitMeasureDropdownVisible ? 'arrow-up' : 'arrow-down'} size={24} color={COLORS.lightGray} />
+    </TouchableOpacity>
+  </View>
 
-          <View style={styles.clientContainer}>
-            <TouchableOpacity style={styles.clientPicker} onPress={toggleUnitMeasureDropdown}>
-              <Text style={styles.clientText}>{unitMeasure || 'Un. de Medida'}</Text>
-              <Icon name={isUnitMeasureDropdownVisible ? 'arrow-up' : 'arrow-down'} size={24} color={COLORS.lightGray} />
-            </TouchableOpacity>
-          </View>
-          {isUnitMeasureDropdownVisible && (
-            <View style={[styles.dropdownContainer, { maxHeight: 150 }]}>
-              <ScrollView nestedScrollEnabled={true}>
-                {unitsOfMeasure.map((unit) => (
-                  <TouchableOpacity key={unit.id} style={styles.dropdownItem} onPress={() => selectUnitMeasure(unit)}>
-                    <Text style={styles.dropdownItemText}>{unit.cod} - {unit.nome}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          )}
-        </View>
+
+  {/* Dropdown da Unidade de Medida */}
+  {isUnitMeasureDropdownVisible && (
+    <View style={[styles.dropdownContainer, { maxHeight: 150, marginTop: 10 }]}>
+      <ScrollView nestedScrollEnabled={true}>
+        {unitsOfMeasure.map((unit) => (
+          <TouchableOpacity key={unit.id} style={styles.dropdownItem} onPress={() => selectUnitMeasure(unit)}>
+            <Text style={styles.dropdownItemText}>{unit.cod} - {unit.nome}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  )}
+  {/* Campo de Custo */}
+  <Text style={styles.costSectionTitle}>Custos (apenas para estimativa de lucro bruto)</Text>
+  <TextInput
+    style={styles.input}
+    placeholder="Valor dos Custos (R$)"
+    value={cost}
+    onChangeText={handleCostChange}
+    keyboardType="numeric"
+  />
+</View>
+
 
         <TouchableOpacity style={styles.button} onPress={handleSave}>
           <Icon name="checkmark-circle" size={25} color={COLORS.black} />

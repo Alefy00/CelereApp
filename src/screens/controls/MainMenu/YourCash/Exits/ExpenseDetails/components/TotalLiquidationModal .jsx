@@ -12,11 +12,22 @@ const TotalLiquidationModal = ({ visible, onClose, onConfirm }) => {
 
     const handleDayPress = (day) => {
         setSelectedDate(new Date(day.dateString)); // Atualiza a data selecionada
-      };
+    };
 
-      const handleShowCalendar = () => {
+    const handleShowCalendar = () => {
         setIsCalendarVisible(true);
-      };
+    };
+
+    const handleConfirm = () => {
+        const currentDate = new Date(); // Data e hora atual do dispositivo
+        const adjustedDate = new Date(selectedDate); // Clona a data selecionada
+        adjustedDate.setHours(currentDate.getHours());
+        adjustedDate.setMinutes(currentDate.getMinutes());
+        adjustedDate.setSeconds(currentDate.getSeconds());
+        adjustedDate.setMilliseconds(currentDate.getMilliseconds());
+        
+        onConfirm(adjustedDate); // Envia a data com o horário ajustado
+    };
 
     return (
         <Modal
@@ -45,14 +56,15 @@ const TotalLiquidationModal = ({ visible, onClose, onConfirm }) => {
                         <Icon name="calendar" size={24} color={COLORS.lightGray} />
                     </TouchableOpacity>
 
-                            <CustomCalendar
-                            visible={isCalendarVisible}
-                            onClose={() => setIsCalendarVisible(false)}
-                            onDayPress={handleDayPress}
-                        />
-                    <TouchableOpacity style={styles.confirmButton} onPress={() => onConfirm(selectedDate)}>
+                    <CustomCalendar
+                        visible={isCalendarVisible}
+                        onClose={() => setIsCalendarVisible(false)}
+                        onDayPress={handleDayPress}
+                    />
+                    
+                    <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
                         <Icon name="checkmark-circle" size={24} color="#000" />
-                        <Text style={styles.confirmButtonText}>Liquidar despesa</Text>
+                        <Text style={styles.confirmButtonText}>Pagar despesa</Text>
                     </TouchableOpacity>
                 </View>
             </View>

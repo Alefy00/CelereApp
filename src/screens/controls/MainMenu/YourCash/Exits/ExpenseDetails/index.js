@@ -170,7 +170,6 @@ const ExpenseDetails = ({ route, navigation }) => {
       Alert.alert('Erro', 'Erro ao conectar-se à API. Tente novamente mais tarde.');
     }
   };
-  
 
   // Confirmar o adiamento e exibir uma mensagem de sucesso
   const handleConfirmPostponement = (selectedDate) => {
@@ -302,24 +301,23 @@ const handleFinalConfirmation = async () => {
         {/* Botões de ações */}
         <TouchableOpacity style={styles.actionButtonFull} onPress={handleOpenDateModal}>
           <Icon name="checkmark-circle" size={20} color={COLORS.black} />
-          <Text style={styles.actionButtonTextFull}>Liquidar valor total</Text>
+          <Text style={styles.actionButtonTextFull}>Pagar valor total</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton2} onPress={handleOpenPartialModal}>
+        {/*<TouchableOpacity style={styles.actionButton2} onPress={handleOpenPartialModal}>
           <Icon name="cut-sharp" size={20} color={COLORS.black} />
           <Text style={styles.actionButtonText}>Liquidar parcialmente</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.actionButtonAdiar} disabled={true}>
-          <Icon name="calendar" size={20} color={COLORS.black} />
-          <Text style={styles.actionButtonText}>Adiar</Text>
-        </TouchableOpacity>
+        </TouchableOpacity>*/ }
 
         <TouchableOpacity style={styles.actionButtonDelete} onPress={handleOpenDeleteModal}>
           <Icon name="trash-outline" size={20} color={COLORS.black} />
           <Text style={styles.actionButtonTextDelete}>Excluir Conta</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity style={styles.actionButtonAdiar} disabled={true}>
+          <Icon name="calendar" size={20} color={COLORS.black} />
+          <Text style={styles.actionButtonText}>Adiar</Text>
+        </TouchableOpacity>
         {/* Modal de liquidação total */}
         <TotalLiquidationModal
           visible={isDateModalVisible}

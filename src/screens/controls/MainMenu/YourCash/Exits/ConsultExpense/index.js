@@ -26,7 +26,7 @@ const ConsultExpense = ({ navigation }) => {
 
   const handleFilter = (filters) => {
     const { searchText, valorPrestacao, selectedDate } = filters;
-    
+
     // Filtra as despesas com base nos critérios fornecidos
     const filtered = expenses.filter(expense => {
       const matchesSearchText = searchText ? expense.item.toLowerCase().includes(searchText.toLowerCase()) : true;
@@ -35,7 +35,6 @@ const ConsultExpense = ({ navigation }) => {
   
       return matchesSearchText && matchesValue && matchesDate;
     });
-  
     setFilteredExpenses(filtered); // Atualiza a lista filtrada
     setIsFilterModalVisible(false); // Fecha o modal após aplicar o filtro
   };
@@ -50,7 +49,6 @@ const ConsultExpense = ({ navigation }) => {
         await fetchCategories();
         setLoading(false);
       };
-  
       fetchData();
     }, [fetchExpenses, toggleState])  // Atualiza ao mudar o estado de toggle
   );
@@ -73,73 +71,36 @@ const ConsultExpense = ({ navigation }) => {
     }
   };
 
-// Função para buscar todas as despesas, separadas por status
+// Função simplificada para buscar despesas pendentes e finalizadas
 const fetchExpenses = useCallback(async (empresa_id) => {
   if (!empresa_id) return;
 
   setLoading(true);
   try {
-    // Buscar despesas com status 'pendente' (para a aba 'Contas a pagar')
-    const responsePendentes = await axios.get(API_EXPENSES_URL, {
+    // Requisição para buscar todas as despesas apenas com o ID da empresa
+    const response = await axios.get(API_EXPENSES_URL, {
       params: {
-        page: 1,
-        page_size: 100,
-        empresa_id: empresa_id,
-        data_inicial: '2023-01-01',
-        data_final: '4030-09-23',
-        status: 'pendente'
+        empresa_id: empresa_id
       }
     });
 
-    // Buscar despesas com status 'finalizada' (para a aba 'Pagas')
-    const responseFinalizadas = await axios.get(API_EXPENSES_URL, {
-      params: {
-        page: 1,
-        page_size: 100,
-        empresa_id: empresa_id,
-        data_inicial: '2023-01-01',
-        data_final: '4030-09-23',
-        status: 'finalizada'
-      }
-    });
-
-    // Inclui despesas recorrentes junto com as despesas principais
-    const todasDespesasPendentes = responsePendentes.data.data.flatMap(despesa => {
-      const recorrencias = responsePendentes.data.data.filter(d => d.despesa_pai === despesa.id);
-      return [despesa, ...recorrencias];
-    });
-
-    const todasDespesasFinalizadas = responseFinalizadas.data.data.flatMap(despesa => {
-      const recorrencias = responseFinalizadas.data.data.filter(d => d.despesa_pai === despesa.id);
-      return [despesa, ...recorrencias];
-    });
-
-    // Atualiza as despesas pendentes e finalizadas separadamente
-    const despesasComValorAPagarPendentes = await Promise.all(todasDespesasPendentes.map(async (expense) => {
-      const detalhesDespesa = await axios.get(`${API_EXPENSES_URL}${expense.id}`);
-      return {
-        ...expense,
-        valor_a_pagar: detalhesDespesa.data.data.valor_a_pagar,
-      };
+    // Obtenha todas as despesas e prepare o campo `valor_a_pagar`
+    const allExpenses = response.data.data.map(despesa => ({
+      ...despesa,
+      valor_a_pagar: despesa.valor
     }));
 
-    const despesasComValorAPagarFinalizadas = await Promise.all(todasDespesasFinalizadas.map(async (expense) => {
-      const detalhesDespesa = await axios.get(`${API_EXPENSES_URL}${expense.id}`);
-      return {
-        ...expense,
-        valor_a_pagar: detalhesDespesa.data.data.valor_a_pagar,
-      };
-    }));
+    // Separe as despesas pendentes e finalizadas
+    const despesasPendentes = allExpenses.filter(despesa => despesa.status === 'pendente');
+    const despesasFinalizadas = allExpenses.filter(despesa => despesa.status === 'finalizada');
 
-    // Atualiza a lista de despesas pendentes e finalizadas
+    // Atualize o estado com base no toggleState
     if (toggleState === 'pendente') {
-      // Exibe todas as despesas pendentes e suas recorrências
-      setExpenses(despesasComValorAPagarPendentes);
-      setFilteredExpenses(despesasComValorAPagarPendentes);
+      setExpenses(despesasPendentes);
+      setFilteredExpenses(despesasPendentes);
     } else if (toggleState === 'liquidada') {
-      // Exibe todas as despesas finalizadas e suas recorrências
-      setExpenses(despesasComValorAPagarFinalizadas);
-      setFilteredExpenses(despesasComValorAPagarFinalizadas);
+      setExpenses(despesasFinalizadas);
+      setFilteredExpenses(despesasFinalizadas);
     }
 
   } catch (error) {
@@ -148,6 +109,7 @@ const fetchExpenses = useCallback(async (empresa_id) => {
     setLoading(false);
   }
 }, [toggleState]);
+
 
 
 
@@ -204,16 +166,18 @@ const fetchExpenses = useCallback(async (empresa_id) => {
   };
 
   const getMonthReference = (dateString) => {
-    const expenseDate = new Date(dateString);  // Converte string em data
-    const previousMonth = new Date(expenseDate.setMonth(expenseDate.getMonth() - 1));  // Subtrai um mês
-    return previousMonth.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });  // Retorna o nome do mês e ano
+    // Define uma data padrão para teste caso `dt_vencimento` seja `null`
+    const expenseDate = dateString ? new Date(dateString) : new Date("2024-12-31");
+    const previousMonth = new Date(expenseDate.setMonth(expenseDate.getMonth() - 1));
+    return previousMonth.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
   };
-
+  
   const formatDate = (dateString) => {
-    const date = new Date(dateString);  // Converte string em data
-    return date.toLocaleDateString('pt-BR');  // Formata para dia/mês/ano em português
+    // Define uma data padrão para teste caso `dt_vencimento` seja `null`
+    const date = dateString ? new Date(dateString) : new Date("2024-12-31");
+    return date.toLocaleDateString('pt-BR');
   };
-
+  
   const goToExpenseDetails = (expense) => {
     navigation.navigate('ExpenseDetails', {
       expense,

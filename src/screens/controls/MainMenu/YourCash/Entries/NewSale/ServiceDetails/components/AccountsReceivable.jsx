@@ -405,13 +405,14 @@ const formatCurrency = (value) => {
           </View>
         </>
       )}
+      {/* 
          <TextInput
         style={styles.additionalCostsInput}
         placeholder="Adicionar gastos envolvidos se houver (R$) - Opcional"
         keyboardType="numeric"
         value={formatCurrency(additionalCosts)}
         onChangeText={setAdditionalCosts}
-        />
+        />*/}
         {/* Total e valor líquido a receber */}
         <View style={styles.totalContainer2}>
           <Text style={styles.totalLabel}>Valor total <Icon name="alert-circle" size={20} color={COLORS.lightGray} /></Text>

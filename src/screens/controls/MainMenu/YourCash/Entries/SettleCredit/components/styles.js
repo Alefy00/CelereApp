@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 10,
-    height: "100%",
+    height: "95%",
   },
   modalContentLiquidate: {
     backgroundColor: COLORS.white,
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
     marginBottom: 10,
-    paddingVertical: 20,
+    paddingVertical: 25,
   },
   cancelButtonModal: {
     backgroundColor: COLORS.primary,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
     marginBottom: 10,
-    paddingVertical: 20,
+    paddingVertical: 25,
   },
   reminderButton: {
     backgroundColor: COLORS.lightGray3,
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 10,
     elevation: 1,
-    paddingVertical: 20,
+    paddingVertical: 25,
   },
   reciboButton: {
     backgroundColor: COLORS.white,
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 10,
     elevation:1,
-    paddingVertical: 20,
+    paddingVertical: 25,
   },
   deleteButton: {
     backgroundColor: COLORS.white,

@@ -434,13 +434,14 @@ const formatCurrency = (value) => {
           </View>
         </>
       )}
+      {/* 
       <TextInput
         style={styles.additionalCostsInput}
         placeholder="Adicionar gastos envolvidos se houver (R$) - Opcional"
         keyboardType="numeric"
         value={formatCurrency(additionalCosts)}
         onChangeText={setAdditionalCosts}
-      />
+      />*/}
             {/* Descontos */}
             <Text style={styles.Desconto}>Descontos</Text>
       <View style={styles.discountSection}>
