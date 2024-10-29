@@ -22,8 +22,6 @@ const InitialRegistration = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  
-  // Adiciona uma ref para o campo de número de telefone
   const numberInputRef = useRef(null);
 
   useEffect(() => {

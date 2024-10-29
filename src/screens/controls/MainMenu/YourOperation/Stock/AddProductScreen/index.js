@@ -213,8 +213,12 @@ const uploadProductImage = async (productId, empresaId) => {
 
   const closeModal = () => {
     setIsModalVisible(false);
-    navigation.navigate('StockInfo');  // Navegar após fechar o modal
+    navigation.goBack();  // Navegar após fechar o modal
   };
+
+  const handleNewProduct = () => {
+    setIsModalVisible(false);
+  }
 
   // Função para adicionar uma nova categoria
   const handleAddCategory = () => {
@@ -321,7 +325,7 @@ const uploadProductImage = async (productId, empresaId) => {
           />
           <TextInput
             style={styles.serviceDescriptionInput}
-            placeholder="Descrição do Produto"
+            placeholder="Descrição do Produto(opcional)"
             placeholderTextColor={COLORS.lightGray}
             value={serviceDescription}
             onChangeText={setServiceDescription}
@@ -330,7 +334,7 @@ const uploadProductImage = async (productId, empresaId) => {
         </View>
 
         <View style={styles.categoryContainer}>
-          <Text style={styles.categoryTitle}>Categoria do produto</Text>
+          <Text style={styles.categoryTitle}>Categoria do produto(opcional)</Text>
           <View style={styles.categoryInputContainer}>
             <Picker
               selectedValue={selectedCategory}
@@ -370,8 +374,11 @@ const uploadProductImage = async (productId, empresaId) => {
             <View style={styles.modalContainer}>
               <Icon name="checkmark-circle" size={90} color={COLORS.green} />
               <Text style={styles.modalText}>Produto cadastrado{'\n'}com sucesso!</Text>
-              <TouchableOpacity style={styles.modalButton} onPress={closeModal}>
-                <Text style={styles.modalButtonText}>Ok</Text>
+              <TouchableOpacity style={styles.modalButton} onPress={handleNewProduct}>
+                <Text style={styles.modalButtonText}>Cadastrar novo produto</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalButtonRetorno} onPress={closeModal}>
+                <Text style={styles.modalButtonText}>Retornar</Text>
               </TouchableOpacity>
             </View>
           </View>

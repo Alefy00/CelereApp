@@ -60,7 +60,6 @@ const NewRegisteredSale = ({ navigation, route }) => {
         return null;  // Retorna null se não houver imagem
       }
     } catch (error) {
-      console.error('Erro ao buscar imagem do produto:', error);
       return null;  // Retorna null em caso de erro
     }
   };
@@ -76,11 +75,9 @@ const NewRegisteredSale = ({ navigation, route }) => {
         return null;  // Retorna null se não houver imagem
       }
     } catch (error) {
-      console.error('Erro ao buscar imagem do serviço:', error);
       return null;  // Retorna null em caso de erro
     }
   };
-
 
   // Função de busca de produtos e serviços
   const fetchProductsAndServices = useCallback(async () => {
@@ -137,7 +134,6 @@ const NewRegisteredSale = ({ navigation, route }) => {
       fetchProductsAndServices(); // Recarrega a lista de produtos e serviços sempre que a tela ganha foco
     }, [fetchProductsAndServices])
   );
-
 
   // Função para buscar as categorias da API e remover duplicatas
   const fetchCategories = useCallback(async () => {
@@ -326,9 +322,6 @@ useFocusEffect(
             </TouchableOpacity>
           </View>
         )}
-        <TouchableOpacity style={styles.barcodeButton} disabled={true}>
-          <Icon name="barcode" size={30} color={COLORS.black} />
-        </TouchableOpacity>
       </>
     );
   };
@@ -346,6 +339,7 @@ useFocusEffect(
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
           <View style={{height: 55}} >
@@ -400,20 +394,20 @@ useFocusEffect(
             <ActivityIndicator size="large" color="#000" />
           ) : (
             <FlatList
-              data={filteredProducts}
-              renderItem={({ item }) => (
-                <RenderProduct
-                  item={item}
-                  handleQuantityChange={handleQuantityChange}
-                  quantities={quantities}
-                />
-              )}
-              keyExtractor={item => item.id.toString()}
-              contentContainerStyle={styles.productsList}
-              numColumns={2}
-              ListFooterComponent={renderFooter}
-            />
-
+            data={filteredProducts}
+            renderItem={({ item }) => (
+              <RenderProduct
+                item={item}
+                handleQuantityChange={handleQuantityChange}
+                quantities={quantities}
+              />
+            )}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.productsList}
+            numColumns={2}
+            ListFooterComponent={renderFooter}
+            scrollEnabled={false}
+          />
           )}
 
           {/* Modal para cadastrar produto ou serviço */}
@@ -437,6 +431,7 @@ useFocusEffect(
           </Modal>
         </View>
       </TouchableWithoutFeedback>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };

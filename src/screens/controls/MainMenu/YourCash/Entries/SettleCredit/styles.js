@@ -121,8 +121,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: 'black',
-    marginLeft: 70,
-    marginTop: -75
+    marginLeft: 50,
+    marginTop: -70
   },
   emptyContainer: {
     flex: 1,
@@ -180,8 +180,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: 'black',
-    marginLeft: 90,
-    marginTop: -70,
+    marginLeft: 50,
+    marginTop: -60,
   },
 });
 

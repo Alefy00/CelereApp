@@ -85,12 +85,13 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       borderBottomWidth: 1,
       borderBottomColor: COLORS.black,
-      marginVertical: 5,
       paddingBottom: 5,
     },
     searchInput: {
       flex: 1,
       fontSize: 16,
+      marginTop: -5,
+      marginBottom: -10,
     },
     listItem: {
       flexDirection: 'row',

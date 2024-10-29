@@ -5,10 +5,6 @@ import { COLORS } from "../../../../constants";
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    position: 'absolute',
-    right: 20,
-    bottom: 80,
-    zIndex: 10,  // Garante que o botão fique acima de outros elementos
   },
   floatingContainer: {
     position: 'absolute',  // Permite que o container flutue sobre o conteúdo
@@ -269,6 +265,21 @@ secondModalOverlay: {
     shadowRadius: 4,
     elevation: 1,
     flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  fourthModalButtonDisable: {
+    width: '100%',
+    padding: 15,
+    borderRadius: 5,
+    backgroundColor: COLORS.lightGray4,
+    alignItems: 'center',
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 1,
     justifyContent: 'center',
     paddingVertical: 40,
   },

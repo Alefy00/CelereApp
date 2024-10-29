@@ -203,7 +203,10 @@ const handleSelectImage = async () => {
 
   const handleCloseModal = () => {
     setModalVisible(false); // Fecha o modal
-    navigation.navigate('RegisteredServices'); // Redireciona para a próxima tela
+    navigation.goBack() // Redireciona para a próxima tela
+  };
+  const handleNewService = () => {
+    setModalVisible(false); // Fecha o modal
   };
 
   const handlePriceCheckboxChange = () => {
@@ -243,7 +246,6 @@ const handleSelectImage = async () => {
     const formattedValue = formatPriceToBRL(text);
     setCost(formattedValue);
   };
-  
 
   return (
     <KeyboardAvoidingView
@@ -290,7 +292,7 @@ const handleSelectImage = async () => {
             />
           <TextInput
             style={styles.textArea}
-            placeholder="Descrição do Serviço"
+            placeholder="Descrição do Serviço (opcional)"
             value={description}
             onChangeText={setDescription}
             multiline
@@ -320,7 +322,7 @@ const handleSelectImage = async () => {
     {/* Unidade de Medida */}
     <TouchableOpacity style={[styles.input, styles.halfWidthInput]} onPress={toggleUnitMeasureDropdown}>
       <Text style={styles.MedidaText}>{unitMeasure || 'Un. de Medida'}</Text>
-      <Icon name={isUnitMeasureDropdownVisible ? 'arrow-up' : 'arrow-down'} size={24} color={COLORS.lightGray} />
+      <Icon name={isUnitMeasureDropdownVisible ? 'arrow-up' : 'arrow-down'} size={24} color={COLORS.lightGray} style={{marginTop:10}} />
     </TouchableOpacity>
   </View>
 
@@ -331,7 +333,7 @@ const handleSelectImage = async () => {
       <ScrollView nestedScrollEnabled={true}>
         {unitsOfMeasure.map((unit) => (
           <TouchableOpacity key={unit.id} style={styles.dropdownItem} onPress={() => selectUnitMeasure(unit)}>
-            <Text style={styles.dropdownItemText}>{unit.cod} - {unit.nome}</Text>
+            <Text style={styles.dropdownItemText}>{unit.nome}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -347,7 +349,6 @@ const handleSelectImage = async () => {
     keyboardType="numeric"
   />
 </View>
-
 
         <TouchableOpacity style={styles.button} onPress={handleSave}>
           <Icon name="checkmark-circle" size={25} color={COLORS.black} />
@@ -366,7 +367,10 @@ const handleSelectImage = async () => {
             <Icon name="checkmark-circle" size={90} color={COLORS.green} />
             <Text style={styles.modalText}>Serviço cadastrado com sucesso!</Text>
             <TouchableOpacity style={styles.confirmButton} onPress={handleCloseModal}>
-              <Text style={styles.confirmButtonText}>Ok</Text>
+              <Text style={styles.confirmButtonText}>Cadastrar novo serviço</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.confirmButton} onPress={handleNewService}>
+              <Text style={styles.confirmButtonText}>Retorna</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -10,6 +10,7 @@ import axios from 'axios';
 import styles from './stylesFilterListCard';
 import { useFocusEffect } from '@react-navigation/native';
 import { API_BASE_URL } from '../../../../services/apiConfig';
+import SalesDetailModal from './SalesDetailModal';
 
 // Função para buscar o ID da empresa logada
 const getEmpresaId = async () => {
@@ -54,8 +55,6 @@ const fetchResumoFinanceiro = async (empresaId, dataInicial, dataFinal) => {
     const vendasLiquidadas = data.find(item => item.item === "Vendas Liquidadas")?.valor || "0,00";
     const despesasLiquidadas = data.find(item => item.item === "Despesas Liquidadas")?.valor || "0,00";
     const saldo = data.find(item => item.item === "Saldo (Vendas - Despesas Pagas)")?.valor || "0,00";
-
-    // Retorna os valores como strings, exatamente como estão na API
     return {
       vendasLiquidadas,
       despesasLiquidadas,
@@ -191,7 +190,6 @@ const mapSalesData = (sales) => {
   });
 };
 
-
 // Função para traduzir o método de pagamento usando o ID
 const getPaymentMethodName = (paymentTypeId) => {
   switch (paymentTypeId) {
@@ -204,7 +202,7 @@ const getPaymentMethodName = (paymentTypeId) => {
     case 4:
       return 'Débito';
     default:
-      return 'Documento';
+      return 'Despesa';
   }
 };
 
@@ -230,7 +228,7 @@ const getPaymentIconById = (paymentTypeId) => {
   }
 };
 
-const FilteredListCard = ({ selectedDate }) => {
+const FilteredListCard = ({ selectedDate, navigation }) => {
   const [selectedTab, setSelectedTab] = useState('sales'); 
   const [searchQuery, setSearchQuery] = useState('');
   const [salesData, setSalesData] = useState([]);
@@ -239,6 +237,25 @@ const FilteredListCard = ({ selectedDate }) => {
   const [vendasLiquidadas, setVendasLiquidadas] = useState(0);
   const [despesasLiquidadas, setDespesasLiquidadas] = useState(0);
   const [saldo, setSaldo] = useState(0);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedSaleId, setSelectedSaleId] = useState(null);
+
+  const openLiquidatedDetailModal = (saleId) => {
+    setSelectedSaleId(saleId);
+    setModalVisible(true);
+  };
+
+  const closeLiquidatedDetailModal = () => {
+    setModalVisible(false);
+    setSelectedSaleId(null);
+  };
+
+  const handleSaleCanceled = () => {
+    // Atualiza a lista de vendas após o cancelamento e fecha o modal
+    setSalesData(prevData => prevData.filter(sale => sale.id !== selectedSaleId));
+    closeLiquidatedDetailModal();
+    Alert.alert("Sucesso", "Venda cancelada com sucesso.");
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -321,7 +338,7 @@ const FilteredListCard = ({ selectedDate }) => {
             <View style={styles.containerArrow}>
               <Ionicons name="arrow-down-outline" size={20} color={COLORS.red} />
               <Text style={[styles.toggleValue, selectedTab === 'expenses' && styles.activeText]}>
-              {despesasLiquidadas}
+              R$ {despesasLiquidadas}
               </Text>
             </View>
           </TouchableOpacity>
@@ -332,36 +349,62 @@ const FilteredListCard = ({ selectedDate }) => {
           <Text style={styles.balanceText}>
             Saldo <Text style={styles.balanceSubText}>(entradas - saídas)</Text>
           </Text>
-          <Text style={styles.balanceValue}>R$ {saldo}</Text>
+          <Text 
+          style={[
+            styles.balanceValue, 
+            { color: parseFloat(saldo) < 0 ? COLORS.red : COLORS.green } // Usa parseFloat para garantir que saldo é numérico
+          ]}
+        >
+          {formatToBRL(saldo)}
+        </Text>
         </View>
 
         {/* Campo de Busca */}
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Pesquise uma venda ou despesa recente..."
+            placeholder="Pesquise uma venda ou despesa"
             placeholderTextColor={COLORS.lightGray}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
           <Ionicons name="search" size={20} color={COLORS.lightGray} />
         </View>
+        <View>
+        {filteredData.map(item => {
+          const isExpenseTab = selectedTab === 'expenses'; // Verifica se está na aba de despesas
 
-        {/* Lista de Itens Filtrados */}
-          <View>
-          {filteredData.map(item => {
-            return (
-              <View key={item.id} style={styles.listItem}>
-                {getPaymentIconById(item.tipo_pagamento_venda)}
+          return (
+            <TouchableOpacity key={item.id} onPress={() => openLiquidatedDetailModal(item.id)}>
+              <View style={styles.listItem}>
+                {isExpenseTab 
+                  ? <Ionicons name="arrow-down-outline" size={20} color={COLORS.red} /> 
+                  : getPaymentIconById(item.tipo_pagamento_venda)
+                }
                 <View style={styles.itemInfo}>
                   <Text style={styles.itemDescription}>{item.description}</Text>
-                  <Text style={styles.itemDetails}>{getPaymentMethodName(item.tipo_pagamento_venda)} - {item.date}</Text>
+                  <Text style={styles.itemDetails}>
+                    {getPaymentMethodName(item.tipo_pagamento_venda)} - {item.date}
+                  </Text>
                 </View>
-                <Text style={styles.itemAmount}>{formatToBRL(item.amount)}</Text>
+                <Text style={[styles.itemAmount, { color: isExpenseTab ? COLORS.red : COLORS.green }]}>
+                  {formatToBRL(item.amount)}
+                </Text>
               </View>
-            );
-          })}
-        </View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      <SalesDetailModal
+        visible={isModalVisible}
+        onClose={closeLiquidatedDetailModal}
+        accountId={selectedSaleId}
+        onSaleCanceled={handleSaleCanceled}
+        servicoNomes={{}} // Pode passar os nomes de serviços, se necessário
+        navigation={navigation}
+      />
+
       </View>
     </KeyboardAwareScrollView>
   );

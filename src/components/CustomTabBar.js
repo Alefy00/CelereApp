@@ -2,18 +2,22 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components/native';
 import { COLORS } from '../constants';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import ResumoIcon0 from '../assets/images/svg/iconMnuBottomBarResume.svg';
 import VencendoIcon0 from '../assets/images/svg/iconMnuBottomBarExpired.svg';
 import IconMicrophone from '../assets/images/svg/iconMicrophone.svg';
 import FluxoCaixa0 from '../assets/images/svg/iconMnuBottomBarCashFlow.svg';
 import MenuIcon0 from '../assets/images/svg/iconMnuBottomMenu.svg';
+import NF from '../assets/images/svg/MainMenu/NF.svg';
+import card0 from '../assets/images/svg/MainMenu/card.svg'
 
 // Selecoes
 import ResumoIcon1 from '../assets/images/svg/tabbar/iconSummary1.svg';
 import VencendoIcon1 from '../assets/images/svg/tabbar/iconExpiring1.svg';
 import FluxoCaixa1 from '../assets/images/svg/tabbar/iconCashFlow1.svg';
 import MenuIcon1 from '../assets/images/svg/tabbar/iconMenu1.svg';
+import ActionButtons from '../screens/controls/Resume/components/ActionButtons';
 
 import { useTranslation } from 'react-i18next';
 import '../translation';
@@ -34,13 +38,12 @@ const TabItem = styled.TouchableOpacity`
   margin-top: 20px;
 `;
 const TabItemCenter = styled.TouchableOpacity`
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   justify-content: center;
   align-items: center;
-  background-color: ${COLORS.primary};
   border-radius: 35px;
-  margin-top: -30px;
+  margin-top: -20px;
 `;
 export const ItemTitle = styled.Text`
   font-size: 12px;
@@ -89,22 +92,22 @@ export default ({ state, navigation }) => {
         )}
       </TabItem>
 
-      <TabItem onPress={() => goTo('Vencendo')} disabled>
+      <TabItem disabled>
         {state.index === 1 ? (
           <>
-            <VencendoIcon1 width="48" height="48" />
+            <Ionicons name="card" size={20} color={COLORS.secondary} />
             <ItemTitle style={{ marginTop: +3 }}>{t('expiring')}</ItemTitle>
           </>
         ) : (
           <>
-            <VencendoIcon0 width="26" height="26" style={{ marginTop: +15, opacity: state.index !== 1 ? 0.6 : 1 }} />
-            <ItemTitle style={{ marginTop: +10 }}>{t('expiring')}</ItemTitle>
+           <Ionicons name="card" size={40} color={COLORS.lightGray4} />
+            <ItemTitle style={{ marginTop: +10 }}>CélerePay</ItemTitle>
           </>
         )}
       </TabItem>
 
-      <TabItemCenter onPress={() => goTo('Microphone')} disabled>
-        <IconMicrophone width="32" height="32" />
+      <TabItemCenter>
+        <ActionButtons navigation={navigation} />
       </TabItemCenter>
 
       <TabItem onPress={() => goTo('FluxoCaixa')} disabled>
@@ -124,13 +127,13 @@ export default ({ state, navigation }) => {
       <TabItem onPress={() => goTo('Menu')} disabled>
         {state.index === 4 ? (
           <>
-            <MenuIcon1 width="48" height="48" />
+            <NF width="48" height="48" />
             <ItemTitle style={{ marginTop: +3 }}>{t('menu')}</ItemTitle>
           </>
         ) : (
           <>
-            <MenuIcon0 width="26" height="26" style={{ marginTop: +15, opacity: state.index !== 4 ? 0.6 : 1 }} />
-            <ItemTitle style={{ marginTop: +10 }}>{t('menu')}</ItemTitle>
+            <NF width="26" height="26" style={{ marginTop: +15, opacity: state.index !== 4 ? 0.6 : 1 }} />
+            <ItemTitle style={{ marginTop: +10 }}>Nota Fiscal-e</ItemTitle>
           </>
         )}
       </TabItem>

@@ -2,7 +2,6 @@
 import { StyleSheet } from "react-native";
 import { COLORS } from "../../../../../../../constants";
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -20,6 +19,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 10,
     flexDirection: 'row',
+    width: "100%",
   },
   registerButtonText: {
     color: COLORS.black,

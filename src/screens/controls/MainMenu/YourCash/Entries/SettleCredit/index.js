@@ -133,7 +133,13 @@ const SettleCredit = ({ navigation }) => {
     }
   }, [getEmpresaId, fetchClientes]);
   
-  
+  const formatCurrency = (value) => {
+    if (!value) return '';
+    return parseFloat(value).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  };
 
   useEffect(() => {
     fetchVendas();
@@ -221,7 +227,7 @@ const renderItem = ({ item }) => {
           <Icon name="person-circle-outline" size={40} color="black" />
           <View style={styles.contaTextContainer}>
             <Text style={styles.contaNome}>
-              {clientes[item.cliente] || 'Cliente não encontrado'}
+              {clientes[item.cliente] || 'Cliente não informado'}
             </Text>
             <Text style={styles.contaData}>
               Data: {formatarData(item.data_venda)}
@@ -246,7 +252,7 @@ const renderItem = ({ item }) => {
               Situação: {item.status}
             </Text>
           </View>
-          <Text style={styles.contaValor}>R${item.valor_total_venda - item.total_pagamentos}</Text>
+          <Text style={styles.contaValor}>{formatCurrency(item.valor_total_venda - item.total_pagamentos)}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -265,7 +271,7 @@ const renderLiquidatedItem = ({ item }) => {
           <Icon name="person-circle-outline" size={40} color="black" />
           <View style={styles.contaTextContainer}>
             <Text style={styles.contaNome2}>
-              {clientes[item.cliente] || 'Cliente não encontrado'}
+              {clientes[item.cliente] || 'Cliente não informado'}
             </Text>
             <Text style={styles.contaData2}>Data: {formatarData(item.data_venda)}</Text>
 
@@ -283,12 +289,11 @@ const renderLiquidatedItem = ({ item }) => {
                 
               </View>
             )}
-
             <Text style={styles.contaSituacaoLiquidada2}>
               Situação: {item.status}
             </Text>
           </View>
-          <Text style={styles.contaValor2}>R${item.valor_total_venda}</Text>
+          <Text style={styles.contaValor2}>{formatCurrency(item.valor_total_venda)}</Text>
         </View>
       </View>
     </TouchableOpacity>

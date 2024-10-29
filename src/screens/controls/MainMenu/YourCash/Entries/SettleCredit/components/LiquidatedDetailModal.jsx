@@ -11,6 +11,11 @@ const LiquidatedDetailModal = ({ visible, onClose, account,  servicoNomes, onSal
     const [isFirstModalVisible, setFirstModalVisible] = useState(visible);
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
 
+    useEffect(() => {
+        if (account) {
+          console.log("Dados da conta no modal:", account);
+        }
+      }, [account]);
 
     // Sincronizar o estado local do modal com a prop 'visible'
     useEffect(() => {

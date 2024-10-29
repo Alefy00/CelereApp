@@ -46,7 +46,7 @@ export default () => {
     >
       <Tab.Screen name="Resumo" component={Resumo} />
       <Tab.Screen name="Vencendo" component={Vencendo} />
-      <Tab.Screen name="Microphone" component={Microphone} />
+    
       <Tab.Screen name="FluxoCaixa" component={FluxoCaixa} />
       <Tab.Screen name="Menu" component={Menu} />
     </Tab.Navigator>

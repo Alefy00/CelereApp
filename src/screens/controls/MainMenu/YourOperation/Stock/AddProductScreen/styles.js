@@ -230,6 +230,16 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
+  modalButtonRetorno: {
+    backgroundColor: COLORS.white,
+    paddingVertical: 25,
+    paddingHorizontal: 30,
+    borderRadius: 5,
+    marginTop: 10,
+    width: '100%',
+    alignItems: 'center',
+    elevation:1
+  },
   modalButtonText: {
     fontSize: 16,
     color: COLORS.black,

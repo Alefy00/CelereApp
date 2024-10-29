@@ -1,12 +1,12 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState,forwardRef  } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../constants';
 
 const ITEM_WIDTH = 70; // Definindo uma largura fixa para cada item
 
-const DateCarousel = ({ onDateSelected }) => {
+const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [filterVisible, setFilterVisible] = useState(false); // Controle de visibilidade do filtro dropdown
   const flatListRef = useRef(null);
@@ -70,7 +70,7 @@ const DateCarousel = ({ onDateSelected }) => {
   };
 
   return (
-    <View>
+    <View ref={ref}>
       <View style={styles.carouselContainer}>
         <FlatList
           ref={flatListRef}
@@ -78,6 +78,7 @@ const DateCarousel = ({ onDateSelected }) => {
           renderItem={renderItem}
           keyExtractor={(item) => item.getTime().toString()} // Usando getTime() que é sempre válido para datas
           horizontal
+          inverted
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.flatListContent}
           getItemLayout={(data, index) => (
@@ -124,7 +125,7 @@ const DateCarousel = ({ onDateSelected }) => {
       )}
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   carouselContainer: {

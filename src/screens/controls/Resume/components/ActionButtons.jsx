@@ -328,8 +328,9 @@ const ActionButtons = ({navigation}) => {
               <Text style={styles.fourthModalText}>Orçamentos</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.fourthModalButton} disabled={true}>
+            <TouchableOpacity style={styles.fourthModalButtonDisable} disabled={true}>
               <Text style={styles.fourthModalText}>PMOC</Text>
+              <Text style={styles.fourthModalText}>(Em breve)</Text>
             </TouchableOpacity>
           </View>
         </View>

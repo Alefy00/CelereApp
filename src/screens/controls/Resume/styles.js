@@ -5,7 +5,7 @@ import { COLORS } from "../../../constants";
 const styles = StyleSheet.create({
   container: {
     backgroundColor: COLORS.background,
-    marginBottom: 150,
+    marginBottom: 50,
   },
   ContainerCarousel:{
     marginBottom:10
@@ -18,6 +18,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: COLORS.black,
     marginLeft:20,
+    marginBottom: 10,
   },
   label2:{
     fontSize: 18,
@@ -71,7 +72,18 @@ const styles = StyleSheet.create({
   justifyContent: 'center',
   alignItems: 'center',
   },
+  updateButton:{
+    width: '100%',
 
+  },
+  updateButtonText:{
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft:25,
+    color: COLORS.green,
+    textDecorationLine:'underline'
+  },
   //Modal styles
   modalContainer: {
     flex: 1,
