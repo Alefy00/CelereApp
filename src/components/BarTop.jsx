@@ -133,7 +133,7 @@ export default ({
       </ToggleRight>
 
       <ToggleRight style={{marginLeft: 10}}>
-        <Btn onPress={openCalculator}>
+        <Btn>
           <CalculatorIcon width="26" height="26" fill={foreColor} />
         </Btn>
       </ToggleRight>

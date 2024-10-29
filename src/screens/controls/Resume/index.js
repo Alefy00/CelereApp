@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, ScrollView, View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS } from '../../../constants';
@@ -8,48 +8,33 @@ import DateCarousel from './components/DateCarousel';
 import styles from './styles';
 import SalesChartCard from './components/SalesChartCard';
 import FilteredListCard from './components/FilteredListCard';
-import TourPopup from './components/TourPopup';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import OpeningBalanceModal from './components/OpeningBalanceModal';
 import { useFocusEffect } from '@react-navigation/native';
 import { API_BASE_URL } from '../../../services/apiConfig';
 import mixpanel from '../../../services/mixpanelClient';
+import TourWrapper from './components/TourWrapper';
+import { TourProvider, useTour } from '../../../services/TourContext';
 
 const MainMenu = ({ navigation }) => {
-  const [isModalVisible, setIsModalVisible] = useState(false); // Modal de Saldo Inicial
+  const { setIsTourActive } = useTour();
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [saldoCaixa, setSaldoCaixa] = useState(null);
   const [saldoInicialInserido, setSaldoInicialInserido] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
   const [empresaId, setEmpresaId] = useState(null);
-  const [isTourVisible, setIsTourVisible] = useState(true); // Controle de exibição do tour
-  const [currentStep, setCurrentStep] = useState(1);
+  const [tourStep, setTourStep] = useState(0);
+  const tourMessages = useMemo(() => [
+    { text: "Aqui você pode escolher o período de visualização.", key: 'dateCarousel', position: { top: 120, left: 80 }, arrowPosition: 'top' },
+    { text: "Aqui você acompanha quanto seu negócio tem de dinheiro automaticamente a cada venda ou pagamento de despesa.", key: 'saldoCaixa', position: { top: 255, left: 70 }, arrowPosition: 'top' },
+    { text: "Sempre que você tocar neste ícone, uma explicação irá aparecer.", key: 'icon', position: { top: 220, left: 92 }, arrowPosition: 'top' },
+    { text: "Aqui serão listadas as entradas e saídas uma a uma.", key: 'filteredListCard', position: { top: 330, left: 55 }, arrowPosition: 'bottom' },
+    { text: "Por aqui você insere vendas e despesas, realiza consultas, cadastra produtos, e muito mais.", key: 'ActionBotton', position: { top: 400, left: 70 }, arrowPosition: 'bottom' },
+  ], []);
 
-  // Referências para os elementos que terão pop-ups
-  const dateCarouselRef = useRef();
-  const saldoRef = useRef();
-
-  // Lista de etapas do tour
-  const tourSteps = [
-    { description: 'Aqui você pode escolher o período de visualização.', ref: dateCarouselRef },
-    { description: 'Este é o saldo de caixa, que reflete suas finanças.', ref: saldoRef },
-  ];
-
-  const handleNextStep = () => {
-    if (currentStep < tourSteps.length) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      setIsTourVisible(false); // Finaliza o tour
-    }
-  };
-
-  // Exibir o OpeningBalanceModal após o tour, se o saldo inicial ainda não tiver sido inserido
-  useEffect(() => {
-    if (!isTourVisible && !saldoInicialInserido) {
-      setIsModalVisible(true); // Exibe o modal de saldo inicial após o tour
-    }
-  }, [isTourVisible, saldoInicialInserido]);
+  const scrollViewRef = useRef(null);
 
   const getEmpresaId = useCallback(async () => {
     try {
@@ -93,9 +78,9 @@ const MainMenu = ({ navigation }) => {
     try {
       const saldo = await fetchSaldoCaixa();
       setSaldoCaixa(saldo);
-      
-      if (saldo === 0 && !saldoInicialInserido && !isTourVisible) {
-        setIsModalVisible(true); // Exibe o modal de saldo inicial apenas se o tour terminou
+
+      if (saldo === 0 && !saldoInicialInserido && tourStep === tourMessages.length) {
+        setIsModalVisible(true);
       } else {
         setSaldoInicialInserido(true);
       }
@@ -104,7 +89,7 @@ const MainMenu = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
-  }, [fetchSaldoCaixa, saldoInicialInserido, isTourVisible]);
+  }, [fetchSaldoCaixa, saldoInicialInserido, tourStep, tourMessages.length]);
 
   useFocusEffect(
     useCallback(() => {
@@ -116,18 +101,6 @@ const MainMenu = ({ navigation }) => {
   const handleDateChange = useCallback((startDate, endDate) => {
     setSelectedDate({ dt_ini: startDate, dt_end: endDate });
   }, []);
-
-  useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    setSelectedDate({ dt_ini: today, dt_end: today });
-    mixpanel.track('Tela principal Exibida');
-  }, []);
-
-  useEffect(() => {
-    if (selectedDate) {
-      updateSaldoCaixa();
-    }
-  }, [selectedDate, updateSaldoCaixa]);
 
   const handleBalanceClick = () => {
     setIsModalVisible(true);
@@ -143,8 +116,13 @@ const MainMenu = ({ navigation }) => {
   };
 
   return (
+    <TourProvider>
+      <TourWrapper
+        tourMessages={tourMessages}
+        onTourComplete={() => setIsTourActive(false)} // Finaliza o tour e desbloqueia o menu
+      >
     <KeyboardAvoidingView behavior="position" enabled>
-      <ScrollView style={{ backgroundColor: "#FDFCF0" }}>
+      <ScrollView ref={scrollViewRef} style={{ backgroundColor: "#FDFCF0" }} scrollEnabled={tourStep >= tourMessages.length}>
         <BarTop
           uriAvatar={'https://www.apptek.com.br/comercial/2024/manut/images/user/foto1.png'}
           titulo={'Planeta '}
@@ -153,11 +131,11 @@ const MainMenu = ({ navigation }) => {
           foreColor={'#000000'}
         />
         <View style={styles.container}>
-          <DateCarousel ref={dateCarouselRef} onDateSelected={(startDate, endDate) => handleDateChange(startDate, endDate)} />
+          <DateCarousel onDateSelected={(startDate, endDate) => handleDateChange(startDate, endDate)} />
           <Text style={styles.label}>Resumo do dia</Text>
           <View style={styles.ContainerCarousel}>
             <View style={styles.pageContainer}>
-              <Text ref={saldoRef} style={styles.title}>
+              <Text style={styles.title}>
                 Saldo Caixa <Icon name="alert-circle" size={16} color={COLORS.lightGray} />
               </Text>
               {loading ? (
@@ -198,21 +176,10 @@ const MainMenu = ({ navigation }) => {
           onClose={handleModalClose}
           onBalanceSaved={updateSaldoCaixa}
         />
-
-        {/* Tour Pop-up */}
-        {isTourVisible && (
-          <TourPopup
-            isVisible={isTourVisible}
-            onNext={handleNextStep}
-            currentStep={currentStep}
-            totalSteps={tourSteps.length}
-            description={tourSteps[currentStep - 1].description}
-            targetRef={tourSteps[currentStep - 1].ref}
-            onCloseComplete={handleNextStep} // Avança para o próximo pop-up após fechar o atual
-          />
-        )}
       </ScrollView>
     </KeyboardAvoidingView>
+    </TourWrapper>
+    </TourProvider>
   );
 };
 

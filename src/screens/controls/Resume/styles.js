@@ -206,7 +206,99 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-
+  //tuor
+  tooltipContainer: {
+    position: 'absolute',
+    backgroundColor: COLORS.black,
+    padding: 15,
+    borderRadius: 8,
+    width: "75%",
+    zIndex: 1000,
+    alignItems: 'center',
+  },
+  tooltipTriangle: {
+    position: 'absolute',
+    width: 0,
+    height: 0,
+    borderStyle: 'solid',
+    backgroundColor: 'transparent',
+  },
+  tooltipTriangleRight: {
+    left: -10,
+    top: '50%',
+    marginTop: -15,
+    borderTopWidth: 10,
+    borderBottomWidth: 10,
+    borderRightWidth: 10,
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderRightColor: COLORS.black,
+  },
+  tooltipTitle: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  tooltipText: {
+    color: COLORS.white,
+    marginBottom: 15,
+    textAlign: 'justify',
+  },
+  nextButton: {
+    backgroundColor: COLORS.primary,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'center'
+  },
+  buttonTextTuor: {
+    color: COLORS.black,
+    fontWeight: 'bold',
+  },
+  tooltipTriangleTop: {
+    position: 'absolute',
+    top: -10,  // ajuste para que a seta aponte para cima
+    left: '55%',
+    marginLeft: -5,
+    width: 0,
+    height: 0,
+    borderLeftWidth: 5,
+    borderRightWidth: 5,
+    borderBottomWidth: 10,
+    borderStyle: 'solid',
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: '#000',  // Cor da seta
+  },
+  tooltipTriangleBottom: {
+    position: 'absolute',
+    bottom: -10,  // ajuste para que a seta aponte para baixo
+    left: '50%',
+    marginLeft: -5,
+    width: 0,
+    height: 0,
+    borderLeftWidth: 5,
+    borderRightWidth: 5,
+    borderTopWidth: 10,
+    borderStyle: 'solid',
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: '#000',  // Cor da seta
+    zIndex:10000
+  },
+  //blockscreen
+  blockLayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Transparência para escurecer o fundo
+    zIndex: 1, // Coloca a camada sobre o conteúdo
+  },
+  
 });
 
 export default styles;

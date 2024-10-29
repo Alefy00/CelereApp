@@ -18,6 +18,8 @@ import VencendoIcon1 from '../assets/images/svg/tabbar/iconExpiring1.svg';
 import FluxoCaixa1 from '../assets/images/svg/tabbar/iconCashFlow1.svg';
 import MenuIcon1 from '../assets/images/svg/tabbar/iconMenu1.svg';
 import ActionButtons from '../screens/controls/Resume/components/ActionButtons';
+import TourWrapper from '../screens/controls/Resume/components/TourWrapper';
+import { useTour } from '../services/TourContext';
 
 import { useTranslation } from 'react-i18next';
 import '../translation';
@@ -69,16 +71,19 @@ export const ItemMsg = styled.Text`
   left: +52px;
 `;
 
-export default ({ state, navigation }) => {
+export default  ({ state, navigation }) => {
   const { t } = useTranslation();
+  const { isTourActive } = useTour();
 
   const goTo = (screenName) => {
-    navigation.navigate(screenName);
+    if (!isTourActive) {
+      navigation.navigate(screenName);
+    }
   };
 
   return (
     <TabArea>
-      <TabItem onPress={() => goTo('Resumo')}>
+      <TabItem onPress={() => goTo('Resumo')} disabled={isTourActive}>
         {state.index === 0 ? (
           <>
             <ResumoIcon1 width="48" height="48" />
@@ -92,7 +97,7 @@ export default ({ state, navigation }) => {
         )}
       </TabItem>
 
-      <TabItem disabled>
+      <TabItem disabled={isTourActive}>
         {state.index === 1 ? (
           <>
             <Ionicons name="card" size={20} color={COLORS.secondary} />
@@ -106,11 +111,11 @@ export default ({ state, navigation }) => {
         )}
       </TabItem>
 
-      <TabItemCenter>
-        <ActionButtons navigation={navigation} />
+      <TabItemCenter disabled={isTourActive}>
+        <ActionButtons navigation={navigation} disabled={isTourActive} />
       </TabItemCenter>
 
-      <TabItem onPress={() => goTo('FluxoCaixa')} disabled>
+      <TabItem onPress={() => goTo('FluxoCaixa')} disabled={isTourActive}>
         {state.index === 3 ? (
           <>
             <FluxoCaixa1 width="48" height="48" />
@@ -124,7 +129,7 @@ export default ({ state, navigation }) => {
         )}
       </TabItem>
 
-      <TabItem onPress={() => goTo('Menu')} disabled>
+      <TabItem onPress={() => goTo('Menu')} disabled={isTourActive}>
         {state.index === 4 ? (
           <>
             <NF width="48" height="48" />
@@ -133,7 +138,7 @@ export default ({ state, navigation }) => {
         ) : (
           <>
             <NF width="26" height="26" style={{ marginTop: +15, opacity: state.index !== 4 ? 0.6 : 1 }} />
-            <ItemTitle style={{ marginTop: +10 }}>Nota Fiscal-e</ItemTitle>
+            <ItemTitle style={{ marginTop: +10 }}>NF-e</ItemTitle>
           </>
         )}
       </TabItem>
