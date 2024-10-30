@@ -334,7 +334,7 @@ const uploadProductImage = async (productId, empresaId) => {
         </View>
 
         <View style={styles.categoryContainer}>
-          <Text style={styles.categoryTitle}>Categoria do produto(opcional)</Text>
+          <Text style={styles.categoryTitle}>Categoria do produto</Text>
           <View style={styles.categoryInputContainer}>
             <Picker
               selectedValue={selectedCategory}

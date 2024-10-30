@@ -22,7 +22,6 @@ const ActionButtons = ({navigation}) => {
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').height)).current;
   const slideAnimThirdModal = useRef(new Animated.Value(Dimensions.get('window').height)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const { isTourActive } = useTour();
   
 
   // Iniciar a animação de pulso ao montar o componente
@@ -167,7 +166,7 @@ const ActionButtons = ({navigation}) => {
 
         {/* Botão de adicionar com animação de pulsar */}
         <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-          <TouchableOpacity style={styles.button} onPress={toggleModal}  disabled={isTourActive}>
+          <TouchableOpacity style={styles.button} onPress={toggleModal} >
             <Ionicons name="add-outline" size={30} color={COLORS.black} />
           </TouchableOpacity>
         </Animated.View>

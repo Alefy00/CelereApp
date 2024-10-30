@@ -5,7 +5,7 @@ import queryClient from './src/services/queryClient';
 import {NavigationContainer} from '@react-navigation/native';
 import MainStack from './src/stacks/MainStack';
 import SplashScreen from 'react-native-splash-screen';
-import { TourProvider } from './src/services/TourContext';
+
 
 export default class App extends React.Component {
   componentDidMount() {
@@ -15,11 +15,9 @@ export default class App extends React.Component {
   render() {
     return (
       <QueryClientProvider client={queryClient}>
-        <TourProvider>
         <NavigationContainer>
           <MainStack />
         </NavigationContainer>
-        </TourProvider>
       </QueryClientProvider>
     );
   };

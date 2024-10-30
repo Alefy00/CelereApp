@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Button, Text, View, TextInput, Modal, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { Text, View, TextInput, Modal, ActivityIndicator, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import BarTop3 from '../../../components/BarTop3';
 import { COLORS } from '../../../constants';
 import axios from 'axios';
@@ -11,6 +11,8 @@ import LogoApp from '../../../assets/images/logo.svg';
 import ProgressBar from '../components/ProgressBar';
 import styles from './styles';
 import { API_BASE_URL } from '../../../services/apiConfig';
+import CheckBox from '@react-native-community/checkbox';
+import PrivacyPolicyModal from './components/PrivacyPolicyModal';
 
 const InitialRegistration = ({ navigation }) => {
   const [phoneData, setPhoneData] = useState({
@@ -23,6 +25,9 @@ const InitialRegistration = ({ navigation }) => {
   const [modalMessage, setModalMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const numberInputRef = useRef(null);
+  const [isPrivacyChecked, setIsPrivacyChecked] = useState(false);
+  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+
 
   useEffect(() => {
     const checkStoredData = async () => {
@@ -131,6 +136,11 @@ const InitialRegistration = ({ navigation }) => {
   const handleSend = useCallback(async () => {
     if (!validateFields()) return;
 
+    if (!isPrivacyChecked) {
+      Alert.alert("Aviso", "Você deve concordar com a política de privacidade para prosseguir.");
+      return;
+    }
+
     const userExists = await checkUserExists();
     if (userExists) return;
 
@@ -177,7 +187,8 @@ const InitialRegistration = ({ navigation }) => {
       console.error('Erro ao conectar à API:', error.message);
       showModal('Não foi possível conectar à API. Verifique sua conexão e tente novamente.');
     }
-  }, [phoneData, validateFields, checkUserExists, showModal, navigation]);
+  }, [phoneData, validateFields, checkUserExists, showModal, navigation, isPrivacyChecked]);
+
 
   const handleModalClose = () => {
     setModalVisible(false);
@@ -234,6 +245,18 @@ const InitialRegistration = ({ navigation }) => {
               onChangeText={(text) => handleInputChange('number', text)}
             />
           </View>
+          <View style={styles.privacyContainer}>
+          <CheckBox
+            value={isPrivacyChecked}
+            onValueChange={setIsPrivacyChecked}
+          />
+          <Text style={styles.privacyText}>
+            Eu concordo com a{' '}
+            <Text style={styles.privacyLink} onPress={() => setPrivacyModalVisible(true)}>
+              política de privacidade
+            </Text>
+          </Text>
+        </View>
           <TouchableOpacity style={styles.button} onPress={handleSend}>
             <Icon name="arrow-forward" size={20} color="#000" />
             <Text style={styles.buttonText}>Enviar Código</Text>
@@ -241,19 +264,7 @@ const InitialRegistration = ({ navigation }) => {
         </View>
         <Text style={styles.infoText}>Um código será enviado para o seu celular.</Text>
       </View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={handleModalClose}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>{modalMessage}</Text>
-            <Button title="OK" onPress={handleModalClose} />
-          </View>
-        </View>
-      </Modal>
+      <PrivacyPolicyModal visible={privacyModalVisible} onClose={() => setPrivacyModalVisible(false)} />
     </View>
   );
 };

@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { KeyboardAvoidingView, ScrollView, View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS } from '../../../constants';
@@ -14,27 +14,13 @@ import OpeningBalanceModal from './components/OpeningBalanceModal';
 import { useFocusEffect } from '@react-navigation/native';
 import { API_BASE_URL } from '../../../services/apiConfig';
 import mixpanel from '../../../services/mixpanelClient';
-import TourWrapper from './components/TourWrapper';
-import { TourProvider, useTour } from '../../../services/TourContext';
 
 const MainMenu = ({ navigation }) => {
-  const { setIsTourActive } = useTour();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [saldoCaixa, setSaldoCaixa] = useState(null);
-  const [saldoInicialInserido, setSaldoInicialInserido] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
   const [empresaId, setEmpresaId] = useState(null);
-  const [tourStep, setTourStep] = useState(0);
-  const tourMessages = useMemo(() => [
-    { text: "Aqui você pode escolher o período de visualização.", key: 'dateCarousel', position: { top: 120, left: 80 }, arrowPosition: 'top' },
-    { text: "Aqui você acompanha quanto seu negócio tem de dinheiro automaticamente a cada venda ou pagamento de despesa.", key: 'saldoCaixa', position: { top: 255, left: 70 }, arrowPosition: 'top' },
-    { text: "Sempre que você tocar neste ícone, uma explicação irá aparecer.", key: 'icon', position: { top: 220, left: 92 }, arrowPosition: 'top' },
-    { text: "Aqui serão listadas as entradas e saídas uma a uma.", key: 'filteredListCard', position: { top: 330, left: 55 }, arrowPosition: 'bottom' },
-    { text: "Por aqui você insere vendas e despesas, realiza consultas, cadastra produtos, e muito mais.", key: 'ActionBotton', position: { top: 400, left: 70 }, arrowPosition: 'bottom' },
-  ], []);
-
-  const scrollViewRef = useRef(null);
 
   const getEmpresaId = useCallback(async () => {
     try {
@@ -43,11 +29,10 @@ const MainMenu = ({ navigation }) => {
         setEmpresaId(Number(storedEmpresaId));
         mixpanel.identify(storedEmpresaId);
       } else {
-        throw new Error('ID da empresa não carregado. Tente novamente.');
+        Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
       }
     } catch (error) {
       console.error('Erro ao obter o ID da empresa do AsyncStorage:', error);
-      Alert.alert('Erro', error.message);
     }
   }, []);
 
@@ -56,73 +41,90 @@ const MainMenu = ({ navigation }) => {
       if (empresaId && selectedDate) {
         const { dt_ini, dt_end } = selectedDate;
         const response = await axios.get(
-          `${API_BASE_URL}/api/ms_datainf/composite/?empresa_id=${empresaId}&dt_ini=${dt_ini}&dt_end=${dt_end}`
+           `${API_BASE_URL}/api/ms_datainf/composite/?empresa_id=${empresaId}&dt_ini=${dt_ini}&dt_end=${dt_end}`
         );
 
         if (response.status === 200 && response.data.status === 'success') {
           const saldoData = response.data.data.find(item => item.item === "Saldo Caixa");
           const saldoTotal = saldoData ? parseFloat(saldoData.valor.replace(/\./g, '').replace(',', '.')) : 0;
-          return saldoTotal;
+          setSaldoCaixa(saldoTotal);
+
+          // Exibe o modal se o saldo for zero
+          if (saldoTotal === 0) {
+            setIsModalVisible(true);
+          } else {
+            setIsModalVisible(false);
+          }
         } else {
-          throw new Error('Não foi possível recuperar o saldo de caixa.');
+          Alert.alert('Erro', 'Não foi possível recuperar o saldo de caixa.');
+          setSaldoCaixa(0);
         }
       }
     } catch (error) {
       console.error('Erro ao buscar saldo:', error);
-      throw error;
-    }
-  }, [empresaId, selectedDate]);
-
-  const updateSaldoCaixa = useCallback(async () => {
-    setLoading(true);
-    try {
-      const saldo = await fetchSaldoCaixa();
-      setSaldoCaixa(saldo);
-
-      if (saldo === 0 && !saldoInicialInserido && tourStep === tourMessages.length) {
-        setIsModalVisible(true);
-      } else {
-        setSaldoInicialInserido(true);
-      }
-    } catch (error) {
-      Alert.alert('Erro', error.message);
+      setSaldoCaixa(0);
     } finally {
       setLoading(false);
     }
-  }, [fetchSaldoCaixa, saldoInicialInserido, tourStep, tourMessages.length]);
+  }, [empresaId, selectedDate]);
 
   useFocusEffect(
     useCallback(() => {
-      getEmpresaId();
-      updateSaldoCaixa();
-    }, [getEmpresaId, updateSaldoCaixa])
+      const updateSaldoOnFocus = async () => {
+        await getEmpresaId();
+        if (selectedDate) {
+          setLoading(true);
+          await fetchSaldoCaixa();
+        }
+      };
+      updateSaldoOnFocus();
+    }, [selectedDate, fetchSaldoCaixa, getEmpresaId])
   );
+
+  useEffect(() => {
+    initializeDateFilter();
+  }, []);
+
+  useEffect(() => {
+    if (selectedDate) {
+      fetchSaldoCaixa();
+    }
+  }, [selectedDate, fetchSaldoCaixa]);
+
+  const formatCurrency = (value) => {
+    const cleanedValue = value.replace(/\D/g, '');
+    const formattedValue = (cleanedValue / 100).toFixed(2);
+    return formattedValue.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  const initializeDateFilter = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setSelectedDate({ dt_ini: today, dt_end: today });
+  };
 
   const handleDateChange = useCallback((startDate, endDate) => {
     setSelectedDate({ dt_ini: startDate, dt_end: endDate });
   }, []);
 
-  const handleBalanceClick = () => {
-    setIsModalVisible(true);
-  };
-
-  const handleModalClose = () => {
-    setIsModalVisible(false);
-    setSaldoInicialInserido(true); // Garante que o modal só apareça manualmente após o primeiro fechamento
-  };
-
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-  };
+  useEffect(() => {
+    mixpanel.track('Tela principal Exibida');
+  }, []);
+    // Função para fechar o modal e atualizar o saldo
+    const handleModalClose = useCallback(() => {
+      setIsModalVisible(false);
+      fetchSaldoCaixa(); // Atualiza o saldo ao fechar o modal
+    }, [fetchSaldoCaixa]);
+  
+    // Verifica se o modal fechou para atualizar o saldo
+    useEffect(() => {
+      if (!isModalVisible) {
+        fetchSaldoCaixa(); // Força a atualização do saldo ao fechar o modal
+      }
+    }, [isModalVisible, fetchSaldoCaixa]);
 
   return (
-    <TourProvider>
-      <TourWrapper
-        tourMessages={tourMessages}
-        onTourComplete={() => setIsTourActive(false)} // Finaliza o tour e desbloqueia o menu
-      >
     <KeyboardAvoidingView behavior="position" enabled>
-      <ScrollView ref={scrollViewRef} style={{ backgroundColor: "#FDFCF0" }} scrollEnabled={tourStep >= tourMessages.length}>
+      <ScrollView style={{ backgroundColor: "#FDFCF0" }}>
         <BarTop
           uriAvatar={'https://www.apptek.com.br/comercial/2024/manut/images/user/foto1.png'}
           titulo={'Planeta '}
@@ -141,24 +143,12 @@ const MainMenu = ({ navigation }) => {
               {loading ? (
                 <ActivityIndicator size="large" color={COLORS.primary} />
               ) : (
-                <View>
-                  <TouchableOpacity disabled={true}>
-                    <Text 
-                      style={[
-                        styles.amount,
-                        { color: parseFloat(saldoCaixa) < 0 ? COLORS.red : COLORS.green }
-                      ]}
-                    >
-                      {formatCurrency(saldoCaixa || 0)}
-                    </Text>
-                  </TouchableOpacity>
-                  {saldoCaixa !== null && (
-                    <TouchableOpacity onPress={handleBalanceClick} style={styles.updateButton}>
-                      <Text style={styles.updateButtonText}>Atualizar Saldo</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
+
+                  <Text style={styles.amount}>R${saldoCaixa ? formatCurrency(saldoCaixa.toFixed(2)) : '0,00'}</Text>
               )}
+            <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+                <Text style={styles.updateButtonAttSaldo}>Atualizar saldo</Text>
+              </TouchableOpacity>
             </View>
           </View>
           <View style={styles.ContainerCircle}>
@@ -166,20 +156,16 @@ const MainMenu = ({ navigation }) => {
           </View>
           <Text style={styles.label2}>Fluxo de caixa do dia</Text>
           <View style={styles.ContainerFilter}>
-            <FilteredListCard selectedDate={selectedDate} navigation={navigation} />
+            <FilteredListCard selectedDate={selectedDate} />
           </View>
         </View>
-        
-        {/* Modal de Saldo Inicial */}
         <OpeningBalanceModal
           visible={isModalVisible}
           onClose={handleModalClose}
-          onBalanceSaved={updateSaldoCaixa}
+          onBalanceSaved={fetchSaldoCaixa} // Chama fetchSaldoCaixa após salvar o saldo inicial
         />
       </ScrollView>
     </KeyboardAvoidingView>
-    </TourWrapper>
-    </TourProvider>
   );
 };
 

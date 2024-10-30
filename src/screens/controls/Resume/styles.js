@@ -72,6 +72,13 @@ const styles = StyleSheet.create({
   justifyContent: 'center',
   alignItems: 'center',
   },
+  updateButtonAttSaldo: {
+    fontSize: 14,
+    color: COLORS.green,
+    marginTop: 5,
+    textAlign: 'center',
+    textDecorationLine: 'underline'
+  },
   updateButton:{
     width: '100%',
 
@@ -213,7 +220,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     width: "75%",
-    zIndex: 1000,
+    zIndex: 11,
     alignItems: 'center',
   },
   tooltipTriangle: {
@@ -286,7 +293,7 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderTopColor: '#000',  // Cor da seta
-    zIndex:10000
+    zIndex:11
   },
   //blockscreen
   blockLayer: {

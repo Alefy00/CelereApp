@@ -209,13 +209,7 @@ useEffect(() => {
       Alert.alert('Erro', 'Por favor, insira um valor válido.');
       return;
     }
-  
-    // Verifica se o parceiro foi selecionado (fornecedor obrigatório)
-    if (!parceiro) {
-      Alert.alert('Erro', 'Por favor, selecione um fornecedor.');
-      return;
-    }
-  
+    
        // Define o texto da recorrência antes de abrir o modal
        const recurrenceText = determineRecurrenceText();
        setRecorrenciaText(recurrenceText);  // Define o texto da recorrência

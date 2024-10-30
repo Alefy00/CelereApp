@@ -363,14 +363,14 @@ const formatCurrency = (value) => {
           style={[styles.paymentOptionButtonDisabled]}
           disabled={true}
         >
-          <Text style={styles.paymentOptionTextDisabled}>CélerePay (Indisponível)</Text>
+          <Text style={styles.paymentOptionTextDisabled}>CélerePay (Em Breve)</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.paymentOptionButtonDisabled]}
           disabled={true}
         >
-          <Text style={styles.paymentOptionTextDisabled}>Maquininha (Indisponível)</Text>
+          <Text style={styles.paymentOptionTextDisabled}>Maquininha (Em Breve)</Text>
         </TouchableOpacity>
       </View>
 

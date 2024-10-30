@@ -8,39 +8,44 @@ const ITEM_WIDTH = 70; // Definindo uma largura fixa para cada item
 
 const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [filterVisible, setFilterVisible] = useState(false); // Controle de visibilidade do filtro dropdown
+  const [filterVisible, setFilterVisible] = useState(false);
   const flatListRef = useRef(null);
+  const [initialized, setInitialized] = useState(false); 
 
-  // Função para ajustar o fuso horário da data (para o fuso de Brasília, GMT-3)
   const adjustDateToBrasiliaTimezone = (date) => {
     const adjustedDate = new Date(date);
-    adjustedDate.setUTCHours(date.getUTCHours() - 3); // Ajuste para o horário de Brasília (GMT-3)
+    adjustedDate.setUTCHours(date.getUTCHours() - 3);
     return adjustedDate;
   };
 
-  // Lista de dias passados até o dia atual
   const generatePastDates = () => {
     const today = new Date();
     const datesArray = [];
-    for (let i = 0; i < 30; i++) {  // Exibir os últimos 30 dias
+    for (let i = 0; i < 30; i++) {
       const date = new Date();
       date.setDate(today.getDate() - i);
-      const adjustedDate = adjustDateToBrasiliaTimezone(date); // Ajustar o fuso horário para Brasília
+      const adjustedDate = adjustDateToBrasiliaTimezone(date);
       datesArray.push(adjustedDate);
     }
     return datesArray;
   };
 
-  // Estado para as datas (apenas dias até o presente)
   const [dates, setDates] = useState(generatePastDates());
 
   useEffect(() => {
-    // Focar no dia atual quando a tela é aberta
-    const todayIndex = 0; // Primeiro dia da lista é o dia atual
-    setTimeout(() => {
-      flatListRef.current?.scrollToIndex({ index: todayIndex, animated: true });
-    }, 100);
-  }, []);
+    if (!initialized) {
+      const todayIndex = 0;
+      setTimeout(() => {
+        flatListRef.current?.scrollToIndex({ index: todayIndex, animated: true });
+      }, 100);
+  
+      // Define apenas a data visualmente ao montar o componente
+      setSelectedDate(new Date());
+      setInitialized(true); // Marca como inicializado
+    }
+  }, [initialized]);
+  
+  
 
   const renderItem = ({ item }) => {
     const isSelected = item.getDate() === selectedDate.getDate() && item.getMonth() === selectedDate.getMonth();
@@ -49,9 +54,8 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
         style={[styles.dateContainer, isSelected && styles.selectedDateContainer]}
         onPress={() => {
           setSelectedDate(item);
-          // Passa a data selecionada no formato YYYY-MM-DD para o componente pai
           const formattedDate = item.toISOString().split('T')[0];
-          onDateSelected(formattedDate, formattedDate); // Para filtro diário, dt_ini e dt_end são iguais
+          onDateSelected(formattedDate, formattedDate);
         }}
       >
         <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
@@ -64,7 +68,6 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
     );
   };
 
-  // Função para exibir ou esconder o menu de filtro
   const toggleFilterVisibility = () => {
     setFilterVisible(!filterVisible);
   };
@@ -76,14 +79,12 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
           ref={flatListRef}
           data={dates}
           renderItem={renderItem}
-          keyExtractor={(item) => item.getTime().toString()} // Usando getTime() que é sempre válido para datas
+          keyExtractor={(item) => item.getTime().toString()}
           horizontal
           inverted
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.flatListContent}
-          getItemLayout={(data, index) => (
-            { length: ITEM_WIDTH, offset: ITEM_WIDTH * index, index }
-          )}
+          getItemLayout={(data, index) => ({ length: ITEM_WIDTH, offset: ITEM_WIDTH * index, index })}
           onScrollToIndexFailed={(info) => {
             const wait = new Promise(resolve => setTimeout(resolve, 500));
             wait.then(() => {
@@ -92,7 +93,6 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
           }}
         />
 
-        {/* Ícone de filtro com fundo amarelo quando ativo */}
         <TouchableOpacity 
           style={[styles.filterIconContainer, filterVisible && styles.filterIconActive]} 
           onPress={toggleFilterVisibility}
@@ -101,7 +101,6 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
         </TouchableOpacity>
       </View>
 
-      {/* Menu de filtro dropdown (em linha) */}
       {filterVisible && (
         <View style={styles.dropdownMenu}>
           <Text style={styles.dropdownTextPeriodo}>Período de tempo:</Text>
@@ -120,7 +119,6 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
               <Text style={styles.dropdownTextDisabled}>Anual</Text>
             </TouchableOpacity>
           </View>
-
         </View>
       )}
     </View>

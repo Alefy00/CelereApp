@@ -1,8 +1,10 @@
 /* eslint-disable prettier/prettier */
-import React, { useContext } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components/native';
 import { COLORS } from '../constants';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import CheckBox from '@react-native-community/checkbox';
 
 import ResumoIcon0 from '../assets/images/svg/iconMnuBottomBarResume.svg';
 import VencendoIcon0 from '../assets/images/svg/iconMnuBottomBarExpired.svg';
@@ -73,17 +75,23 @@ export const ItemMsg = styled.Text`
 
 export default  ({ state, navigation }) => {
   const { t } = useTranslation();
-  const { isTourActive } = useTour();
 
   const goTo = (screenName) => {
-    if (!isTourActive) {
-      navigation.navigate(screenName);
-    }
+    navigation.navigate(screenName);
+  };
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState('');
+  const [notify, setNotify] = useState(false);
+
+  const openModal = (featureName) => {
+    setSelectedFeature(featureName);
+    setModalVisible(true);
   };
 
-  return (
+  return ( 
+    <>
     <TabArea>
-      <TabItem onPress={() => goTo('Resumo')} disabled={isTourActive}>
+      <TabItem onPress={() => goTo('Resumo')}>
         {state.index === 0 ? (
           <>
             <ResumoIcon1 width="48" height="48" />
@@ -97,7 +105,7 @@ export default  ({ state, navigation }) => {
         )}
       </TabItem>
 
-      <TabItem disabled={isTourActive}>
+      <TabItem onPress={() => openModal('CélerePay')}>
         {state.index === 1 ? (
           <>
             <Ionicons name="card" size={20} color={COLORS.secondary} />
@@ -111,11 +119,11 @@ export default  ({ state, navigation }) => {
         )}
       </TabItem>
 
-      <TabItemCenter disabled={isTourActive}>
-        <ActionButtons navigation={navigation} disabled={isTourActive} />
+      <TabItemCenter>
+        <ActionButtons navigation={navigation} />
       </TabItemCenter>
 
-      <TabItem onPress={() => goTo('FluxoCaixa')} disabled={isTourActive}>
+      <TabItem onPress={() => openModal('Fluxo de Caixa')}>
         {state.index === 3 ? (
           <>
             <FluxoCaixa1 width="48" height="48" />
@@ -129,7 +137,7 @@ export default  ({ state, navigation }) => {
         )}
       </TabItem>
 
-      <TabItem onPress={() => goTo('Menu')} disabled={isTourActive}>
+      <TabItem onPress={() => openModal('Nota Fiscal')}>
         {state.index === 4 ? (
           <>
             <NF width="48" height="48" />
@@ -143,5 +151,69 @@ export default  ({ state, navigation }) => {
         )}
       </TabItem>
     </TabArea>
-  );
+      <Modal transparent={true} visible={modalVisible} animationType="slide">
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>{selectedFeature} estará disponível em breve!</Text>
+          <Text style={styles.modalText}>Gostaria de ser notificado?</Text>
+          <View style={styles.checkboxContainer}>
+            <CheckBox value={notify} onValueChange={setNotify} />
+            <Text style={styles.checkboxLabel}>Sim, me notifique</Text>
+          </View>
+          <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalButton}>
+            <Text style={styles.modalButtonText}>Fechar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  </>
+);
 };
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: "80%",
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#000',
+    textAlign: "center",
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+    color: '#000',
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  checkboxLabel: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#000',
+  },
+  modalButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: COLORS.primary,
+    borderRadius: 5,
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+});

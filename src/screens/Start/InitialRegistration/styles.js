@@ -97,7 +97,7 @@ export default StyleSheet.create({
     fontSize: 15,
     color: '#000',
     textAlign: 'center',
-    marginBottom: 50,
+    marginBottom: 40,
     alignSelf: 'flex-start',
   },
   modalContainer: {
@@ -130,5 +130,11 @@ export default StyleSheet.create({
     flex: 1,
     backgroundColor:COLORS.primary,
     justifyContent:'center',
+  },
+  //privacida
+  privacyContainer:{
+    marginTop: -20,
+    flexDirection: 'row',
+    alignItems:'center'
   }
 });

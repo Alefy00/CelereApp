@@ -99,8 +99,8 @@ const OpeningBalanceModal = ({ visible, onClose, onBalanceSaved }) => {
 
       if (response.status === 201 && response.data.status === 'success') {
         await AsyncStorage.setItem('initialBalanceAdded', 'true');
-        setSuccessModalVisible(true); // Exibe o modal de sucesso
         onBalanceSaved();
+        setSuccessModalVisible(true); // Exibe o modal de sucesso
       } else {
         Alert.alert('Erro', response.data.message || 'Erro ao salvar o saldo inicial.');
       }
