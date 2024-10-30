@@ -228,7 +228,7 @@ const getPaymentIconById = (paymentTypeId) => {
   }
 };
 
-const FilteredListCard = ({ selectedDate, navigation }) => {
+const FilteredListCard = ({ selectedDate, navigation, onSaleCanceledRefresh }) => {
   const [selectedTab, setSelectedTab] = useState('sales'); 
   const [searchQuery, setSearchQuery] = useState('');
   const [salesData, setSalesData] = useState([]);
@@ -251,10 +251,10 @@ const FilteredListCard = ({ selectedDate, navigation }) => {
   };
 
   const handleSaleCanceled = () => {
-    // Atualiza a lista de vendas após o cancelamento e fecha o modal
     setSalesData(prevData => prevData.filter(sale => sale.id !== selectedSaleId));
     closeLiquidatedDetailModal();
     Alert.alert("Sucesso", "Venda cancelada com sucesso.");
+    onSaleCanceledRefresh(); // Chama a função de atualização no MainMenu
   };
 
   useFocusEffect(

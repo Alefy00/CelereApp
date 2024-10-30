@@ -88,11 +88,22 @@ const NewExpense = ({ navigation  }) => {
   };
   
   const handleDayPress = (day) => {
-    const selectedDate = new Date(day.dateString); // Recebe a data selecionada no calendário
-    setDate(selectedDate); // Atualiza a data de pagamento diretamente
-    setIsCalendarVisible(false); // Fecha o calendário
+    const selectedDate = new Date(day.dateString);
+    const today = new Date();
+  
+    // Log para verificar a data selecionada
+    console.log("Data selecionada:", selectedDate);
+  
+    // Verifica se a data selecionada é hoje ou uma data passada
+    if (selectedDate <= today) {
+      setDate(selectedDate); // Atualiza a data de pagamento com a data selecionada
+      setIsCalendarVisible(false);
+    } else {
+      Alert.alert('Data Inválida', 'Por favor, selecione uma data anterior');
+    }
   };
-
+  
+  
   const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
@@ -320,14 +331,6 @@ useFocusEffect(
     navigation.navigate('IncludeCategoriesExpense');
   };
 
-  const formatCurrency = (value) => {
-    if (!value) return '';
-    return parseFloat(value).toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    });
-  };
-
   return (
     <ScrollView style={styles.container}>
       <BarTop2
@@ -525,6 +528,7 @@ useFocusEffect(
           visible={isCalendarVisible}
           onClose={() => setIsCalendarVisible(false)}
           onDayPress={handleDayPress}
+          maximumDate={new Date().toISOString().split('T')[0]} 
         />
 
       <ConfirmModal

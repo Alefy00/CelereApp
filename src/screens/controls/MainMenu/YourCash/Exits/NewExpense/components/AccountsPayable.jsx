@@ -85,11 +85,19 @@ const AccountsPayable = ({ navigation }) => {
     setShowCalendar(true);
   };
 
-  const handleDayPress = (day) => {
-    const selectedDate = new Date(day.dateString);
-    setDueDate(selectedDate);
+// Atualize a função handleDayPress para garantir que a data está sendo configurada corretamente
+const handleDayPress = (day) => {
+  const selectedDate = new Date(day.dateString);
+  const today = new Date();
+  
+  // Verifica se a data selecionada é hoje ou uma data futura
+  if (selectedDate >= today) {
+    setDueDate(selectedDate); // Atualiza a data de vencimento com a data selecionada
     setShowCalendar(false);
-  };
+  } else {
+    Alert.alert('Data Inválida', 'Por favor, selecione uma data de hoje em diante.');
+  }
+};
   const getSupplierNameById = (id) => {
     const supplier = suppliers.find((s) => s.value === id);
     return supplier ? supplier.label : 'Parceiro não encontrado';
@@ -298,7 +306,9 @@ useEffect(() => {
   const handleAcconunts = () => {
     navigation.navigate('AccountsPayable');
   };
-
+  useEffect(() => {
+    fetchSuppliers();
+  }, [fetchSuppliers]);
   // Função para definir o fornecedor selecionado
   const handleSelectSupplier = (supplier) => {
     console.log('Fornecedor selecionado:', supplier);  // Verifica o valor selecionado
@@ -505,6 +515,7 @@ useEffect(() => {
         visible={showCalendar}
         onClose={() => setShowCalendar(false)}
         onDayPress={handleDayPress}
+        minimumDate={new Date().toISOString().split('T')[0]}
       />
       <ConfirmModal
         visible={modalVisible}

@@ -477,6 +477,7 @@ const formatCurrency = (value) => {
 
             <TouchableOpacity style={styles.invoiceOptionButtonNotaFiscal} onPress={() => console.log("Emitir Nota Fiscal")} disabled={true}>
               <Text style={styles.invoiceOptionTextNotaFiscal}>Nota Fiscal</Text>
+              <Text style={styles.invoiceOptionTextNotaFiscal}>(Em breve)</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.closeButton} onPress={handleCloseInvoiceModal}>
               <Icon name="close" size={25} color={COLORS.black} />

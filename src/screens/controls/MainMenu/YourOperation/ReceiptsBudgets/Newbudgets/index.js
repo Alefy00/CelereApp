@@ -67,7 +67,6 @@ const NewBudgets = ({ navigation, route }) => {
         return null;  // Retorna null se não houver imagem
       }
     } catch (error) {
-      console.error('Erro ao buscar imagem do produto:', error);
       return null;  // Retorna null em caso de erro
     }
   };
@@ -285,9 +284,6 @@ const NewBudgets = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
       )}
-      <TouchableOpacity style={styles.barcodeButton}>
-        <Icon name="barcode" size={30} color={COLORS.black} />
-      </TouchableOpacity>
     </>
   );
 
