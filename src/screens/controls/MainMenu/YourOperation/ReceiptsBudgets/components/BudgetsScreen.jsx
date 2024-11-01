@@ -1,8 +1,9 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import { WebView } from 'react-native-webview';
 import Share from 'react-native-share';
+import Pdf from 'react-native-pdf';
+import RNFetchBlob from 'rn-fetch-blob';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import { COLORS } from '../../../../../../constants';
@@ -13,12 +14,22 @@ import { API_BASE_URL } from '../../../../../../services/apiConfig';
 
 const BudgetsScreen = ({ navigation, route }) => {
     const { saleId } = route.params;  // ID do orçamento passado para a tela
-    const [pdfUrl, setPdfUrl] = useState(null); // URL do PDF retornada pela API
     const [loading, setLoading] = useState(false); // Estado de carregamento
     const [error, setError] = useState(null); // Estado de erro
+    const [pdfPath, setPdfPath] = useState(null); 
 
     const showAlert = (title, message) => Alert.alert(title, message);
 
+    // Função auxiliar para converter ArrayBuffer para Base64
+const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return RNFetchBlob.base64.encode(binary);
+};
     // Função para obter o ID da empresa logada
     const getEmpresaId = useCallback(async () => {
         try {
@@ -32,69 +43,72 @@ const BudgetsScreen = ({ navigation, route }) => {
         }
     }, []);
 
-// Função para obter a URL do recibo
-const fetchReceipt = useCallback(async () => {
-    try {
-        console.log('Iniciando requisição para gerar recibo...');
-        setLoading(true);
-        const empresaId = await getEmpresaId();
+    const fetchReceipt = useCallback(async () => {
+        try {
+            console.log('Iniciando requisição para gerar orçamento...');
+            setLoading(true);
+            const empresaId = await getEmpresaId();
 
-        if (!empresaId) {
-            setLoading(false);
-            return;
-        }
-
-        // Requisição para obter a URL do PDF com orcamento_id em vez de venda_id
-        const response = await axios.get(`${API_BASE_URL}/cad/orcamento/gerar_recibo_orcamento/`, {
-            params: {
-                empresa_id: empresaId,
-                orcamento_id: saleId,  // Alterado para orcamento_id
-                is_pdf_file: 'True' // Garantir que a resposta seja a URL do PDF
+            if (!empresaId) {
+                setLoading(false);
+                return;
             }
-        });
 
-        console.log('Resposta da API:', response.data);  // Log da resposta da API
+            // Requisição para obter o PDF do orçamento como arraybuffer
+            const response = await axios.get(`${API_BASE_URL}/cad/orcamento/gerar_recibo_orcamento/`, {
+                params: {
+                    empresa_id: empresaId,
+                    orcamento_id: saleId,
+                    is_pdf_file: 'False'
+                },
+                responseType: 'arraybuffer'
+            });
 
-        // Verifique se a URL foi recebida corretamente
-        if (response.data?.url) {
-            setPdfUrl(response.data.url);  // Definir a URL do PDF
-        } else {
-            setError('Erro ao gerar o recibo: URL não encontrada.');
-            console.error('Erro: URL do PDF não encontrada na resposta.');
+            const base64Data = arrayBufferToBase64(response.data);
+            const path = `${RNFetchBlob.fs.dirs.CacheDir}/orcamento_${saleId}.pdf`;
+            await RNFetchBlob.fs.writeFile(path, base64Data, 'base64');
+            setPdfPath(path);
+            console.log('PDF salvo em caminho temporário:', path);
+
+            // Verifica o conteúdo do PDF para garantir que não está vazio
+            const fileContent = await RNFetchBlob.fs.readFile(path, 'base64');
+            if (!fileContent || fileContent.length < 100) {
+                console.error('Arquivo PDF parece estar incompleto ou corrompido.');
+                Alert.alert('Erro', 'O arquivo PDF parece estar incompleto ou corrompido.');
+                setError('Erro ao gerar o orçamento: arquivo incompleto.');
+            } else {
+                console.log('PDF salvo com sucesso e encontrado no cache.');
+            }
+        } catch (error) {
+            setError('Erro ao gerar o orçamento.');
+            console.error('Erro na requisição ou manipulação dos dados:', error);
+        } finally {
+            setLoading(false);
         }
-    } catch (error) {
-        setError('Erro ao gerar o recibo.');
-        console.error('Erro na requisição:', error.response ? error.response.data : error.message);
-    } finally {
-        setLoading(false);
-    }
-}, [saleId, getEmpresaId]);
+    }, [saleId, getEmpresaId]);
 
 
     useEffect(() => {
         fetchReceipt();
     }, [fetchReceipt]);
 
-    // Função para compartilhar a URL do PDF
     const handleShare = async () => {
-        if (!pdfUrl) {
-            showAlert('Erro', 'O recibo ainda não está pronto para compartilhar.');
+        if (!pdfPath) {
+            showAlert('Erro', 'O orçamento ainda não está pronto para compartilhar.');
             return;
         }
 
         try {
             const shareOptions = {
-                title: 'Compartilhar Recibo',
-                url: pdfUrl,  // Compartilhando o link da URL do PDF
+                title: 'Compartilhar Orçamento',
+                url: `file://${pdfPath}`,
             };
 
             await Share.open(shareOptions);
         } catch (error) {
             if (error.message !== 'User did not share') {
-                console.error('Erro ao compartilhar o link:', error);
-                showAlert('Erro', 'Não foi possível compartilhar o link.');
-            } else {
-                console.log('Usuário cancelou o compartilhamento.');
+                console.error('Erro ao compartilhar o PDF:', error);
+                showAlert('Erro', 'Não foi possível compartilhar o PDF.');
             }
         }
     };
@@ -115,20 +129,25 @@ const fetchReceipt = useCallback(async () => {
                 />
             </View>
 
-            {/* Carregamento ou erro */}
+
             {loading ? (
                 <ActivityIndicator size="large" color={COLORS.black} />
             ) : error ? (
                 <Text style={styles.errorText}>{error}</Text>
-            ) : pdfUrl ? (
-                <WebView
-                    source={{ uri: `https://docs.google.com/viewer?url=${pdfUrl}&embedded=true` }}  // Usando Google Docs Viewer
+            ) : pdfPath ? (
+                <Pdf
+                    source={{ uri: `file://${pdfPath}` }}
                     style={styles.pdf}
                     onError={(err) => {
-                        console.error('Erro no WebView:', err.nativeEvent);
-                        showAlert('Erro', 'Não foi possível carregar o PDF.');
+                        console.error('Erro no Pdf:', err);
+                        Alert.alert('Erro', 'Não foi possível carregar o PDF.');
                     }}
-                    onLoadEnd={() => console.log('PDF carregado com sucesso')}
+                    onLoadComplete={() => {
+                        console.log('PDF carregado com sucesso');
+                        RNFetchBlob.fs.unlink(pdfPath)
+                            .then(() => console.log('Arquivo PDF temporário excluído'))
+                            .catch((err) => console.error('Erro ao excluir o arquivo temporário:', err));
+                    }}
                 />
             ) : null}
 

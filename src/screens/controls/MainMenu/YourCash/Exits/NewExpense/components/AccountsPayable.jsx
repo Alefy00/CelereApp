@@ -26,6 +26,7 @@ import RecurrenceField from './RecurrenceField';
 import SupplierDropdown from './SupplierDropdown';
 import CustomCalendar from '../../../../../../../components/CustomCalendar';
 import { API_BASE_URL } from '../../../../../../../services/apiConfig';
+import { useFocusEffect } from '@react-navigation/native';
 
 const categoryIcons = {
   1: IconFornecedor, // Fornecedores de matéria-prima, produtos ou suprimentos
@@ -87,16 +88,23 @@ const AccountsPayable = ({ navigation }) => {
 
 // Atualize a função handleDayPress para garantir que a data está sendo configurada corretamente
 const handleDayPress = (day) => {
-  const selectedDate = new Date(day.dateString);
-  const today = new Date();
-  
-  // Verifica se a data selecionada é hoje ou uma data futura
+  const selectedDate = new Date(`${day.dateString}T00:00:00`); // Define a data sem fuso horário específico
+  const today = new Date(new Date().setHours(0, 0, 0, 0)); // Define "hoje" sem horário para comparação
+
   if (selectedDate >= today) {
     setDueDate(selectedDate); // Atualiza a data de vencimento com a data selecionada
     setShowCalendar(false);
   } else {
     Alert.alert('Data Inválida', 'Por favor, selecione uma data de hoje em diante.');
   }
+};
+
+const getCurrentTime = () => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  return `${hours}:${minutes}:${seconds}`;
 };
   const getSupplierNameById = (id) => {
     const supplier = suppliers.find((s) => s.value === id);
@@ -161,17 +169,16 @@ const fetchSuppliers = useCallback(async () => {
   setLoading(false);
 }, []);
 
-
-useEffect(() => {
-  fetchSuppliers();
-}, [fetchSuppliers]);
-
-
   useEffect(() => {
     fetchCategories();
     fetchSuppliers();
   }, [fetchCategories, fetchSuppliers]);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchSuppliers(); // Atualiza a lista de fornecedores quando a tela ganha o foco
+    }, [fetchSuppliers])
+  );
 
   const determineRecurrenceText = () => {
     let text = 'Pagamento único';  // Define como pagamento único por padrão
@@ -235,12 +242,12 @@ useEffect(() => {
       setLoading(false);
       return;
     }
-  
+    const formattedDueDate = format(dueDate, 'yyyy-MM-dd');
     const expenseData = {
       empresa_id: Number(empresa_id),
-      item: item || '',
+      item: item,
       valor: valorNumerico,
-      dt_vencimento: format(dueDate, 'yyyy-MM-dd'),
+      dt_vencimento: formattedDueDate,
       dt_pagamento: null,
       fornecedor_id: Number(parceiro),
       categoria_despesa_id: Number(categoria),
@@ -249,7 +256,7 @@ useEffect(() => {
 
     // Somente adicionar os campos de recorrência se isRecurring for true
     if (isRecurring) {
-      expenseData.tipo_recorrencia = selectedFrequencyId || null;
+      expenseData.tipo_recorrencia = selectedFrequencyName.toLowerCase();
       expenseData.recorrencia = !isIndeterminate && repeatCount > 0 ? repeatCount : 0;
       expenseData.eh_recorrencia_indeterminada = !!isIndeterminate;
     } else {
@@ -258,7 +265,7 @@ useEffect(() => {
       delete expenseData.recorrencia;
       delete expenseData.eh_recorrencia_indeterminada;
     }
-  
+    console.log("dado enviados",expenseData)
     try {
       const response = await axios.post(`${API_BASE_URL}/cad/despesa/`, expenseData, {
         headers: {
@@ -279,25 +286,25 @@ useEffect(() => {
       setLoading(false);
     }
   };
-  
+
   const handleRegisterNew = () => {
     setCategoria('');
     setSelectedCategory('');
     setValor('');
+    setValorNumerico(0); // Limpa o valor numérico da despesa
     setItem('');
     setParceiro('');
     setSelectedSupplier(null);
     setRepeatCount(0);  // Limpa a quantidade de repetições
     setIsIndeterminate(false);  // Reseta a recorrência indeterminada
-    setSelectedFrequencyId('');  // Limpa a frequência
-    setIsRecurring(false);  // Reseta a recorrência
-    setRecorrenciaText('Pagamento único');  // Volta ao padrão de recorrência
+    setSelectedFrequencyId('');  // Limpa o tipo de frequência selecionada
+    setSelectedFrequencyName(''); // Limpa o nome do tipo de frequência
+    setIsRecurring(false);  // Desmarca o checkbox de recorrência
+    setRecorrenciaText('Pagamento único');  // Define o texto padrão para recorrência
     setDate(new Date());
     setDueDate(new Date());
     setBarcode('');
-    setSuccessModalVisible(false);
   };
-  
 
   const toggleExpenseType = () => {
     navigation.navigate('NewExpense');
@@ -306,6 +313,11 @@ useEffect(() => {
   const handleAcconunts = () => {
     navigation.navigate('AccountsPayable');
   };
+
+  const handleCloseSucessModal = () => {
+    setSuccessModalVisible(false);
+    navigation.navigate("MainTab");
+  }
   useEffect(() => {
     fetchSuppliers();
   }, [fetchSuppliers]);
@@ -326,9 +338,7 @@ useEffect(() => {
       return numberValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
   };
-  
 
-  
   return (
     <ScrollView style={styles.container}>
       <BarTop2
@@ -529,14 +539,11 @@ useEffect(() => {
         repeatCount={repeatCount}
         isIndeterminate={isIndeterminate}
       />
-
       <SucessModal
         visible={successModalVisible}
-        onClose={() => setSuccessModalVisible(false)} // Agora fecha o modal e mantém o usuário na tela
-        onRegisterNew={handleRegisterNew}
-        onConfirm={handleConfirm}
+        onClose={handleCloseSucessModal} // Agora fecha o modal e mantém o usuário na tela
+        onRegisterNew={() => setSuccessModalVisible(false)}
       />
-
     </ScrollView>
   );
 };

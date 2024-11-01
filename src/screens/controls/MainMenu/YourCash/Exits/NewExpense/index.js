@@ -284,9 +284,9 @@ useFocusEffect(
       });
       console.log('Resposta da API:', response.data);
       if (response.status === 201 || response.data.status === 'success') {
+        setSuccessModalVisible(true);
         const despesaId = response.data.data[0].id; // Captura o id da primeira despesa criada
         console.log('ID da despesa cadastrada:', despesaId); // Log do id da despesa
-        setSuccessModalVisible(true);
         handleRegisterNew(); // Limpa todos os campos após o envio bem-sucedido
       } else {
         Alert.alert('Erro', `Ocorreu um erro ao salvar a despesa: ${response.data.message || 'Erro desconhecido'}`);
@@ -311,7 +311,6 @@ useFocusEffect(
     setDate(new Date());
     setDueDate(new Date());
     setBarcode('');
-    setSuccessModalVisible(false);
     setRepeatCount(0);
     setIsIndeterminate(false);
     setSelectedFrequencyId('');
@@ -330,6 +329,11 @@ useFocusEffect(
   const handleCategoriesScreen = () => {
     navigation.navigate('IncludeCategoriesExpense');
   };
+
+  const handleCloseSucessModal = () => {
+    setSuccessModalVisible(false);
+    navigation.navigate("MainTab");
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -547,9 +551,8 @@ useFocusEffect(
 
       <SucessModal
         visible={successModalVisible}
-        onClose={() => setSuccessModalVisible(false)} // Agora fecha o modal e mantém o usuário na tela
-        onRegisterNew={handleRegisterNew}
-        onConfirm={handleConfirm}
+        onClose={handleCloseSucessModal} // Agora fecha o modal e mantém o usuário na tela
+        onRegisterNew={() => setSuccessModalVisible(false)}
       />
     </ScrollView>
   );

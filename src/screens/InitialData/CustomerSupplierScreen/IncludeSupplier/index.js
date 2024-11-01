@@ -101,10 +101,6 @@ const IncludeSupplier = ({ navigation }) => {
     navigation.goBack();
   };
 
-  const handleFocus = () => {
-    setIsButtonVisible(false);
-  };
-
   const handleBlur = () => {
     setIsButtonVisible(true);
   };
@@ -139,7 +135,6 @@ const IncludeSupplier = ({ navigation }) => {
             placeholderTextColor={COLORS.lightGray}
             value={supplierName}
             onChangeText={setSupplierName}
-            onFocus={handleFocus}
             onBlur={handleBlur}
           />
         </View>
@@ -154,7 +149,6 @@ const IncludeSupplier = ({ navigation }) => {
             value={supplierPhone}
             onChangeText={setSupplierPhone}
             keyboardType="phone-pad"
-            onFocus={handleFocus}
             onBlur={handleBlur}
           />
         </View>
@@ -168,7 +162,6 @@ const IncludeSupplier = ({ navigation }) => {
             placeholderTextColor={COLORS.lightGray}
             value={additionalInfo}
             onChangeText={setAdditionalInfo}
-            onFocus={handleFocus}
             onBlur={handleBlur}
           />
         </View>

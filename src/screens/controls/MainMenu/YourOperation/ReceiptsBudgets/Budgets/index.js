@@ -253,8 +253,8 @@ const Budget = ({ navigation }) => {
                   <Text style={styles.deleteButtonText}>Excluir</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
-                <Icon name="checkbox" size={20} color={COLORS.black} />
-                  <Text style={styles.cancelButtonText}>Cancelar</Text>
+                <Icon name="close" size={20} color={COLORS.black} />
+                  <Text style={styles.cancelButtonText}>Fechar</Text>
                 </TouchableOpacity>
               </View>
             </View>

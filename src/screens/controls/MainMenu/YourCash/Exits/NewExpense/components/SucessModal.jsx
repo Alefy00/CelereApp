@@ -18,11 +18,11 @@ const SucessModal = ({visible, onClose, onRegisterNew}) => {
                 <Icon name="checkmark-circle" size={80} color={COLORS.green} />
               </View>
               <Text style={styles.title}>Sua despesa foi registrada!</Text>
-              <TouchableOpacity style={styles.returnButton} onPress={onClose}>
-                <Text style={styles.titleBack}>Voltar ao Menu</Text>
-              </TouchableOpacity>
               <TouchableOpacity style={styles.newExpenseButton} onPress={onRegisterNew}>
                 <Text style={styles.newExpenseButtonText}> Registrar nova despesa</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.returnButton} onPress={onClose}>
+                <Text style={styles.titleBack}>Voltar ao Resumo</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
       color: '#000'
     },
     returnButton: {
-      backgroundColor: COLORS.primary,
+      backgroundColor: COLORS.white,
       padding: 25,
       borderRadius: 5,
       alignItems: 'center',
@@ -78,14 +78,14 @@ const styles = StyleSheet.create({
       fontWeight: '500'
     },
     newExpenseButton: {
-      backgroundColor: COLORS.green,
+      backgroundColor: COLORS.primary,
       padding: 25,
       borderRadius: 5,
       alignItems: 'center',
       width: '100%',
     },
     newExpenseButtonText: {
-      color: '#fff',
+      color: '#000',
       fontSize: 15,
       fontWeight: '500'
 

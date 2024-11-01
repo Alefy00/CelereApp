@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import { WebView } from 'react-native-webview';
 import Share from 'react-native-share';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
@@ -10,90 +9,92 @@ import styles from './stylesReceip';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BarTop2 from '../../../../../../../components/BarTop2';
 import { API_BASE_URL } from '../../../../../../../services/apiConfig';
+import Pdf from 'react-native-pdf';
+import RNFetchBlob from 'rn-fetch-blob';
 
 const ReceiptScreen = ({ navigation, route }) => {
     const { saleId, fromLiquidateNow, fromLiquidateAgora, fromLiquidateNowService } = route.params; 
-    const [pdfUrl, setPdfUrl] = useState(null); // URL do PDF retornada pela API
     const [loading, setLoading] = useState(false); // Estado de carregamento
     const [error, setError] = useState(null); // Estado de erro
+    const [pdfPath, setPdfPath] = useState(null); 
 
-    const showAlert = (title, message) => Alert.alert(title, message);
-
-    const getEmpresaId = useCallback(async () => {
-        try {
-            const storedEmpresaId = await AsyncStorage.getItem('empresaId');
-            if (storedEmpresaId) return Number(storedEmpresaId);
-            showAlert('Erro', 'ID da empresa não encontrado.');
-            return null;
-        } catch (error) {
-            console.error('Erro ao buscar o ID da empresa:', error);
-            return null;
-        }
-    }, []);
-
-    // Função para obter a URL do recibo
-// Função para obter a URL do recibo
-const fetchReceipt = useCallback(async () => {
-    try {
-        console.log('Iniciando requisição para gerar recibo...');
-        setLoading(true);
-        const empresaId = await getEmpresaId();
-
-        if (!empresaId) {
-            setLoading(false);
-            return;
-        }
-
-        // Requisição para obter a URL do PDF com is_pdf_file=True
-        const response = await axios.get(`${API_BASE_URL}/cad/vendas/gerar_recibo_venda/`, {
-            params: {
-                empresa_id: empresaId,
-                venda_id: saleId,
-                is_pdf_file: 'True' // Garantir que está sendo enviado como string
-            }
-        });
-        console.log('Resposta da API:', response.data); // Log da resposta da API
-
-        // Verifique se a URL foi recebida corretamente
-        if (response.data?.url) {
-            setPdfUrl(response.data.url); // Definir a URL do PDF
-        } else {
-            setError('Erro ao gerar o recibo: URL não encontrada.');
-            console.error('Erro: URL do PDF não encontrada na resposta.');
-        }
-    } catch (error) {
-        setError('Erro ao gerar o recibo.');
-        console.error('Erro na requisição:', error);
-    } finally {
-        setLoading(false);
+    // Função auxiliar para converter ArrayBuffer para Base64
+const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
     }
-}, [saleId, getEmpresaId]);
+    return RNFetchBlob.base64.encode(binary);
+};
+    const fetchReceipt = useCallback(async () => {
+        try {
+            console.log('Iniciando requisição para gerar recibo...');
+            setLoading(true);
+            const empresaId = await AsyncStorage.getItem('empresaId');
+
+            if (!empresaId) {
+                Alert.alert('Erro', 'ID da empresa não encontrado.');
+                setLoading(false);
+                return;
+            }
+
+            const response = await axios.get(`${API_BASE_URL}/cad/vendas/gerar_recibo_venda/`, {
+                params: {
+                    empresa_id: empresaId,
+                    venda_id: saleId,
+                    is_pdf_file: 'False'
+                },
+                responseType: 'arraybuffer'
+            });
+
+            const base64Data = arrayBufferToBase64(response.data);
+
+            const path = `${RNFetchBlob.fs.dirs.CacheDir}/recibo_${saleId}.pdf`;
+            await RNFetchBlob.fs.writeFile(path, base64Data, 'base64');
+            setPdfPath(path);
+            console.log('PDF salvo em caminho temporário:', path);
+
+            // Verifica o conteúdo do PDF para garantir que não está vazio
+            const fileContent = await RNFetchBlob.fs.readFile(path, 'base64');
+            if (!fileContent || fileContent.length < 100) { // Um arquivo PDF muito pequeno pode indicar erro
+                console.error('Arquivo PDF parece estar incompleto ou corrompido.');
+                Alert.alert('Erro', 'O arquivo PDF parece estar incompleto ou corrompido.');
+                setError('Erro ao gerar o recibo: arquivo incompleto.');
+            } else {
+                console.log('PDF salvo com sucesso e encontrado no cache.');
+            }
+        } catch (error) {
+            setError('Erro ao gerar o recibo.');
+            console.error('Erro na requisição ou manipulação dos dados:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [saleId]);
+
 
     useEffect(() => {
         fetchReceipt();
     }, [fetchReceipt]);
 
-    // Função para compartilhar a URL do PDF
     const handleShare = async () => {
-        if (!pdfUrl) {
-            showAlert('Erro', 'O recibo ainda não está pronto para compartilhar.');
+        if (!pdfPath) {
+            Alert.alert('Erro', 'O recibo ainda não está pronto para compartilhar.');
             return;
         }
 
         try {
             const shareOptions = {
                 title: 'Compartilhar Recibo',
-                url: pdfUrl, // Compartilhando o link da URL do PDF
+                url: `file://${pdfPath}`,
             };
 
             await Share.open(shareOptions);
         } catch (error) {
             if (error.message !== 'User did not share') {
-                console.error('Erro ao compartilhar o link:', error);
-                showAlert('Erro', 'Não foi possível compartilhar o link.');
-            } else {
-                // Se o usuário cancelar o compartilhamento, não faz nada.
-                console.log('Usuário cancelou o compartilhamento.');
+                console.error('Erro ao compartilhar o PDF:', error);
+                Alert.alert('Erro', 'Não foi possível compartilhar o PDF.');
             }
         }
     };
@@ -123,20 +124,24 @@ const fetchReceipt = useCallback(async () => {
                 />
             </View>
 
-            {/* Carregamento ou erro */}
             {loading ? (
                 <ActivityIndicator size="large" color={COLORS.black} />
             ) : error ? (
                 <Text style={styles.errorText}>{error}</Text>
-            ) : pdfUrl ? (
-                <WebView
-                    source={{ uri: `https://docs.google.com/viewer?url=${pdfUrl}&embedded=true` }} // Usando Google Docs Viewer
+            ) : pdfPath ? (
+                <Pdf
+                    source={{ uri: `file://${pdfPath}` }}
                     style={styles.pdf}
                     onError={(err) => {
-                        console.error('Erro no WebView:', err.nativeEvent);
-                        showAlert('Erro', 'Não foi possível carregar o PDF.');
-                    }} // Adicionando log de erro no WebView
-                    onLoadEnd={() => console.log('PDF carregado com sucesso')} // Log quando o PDF é carregado
+                        console.error('Erro no Pdf:', err);
+                        Alert.alert('Erro', 'Não foi possível carregar o PDF.');
+                    }}
+                    onLoadComplete={() => {
+                        console.log('PDF carregado com sucesso');
+                        RNFetchBlob.fs.unlink(pdfPath)
+                            .then(() => console.log('Arquivo PDF temporário excluído'))
+                            .catch((err) => console.error('Erro ao excluir o arquivo temporário:', err));
+                    }}
                 />
             ) : null}
 

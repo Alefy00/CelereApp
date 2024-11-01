@@ -16,6 +16,7 @@ const OpeningBalanceModal = ({ visible, onClose, onBalanceSaved }) => {
   const [totalBalance, setTotalBalance] = useState(0);
   const [loading, setLoading] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false); // Adiciona o estado do modal de sucesso
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false); 
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
@@ -62,39 +63,25 @@ const OpeningBalanceModal = ({ visible, onClose, onBalanceSaved }) => {
     setTotalBalance(cashValue + bankValue);
   }, [cash, bank]);
 
-  // Função para validar os campos
-  const validateFields = () => {
-    if (!cash || parseFloat(cash.replace(/\./g, '').replace(',', '.')) <= 0) {
-      Alert.alert('Erro', 'Por favor, insira um valor válido para "Valor em Espécie".');
-      return false;
-    }
-    if (!bank || parseFloat(bank.replace(/\./g, '').replace(',', '.')) <= 0) {
-      Alert.alert('Erro', 'Por favor, insira um valor válido para "Saldo no Banco".');
-      return false;
-    }
-    return true;
-  };
 
-  const handleOnclose = () => {
-    onClose();
-  };
-
-  // Função para salvar o saldo inicial
-  const handleSave = async () => {
-    if (!validateFields()) return;
-
+    // Função para exibir o pop-up de confirmação
+    const handleSave = () => {
+      setConfirmModalVisible(true); // Exibe o pop-up de confirmação
+    };
+   // Função para validar e fazer a requisição após confirmação
+   const confirmAndSave = async () => {
+    setConfirmModalVisible(false);
     if (!empresaId) {
       Alert.alert('Erro', 'ID da empresa não carregado.');
       return;
     }
 
     setLoading(true);
-
     try {
       const response = await axios.post(`${API_BASE_URL}/cad/saldo_caixa_inicial/`, {
         empresa_id: empresaId,
-        valor_especie: cash.replace(/\./g, '').replace(',', '.'),
-        saldo_banco: bank.replace(/\./g, '').replace(',', '.'),
+        valor_especie: cash.replace(/\./g, '').replace(',', '.') || '0',
+        saldo_banco: bank.replace(/\./g, '').replace(',', '.') || '0',
       });
 
       if (response.status === 201 && response.data.status === 'success') {
@@ -111,6 +98,7 @@ const OpeningBalanceModal = ({ visible, onClose, onBalanceSaved }) => {
       setLoading(false);
     }
   };
+
 
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>
@@ -151,12 +139,31 @@ const OpeningBalanceModal = ({ visible, onClose, onBalanceSaved }) => {
             <Icon name="checkmark-circle" size={20} color={COLORS.black} />
             <Text style={styles.buttonText}>Salvar Tudo</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.saveButton2} onPress={handleOnclose}>
+          <TouchableOpacity style={styles.saveButton2} onPress={onClose}>
             <TimeIcon size={20} color={COLORS.black} />
             <Text style={styles.buttonText}>Deixa para depois</Text>
           </TouchableOpacity>
 
           {loading && <ActivityIndicator size="large" color={COLORS.primary} />}
+          {/* Pop-up de Confirmação */}
+          <Modal visible={confirmModalVisible} animationType="slide" transparent={true}>
+            <View style={styles.confirmModalContainer}>
+              <View style={styles.confirmModalContent}>
+                <Text style={styles.confirmMessage}>Seu caixa atual é de</Text>
+                <Text style={styles.confirmAmount}>R$ {formatCurrency(totalBalance.toFixed(2))}</Text>
+                <TouchableOpacity style={styles.confirmButton} onPress={confirmAndSave}>
+                  <Icon name="checkmark-circle" size={20} color={COLORS.black} />
+                  <Text style={styles.confirmButtonText}>Confirmar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.backButton} onPress={() => setConfirmModalVisible(false)}>
+                <Icon name="arrow-back" size={20} color={COLORS.black} />
+                  <Text style={styles.backButtonText}>Voltar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
+          {/* Modal de Sucesso */}
           <Modal visible={successModalVisible} animationType="slide" transparent={true}>
             <View style={styles.successModalContainer}>
               <View style={styles.successModalContent}>
@@ -165,8 +172,8 @@ const OpeningBalanceModal = ({ visible, onClose, onBalanceSaved }) => {
                 <TouchableOpacity
                   style={styles.successButton}
                   onPress={() => {
-                    setSuccessModalVisible(false); // Fecha o modal de sucesso
-                    onClose(); // Fecha o modal principal após sucesso
+                    setSuccessModalVisible(false);
+                    onClose();
                   }}
                 >
                   <Text style={styles.successButtonText}>Ok</Text>

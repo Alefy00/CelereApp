@@ -6,6 +6,7 @@ import {Platform} from 'react-native';
 import CalculatorIcon from '../assets/images/svg/iconCalculator.svg';
 import RobotIcon from '../assets/images/svg/iconRobot.svg';
 import CalculatorModal from './CalculatorModal';
+import CelereLogo from '../assets/images/svg/CelerePay/logo.svg'
 
 export const HeaderArea = styled.View`
   flex: 1;
@@ -50,13 +51,14 @@ export const HeaderSubTitle = styled.Text`
   flex: 1;
   font-size: 14px;
   font-family: Rubik-Medium;
-  color: ${props => `${props.foreColor}`};
+  color: #000;
   background-color: ${props => `${props.backColor}`};
   padding-left: 8px;
   padding-right: 8px;
   margin-left: 13px;
   margin-top: -20px;
   font-weight: bold;
+  z-index: 10;
 `;
 
 export const ToggleLeft = styled.View`
@@ -116,7 +118,7 @@ export default ({
   return (
     <HeaderArea backColor={backColor}>
       <ToggleLeft>
-        <UserAvatar source={{uri: uriAvatar}}  onPress={handleMenu}/>
+      <CelereLogo width={32} height={32} onPress={handleMenu} />
       </ToggleLeft>
 
       <ToggleText>

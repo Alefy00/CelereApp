@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useCallback, useEffect, useState } from 'react';
-import { KeyboardAvoidingView, ScrollView, View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { KeyboardAvoidingView, ScrollView, View, Text, TouchableOpacity, ActivityIndicator, Alert, BackHandler } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS } from '../../../constants';
 import BarTop from '../../../components/BarTop';
@@ -21,7 +21,25 @@ const MainMenu = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
   const [empresaId, setEmpresaId] = useState(null);
-  const [refreshFlag, setRefreshFlag] = useState(false);
+
+    // Função para lidar com o botão de voltar do dispositivo
+    useFocusEffect(
+      useCallback(() => {
+        const onBackPress = () => {
+          Alert.alert(
+            'Sair do Aplicativo',
+            'Você já está na tela principal. Deseja sair?',
+            [
+              { text: 'Não', style: 'cancel' },
+              { text: 'Sim', onPress: () => BackHandler.exitApp() }
+            ]
+          );
+          return true;
+        };
+        BackHandler.addEventListener('hardwareBackPress', onBackPress);
+        return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      }, [])
+    );
 
   const getEmpresaId = useCallback(async () => {
     try {
@@ -108,11 +126,10 @@ useEffect(() => {
   const formatCurrency = (value) => {
     const numericValue = parseFloat(value);
     if (isNaN(numericValue)) return '0,00';
-  
+
     const formattedValue = Math.abs(numericValue).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     return numericValue < 0 ? `-R$ ${formattedValue}` : `R$ ${formattedValue}`;
   };
-  
 
 // Função de inicialização para exibir o modal apenas se necessário
 const initializeDateFilter = useCallback(async () => {
@@ -126,7 +143,6 @@ const initializeDateFilter = useCallback(async () => {
     setIsModalVisible(true);
   }
 }, [saldoCaixa]);
-  
 
   const handleDateChange = useCallback((startDate, endDate) => {
     setSelectedDate({ dt_ini: startDate, dt_end: endDate });
@@ -150,15 +166,12 @@ const initializeDateFilter = useCallback(async () => {
     const today = new Date().toISOString().split('T')[0];
     setSelectedDate({ dt_ini: today, dt_end: today }); // Atualiza selectedDate para a data atual
   };
-  
 
   return (
     <KeyboardAvoidingView behavior="position" enabled>
       <ScrollView style={{ backgroundColor: "#FDFCF0" }}>
         <BarTop
-          uriAvatar={'https://www.apptek.com.br/comercial/2024/manut/images/user/foto1.png'}
-          titulo={'Planeta '}
-          subtitulo={'Planeta '}
+          subtitulo={'Célere'}
           backColor={COLORS.primary}
           foreColor={'#000000'}
         />
@@ -173,7 +186,10 @@ const initializeDateFilter = useCallback(async () => {
               {loading ? (
                 <ActivityIndicator size="large" color={COLORS.primary} />
               ) : (
-                <Text style={styles.amount}>{formatCurrency(saldoCaixa)}</Text>
+                <Text  style={[
+                  styles.amount, 
+                  { color: saldoCaixa < 0 ? COLORS.red : COLORS.green }
+                ]}>{`${formatCurrency(saldoCaixa)}`}</Text>
               )}
               <TouchableOpacity onPress={() => setIsModalVisible(true)}>
                 <Text style={styles.updateButtonAttSaldo}>Atualizar saldo</Text>
