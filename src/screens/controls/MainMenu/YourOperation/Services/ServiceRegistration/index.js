@@ -366,10 +366,10 @@ const handleSelectImage = async () => {
           <View style={styles.modalContent}>
             <Icon name="checkmark-circle" size={90} color={COLORS.green} />
             <Text style={styles.modalText}>Serviço cadastrado com sucesso!</Text>
-            <TouchableOpacity style={styles.confirmButton} onPress={handleCloseModal}>
+            <TouchableOpacity style={styles.confirmButton} onPress={handleNewService}>
               <Text style={styles.confirmButtonText}>Cadastrar novo serviço</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.confirmButton} onPress={handleNewService}>
+            <TouchableOpacity style={styles.confirmButton} onPress={handleCloseModal}>
               <Text style={styles.confirmButtonText}>Retorna</Text>
             </TouchableOpacity>
           </View>
