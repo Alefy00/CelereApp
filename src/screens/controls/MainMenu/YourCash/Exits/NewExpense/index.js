@@ -88,10 +88,9 @@ const NewExpense = ({ navigation  }) => {
   };
   
   const handleDayPress = (day) => {
-    const selectedDate = new Date(day.dateString);
-    const today = new Date();
+    const selectedDate = new Date(`${day.dateString}T00:00:00`);
+    const today = new Date(new Date().setHours(0, 0, 0, 0)); // Define "hoje" sem horário para comparação
   
-    // Log para verificar a data selecionada
     console.log("Data selecionada:", selectedDate);
   
     // Verifica se a data selecionada é hoje ou uma data passada
@@ -102,7 +101,6 @@ const NewExpense = ({ navigation  }) => {
       Alert.alert('Data Inválida', 'Por favor, selecione uma data anterior');
     }
   };
-  
   
   const fetchCategories = useCallback(async () => {
     setLoading(true);
@@ -532,7 +530,7 @@ useFocusEffect(
           visible={isCalendarVisible}
           onClose={() => setIsCalendarVisible(false)}
           onDayPress={handleDayPress}
-          maximumDate={new Date().toISOString().split('T')[0]} 
+          maximumDate={new Date().toISOString().split('T')[0]}
         />
 
       <ConfirmModal

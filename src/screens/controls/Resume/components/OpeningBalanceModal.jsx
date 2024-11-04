@@ -34,6 +34,11 @@ const OpeningBalanceModal = ({ visible, onClose, onBalanceSaved }) => {
     }
   };
 
+  const handleClear = () => {
+    setCash('');
+    setBank('');
+  };
+
   // Carregar o ID da empresa assim que o modal for exibido
   useEffect(() => {
     if (visible) {
@@ -88,6 +93,7 @@ const OpeningBalanceModal = ({ visible, onClose, onBalanceSaved }) => {
         await AsyncStorage.setItem('initialBalanceAdded', 'true');
         onBalanceSaved();
         setSuccessModalVisible(true); // Exibe o modal de sucesso
+        handleClear();
       } else {
         Alert.alert('Erro', response.data.message || 'Erro ao salvar o saldo inicial.');
       }

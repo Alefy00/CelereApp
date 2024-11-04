@@ -75,7 +75,7 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
   };
 
   const handleDayPress = (day) => {
-    setPaymentDate(new Date(day.dateString)); // Atualiza a data selecionada
+    setPaymentDate(new Date(`${day.dateString}`)); // Atualiza a data selecionada
   };
 
   const handleCloseModal = () => {

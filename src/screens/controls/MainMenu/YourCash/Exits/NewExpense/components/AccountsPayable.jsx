@@ -91,6 +91,9 @@ const handleDayPress = (day) => {
   const selectedDate = new Date(`${day.dateString}T00:00:00`); // Define a data sem fuso horário específico
   const today = new Date(new Date().setHours(0, 0, 0, 0)); // Define "hoje" sem horário para comparação
 
+      // Log para verificar a data selecionada
+      console.log("Data selecionada:", selectedDate);
+
   if (selectedDate >= today) {
     setDueDate(selectedDate); // Atualiza a data de vencimento com a data selecionada
     setShowCalendar(false);

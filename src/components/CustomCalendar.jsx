@@ -4,6 +4,7 @@ import { View, Text, Modal, TouchableOpacity, StyleSheet } from 'react-native';
 import { Calendar,LocaleConfig } from 'react-native-calendars';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../constants'; // Ajuste a importação conforme seu projeto
+import { zonedTimeToUtc, format } from 'date-fns-tz'; 
 
 // Configurando o calendário para exibir em português
 LocaleConfig.locales['pt-br'] = {
@@ -17,13 +18,16 @@ LocaleConfig.defaultLocale = 'pt-br';
 
 const CustomCalendar = ({ visible, onClose, onDayPress }) => {
   const [selectedDate, setSelectedDate] = useState('');
-  
 
   const handleDayPress = (day) => {
-    setSelectedDate(day.dateString); // Armazena a data selecionada
-    onDayPress(day); // Chama a função passada para atualizar o valor no componente pai
+    const selectedDate = new Date(day.dateString + 'T12:00:00'); // Define a data no meio-dia local
+    const formattedDate = selectedDate.toISOString().split('T')[0]; // Formata para 'yyyy-MM-dd'
+  
+    setSelectedDate(day.dateString); // Marca a data selecionada no calendário
+    onDayPress({ dateString: formattedDate }); // Passa a data formatada para o componente pai
     onClose(); // Fecha o modal
   };
+  
 
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>

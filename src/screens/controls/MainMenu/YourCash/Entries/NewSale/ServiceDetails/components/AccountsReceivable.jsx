@@ -113,7 +113,7 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
     };
   
     const handleDayPress = (day) => {
-      setPaymentDate(new Date(day.dateString)); // Atualiza a data selecionada
+      setPaymentDate(new Date(`${day.dateString}`)); // Atualiza a data selecionada
     };
 
     const handleCloseModalMain= () => {
