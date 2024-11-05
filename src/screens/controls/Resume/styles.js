@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     confirmAmount: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: '#00A000', // Verde para o valor
+      color: COLORS.green, // Verde para o valor
       marginVertical: 10,
     },
     confirmButton: {

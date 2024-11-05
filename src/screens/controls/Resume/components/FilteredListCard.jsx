@@ -30,18 +30,47 @@ const getEmpresaId = async () => {
     return null;
   }
 };
+
 // Função utilitária para formatar valores como moeda Real Brasileiro (BRL)
 const formatToBRL = (value) => {
   if (typeof value === 'string') {
-    // Remove os pontos (separadores de milhar) e substitui a vírgula pelo ponto (separador decimal)
+    // Remove o ponto que representa milhar e substitui a vírgula para a correta conversão
     const cleanValue = value.replace(/\./g, '').replace(',', '.');
     const number = parseFloat(cleanValue);
     return number.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   } else if (typeof value === 'number') {
-    // Se já for um número, apenas formata diretamente
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   } else {
     return 'R$ 0,00'; // Valor padrão em caso de erro
+  }
+};
+
+
+
+// Função para buscar o acerto do saldo de caixa
+const fetchAcertoSaldoCaixa = async (empresaId, dataInicial, dataFinal) => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/api/ms_datainf/get_lista_acerto_saldo_caixa/?empresa_id=${empresaId}&dt_ini=${dataInicial}&dt_end=${dataFinal}`
+    );
+    return response.data.data || [];
+  } catch (error) {
+    console.error("Erro ao buscar acerto de saldo de caixa:", error);
+    return [];
+  }
+};
+
+// Função para obter o ícone correto baseado no tipo do item
+const getIconForItem = (item, isExpenseTab) => {
+  if (item.isAcertoSaldo) {
+    // Ícone de refresh em azul para acertos de saldo
+    return <Ionicons name="refresh-outline" size={20} color={COLORS.blue} />;
+  } else if (isExpenseTab) {
+    // Ícone de seta para baixo em vermelho para despesas
+    return <Ionicons name="arrow-down-outline" size={20} color={COLORS.red} />;
+  } else {
+    // Ícone padrão baseado no método de pagamento para vendas
+    return getPaymentIconById(item.tipo_pagamento_venda);
   }
 };
 
@@ -122,12 +151,13 @@ const fetchAllDespesas = async (empresaId) => {
   }
 };
 
-// Função para mapear e filtrar os dados das despesas no front-end
+// Atualizar o retorno dos dados mapeados com a nova verificação
 const mapExpenseData = (expenses, dataInicial, dataFinal) => {
-  const despesasFiltradas = expenses.filter(expense =>
-    expense.status === 'finalizada' &&
-    new Date(expense.dt_pagamento) >= new Date(dataInicial) &&
-    new Date(expense.dt_pagamento) <= new Date(dataFinal)
+  const despesasFiltradas = expenses.filter(
+    (expense) =>
+      expense.status === 'finalizada' &&
+      new Date(expense.dt_pagamento) >= new Date(dataInicial) &&
+      new Date(expense.dt_pagamento) <= new Date(dataFinal)
   );
   return despesasFiltradas.map((expense) => ({
     id: expense.id,
@@ -135,6 +165,7 @@ const mapExpenseData = (expenses, dataInicial, dataFinal) => {
     method: 'Despesa',
     date: formatDate(expense.dt_pagamento),
     amount: parseFloat(expense.valor),
+    isAcertoSaldo: false, // Não é acerto de saldo
   }));
 };
 
@@ -169,14 +200,13 @@ const fetchAllVendas = async (empresaId, dataInicial, dataFinal) => {
   return await fetchVendasPaginadas(`${API_BASE_URL}/cad/vendas/?empresa=${empresaId}&data_inicial=${dataInicial}&data_final=${dataFinal}`);
 };
 
-// Função para mapear os dados das vendas, priorizando o nome do serviço quando disponível
+// Atualização de mapSalesData para incluir `isAcertoSaldo`
 const mapSalesData = (sales) => {
   return sales.map((sale) => {
-    // Itera pelos itens e verifica se há um serviço ou produto com nome
     const itemName = sale.itens.reduce((name, item) => {
-      if (item.servico?.nome) return item.servico.nome; // Prioriza o nome do serviço
-      if (item.nome) return item.nome; // Usa o nome do produto, se o serviço não existir
-      return name; // Mantém o nome atual se nenhum nome for encontrado
+      if (item.servico?.nome) return item.servico.nome;
+      if (item.nome) return item.nome;
+      return name;
     }, 'Item sem nome');
 
     return {
@@ -186,6 +216,7 @@ const mapSalesData = (sales) => {
       date: formatDate(sale.data_venda),
       amount: parseFloat(sale.valor_total_venda),
       tipo_pagamento_venda: sale.tipo_pagamento_venda,
+      isAcertoSaldo: false, // Não é acerto de saldo
     };
   });
 };
@@ -257,50 +288,74 @@ const FilteredListCard = ({ selectedDate, navigation, onSaleCanceledRefresh }) =
     onSaleCanceledRefresh(); // Chama a função de atualização no MainMenu
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      const loadSalesData = async () => {
-        const empresaId = await getEmpresaId();
-        if (empresaId && selectedDate) {
-          const { dt_ini, dt_end } = selectedDate;
-      
-          // Busca vendas detalhadas
-          const sales = await fetchAllVendas(empresaId, dt_ini, dt_end);
-          
-          // Processa as vendas para carregar os nomes dos itens corretamente
-          const vendasProcessadas = await processarVendas(sales);
-          
-          // Mapeia as vendas processadas para exibir os dados na interface
-          const mappedSales = mapSalesData(vendasProcessadas);
-          setSalesData(mappedSales);
-      
-          // Soma o valor total das vendas finalizadas
-          const total = mappedSales.reduce((sum, sale) => sum + sale.amount, 0);
-          setSalesTotal(total);
-      
-          // Busca o resumo financeiro
-          const resumoFinanceiro = await fetchResumoFinanceiro(empresaId, dt_ini, dt_end);
-          setVendasLiquidadas(resumoFinanceiro.vendasLiquidadas);
-          setDespesasLiquidadas(resumoFinanceiro.despesasLiquidadas);
-          setSaldo(resumoFinanceiro.saldo);
-        }
-      };
+// Adicionar a lógica de carregamento dentro de useFocusEffect
+useFocusEffect(
+  useCallback(() => {
+    const loadSalesData = async () => {
+      const empresaId = await getEmpresaId();
+      if (empresaId && selectedDate) {
+        const { dt_ini, dt_end } = selectedDate;
 
-      const loadExpenseData = async () => {
-        const empresaId = await getEmpresaId();
-        if (empresaId && selectedDate) {
-          const { dt_ini, dt_end } = selectedDate;
+        // Busca e processa vendas detalhadas
+        const sales = await fetchAllVendas(empresaId, dt_ini, dt_end);
+        const vendasProcessadas = await processarVendas(sales);
+        const mappedSales = mapSalesData(vendasProcessadas);
+        setSalesData(mappedSales);
 
-          const despesas = await fetchAllDespesas(empresaId);
-          const mappedExpenses = mapExpenseData(despesas, dt_ini, dt_end);
-          setExpenseData(mappedExpenses);
-        }
-      };
+        // Soma o valor total das vendas finalizadas
+        const total = mappedSales.reduce((sum, sale) => sum + sale.amount, 0);
+        setSalesTotal(total);
 
-      loadSalesData();
-      loadExpenseData();
-    }, [selectedDate])
-  );
+        // Busca o resumo financeiro
+        const resumoFinanceiro = await fetchResumoFinanceiro(empresaId, dt_ini, dt_end);
+        setVendasLiquidadas(resumoFinanceiro.vendasLiquidadas);
+        setDespesasLiquidadas(resumoFinanceiro.despesasLiquidadas);
+        setSaldo(resumoFinanceiro.saldo);
+
+        // Busca o acerto do saldo de caixa e filtra por receita/despesa
+        const acertosSaldoCaixa = await fetchAcertoSaldoCaixa(empresaId, dt_ini, dt_end);
+        const entradasAcertos = acertosSaldoCaixa.filter(item => item.categoria_operacao === 'receita');
+        const saidasAcertos = acertosSaldoCaixa.filter(item => item.categoria_operacao === 'despesa');
+
+        // Mapeia os dados de acerto de saldo de caixa para o formato esperado, mantendo a exclusividade de chave e sem duplicações
+        const mappedEntradas = entradasAcertos.map((item, index) => ({
+          id: `entrada-${item.item}-${item.data_operacao}-${item.valor}-${Math.random()}`,// Chave única baseada no índice do loop
+          description: item.item,
+          method: 'Acerto de Caixa',
+          date: item.data_operacao,
+          valor: item.valor, 
+          isAcertoSaldo: true, // Indica que é um acerto de saldo para exibição em azul
+        }));
+
+        const mappedSaidas = saidasAcertos.map((item, index) => ({
+          id: `saida-${item.item}-${item.data_operacao}-${item.valor}-${Math.random()}`, // Chave única baseada no índice do loop
+          description: item.item,
+          method: 'Acerto de Caixa',
+          date: item.data_operacao,
+          valor: item.valor, 
+          isAcertoSaldo: true, // Indica que é um acerto de saldo para exibição em azul
+        }));
+
+        // Atualiza os dados de entrada e saída combinando com vendas e despesas
+        setSalesData(prevSalesData => [...prevSalesData, ...mappedEntradas]);
+        setExpenseData(prevExpenseData => [...prevExpenseData, ...mappedSaidas]);
+      }
+    };
+
+    const loadExpenseData = async () => {
+      const empresaId = await getEmpresaId();
+      if (empresaId && selectedDate) {
+        const { dt_ini, dt_end } = selectedDate;
+        const despesas = await fetchAllDespesas(empresaId);
+        const mappedExpenses = mapExpenseData(despesas, dt_ini, dt_end);
+        setExpenseData(mappedExpenses);
+      }
+    };
+
+    loadSalesData();
+    loadExpenseData();
+  }, [selectedDate])
+);
 
   const dataToShow = selectedTab === 'sales' ? salesData : expenseData;
   const filteredData = dataToShow.filter(item =>
@@ -371,31 +426,31 @@ const FilteredListCard = ({ selectedDate, navigation, onSaleCanceledRefresh }) =
           <Ionicons name="search" size={20} color={COLORS.lightGray} />
         </View>
         <View>
-        {filteredData.map(item => {
-          const isExpenseTab = selectedTab === 'expenses'; // Verifica se está na aba de despesas
+        {filteredData.map((item) => {
+          const isExpenseTab = selectedTab === 'expenses';
+          const itemColor = item.isAcertoSaldo ? COLORS.blue : (isExpenseTab ? COLORS.red : COLORS.green);
+
+          // Formata o valor para exibição, adicionando sinal de negativo na aba de despesas se for um ajuste
+          const displayValue = item.isAcertoSaldo && isExpenseTab ? `- R$ ${item.valor}` : `R$ ${item.valor}`;
 
           return (
             <TouchableOpacity key={item.id} onPress={() => openLiquidatedDetailModal(item.id)}>
               <View style={styles.listItem}>
-                {isExpenseTab 
-                  ? <Ionicons name="arrow-down-outline" size={20} color={COLORS.red} /> 
-                  : getPaymentIconById(item.tipo_pagamento_venda)
-                }
+                {getIconForItem(item, isExpenseTab)}
                 <View style={styles.itemInfo}>
                   <Text style={styles.itemDescription}>{item.description}</Text>
                   <Text style={styles.itemDetails}>
-                    {getPaymentMethodName(item.tipo_pagamento_venda)} - {item.date}
+                    {item.method} - {item.date}
                   </Text>
                 </View>
-                <Text style={[styles.itemAmount, { color: isExpenseTab ? COLORS.red : COLORS.green }]}>
-                  {formatToBRL(item.amount)}
+                <Text style={[styles.itemAmount, { color: itemColor }]}>
+                {item.isAcertoSaldo ? displayValue : formatToBRL(item.amount)}
                 </Text>
               </View>
             </TouchableOpacity>
           );
         })}
       </View>
-
       <SalesDetailModal
         visible={isModalVisible}
         onClose={closeLiquidatedDetailModal}
@@ -404,7 +459,6 @@ const FilteredListCard = ({ selectedDate, navigation, onSaleCanceledRefresh }) =
         servicoNomes={{}} // Pode passar os nomes de serviços, se necessário
         navigation={navigation}
       />
-
       </View>
     </KeyboardAwareScrollView>
   );

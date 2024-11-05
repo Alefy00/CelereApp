@@ -50,7 +50,7 @@ const AccountsPayable = ({ navigation }) => {
   const [parceiro, setParceiro] = useState('');
   const [suppliers, setSuppliers] = useState([]);
   const [date, setDate] = useState(new Date());
-  const [dueDate, setDueDate] = useState(new Date());
+  const [dueDate, setDueDate] = useState(new Date()); // Inicializa como um objeto Date
   const [modalVisible, setModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -86,29 +86,22 @@ const AccountsPayable = ({ navigation }) => {
     setShowCalendar(true);
   };
 
-// Atualize a função handleDayPress para garantir que a data está sendo configurada corretamente
-const handleDayPress = (day) => {
-  const selectedDate = new Date(`${day.dateString}T00:00:00`); // Define a data sem fuso horário específico
-  const today = new Date(new Date().setHours(0, 0, 0, 0)); // Define "hoje" sem horário para comparação
+  const handleDayPress = (day) => {
+    const [year, month, dayOfMonth] = day.dateString.split('-'); // Divide a data no formato "yyyy-MM-dd"
+    const selectedDate = new Date(year, month - 1, dayOfMonth); // Configura a data para o fuso horário local
+  
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Define "hoje" sem horário para comparação
+  
+    if (selectedDate >= today) {
+      setDueDate(selectedDate); // Armazena o selectedDate como um objeto Date
+      setShowCalendar(false);
+    } else {
+      Alert.alert('Data Inválida', 'Por favor, selecione uma data de hoje em diante.');
+    }
+  };
 
-      // Log para verificar a data selecionada
-      console.log("Data selecionada:", selectedDate);
 
-  if (selectedDate >= today) {
-    setDueDate(selectedDate); // Atualiza a data de vencimento com a data selecionada
-    setShowCalendar(false);
-  } else {
-    Alert.alert('Data Inválida', 'Por favor, selecione uma data de hoje em diante.');
-  }
-};
-
-const getCurrentTime = () => {
-  const now = new Date();
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  return `${hours}:${minutes}:${seconds}`;
-};
   const getSupplierNameById = (id) => {
     const supplier = suppliers.find((s) => s.value === id);
     return supplier ? supplier.label : 'Parceiro não encontrado';
@@ -210,6 +203,10 @@ const fetchSuppliers = useCallback(async () => {
   };
   
   const handleSave = () => {
+    if (!dueDate) {
+      Alert.alert('Erro', 'Por favor, selecione uma data de vencimento.');
+      return;
+    }
     console.log('Categoria:', categoria);
     console.log('Valor:', valor);
     console.log('Parceiro:', parceiro);
@@ -245,12 +242,11 @@ const fetchSuppliers = useCallback(async () => {
       setLoading(false);
       return;
     }
-    const formattedDueDate = format(dueDate, 'yyyy-MM-dd');
     const expenseData = {
       empresa_id: Number(empresa_id),
       item: item,
       valor: valorNumerico,
-      dt_vencimento: formattedDueDate,
+      dt_vencimento: format(dueDate, 'yyyy-MM-dd'),
       dt_pagamento: null,
       fornecedor_id: Number(parceiro),
       categoria_despesa_id: Number(categoria),
@@ -376,11 +372,13 @@ const fetchSuppliers = useCallback(async () => {
             <View style={styles.datePickerContainer}>
             <Text style={styles.dateLabel}>Data de vencimento</Text>
             <TouchableOpacity style={styles.datePickerRow} onPress={handleShowCalendar}>
-              <TextInput
-                style={styles.dateInput}
-                value={format(dueDate, 'dd/MM/yyyy', { locale: ptBR })}
-                editable={false}
-              />
+            <TextInput
+              style={styles.dateInput}
+              value={dueDate ? format(dueDate, 'dd/MM/yyyy') : ''} // Formata `dueDate` para exibição
+              editable={false}
+            />
+
+
                 <Icon name="calendar" size={20} color={COLORS.gray} />
             </TouchableOpacity>
           </View>
@@ -536,7 +534,7 @@ const fetchSuppliers = useCallback(async () => {
         onConfirm={handleConfirm}
         valor={valor} // O valor já está formatado
         parceiro={getSupplierNameById(parceiro)}
-        dataVencimento={format(dueDate, 'dd/MM/yyyy', { locale: ptBR })}
+        dataVencimento={dueDate ? format(dueDate, 'dd/MM/yyyy') : ''}
         isRecurring={isRecurring}
         tipoRecorrencia={selectedFrequencyName}
         repeatCount={repeatCount}

@@ -267,9 +267,17 @@ const styles = StyleSheet.create({
     width: "100%",
     marginBottom: 10
   },
+  confirmButtonReturn: {
+    backgroundColor: '#FFF', // Amarelo do botão
+    borderRadius: 5,
+    paddingVertical: 25,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    width: "100%",
+    marginBottom: 10
+  },
   confirmButtonText: {
     fontSize: 16,
-    fontWeight: 'bold',
     color: '#000', // Texto preto
   },
 });

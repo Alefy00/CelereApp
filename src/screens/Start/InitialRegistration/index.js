@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Text, View, TextInput, Modal, ActivityIndicator, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { Text, View, TextInput, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import BarTop3 from '../../../components/BarTop3';
 import { COLORS } from '../../../constants';
 import axios from 'axios';
@@ -13,6 +13,7 @@ import styles from './styles';
 import { API_BASE_URL } from '../../../services/apiConfig';
 import CheckBox from '@react-native-community/checkbox';
 import PrivacyPolicyModal from './components/PrivacyPolicyModal';
+import ErrorModal from '../../../components/ErrorModal';
 
 const InitialRegistration = ({ navigation }) => {
   const [phoneData, setPhoneData] = useState({
@@ -21,13 +22,13 @@ const InitialRegistration = ({ navigation }) => {
     ddd: '',
     number: '',
   });
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
+  
   const [loading, setLoading] = useState(true);
   const numberInputRef = useRef(null);
   const [isPrivacyChecked, setIsPrivacyChecked] = useState(false);
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
-
+  const [errorVisible, setErrorVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const checkStoredData = async () => {
@@ -73,23 +74,23 @@ const InitialRegistration = ({ navigation }) => {
     }
   }, []);
 
-  const showModal = useCallback((message) => {
-    setModalMessage(message);
-    setModalVisible(true);
-  }, []);
+  const showError = (message) => {
+    setErrorMessage(message);
+    setErrorVisible(true);
+  };
 
   const validateFields = useCallback(() => {
     const { ddi, ddd, number } = phoneData;
     if (!ddi || !ddd || !number) {
-      showModal('Todos os campos devem ser preenchidos.');
+      showError('Todos os campos devem ser preenchidos.');
       return false;
     }
     if (!/^\d+$/.test(ddi) || !/^\d+$/.test(ddd) || !/^\d+$/.test(number)) {
-      showModal('DDI, DDD e Número de Celular devem conter apenas números.');
+      showError('DDI, DDD e Número de Celular devem conter apenas números.');
       return false;
     }
     return true;
-  }, [phoneData, showModal]);
+  }, [phoneData]);
 
   const checkUserExists = useCallback(async () => {
     try {
@@ -128,16 +129,16 @@ const InitialRegistration = ({ navigation }) => {
       return false;
     } catch (error) {
       console.error('Erro ao verificar usuário:', error.message);
-      showModal('Erro ao verificar o usuário. Tente novamente.');
+      showError('Erro ao verificar o usuário. Tente novamente.');
       return false;
     }
-  }, [phoneData, showModal, navigation]);
+  }, [phoneData, navigation]);
 
   const handleSend = useCallback(async () => {
     if (!validateFields()) return;
 
     if (!isPrivacyChecked) {
-      Alert.alert("Aviso", "Você deve concordar com a política de privacidade para prosseguir.");
+      showError("Você deve concordar com a política de privacidade para prosseguir.");
       return;
     }
 
@@ -177,22 +178,17 @@ const InitialRegistration = ({ navigation }) => {
           if (storedEmpresaId) {
             navigation.navigate('InitialCode');
           } else {
-            console.error('Erro ao armazenar o ID da empresa.');
+            showError('Erro ao armazenar o ID da empresa.');
           }
         }
       } else {
-        showModal(response.data.message || 'Erro ao registrar. Tente novamente.');
+        showError(response.data.message || 'Erro ao registrar. Tente novamente.');
       }
     } catch (error) {
       console.error('Erro ao conectar à API:', error.message);
-      showModal('Não foi possível conectar à API. Verifique sua conexão e tente novamente.');
+      showError('Não foi possível conectar. Verifique sua conexão e tente novamente.');
     }
-  }, [phoneData, validateFields, checkUserExists, showModal, navigation, isPrivacyChecked]);
-
-
-  const handleModalClose = () => {
-    setModalVisible(false);
-  };
+  }, [phoneData, validateFields, checkUserExists, navigation, isPrivacyChecked]);
 
   if (loading) {
     return (
@@ -265,6 +261,7 @@ const InitialRegistration = ({ navigation }) => {
         <Text style={styles.infoText}>Um código será enviado para o seu celular.</Text>
       </View>
       <PrivacyPolicyModal visible={privacyModalVisible} onClose={() => setPrivacyModalVisible(false)} />
+      <ErrorModal visible={errorVisible} message={errorMessage} onClose={() => setErrorVisible(false)} />
     </View>
   );
 };

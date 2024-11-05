@@ -167,16 +167,24 @@ const fetchExpenses = useCallback(async (empresa_id) => {
 
   const getMonthReference = (dateString) => {
     // Define uma data padrão para teste caso `dt_vencimento` seja `null`
-    const expenseDate = dateString ? new Date(dateString) : new Date("2024-12-31");
+    const expenseDate = dateString ? new Date(dateString) : new Date("2034-12-31");
     const previousMonth = new Date(expenseDate.setMonth(expenseDate.getMonth() - 1));
     return previousMonth.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
   };
   
   const formatDate = (dateString) => {
-    // Define uma data padrão para teste caso `dt_vencimento` seja `null`
-    const date = dateString ? new Date(dateString) : new Date("2024-12-31");
-    return date.toLocaleDateString('pt-BR');
+    if (!dateString) return ''; // Retorna vazio se a data for nula ou indefinida
+  
+    // Extrai ano, mês e dia da string de data no formato "yyyy-MM-dd"
+    const [year, month, day] = dateString.split('-');
+    
+    // Cria uma nova data sem ajustar para o fuso horário local
+    const formattedDate = new Date(year, month - 1, day);
+    
+    // Retorna a data formatada como "dd/MM/yyyy"
+    return formattedDate.toLocaleDateString('pt-BR');
   };
+  
   
   const goToExpenseDetails = (expense) => {
     navigation.navigate('ExpenseDetails', {

@@ -75,8 +75,12 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
   };
 
   const handleDayPress = (day) => {
-    setPaymentDate(new Date(`${day.dateString}`)); // Atualiza a data selecionada
+    const [year, month, dayOfMonth] = day.dateString.split('-');
+    const selectedDate = new Date(year, month - 1, dayOfMonth); // Define a data sem ajuste de fuso horário
+    setPaymentDate(selectedDate); // Armazena a data de vencimento
+    setIsCalendarVisible(false); // Fecha o calendário após a seleção
   };
+  
 
   const handleCloseModal = () => {
     setIsModalVisible(false);
@@ -171,9 +175,10 @@ const handleRegisterSale = async () => {
         {/* Data do pagamento */}
         <View style={styles.dateContainer}>
       <TouchableOpacity onPress={handleShowCalendar} style={styles.datePicker}>
-        <Text style={styles.dateText}>
-          {`Data do Vencimento: ${paymentDate.toLocaleDateString('pt-BR')}`}
-        </Text>
+      <Text style={styles.dateText}>
+        {`Data do Vencimento: ${paymentDate ? paymentDate.toLocaleDateString('pt-BR') : ''}`}
+      </Text>
+
         <Icon name="calendar" size={24} color={COLORS.lightGray} />
       </TouchableOpacity>
 

@@ -88,14 +88,17 @@ const NewExpense = ({ navigation  }) => {
   };
   
   const handleDayPress = (day) => {
-    const selectedDate = new Date(`${day.dateString}T00:00:00`);
-    const today = new Date(new Date().setHours(0, 0, 0, 0)); // Define "hoje" sem horário para comparação
+    const [year, month, dayOfMonth] = day.dateString.split('-');
+    const selectedDate = new Date(year, month - 1, dayOfMonth);
+  
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Define "hoje" sem horário para comparação
   
     console.log("Data selecionada:", selectedDate);
   
     // Verifica se a data selecionada é hoje ou uma data passada
     if (selectedDate <= today) {
-      setDate(selectedDate); // Atualiza a data de pagamento com a data selecionada
+      setDate(selectedDate); // Armazena a data de pagamento como objeto Date
       setIsCalendarVisible(false);
     } else {
       Alert.alert('Data Inválida', 'Por favor, selecione uma data anterior');
@@ -227,6 +230,7 @@ useFocusEffect(
       return;
     }
   
+
     if (!valorNumerico || isNaN(valorNumerico) || valorNumerico <= 0) {
       Alert.alert('Erro', 'Por favor, insira um valor válido.');
       return;
@@ -369,9 +373,9 @@ useFocusEffect(
             <View style={styles.datePickerContainer}>
               <Text style={styles.dateLabel}>Data de pagamento</Text>
               <TouchableOpacity style={styles.datePickerRow} onPress={handleShowCalendar}>
-                <TextInput
+              <TextInput
                   style={styles.dateInput}
-                  value={format(date, 'dd/MM/yyyy', { locale: ptBR })} // Formata a data de pagamento
+                  value={date ? format(date, 'dd/MM/yyyy', { locale: ptBR }) : ''} // Formata a data de pagamento
                   editable={false} // Campo não editável diretamente
                 />
                   <Icon name="calendar" size={20} color={COLORS.gray} />
@@ -539,8 +543,8 @@ useFocusEffect(
         onConfirm={handleConfirm}
         valor={valor}
         parceiro={getSupplierNameById(parceiro)}
-        dataPagamento={format(date, 'dd/MM/yyyy', { locale: ptBR })}
-        dataVencimento={format(dueDate, 'dd/MM/yyyy', { locale: ptBR })}
+        dataPagamento={date ? format(date, 'dd/MM/yyyy', { locale: ptBR }) : ''}
+        dataVencimento={date ? format(date, 'dd/MM/yyyy', { locale: ptBR }) : ''}
         isRecurring={isRecurring}
         tipoRecorrencia={selectedFrequencyName}
         repeatCount={repeatCount}

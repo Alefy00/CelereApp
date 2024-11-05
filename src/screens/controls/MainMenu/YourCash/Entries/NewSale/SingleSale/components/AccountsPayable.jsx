@@ -312,7 +312,7 @@ const selectClient = (client) => {
 };
 
   const handleDayPress = (day) => {
-    setPaymentDate(new Date(day.dateString)); // Atualiza a data selecionada
+    setPaymentDate(new Date(`${day.dateString}`)); // Atualiza a data selecionada
 
       // Evento Mixpanel - Captura a alteração da data de vencimento
   mixpanel.track('Data de Vencimento Alterada', {

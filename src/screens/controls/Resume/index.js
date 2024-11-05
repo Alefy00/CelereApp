@@ -192,20 +192,20 @@ const initializeDateFilter = useCallback(async () => {
                 ]}>{`${formatCurrency(saldoCaixa)}`}</Text>
               )}
               <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-                <Text style={styles.updateButtonAttSaldo}>Atualizar saldo</Text>
+                <Text style={styles.updateButtonAttSaldo}>Ajustar caixa</Text>
               </TouchableOpacity>
             </View>
           </View>
           <View style={styles.ContainerCircle}>
             <SalesChartCard selectedDate={selectedDate} />
           </View>
-          <Text style={styles.label2}>Fluxo de caixa do dia</Text>
+          <Text style={styles.label2}>Fluxo de caixa por lançamento</Text>
           <View style={styles.ContainerFilter}>
-          <FilteredListCard 
-        selectedDate={selectedDate} 
-        navigation={navigation} 
-        onSaleCanceledRefresh={refreshDataWithCurrentDate} // Passa a função para atualizar a data
-      />
+          <FilteredListCard
+            selectedDate={selectedDate}
+            navigation={navigation} 
+            onSaleCanceledRefresh={refreshDataWithCurrentDate} // Passa a função para atualizar a data
+          />
           </View>
         </View>
         <OpeningBalanceModal

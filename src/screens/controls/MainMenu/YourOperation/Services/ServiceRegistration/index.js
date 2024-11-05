@@ -369,7 +369,7 @@ const handleSelectImage = async () => {
             <TouchableOpacity style={styles.confirmButton} onPress={handleNewService}>
               <Text style={styles.confirmButtonText}>Cadastrar novo serviço</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.confirmButton} onPress={handleCloseModal}>
+            <TouchableOpacity style={styles.confirmButtonReturn} onPress={handleCloseModal}>
               <Text style={styles.confirmButtonText}>Retorna</Text>
             </TouchableOpacity>
           </View>
