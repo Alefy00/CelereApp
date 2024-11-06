@@ -10,8 +10,6 @@ import { COLORS } from '../../../constants';
 import styles from './styles';
 import { API_BASE_URL } from '../../../services/apiConfig';
 
-const API_URL = 'https://api.celere.top/config/ativar-empreendedor/';
-
 const InitialCode = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [codigoAtivacao1, setCodigoAtivacao1] = useState('');
@@ -30,7 +28,6 @@ const InitialCode = ({ navigation }) => {
           setUserData(JSON.parse(storedUserData));
         } else {
           setModalMessage('Dados do usuário não encontrados.');
-          
         }
       } catch (error) {
         console.error("Erro ao carregar dados do usuário:", error);
@@ -89,7 +86,6 @@ const InitialCode = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.barTopContainer}>
         <BarTop3
-       
           backColor={COLORS.primary}
           foreColor={COLORS.black}
           routeMailer={''}

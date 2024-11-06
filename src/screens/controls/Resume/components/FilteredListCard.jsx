@@ -432,9 +432,11 @@ useFocusEffect(
 
           // Formata o valor para exibição, adicionando sinal de negativo na aba de despesas se for um ajuste
           const displayValue = item.isAcertoSaldo && isExpenseTab ? `- R$ ${item.valor}` : `R$ ${item.valor}`;
+          // Condicional para tornar o item clicável apenas se não for um acerto de saldo
+          const ItemWrapper = item.isAcertoSaldo ? View : TouchableOpacity;
 
           return (
-            <TouchableOpacity key={item.id} onPress={() => openLiquidatedDetailModal(item.id)}>
+            <ItemWrapper key={item.id} onPress={() => !item.isAcertoSaldo && openLiquidatedDetailModal(item.id)}>
               <View style={styles.listItem}>
                 {getIconForItem(item, isExpenseTab)}
                 <View style={styles.itemInfo}>
@@ -447,7 +449,7 @@ useFocusEffect(
                 {item.isAcertoSaldo ? displayValue : formatToBRL(item.amount)}
                 </Text>
               </View>
-            </TouchableOpacity>
+            </ItemWrapper>
           );
         })}
       </View>

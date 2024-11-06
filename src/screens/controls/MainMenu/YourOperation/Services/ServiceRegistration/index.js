@@ -289,6 +289,7 @@ const handleSelectImage = async () => {
             placeholder="Nome do serviço"
             value={name}
             onChangeText={setName}
+            maxLength={18}
             />
           <TextInput
             style={styles.textArea}

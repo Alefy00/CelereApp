@@ -248,7 +248,7 @@ const uploadProductImage = async (productId, empresaId) => {
               {photo ? (
                 <Image
                     source={{ uri: photo.uri }}
-                    style={{ width: 120, height: 120, resizeMode: 'contain', borderRadius: 10, }}  // Tamanho fixo para garantir visualização
+                    style={{ width: 110, height: 110, resizeMode: 'contain', borderRadius: 10, }}  // Tamanho fixo para garantir visualização
                     onError={(error) => console.error('Erro ao carregar a imagem:', error.nativeEvent.error)}
                   />
               ) : (
@@ -322,6 +322,7 @@ const uploadProductImage = async (productId, empresaId) => {
             placeholderTextColor={COLORS.lightGray}
             value={productName}
             onChangeText={setProductName}
+            maxLength={18}
           />
           <TextInput
             style={styles.serviceDescriptionInput}

@@ -429,6 +429,7 @@ return (
           style={styles.input}
           value={item.name}
           onChangeText={(text) => updateCartItem(index, 'name', text)}
+          maxLength={18}
         />
         <TextInput
           placeholder="Preço de custo (R$)"

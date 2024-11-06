@@ -3,16 +3,16 @@ import React from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { COLORS } from "../constants";
 
-const ErrorModal = ({ visible, message, onClose}) => {
+const ErrorModal = ({ visible, message, onClose }) => {
     return (
         <Modal
-        animationType="slide"
-        transparent={true}
-        visible={visible}
-        onRequestClose={onClose}
+            animationType="slide"
+            transparent={true}
+            visible={visible}
+            onRequestClose={onClose}
         >
             <View style={styles.modalContainer}>
-                <View styles={styles.modalView}>
+                <View style={styles.modalView}>
                     <Text style={styles.modalMessage}>{message}</Text>
                     <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                         <Text style={styles.closeButtonText}>OK</Text>
@@ -31,8 +31,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      },
-      modalView: {
+    },
+    modalView: {
         width: '80%',
         backgroundColor: COLORS.white,
         borderRadius: 10,
@@ -43,22 +43,22 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
-      },
-      modalMessage: {
+    },
+    modalMessage: {
         marginBottom: 15,
         textAlign: 'center',
         fontSize: 16,
         color: COLORS.black,
-      },
-      closeButton: {
+    },
+    closeButton: {
         backgroundColor: COLORS.primary,
         borderRadius: 5,
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-      },
-      closeButtonText: {
-        color: COLORS.white,
+        paddingHorizontal: 40,
+        paddingVertical: 15,
+    },
+    closeButtonText: {
+        color: COLORS.black,  // Corrigido para branco para contraste
         fontSize: 14,
         fontWeight: 'bold',
-      },
-})
+    },
+});
