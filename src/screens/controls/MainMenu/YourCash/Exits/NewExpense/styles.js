@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   pickerButton:{
     flexDirection: 'row',
     borderBottomWidth: 1,
-    width: '80%',
+    width: '100%',
     justifyContent: 'space-between',
   },
   pickerButtonText:{

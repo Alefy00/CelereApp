@@ -124,11 +124,12 @@ const calculateTotalAmount = useCallback(() => {
                       </Text>
                   </View>
 
-                  {/* Manter outros botões conforme solicitado */}
+                  {/* 
                   <TouchableOpacity style={styles.cancelButtonModal} onPress={openConfirmModal}>
                       <Icon name="close-circle-outline" size={24} color="black" />
                       <Text style={styles.buttonText}>Cancelar venda</Text>
                   </TouchableOpacity>
+                  */}
 
                   <TouchableOpacity style={styles.reciboButton}  onPress={() => {
                             // Navegar para a tela ReceiptScreen com o saleId

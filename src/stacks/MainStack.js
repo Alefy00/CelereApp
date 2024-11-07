@@ -27,6 +27,7 @@ import AlimentosScreen from '../screens/Start/InitialBranch/AlimentosScreen';
 import ServicosScreen from '../screens/Start/InitialBranch/ServicosScreen';
 import FabricacaoScreen from '../screens/Start/InitialBranch/FabricacaoScreen';
 
+
 import OpeningBalance from '../screens/InitialData/OpeningBalance';
 
 import MonthlySalesForecast from '../screens/InitialData/SalesForecast/MonthlySalesForecast';
@@ -97,6 +98,7 @@ export default () => (
     <Stack.Screen name="AddCategoryService" component={AddCategoryService} />
 
     <Stack.Screen name="MainMenu" component={MainMenu} />
+
 
     <Stack.Screen name="MainTab" component={MainTab} />
 

@@ -110,9 +110,6 @@ const fetchExpenses = useCallback(async (empresa_id) => {
   }
 }, [toggleState]);
 
-
-
-
   const fetchCategories = async () => {
     try {
       const response = await axios.get(API_CATEGORIES_URL);
@@ -184,8 +181,7 @@ const fetchExpenses = useCallback(async (empresa_id) => {
     // Retorna a data formatada como "dd/MM/yyyy"
     return formattedDate.toLocaleDateString('pt-BR');
   };
-  
-  
+
   const goToExpenseDetails = (expense) => {
     navigation.navigate('ExpenseDetails', {
       expense,

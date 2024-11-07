@@ -227,7 +227,7 @@ const renderItem = ({ item }) => {
           <Icon name="person-circle-outline" size={40} color="black" />
           <View style={styles.contaTextContainer}>
             <Text style={styles.contaNome}>
-              {clientes[item.cliente] || 'Cliente não informado'}
+              {clientes[item.cliente] || ''}
             </Text>
             <Text style={styles.contaData}>
               Data: {formatarData(item.data_venda)}
@@ -271,7 +271,7 @@ const renderLiquidatedItem = ({ item }) => {
           <Icon name="person-circle-outline" size={40} color="black" />
           <View style={styles.contaTextContainer}>
             <Text style={styles.contaNome2}>
-              {clientes[item.cliente] || 'Cliente não informado'}
+              {clientes[item.cliente] || ''}
             </Text>
             <Text style={styles.contaData2}>Data: {formatarData(item.data_venda)}</Text>
 
@@ -286,7 +286,6 @@ const renderLiquidatedItem = ({ item }) => {
                 <Text style={styles.contaProdutos2}>
                   {quantidadeServicos} Serviços
                 </Text>
-                
               </View>
             )}
             <Text style={styles.contaSituacaoLiquidada2}>

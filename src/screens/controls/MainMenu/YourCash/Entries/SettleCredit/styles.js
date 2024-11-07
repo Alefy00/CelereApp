@@ -121,8 +121,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: 'black',
-    marginLeft: 50,
-    marginTop: -70
+    marginLeft: "15%",
+    marginTop: "-20%"
   },
   emptyContainer: {
     flex: 1,
@@ -159,6 +159,7 @@ const styles = StyleSheet.create({
   contaNome2: {
     fontSize: 16,
     color: 'black',
+    marginRight: "10%"
   },
   contaData2: {
     fontSize: 14,
@@ -180,8 +181,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: 'black',
-    marginLeft: 50,
-    marginTop: -60,
+    marginLeft: "20%",
+  marginTop: "-20%",
   },
 });
 

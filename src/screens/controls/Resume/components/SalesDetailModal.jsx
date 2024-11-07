@@ -149,10 +149,11 @@ const SalesDetailModal = ({ visible, onClose, accountId, onSaleCanceled, navigat
                                 </Text>
                             </View>
 
-                            <TouchableOpacity style={styles.cancelButtonModal} onPress={openConfirmModal}>
+                          {/*   <TouchableOpacity style={styles.cancelButtonModal} onPress={openConfirmModal}>
                                 <Icon name="close-circle-outline" size={24} color="black" />
                                 <Text style={styles.buttonText}>Cancelar venda</Text>
                             </TouchableOpacity>
+                            */}
 
                             <TouchableOpacity style={styles.reciboButton} onPress={() => {
                                 closeFirstModal();

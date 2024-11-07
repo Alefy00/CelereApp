@@ -406,7 +406,6 @@ const formatCurrency = (value) => {
   </View>
 )}
 
-
       <View style={styles.valueSummaryContainer}>
         <View style={styles.valueItem}>
           <Text style={styles.valueLabel}>Valor Bruto <Icon name="alert-circle" size={18} color={COLORS.lightGray} /></Text>
@@ -473,7 +472,6 @@ const formatCurrency = (value) => {
               >
                 <Text style={styles.invoiceOptionTextRecibo}>Recibo</Text>
               </TouchableOpacity>
-
 
             <TouchableOpacity style={styles.invoiceOptionButtonNotaFiscal} onPress={() => console.log("Emitir Nota Fiscal")} disabled={true}>
               <Text style={styles.invoiceOptionTextNotaFiscal}>Nota Fiscal</Text>

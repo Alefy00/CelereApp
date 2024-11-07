@@ -14,8 +14,7 @@ const formatCurrency = (value) => {
 // Função utilitária para formatar a data
 const formatDate = (date) => {
   if (!date) return 'Data';
-  const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-  return date.toLocaleDateString('pt-BR', options);
+  return date.toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 };
 
 const FilterModal = ({ visible, onClose, onFilter }) => {
@@ -30,12 +29,16 @@ const FilterModal = ({ visible, onClose, onFilter }) => {
     setValorPrestacao(formatCurrency(cleanValue / 100)); // Divide por 100 para ajustar os centavos
   };
 
-  // Função para manipular a seleção de data
-  const handleDayPress = (day) => {
-    const selectedDate = new Date(day.dateString);
-    setSelectedDate(selectedDate);
-    setShowCalendar(false); // Fecha o calendário após a seleção
-  };
+// Função para manipular a seleção de data no FilterModal
+const handleDayPress = (day) => {
+  // Extrai o ano, mês e dia selecionados
+  const [year, month, dayOfMonth] = day.dateString.split('-');
+  // Cria um novo objeto Date com os valores corretos
+  const selectedDate = new Date(year, month - 1, dayOfMonth);
+  
+  setSelectedDate(selectedDate); // Armazena a data selecionada corretamente
+  setShowCalendar(false); // Fecha o calendário após a seleção
+};
 
   // Função para aplicar o filtro
   const applyFilter = () => {

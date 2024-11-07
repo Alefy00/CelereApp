@@ -406,9 +406,9 @@ useFocusEffect(
                 </Text>
                   <Icon name="arrow-down" size={22} color={COLORS.gray} />
               </TouchableOpacity>
-                  <TouchableOpacity style={styles.addButton} onPress={handleCategoriesScreen} disabled={true}>
+                {/*<TouchableOpacity style={styles.addButton} onPress={handleCategoriesScreen} disabled={true}>
                     <Icon name="add" size={30} color={COLORS.black} />
-                  </TouchableOpacity>
+                  </TouchableOpacity>*/} 
               </View>
 
                 {/* Modal de Seleção de Categoria */}

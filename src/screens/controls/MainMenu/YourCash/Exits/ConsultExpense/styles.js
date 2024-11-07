@@ -144,7 +144,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     alignSelf: 'center',
     color: COLORS.black,
-    marginTop: -95,
+    marginTop: "-32%",
+    marginRight: '12%',
 
   },
   //toggle botão

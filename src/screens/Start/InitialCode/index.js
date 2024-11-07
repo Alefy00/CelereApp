@@ -9,13 +9,15 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../constants';
 import styles from './styles';
 import { API_BASE_URL } from '../../../services/apiConfig';
+import ErrorModal from '../../../components/ErrorModal';
 
 const InitialCode = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [codigoAtivacao1, setCodigoAtivacao1] = useState('');
   const [codigoAtivacao2, setCodigoAtivacao2] = useState('');
   const [loading, setLoading] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
+  const [errorVisible, setErrorVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Adicionar refs para os campos de input
   const codigoAtivacao2Ref = useRef(null);
@@ -27,20 +29,25 @@ const InitialCode = ({ navigation }) => {
         if (storedUserData) {
           setUserData(JSON.parse(storedUserData));
         } else {
-          setModalMessage('Dados do usuário não encontrados.');
+          showError('Dados do usuário não encontrados.');
         }
       } catch (error) {
         console.error("Erro ao carregar dados do usuário:", error);
-        setModalMessage('Erro ao carregar dados do usuário.');
+        showError('Erro ao carregar dados do usuário.');
       }
     };
 
     fetchUserData();
   }, [navigation]);
 
+  const showError = (message) => {
+    setErrorMessage(message);
+    setErrorVisible(true);
+  };
+
   const validateFields = useCallback(() => {
     if (codigoAtivacao1.length !== 1 || codigoAtivacao2.length !== 1) {
-      setModalMessage('O código de ativação deve ter 2 dígitos.');
+      showError('O código de ativação deve ter 2 dígitos.');
       return false;
     }
     return true;
@@ -50,7 +57,7 @@ const InitialCode = ({ navigation }) => {
     if (!validateFields()) return;
 
     if (!userData || !userData.id) {
-      setModalMessage('Dados do usuário não encontrados.');
+      showError('Dados do usuário não encontrados.');
       return;
     }
 
@@ -65,11 +72,11 @@ const InitialCode = ({ navigation }) => {
         await AsyncStorage.mergeItem('userPhone', JSON.stringify({ isValidated: true }));
         navigation.navigate('BusinessInfoScreen');
       } else {
-        setModalMessage('Código de ativação incorreto. Tente novamente.');
+        showError('Código de ativação incorreto. Tente novamente.');
       }
     } catch (error) {
       console.error('Erro ao conectar à API:', error.message);
-      setModalMessage('Não foi possível conectar à API. Verifique sua conexão e tente novamente.');
+      showError('Não foi possível conectar. Verifique sua conexão e tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -127,13 +134,12 @@ const InitialCode = ({ navigation }) => {
           <ActivityIndicator size="large" color="#000" style={{ marginTop: 20 }} />
         )}
 
-        {modalMessage ? (
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>{modalMessage}</Text>
-            <Button title="OK" onPress={() => setModalMessage('')} />
-          </View>
-        ) : null}
       </View>
+      <ErrorModal
+        visible={errorVisible}
+        message={errorMessage}
+        onClose={() => setErrorVisible(false)}
+      />
     </View>
   );
 };

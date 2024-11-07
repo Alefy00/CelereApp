@@ -212,19 +212,25 @@ const calculateTotalAmount = useCallback(() => {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.reminderButton}  disabled={true}>
-              <Icon name="share-social-outline" size={24} color="black" />
-              <Text style={styles.buttonText}>Lembrete de cobrança</Text>
+            <View style={{flexDirection: "row"}}>
+                <Icon name="share-social-outline" size={24} color="black" />
+                <Text style={styles.buttonText}>Lembrete de cobrança</Text>
+              </View>
+              <Text style={styles.buttonText}>(Em breve)</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.postponeButton} disabled={true}>
-              <Icon name="calendar-outline" size={24} color="black" />
-              <Text style={styles.buttonText}>Adiar</Text>
+              <View style={{flexDirection: "row"}}>
+                <Icon name="calendar-outline" size={24} color="black" />
+                <Text style={styles.buttonText}>Adiar</Text>
+              </View>
+              <Text style={styles.buttonText}>(Em breve)</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.deleteButton} onPress={handleCancelSale}>
               <Icon name="close-circle-outline" size={24} color="black" />
               <Text style={styles.buttonText}>Excluir conta</Text>
             </TouchableOpacity>
+
           </View>
         </View>
       </Modal>
