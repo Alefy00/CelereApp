@@ -58,10 +58,6 @@ const SalesDetailModal = ({ visible, onClose, accountId, onSaleCanceled, navigat
         onClose();
     };
 
-    const openConfirmModal = () => {
-        setConfirmModalVisible(true);
-    };
-
     const handleCancelSale = async () => {
         try {
             await axios.delete(`${API_BASE_URL}/cad/vendas/${accountId}/`);
@@ -154,11 +150,17 @@ const SalesDetailModal = ({ visible, onClose, accountId, onSaleCanceled, navigat
                                 <Text style={styles.buttonText}>Cancelar venda</Text>
                             </TouchableOpacity>
                             */}
-
-                            <TouchableOpacity style={styles.reciboButton} onPress={() => {
-                                closeFirstModal();
-                                navigation?.navigate('ReceiptScreen', { saleId: accountDetails.id });
-                            }}>
+                            <TouchableOpacity
+                                style={styles.reciboButton}
+                                onPress={() => {
+                                    if (accountDetails?.id) {
+                                        closeFirstModal();
+                                        navigation.navigate('ReceiptScreen', { saleId: accountDetails.id });
+                                    } else {
+                                        Alert.alert("Erro", "Detalhes da venda ainda não foram carregados.");
+                                    }
+                                }}
+                            >
                                 <Icon name="share-social-outline" size={24} color="black" />
                                 <Text style={styles.buttonText}>Gerar recibo</Text>
                             </TouchableOpacity>

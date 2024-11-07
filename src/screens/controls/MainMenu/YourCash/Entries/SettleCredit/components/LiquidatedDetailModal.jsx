@@ -27,12 +27,7 @@ const LiquidatedDetailModal = ({ visible, onClose, account,  servicoNomes, onSal
         setFirstModalVisible(false);
         onClose();
     };
-        // Função para abrir o modal de confirmação
-        const openConfirmModal = () => {
-          setConfirmModalVisible(true);
-      };
 
-  
     const renderItem = ({ item }) => {
       const isProduct = item.produto !== null;
       const isService = item.servico !== null;

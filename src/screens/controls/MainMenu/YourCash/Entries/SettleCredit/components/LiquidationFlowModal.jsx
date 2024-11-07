@@ -139,13 +139,13 @@ import { API_BASE_URL } from '../../../../../../../services/apiConfig';
               {/* Botão para confirmar a liquidação */}
               <TouchableOpacity style={styles.confirmButton2} onPress={proceedToConfirmation}>
                 <Icon name="checkmark-circle" size={24} color={COLORS.black} />
-                <Text style={styles.buttonText}>Liquidar Conta</Text>
+                <Text style={styles.buttonText}>Pagar Conta</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.confirmationModalContainer}>
               <Text style={styles.modalTitle}>Tem certeza disso?</Text>
-              <Text style={styles.modalSubtitle}>Liquidar esta conta removerá ela da lista.</Text>
+              <Text style={styles.modalSubtitle}>Pagar esta conta removerá ela da lista.</Text>
   
               <View style={styles.confirmationButtonsContainer}>
                 <TouchableOpacity style={styles.cancelButton} onPress={() => setIsConfirmVisible(false)}>
@@ -155,7 +155,7 @@ import { API_BASE_URL } from '../../../../../../../services/apiConfig';
   
                 <TouchableOpacity style={styles.confirmButton} onPress={handleFinalConfirmation}>
                   <Icon name="checkmark-circle" size={24} color={COLORS.black} />
-                  <Text style={styles.buttonText}>Liquidar</Text>
+                  <Text style={styles.buttonText}>Pagar</Text>
                 </TouchableOpacity>
               </View>
             </View>

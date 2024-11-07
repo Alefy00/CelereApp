@@ -143,14 +143,6 @@ const SalesChartCard = ({ selectedDate }) => {
     }, [fetchChartData])
   );
 
-  const formatCurrency = (value) => {
-    if (!value) return '';
-    return parseFloat(value).toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    });
-  };
-
   return (
     <View style={styles.card}>
       <View style={styles.row}>
