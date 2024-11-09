@@ -21,7 +21,7 @@ const BudgetsScreen = ({ navigation, route }) => {
     const showAlert = (title, message) => Alert.alert(title, message);
 
     // Função auxiliar para converter ArrayBuffer para Base64
-const arrayBufferToBase64 = (buffer) => {
+    const arrayBufferToBase64 = (buffer) => {
     let binary = '';
     const bytes = new Uint8Array(buffer);
     const len = bytes.byteLength;
@@ -97,21 +97,32 @@ const arrayBufferToBase64 = (buffer) => {
             showAlert('Erro', 'O orçamento ainda não está pronto para compartilhar.');
             return;
         }
-
+    
         try {
+            // Verifica se o arquivo PDF realmente existe no caminho especificado
+            const fileExists = await RNFetchBlob.fs.exists(pdfPath);
+            if (!fileExists) {
+                showAlert('Erro', 'O arquivo PDF não foi encontrado.');
+                return;
+            }
+    
             const shareOptions = {
                 title: 'Compartilhar Orçamento',
                 url: `file://${pdfPath}`,
+                failOnCancel: false,  // Para evitar erros ao cancelar o compartilhamento
+                type: 'application/pdf',
             };
-
+    
             await Share.open(shareOptions);
         } catch (error) {
+            // Trata o erro caso o compartilhamento falhe, mas ignora o erro quando o usuário cancela
             if (error.message !== 'User did not share') {
                 console.error('Erro ao compartilhar o PDF:', error);
-                showAlert('Erro', 'Não foi possível compartilhar o PDF.');
+                showAlert('Erro', 'Não foi possível compartilhar o PDF. Verifique se o aplicativo de destino permite o compartilhamento de arquivos PDF.');
             }
         }
     };
+    
 
     // Função para voltar para a tela anterior
     const handleBack = () => {
@@ -128,7 +139,6 @@ const arrayBufferToBase64 = (buffer) => {
                     onPress={() => navigation.goBack()}
                 />
             </View>
-
 
             {loading ? (
                 <ActivityIndicator size="large" color={COLORS.black} />
