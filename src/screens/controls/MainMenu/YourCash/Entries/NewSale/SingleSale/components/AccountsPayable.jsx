@@ -9,6 +9,7 @@ import axios from 'axios';
 import CustomCalendar from '../../../../../../../../components/CustomCalendar';
 import { API_BASE_URL } from '../../../../../../../../services/apiConfig';
 import mixpanel from '../../../../../../../../services/mixpanelClient';
+import moment from 'moment-timezone';
 
 // Função para mostrar alertas
 const showAlert = (title, message) => {
@@ -29,7 +30,6 @@ const AccountsPayable = ({  navigation }) => {
   const [cartItems, setCartItems] = useState([{ id: 1, name: '', priceVenda: 0, priceCusto: 0, quantity: 1 }]);
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
 
-   
   // Função para buscar o ID da empresa logada
   const getEmpresaId = useCallback(async () => {
     try {
@@ -164,8 +164,8 @@ const registerSale = async () => {
       return;
     }
 
-    // Formatação da data de vencimento inserida pelo usuário
-    const formattedPaymentDate = paymentDate.toISOString().split('T')[0];
+    // Formatação da data de vencimento com o fuso horário de Brasília
+    const formattedPaymentDate = moment(paymentDate).tz('America/Sao_Paulo').format('YYYY-MM-DD');
 
     const vendaData = {
       empresa: empresaId,
@@ -311,14 +311,16 @@ const selectClient = (client) => {
   });
 };
 
-  const handleDayPress = (day) => {
-    setPaymentDate(new Date(`${day.dateString}`)); // Atualiza a data selecionada
+const handleDayPress = (day) => {
+  const selectedDate = moment.tz(day.dateString, 'America/Sao_Paulo').toDate();
+  setPaymentDate(selectedDate); // Armazena a data de vencimento com o fuso horário ajustado
+  setIsCalendarVisible(false); // Fecha o calendário após a seleção
 
-      // Evento Mixpanel - Captura a alteração da data de vencimento
+  // Evento Mixpanel - Captura a alteração da data de vencimento
   mixpanel.track('Data de Vencimento Alterada', {
     novaData: day.dateString,
   });
-  };
+};
 
   const handleShowCalendar = () => {
     setIsCalendarVisible(true);
@@ -335,7 +337,7 @@ const selectClient = (client) => {
           <View style={styles.dateContainer}>
           <TouchableOpacity onPress={handleShowCalendar} style={styles.datePicker}>
             <Text style={styles.dateText}>
-              {`Data do Vencimento: ${paymentDate.toLocaleDateString('pt-BR')}`}
+            {`Data do Vencimento: ${moment(paymentDate).format('DD/MM/YYYY')}`}
             </Text>
             <Icon name="calendar" size={24} color={COLORS.lightGray} />
           </TouchableOpacity>
@@ -512,4 +514,3 @@ const selectClient = (client) => {
 };
 
 export default AccountsPayable;
-

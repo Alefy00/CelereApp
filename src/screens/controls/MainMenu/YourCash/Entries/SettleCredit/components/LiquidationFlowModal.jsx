@@ -2,17 +2,17 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { COLORS } from '../../../../../../../constants'; // Supondo que já temos o arquivo COLORS configurado
 import { StyleSheet } from 'react-native';
 import axios from 'axios';  // Para realizar a requisição
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '../../../../../../../services/apiConfig';
+import CustomCalendar from '../../../../../../../components/CustomCalendar';
+import moment from 'moment-timezone';
 
-  
   const LiquidationFlowModal = ({ visible, onClose, onConfirmLiquidation, saleId }) => {
-    const [newDueDate, setNewDueDate] = useState(new Date());
-    const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+    const [newDueDate, setNewDueDate] = useState(moment().tz('America/Sao_Paulo'));
+    const [isCalendarVisible, setCalendarVisible] = useState(false);
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -30,23 +30,15 @@ import { API_BASE_URL } from '../../../../../../../services/apiConfig';
         }
       }, []);
   
-    const showDatePicker = () => {
-        setDatePickerVisible(true);
+      const showCalendar = () => {
+        setCalendarVisible(true);
       };
     
-      const hideDatePicker = () => {
-        setDatePickerVisible(false);
-      };
       const handleConfirmDate = (date) => {
-        if (date) {
-          setNewDueDate(date); // Armazena a data no estado
-          console.log(`Data selecionada: ${date}`); // Exibe a data no console para verificação
-        } else {
-          console.log('Nenhuma data selecionada.');
-        }
-        hideDatePicker();
-      };
-      
+        setNewDueDate(moment(date).tz('America/Sao_Paulo')); // Ajusta a data selecionada com timezone
+        setCalendarVisible(false);
+      }; 
+
       const proceedToConfirmation = () => {
         if (newDueDate) {
           setIsConfirmVisible(true);
@@ -55,17 +47,11 @@ import { API_BASE_URL } from '../../../../../../../services/apiConfig';
         }
       };
 
-      
        // Função para formatar a data no formato brasileiro para exibir ao usuário
-  const formatDateBrazilian = (date) => {
-    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
-  };
-
-    // Função para formatar a data no formato ISO (YYYY-MM-DD) para enviar à API
-    const formatDateISO = (date) => {
-        return date.toISOString().split('T')[0];
+       const formatDateBrazilian = (date) => {
+        return date.format('DD/MM/YYYY');
       };
-    
+
       const handleFinalConfirmation = async () => {
         console.log(`Data a ser usada na liquidação: ${newDueDate}`);  // Verifique se `newDueDate` está acessível
         if (!newDueDate) {
@@ -75,7 +61,7 @@ import { API_BASE_URL } from '../../../../../../../services/apiConfig';
       
         setLoading(true);
         try {
-          const formattedDate = formatDateISO(newDueDate); // Formatar a data para YYYY-MM-DD
+          const formattedDate = newDueDate.format('YYYY-MM-DD');
           const empresaId = await getEmpresaId(); // Obter o ID da empresa logada
       
           if (!empresaId) {
@@ -106,9 +92,7 @@ import { API_BASE_URL } from '../../../../../../../services/apiConfig';
           setLoading(false); // Remove o indicador de loading
         }
       };
-      
-  
-  
+
     return (
       <Modal visible={visible} transparent={true} animationType="slide">
         <View style={styles.modalOverlay}>
@@ -122,20 +106,18 @@ import { API_BASE_URL } from '../../../../../../../services/apiConfig';
               </View>
   
             {/* Seção para escolher a data */}
-            <TouchableOpacity onPress={showDatePicker} style={styles.datePickerContainer}>
+            <TouchableOpacity onPress={showCalendar} style={styles.datePickerContainer}>
               <Text style={styles.dateLabel}>
                 Hoje, {newDueDate ? formatDateBrazilian(newDueDate) : 'Escolha a data'}
               </Text>
               <Icon name="calendar" size={24} color={COLORS.gray} />
             </TouchableOpacity>
-  
-              <DateTimePickerModal
-                isVisible={isDatePickerVisible}
-                mode="date"
-                onConfirm={handleConfirmDate}
-                onCancel={hideDatePicker}
-              />
-  
+
+            <CustomCalendar
+              visible={isCalendarVisible}
+              onClose={() => setCalendarVisible(false)}
+              onDayPress={(day) => handleConfirmDate(day.dateString)}
+            />
               {/* Botão para confirmar a liquidação */}
               <TouchableOpacity style={styles.confirmButton2} onPress={proceedToConfirmation}>
                 <Icon name="checkmark-circle" size={24} color={COLORS.black} />

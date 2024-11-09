@@ -20,8 +20,6 @@ import VencendoIcon1 from '../assets/images/svg/tabbar/iconExpiring1.svg';
 import FluxoCaixa1 from '../assets/images/svg/tabbar/iconCashFlow1.svg';
 import MenuIcon1 from '../assets/images/svg/tabbar/iconMenu1.svg';
 import ActionButtons from '../screens/controls/Resume/components/ActionButtons';
-import TourWrapper from '../screens/controls/Resume/components/TourWrapper';
-import { useTour } from '../services/TourContext';
 
 import { useTranslation } from 'react-i18next';
 import '../translation';

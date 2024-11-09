@@ -123,15 +123,8 @@ const BusinessInfoScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.barTopContainer}>
-        <BarTop3
-    
-          backColor={COLORS.primary}
-          foreColor={COLORS.black}
-          routeMailer={''}
-          routeCalculator={''}
-        />
-      </View>
 
+      </View>
       <ProgressBar currentStep={3} totalSteps={4} />
 
       <View style={styles.contentContainer}>

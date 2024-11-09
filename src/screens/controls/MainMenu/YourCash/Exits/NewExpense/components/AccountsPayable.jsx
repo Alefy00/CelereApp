@@ -14,8 +14,8 @@ import IconProLabore from '../../../../../../../assets/images/svg/NewExpense/Ico
 import Icontaxas from '../../../../../../../assets/images/svg/NewExpense/IconTaxas.svg';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
+import moment from 'moment-timezone';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BarTop2 from '../../../../../../../components/BarTop2';
 import { COLORS } from '../../../../../../../constants';
@@ -49,8 +49,8 @@ const AccountsPayable = ({ navigation }) => {
   const [item, setItem] = useState('');
   const [parceiro, setParceiro] = useState('');
   const [suppliers, setSuppliers] = useState([]);
-  const [date, setDate] = useState(new Date());
-  const [dueDate, setDueDate] = useState(new Date()); // Inicializa como um objeto Date
+  const [date, setDate] = useState(moment().tz('America/Sao_Paulo'));
+  const [dueDate, setDueDate] = useState(moment().tz('America/Sao_Paulo'));
   const [modalVisible, setModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -87,20 +87,16 @@ const AccountsPayable = ({ navigation }) => {
   };
 
   const handleDayPress = (day) => {
-    const [year, month, dayOfMonth] = day.dateString.split('-'); // Divide a data no formato "yyyy-MM-dd"
-    const selectedDate = new Date(year, month - 1, dayOfMonth); // Configura a data para o fuso horário local
-  
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Define "hoje" sem horário para comparação
-  
-    if (selectedDate >= today) {
-      setDueDate(selectedDate); // Armazena o selectedDate como um objeto Date
+    const selectedDate = moment.tz(day.dateString, 'YYYY-MM-DD', 'America/Sao_Paulo');
+    const today = moment.tz('America/Sao_Paulo').startOf('day');
+
+    if (selectedDate.isSameOrAfter(today)) {
+      setDueDate(selectedDate);
       setShowCalendar(false);
     } else {
       Alert.alert('Data Inválida', 'Por favor, selecione uma data de hoje em diante.');
     }
   };
-
 
   const getSupplierNameById = (id) => {
     const supplier = suppliers.find((s) => s.value === id);
@@ -207,10 +203,7 @@ const fetchSuppliers = useCallback(async () => {
       Alert.alert('Erro', 'Por favor, selecione uma data de vencimento.');
       return;
     }
-    console.log('Categoria:', categoria);
-    console.log('Valor:', valor);
-    console.log('Parceiro:', parceiro);
-  
+
     if (!categoria) {
       Alert.alert('Erro', 'Por favor, selecione uma categoria.');
       return;
@@ -246,7 +239,7 @@ const fetchSuppliers = useCallback(async () => {
       empresa_id: Number(empresa_id),
       item: item,
       valor: valorNumerico,
-      dt_vencimento: format(dueDate, 'yyyy-MM-dd'),
+      dt_vencimento: dueDate.format('YYYY-MM-DD'),
       dt_pagamento: null,
       fornecedor_id: Number(parceiro),
       categoria_despesa_id: Number(categoria),
@@ -300,8 +293,8 @@ const fetchSuppliers = useCallback(async () => {
     setSelectedFrequencyName(''); // Limpa o nome do tipo de frequência
     setIsRecurring(false);  // Desmarca o checkbox de recorrência
     setRecorrenciaText('Pagamento único');  // Define o texto padrão para recorrência
-    setDate(new Date());
-    setDueDate(new Date());
+    setDate(moment().tz('America/Sao_Paulo'));
+    setDueDate(moment().tz('America/Sao_Paulo'));
     setBarcode('');
   };
 
@@ -372,14 +365,12 @@ const fetchSuppliers = useCallback(async () => {
             <View style={styles.datePickerContainer}>
             <Text style={styles.dateLabel}>Data de vencimento</Text>
             <TouchableOpacity style={styles.datePickerRow} onPress={handleShowCalendar}>
-            <TextInput
-              style={styles.dateInput}
-              value={dueDate ? format(dueDate, 'dd/MM/yyyy') : ''} // Formata `dueDate` para exibição
-              editable={false}
-            />
-
-
-                <Icon name="calendar" size={20} color={COLORS.gray} />
+              <TextInput
+                style={styles.dateInput}
+                value={dueDate ? dueDate.format('DD/MM/YYYY') : ''}
+                editable={false}
+              />
+              <Icon name="calendar" size={20} color={COLORS.gray} />
             </TouchableOpacity>
           </View>
 
@@ -468,7 +459,6 @@ const fetchSuppliers = useCallback(async () => {
               onChangeText={(text) => {
                 const formattedValue = formatCurrency(text);
                 setValor(formattedValue);
-                
                 // Também armazenamos o valor numérico para uso na requisição
                 const numericValue = text.replace(/\D/g, '');
                 const numberValue = parseFloat(numericValue) / 100;
@@ -503,8 +493,8 @@ const fetchSuppliers = useCallback(async () => {
 
             {/* Cartão de Recorrência */}
             <RecurrenceField
-                  setSelectedFrequencyId={setSelectedFrequencyId}
-                  setSelectedFrequencyName={setSelectedFrequencyName}
+                setSelectedFrequencyId={setSelectedFrequencyId}
+                setSelectedFrequencyName={setSelectedFrequencyName}
                 setIsIndeterminate={setIsIndeterminate}          // Passa a função para definir se é indeterminado
                 setRepeatCount={setRepeatCount}                  // Passa a função para definir a quantidade de repetições
                 setIsRecurring={setIsRecurring}
@@ -526,7 +516,7 @@ const fetchSuppliers = useCallback(async () => {
         visible={showCalendar}
         onClose={() => setShowCalendar(false)}
         onDayPress={handleDayPress}
-        minimumDate={new Date().toISOString().split('T')[0]}
+        minimumDate={moment().tz('America/Sao_Paulo').format('YYYY-MM-DD')}
       />
       <ConfirmModal
         visible={modalVisible}
@@ -534,7 +524,7 @@ const fetchSuppliers = useCallback(async () => {
         onConfirm={handleConfirm}
         valor={valor} // O valor já está formatado
         parceiro={getSupplierNameById(parceiro)}
-        dataVencimento={dueDate ? format(dueDate, 'dd/MM/yyyy') : ''}
+        dataVencimento={dueDate ? dueDate.format('DD/MM/YYYY') : ''}
         isRecurring={isRecurring}
         tipoRecorrencia={selectedFrequencyName}
         repeatCount={repeatCount}

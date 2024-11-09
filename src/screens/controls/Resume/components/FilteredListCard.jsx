@@ -7,10 +7,13 @@ import { COLORS } from '../../../../constants';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import moment from 'moment-timezone';
 import styles from './stylesFilterListCard';
 import { useFocusEffect } from '@react-navigation/native';
 import { API_BASE_URL } from '../../../../services/apiConfig';
 import SalesDetailModal from './SalesDetailModal';
+
+const TIMEZONE = 'America/Sao_Paulo';
 
 // Função para buscar o ID da empresa logada
 const getEmpresaId = async () => {
@@ -44,8 +47,6 @@ const formatToBRL = (value) => {
     return 'R$ 0,00'; // Valor padrão em caso de erro
   }
 };
-
-
 
 // Função para buscar o acerto do saldo de caixa
 const fetchAcertoSaldoCaixa = async (empresaId, dataInicial, dataFinal) => {
@@ -151,13 +152,12 @@ const fetchAllDespesas = async (empresaId) => {
   }
 };
 
-// Atualizar o retorno dos dados mapeados com a nova verificação
+// Atualização de mapExpenseData com moment-timezone
 const mapExpenseData = (expenses, dataInicial, dataFinal) => {
   const despesasFiltradas = expenses.filter(
     (expense) =>
       expense.status === 'finalizada' &&
-      new Date(expense.dt_pagamento) >= new Date(dataInicial) &&
-      new Date(expense.dt_pagamento) <= new Date(dataFinal)
+      moment(expense.dt_pagamento).isBetween(moment(dataInicial), moment(dataFinal), null, '[]')
   );
   return despesasFiltradas.map((expense) => ({
     id: expense.id,
@@ -165,7 +165,7 @@ const mapExpenseData = (expenses, dataInicial, dataFinal) => {
     method: 'Despesa',
     date: formatDate(expense.dt_pagamento),
     amount: parseFloat(expense.valor),
-    isAcertoSaldo: false, // Não é acerto de saldo
+    isAcertoSaldo: false,
   }));
 };
 
@@ -237,11 +237,11 @@ const getPaymentMethodName = (paymentTypeId) => {
   }
 };
 
-// Função para formatar a data da venda
+// Função para formatar a data com o timezone de São Paulo
 const formatDate = (date) => {
-  const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
-  return new Date(date).toLocaleDateString('pt-BR', options);
+  return moment(date).tz(TIMEZONE).format('DD/MM/YYYY HH:mm');
 };
+
 
 // Função para escolher o ícone com base no método de pagamento
 const getPaymentIconById = (paymentTypeId) => {

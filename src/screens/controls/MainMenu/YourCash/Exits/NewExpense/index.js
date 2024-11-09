@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Platform, ActivityIndicator, Alert, Modal, FlatList } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Modal, FlatList } from 'react-native';
 import IconAluguel from '../../../../../../assets/images/svg/NewExpense/IconAluguel.svg';
 import IconDespesas from '../../../../../../assets/images/svg/NewExpense/IconDespesas.svg';
 import IconFornecedor from '../../../../../../assets/images/svg/NewExpense/IconFornecedor.svg';
@@ -14,8 +14,7 @@ import IconProLabore from '../../../../../../assets/images/svg/NewExpense/IconPr
 import Icontaxas from '../../../../../../assets/images/svg/NewExpense/IconTaxas.svg';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import moment from 'moment-timezone';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BarTop2 from "../../../../../../components/BarTop2";
 import { COLORS } from "../../../../../../constants";
@@ -88,22 +87,17 @@ const NewExpense = ({ navigation  }) => {
   };
   
   const handleDayPress = (day) => {
-    const [year, month, dayOfMonth] = day.dateString.split('-');
-    const selectedDate = new Date(year, month - 1, dayOfMonth);
-  
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Define "hoje" sem horário para comparação
-  
-    console.log("Data selecionada:", selectedDate);
-  
-    // Verifica se a data selecionada é hoje ou uma data passada
-    if (selectedDate <= today) {
-      setDate(selectedDate); // Armazena a data de pagamento como objeto Date
+    const selectedDate = moment(day.dateString).toDate(); // Converte a data selecionada usando moment
+
+    const today = moment().startOf('day');
+    
+    if (moment(selectedDate).isSameOrBefore(today, 'day')) {
+      setDate(selectedDate); // Atualiza a data de pagamento
       setIsCalendarVisible(false);
     } else {
-      Alert.alert('Data Inválida', 'Por favor, selecione uma data anterior');
+      Alert.alert('Data Inválida', 'Por favor, selecione uma data anterior.');
     }
-  };
+};
   
   const fetchCategories = useCallback(async () => {
     setLoading(true);
@@ -220,7 +214,7 @@ useFocusEffect(
     console.log('Categoria:', categoria);
     console.log('Valor:', valor);
     console.log('Parceiro:', parceiro);
-  
+
     if (!categoria) {
       Alert.alert('Erro', 'Por favor, selecione uma categoria.');
       return;
@@ -229,7 +223,6 @@ useFocusEffect(
       Alert.alert('Erro', 'Insira o nome do item');
       return;
     }
-  
 
     if (!valorNumerico || isNaN(valorNumerico) || valorNumerico <= 0) {
       Alert.alert('Erro', 'Por favor, insira um valor válido.');
@@ -258,8 +251,8 @@ useFocusEffect(
       empresa_id: Number(empresa_id),
       item: item || '',
       valor: valorNumerico,
-      dt_vencimento: format(dueDate, 'yyyy-MM-dd'),
-      dt_pagamento: date ? format(date, 'yyyy-MM-dd') : null,
+      dt_vencimento: moment(dueDate).format('YYYY-MM-DD'),
+      dt_pagamento: date ? moment(date).format('YYYY-MM-DD') : null,
       fornecedor_id: Number(parceiro),
       categoria_despesa_id: Number(categoria),
       status: 'finalizada',
@@ -328,10 +321,6 @@ useFocusEffect(
     navigation.navigate('AccountsPayable');
   };
 
-  const handleCategoriesScreen = () => {
-    navigation.navigate('IncludeCategoriesExpense');
-  };
-
   const handleCloseSucessModal = () => {
     setSuccessModalVisible(false);
     navigation.navigate("MainTab");
@@ -375,11 +364,11 @@ useFocusEffect(
               <TouchableOpacity style={styles.datePickerRow} onPress={handleShowCalendar}>
               <TextInput
                   style={styles.dateInput}
-                  value={date ? format(date, 'dd/MM/yyyy', { locale: ptBR }) : ''} // Formata a data de pagamento
+                  value={date ? moment(date).format('DD/MM/YYYY') : ''} // Formata a data de pagamento
                   editable={false} // Campo não editável diretamente
-                />
-                  <Icon name="calendar" size={20} color={COLORS.gray} />
-              </TouchableOpacity>
+              />
+              <Icon name="calendar" size={20} color={COLORS.gray} />
+            </TouchableOpacity>
             </View>
 
             {/* Campo de Código de Barras */}
@@ -467,7 +456,7 @@ useFocusEffect(
                     onChangeText={(text) => {
                       // Remove todos os caracteres que não são números
                       const numericValue = text.replace(/\D/g, '');
-                      
+
                       // Divide por 100 para obter o valor com centavos
                       const numberValue = parseFloat(numericValue) / 100;
 
@@ -495,7 +484,7 @@ useFocusEffect(
 
             {/* Fornecedor com novo Dropdown */}
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>Fornecedor</Text>
+              <Text style={styles.cardTitle}>Fornecedor(opcional)</Text>
               {loading ? (
                 <ActivityIndicator size="small" color="#000" />
               ) : (
@@ -510,8 +499,8 @@ useFocusEffect(
 
            {/* Recorrencia */}
             <RecurrenceField
-                  setSelectedFrequencyId={setSelectedFrequencyId}
-                  setSelectedFrequencyName={setSelectedFrequencyName}
+                setSelectedFrequencyId={setSelectedFrequencyId}
+                setSelectedFrequencyName={setSelectedFrequencyName}
                 setIsIndeterminate={setIsIndeterminate}          // Passa a função para definir se é indeterminado
                 setRepeatCount={setRepeatCount}                  // Passa a função para definir a quantidade de repetições
                 setIsRecurring={setIsRecurring}
@@ -534,7 +523,7 @@ useFocusEffect(
           visible={isCalendarVisible}
           onClose={() => setIsCalendarVisible(false)}
           onDayPress={handleDayPress}
-          maximumDate={new Date().toISOString().split('T')[0]}
+          maximumDate={moment().format('YYYY-MM-DD')}
         />
 
       <ConfirmModal
@@ -543,8 +532,8 @@ useFocusEffect(
         onConfirm={handleConfirm}
         valor={valor}
         parceiro={getSupplierNameById(parceiro)}
-        dataPagamento={date ? format(date, 'dd/MM/yyyy', { locale: ptBR }) : ''}
-        dataVencimento={date ? format(date, 'dd/MM/yyyy', { locale: ptBR }) : ''}
+        dataPagamento={date ? moment(date).format('DD/MM/YYYY') : ''}
+        dataVencimento={date ? moment(date).format('DD/MM/YYYY') : ''}
         isRecurring={isRecurring}
         tipoRecorrencia={selectedFrequencyName}
         repeatCount={repeatCount}

@@ -72,11 +72,7 @@ const InitialBranch = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.barTopContainer}>
-        <BarTop3
-      
-          backColor={COLORS.primary}
-          foreColor={COLORS.black}
-        />
+
       </View>
 
       <ProgressBar currentStep={4} totalSteps={4} />

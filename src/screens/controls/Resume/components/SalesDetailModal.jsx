@@ -6,12 +6,14 @@ import styles from '../../MainMenu/YourCash/Entries/SettleCredit/components/styl
 import { COLORS } from "../../../../constants";
 import { API_BASE_URL } from "../../../../services/apiConfig";
 import ConfirmCancelModal from "../../MainMenu/YourCash/Entries/SettleCredit/components/ConfirmCancelModal";
+import CancelWarningModal from "./CancelWarningModal";
 import axios from "axios";
 
 const SalesDetailModal = ({ visible, onClose, accountId, onSaleCanceled, navigation }) => {
     const [accountDetails, setAccountDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+    const [warningModalVisible, setWarningModalVisible] = useState(false);
     const [itemsWithServiceNames, setItemsWithServiceNames] = useState([]);
 
     useEffect(() => {
@@ -57,7 +59,18 @@ const SalesDetailModal = ({ visible, onClose, accountId, onSaleCanceled, navigat
         setConfirmModalVisible(false);
         onClose();
     };
+    const openConfirmModal = () => {
+        setConfirmModalVisible(true);
+    };
 
+    const openWarningModal = () => {
+        setWarningModalVisible(true);
+    };
+
+    const navigateToExpense = () => {
+        closeFirstModal();
+        navigation.navigate('NewExpense');
+    };
     const handleCancelSale = async () => {
         try {
             await axios.delete(`${API_BASE_URL}/cad/vendas/${accountId}/`);
@@ -145,11 +158,11 @@ const SalesDetailModal = ({ visible, onClose, accountId, onSaleCanceled, navigat
                                 </Text>
                             </View>
 
-                          {/*   <TouchableOpacity style={styles.cancelButtonModal} onPress={openConfirmModal}>
+                         <TouchableOpacity style={styles.cancelButtonModal} onPress={openWarningModal}>
                                 <Icon name="close-circle-outline" size={24} color="black" />
                                 <Text style={styles.buttonText}>Cancelar venda</Text>
                             </TouchableOpacity>
-                            */}
+
                             <TouchableOpacity
                                 style={styles.reciboButton}
                                 onPress={() => {
@@ -180,6 +193,11 @@ const SalesDetailModal = ({ visible, onClose, accountId, onSaleCanceled, navigat
                     onClose={closeFirstModal}
                     saleId={accountDetails?.id}
                     onSaleCanceled={handleCancelSale}
+                />
+                <CancelWarningModal
+                    visible={warningModalVisible}
+                    onClose={closeFirstModal}
+                    onNavigateToExpense={navigateToExpense}
                 />
             </View>
         </Modal>

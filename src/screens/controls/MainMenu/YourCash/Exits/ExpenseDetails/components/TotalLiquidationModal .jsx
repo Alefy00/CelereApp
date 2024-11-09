@@ -4,14 +4,15 @@ import { View, Text, TouchableOpacity, Modal,StyleSheet } from 'react-native';
 import { COLORS } from '../../../../../../../constants';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CustomCalendar from '../../../../../../../components/CustomCalendar';
+import moment from 'moment-timezone';
 
 
 const TotalLiquidationModal = ({ visible, onClose, onConfirm }) => {
-    const [selectedDate, setSelectedDate] = useState(new Date()); // Data selecionada pelo usuário
+    const [selectedDate, setSelectedDate] = useState(moment()); // Data selecionada pelo usuário
     const [isCalendarVisible, setIsCalendarVisible] = useState(false);
 
     const handleDayPress = (day) => {
-        setSelectedDate(new Date(day.dateString)); // Atualiza a data selecionada
+        setSelectedDate(moment(day.dateString).tz('America/Sao_Paulo')); // Define a data selecionada no fuso horário de São Paulo
     };
 
     const handleShowCalendar = () => {
@@ -19,13 +20,15 @@ const TotalLiquidationModal = ({ visible, onClose, onConfirm }) => {
     };
 
     const handleConfirm = () => {
-        const currentDate = new Date(); // Data e hora atual do dispositivo
-        const adjustedDate = new Date(selectedDate); // Clona a data selecionada
-        adjustedDate.setHours(currentDate.getHours());
-        adjustedDate.setMinutes(currentDate.getMinutes());
-        adjustedDate.setSeconds(currentDate.getSeconds());
-        adjustedDate.setMilliseconds(currentDate.getMilliseconds());
-        
+        const adjustedDate = moment(selectedDate)
+            .set({
+                hour: moment().hour(),
+                minute: moment().minute(),
+                second: moment().second(),
+                millisecond: moment().millisecond(),
+            })
+            .toDate(); // Converte para o formato Date após ajustar o horário
+
         onConfirm(adjustedDate); // Envia a data com o horário ajustado
     };
 
@@ -51,7 +54,7 @@ const TotalLiquidationModal = ({ visible, onClose, onConfirm }) => {
                         onPress={handleShowCalendar}
                     >
                         <Text style={styles.dateText}>
-                            {`Hoje, ${selectedDate.toLocaleDateString('pt-BR')}`}
+                        {`Hoje, ${selectedDate.format('DD/MM/YYYY')}`}
                         </Text>
                         <Icon name="calendar" size={24} color={COLORS.lightGray} />
                     </TouchableOpacity>
@@ -61,7 +64,6 @@ const TotalLiquidationModal = ({ visible, onClose, onConfirm }) => {
                         onClose={() => setIsCalendarVisible(false)}
                         onDayPress={handleDayPress}
                     />
-                    
                     <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
                         <Icon name="checkmark-circle" size={24} color="#000" />
                         <Text style={styles.confirmButtonText}>Pagar despesa</Text>

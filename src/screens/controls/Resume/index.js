@@ -14,6 +14,7 @@ import OpeningBalanceModal from './components/OpeningBalanceModal';
 import { useFocusEffect } from '@react-navigation/native';
 import { API_BASE_URL } from '../../../services/apiConfig';
 import mixpanel from '../../../services/mixpanelClient';
+import moment from 'moment-timezone';
 
 const MainMenu = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -133,7 +134,8 @@ useEffect(() => {
 
 // Função de inicialização para exibir o modal apenas se necessário
 const initializeDateFilter = useCallback(async () => {
-  const today = new Date().toISOString().split('T')[0];
+  const brasilTime = moment().tz('America/Sao_Paulo');
+  const today = brasilTime.format('YYYY-MM-DD');
   setSelectedDate({ dt_ini: today, dt_end: today });
 
   const modalDismissed = await checkModalStatus();
@@ -163,9 +165,16 @@ const initializeDateFilter = useCallback(async () => {
   }, [fetchSaldoCaixa, saldoCaixa]);
 
   const refreshDataWithCurrentDate = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const brasilTime = moment().tz('America/Sao_Paulo');
+    const today = brasilTime.format('YYYY-MM-DD');
     setSelectedDate({ dt_ini: today, dt_end: today }); // Atualiza selectedDate para a data atual
   };
+
+  const refreshFilteredList = useCallback(() => {
+    // Implementação para atualizar o FilteredListCard, por exemplo, alterando um estado trigger.
+    setSelectedDate((prevDate) => ({ ...prevDate })); // Isso força uma re-renderização do componente com a mesma data.
+  }, []);
+  
 
   return (
     <KeyboardAvoidingView behavior="position" enabled>
@@ -211,7 +220,10 @@ const initializeDateFilter = useCallback(async () => {
         <OpeningBalanceModal
           visible={isModalVisible}
           onClose={handleModalClose}
-          onBalanceSaved={fetchSaldoCaixa} // Chama fetchSaldoCaixa após salvar o saldo inicial
+          onBalanceSaved={() => {
+            fetchSaldoCaixa(); // Chama fetchSaldoCaixa após salvar o saldo inicial
+            refreshFilteredList(); // Atualiza o FilteredListCard
+          }}
         />
       </ScrollView>
     </KeyboardAvoidingView>

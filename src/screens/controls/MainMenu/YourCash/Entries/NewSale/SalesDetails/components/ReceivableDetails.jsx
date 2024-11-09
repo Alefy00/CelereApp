@@ -8,6 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import CustomCalendar from "../../../../../../../../components/CustomCalendar";
 import { API_BASE_URL } from "../../../../../../../../services/apiConfig";
+import moment from 'moment-timezone';
 
 const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
   const [paymentMethod, setPaymentMethod] = useState('Boleto');
@@ -43,8 +44,7 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
   }, []);
 
   useEffect(() => {
-    const date = new Date();
-    const formattedDate = `Hoje, ${date.toLocaleDateString('pt-BR')}`;
+    const formattedDate = `Hoje, ${moment().tz('America/Sao_Paulo').format('DD/MM/YYYY')}`;
     setCurrentDate(formattedDate);
   }, []);
 
@@ -75,12 +75,10 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
   };
 
   const handleDayPress = (day) => {
-    const [year, month, dayOfMonth] = day.dateString.split('-');
-    const selectedDate = new Date(year, month - 1, dayOfMonth); // Define a data sem ajuste de fuso horário
-    setPaymentDate(selectedDate); // Armazena a data de vencimento
-    setIsCalendarVisible(false); // Fecha o calendário após a seleção
+    const selectedDate = moment(day.dateString).tz('America/Sao_Paulo').toDate();
+    setPaymentDate(selectedDate);
+    setIsCalendarVisible(false);
   };
-  
 
   const handleCloseModal = () => {
     setIsModalVisible(false);
@@ -101,7 +99,7 @@ const handleRegisterSale = async () => {
     if (!empresaId) return;
 
     const paymentMethodId = paymentMethod === 'Boleto' ? 1 : null; // 1 para Boleto, null para Fiado
-    const formattedDueDate = paymentDate.toISOString().split('T')[0]; // Data de vencimento selecionada pelo usuário (prevista)
+    const formattedDueDate = moment(paymentDate).tz('America/Sao_Paulo').format('YYYY-MM-DD');
     const totalValue = liquidValue; // Valor bruto a receber após desconto
     const totalCostValue = totalPrice; // Valor total do custo, que pode ser ajustado conforme necessário
 

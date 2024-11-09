@@ -12,6 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { API_BASE_URL } from "../../../../../../services/apiConfig";
 import mixpanel from "../../../../../../services/mixpanelClient";
+import moment from 'moment-timezone';
 
 const SettleCredit = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('open'); // Aba atual: "open" para liquidadas, "settled" para contas a receber
@@ -202,10 +203,10 @@ const SettleCredit = ({ navigation }) => {
   const handleSaleCanceled = () => {
     fetchVendas(); // Recarregar as vendas após o cancelamento
 };
-  // Função para formatar a data para exibir apenas dia, mês e ano
+
+// Função para formatar a data para exibir apenas dia, mês e ano no fuso horário de Brasília
 const formatarData = (data) => {
-  const date = new Date(data);
-  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  return moment(data).tz('America/Sao_Paulo').format('DD/MM/YYYY');
 };
 
 useEffect(() => {

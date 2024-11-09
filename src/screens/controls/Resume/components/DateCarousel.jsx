@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState,forwardRef  } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../constants';
+import moment from 'moment-timezone';
 
 const ITEM_WIDTH = 70; // Definindo uma largura fixa para cada item
 
@@ -13,19 +14,14 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
   const [initialized, setInitialized] = useState(false); 
 
   const adjustDateToBrasiliaTimezone = (date) => {
-    const adjustedDate = new Date(date);
-    adjustedDate.setUTCHours(date.getUTCHours() - 3);
-    return adjustedDate;
+    return moment(date).tz('America/Sao_Paulo').toDate();
   };
-
   const generatePastDates = () => {
-    const today = new Date();
+    const today = moment().tz('America/Sao_Paulo');
     const datesArray = [];
     for (let i = 0; i < 30; i++) {
-      const date = new Date();
-      date.setDate(today.getDate() - i);
-      const adjustedDate = adjustDateToBrasiliaTimezone(date);
-      datesArray.push(adjustedDate);
+      const date = today.clone().subtract(i, 'days');
+      datesArray.push(date.toDate());
     }
     return datesArray;
   };
@@ -44,8 +40,6 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
       setInitialized(true); // Marca como inicializado
     }
   }, [initialized]);
-  
-  
 
   const renderItem = ({ item }) => {
     const isSelected = item.getDate() === selectedDate.getDate() && item.getMonth() === selectedDate.getMonth();
@@ -54,7 +48,7 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
         style={[styles.dateContainer, isSelected && styles.selectedDateContainer]}
         onPress={() => {
           setSelectedDate(item);
-          const formattedDate = item.toISOString().split('T')[0];
+          const formattedDate = moment(item).tz('America/Sao_Paulo').format('YYYY-MM-DD');
           onDateSelected(formattedDate, formattedDate);
         }}
       >
@@ -62,7 +56,7 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
           {item.getDate().toString().padStart(2, '0')}
         </Text>
         <Text style={[styles.monthText, isSelected && styles.selectedDateText]}>
-          {item.toLocaleDateString('pt-BR', { month: 'short' }).toUpperCase()}
+          {moment(item).tz('America/Sao_Paulo').format('MMM').toUpperCase()}
         </Text>
       </TouchableOpacity>
     );

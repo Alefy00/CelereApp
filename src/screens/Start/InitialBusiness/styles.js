@@ -9,7 +9,7 @@ export default StyleSheet.create({
   },
   barTopContainer: {
     width: '100%',
-    height: 50,
+    height: 20,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',

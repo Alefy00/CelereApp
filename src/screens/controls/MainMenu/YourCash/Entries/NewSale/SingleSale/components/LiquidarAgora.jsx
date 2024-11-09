@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '../../../../../../../../services/apiConfig';
 import mixpanel from '../../../../../../../../services/mixpanelClient';
+import moment from 'moment-timezone';
 
 // Função para mostrar alertas
 const showAlert = (title, message) => {
@@ -33,7 +34,13 @@ const LiquidarAgora = ({ navigation }) => {
   const [totalBruto, setTotalBruto] = useState(0);
   const [totalLiquido, setTotalLiquido] = useState(0);
   const [cartItems, setCartItems] = useState([{ id: 1, name: '', priceVenda: 0, priceCusto: 0, quantity: 1 }]);
-  const [saleId, setSaleId] = useState(null); 
+  const [saleId, setSaleId] = useState(null);
+  const [currentDate, setCurrentDate] = useState('');
+
+  useEffect(() => {
+    const formattedDate = `Hoje, ${moment().tz('America/Sao_Paulo').format('DD/MM/YYYY')}`;
+    setCurrentDate(formattedDate);
+  }, []);
   
   // Função para buscar o ID da empresa logada
   const getEmpresaId = useCallback(async () => {
@@ -171,8 +178,7 @@ useEffect(() => {
   const registerSale = async () => {
     try {
       const empresaId = await getEmpresaId();
-      const currentDate = new Date().toISOString().split('T')[0];
-
+      const currentDate = moment().tz('America/Sao_Paulo').format('YYYY-MM-DD');
 
       if (!selectedPaymentMethod) {
         showAlert("Erro", "Selecione uma forma de pagamento.");

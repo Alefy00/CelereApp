@@ -12,19 +12,18 @@ import PostponeExpenseModal from './components/PostponeExpenseModal';
 import DeleteExpenseModal from './components/DeleteExpenseModal';
 import styles from './styles';
 import axios from 'axios';
+import moment from 'moment-timezone';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '../../../../../../services/apiConfig';
 
 // Função para formatar as datas no formato brasileiro
 const formatDateToBrazilian = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('pt-BR');
+  return moment(dateString).tz("America/Sao_Paulo").format("DD/MM/YYYY");
 };
 
+
 const getMonthReference = (dateString) => {
-  const expenseDate = new Date(dateString);  // Converte string em data
-  const previousMonth = new Date(expenseDate.setMonth(expenseDate.getMonth() - 1));  // Subtrai um mês
-  return previousMonth.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });  // Retorna o nome do mês e ano
+  return moment(dateString).tz("America/Sao_Paulo").subtract(1, 'month').format("MMMM [de] YYYY");
 };
 
 const getEmpresaId = async () => {
@@ -79,11 +78,6 @@ const ExpenseDetails = ({ route, navigation }) => {
   const handleOpenDateModal = () => {
     setIsDateModalVisible(true);
   };
-  
-  // Abrir o modal de liquidação parcial
-  const handleOpenPartialModal = () => {
-    setIsPartialModalVisible(true);
-  };
 
   const handleOpenDeleteModal = () => {
     setIsDeleteModalVisible(true); // Abre o modal de exclusão
@@ -127,8 +121,7 @@ const ExpenseDetails = ({ route, navigation }) => {
   };
 
   const formatDateToISO = (date) => {
-    const d = new Date(date);
-    return d.toISOString().split('T')[0]; // Retorna no formato "YYYY-MM-DD"
+    return moment(date).tz("America/Sao_Paulo").format("YYYY-MM-DD");
   };
 
   // Função para confirmar a liquidação
@@ -175,7 +168,6 @@ const ExpenseDetails = ({ route, navigation }) => {
   const handleConfirmPostponement = (selectedDate) => {
     setIsPostponeModalVisible(false);
     Alert.alert('Despesa Adiada', `Despesa adiada para: ${formatDateToBrazilian(selectedDate)}`);
-    // Adicione a lógica de adiamento aqui, se necessário
   };
   
   // Confirmar o valor parcial e abrir o segundo modal de confirmação

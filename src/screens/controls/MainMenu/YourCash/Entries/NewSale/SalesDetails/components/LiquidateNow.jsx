@@ -12,6 +12,7 @@ import DebitCardIcon from "../../../../../../../../assets/images/svg/iconCard.sv
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_BASE_URL } from "../../../../../../../../services/apiConfig";
 import mixpanel from "../../../../../../../../services/mixpanelClient";
+import moment from 'moment-timezone';
 
 const LiquidateNow = ({ products, totalPrice, clients, navigation, route }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -87,8 +88,7 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route }) => {
   };
 
   useEffect(() => {
-    const date = new Date();
-    const formattedDate = `Hoje, ${date.toLocaleDateString('pt-BR')}`;
+    const formattedDate = `Hoje, ${moment().tz('America/Sao_Paulo').format('DD/MM/YYYY')}`;
     setCurrentDate(formattedDate);
   }, []);
 
@@ -115,7 +115,7 @@ const handleRegisterSale = async () => {
     const empresaId = await getEmpresaId(); // Obtém o ID da empresa logada
     if (!empresaId) return;
 
-    const currentDate = new Date().toISOString().split('T')[0]; // Data atual do dispositivo
+    const currentDate = moment().tz('America/Sao_Paulo').format('YYYY-MM-DD');
     const totalValue = liquidValue; // Valor bruto a receber após desconto
 
     if (!selectedPaymentMethod) {
@@ -405,7 +405,6 @@ const formatCurrency = (value) => {
     </Text>
   </View>
 )}
-
       <View style={styles.valueSummaryContainer}>
         <View style={styles.valueItem}>
           <Text style={styles.valueLabel}>Valor Bruto <Icon name="alert-circle" size={18} color={COLORS.lightGray} /></Text>

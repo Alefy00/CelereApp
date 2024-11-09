@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomCalendar from '../../../../../../../../components/CustomCalendar';
 import { API_BASE_URL } from '../../../../../../../../services/apiConfig';
 import mixpanel from '../../../../../../../../services/mixpanelClient';
+import moment from 'moment-timezone';
 
 const API_VENDAS = `${API_BASE_URL}/cad/vendas/`;
 const API_ITENS_VENDA = `${API_BASE_URL}/cad/itens_venda/`;
@@ -35,14 +36,12 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
     const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
     const [isCalendarVisible, setIsCalendarVisible] = useState(false);
     const [servicePrices, setServicePrices] = useState({});
-    const [priceInputValues, setPriceInputValues] = useState({});
     const [currentDate, setCurrentDate] = useState('');
 
           // Função para mostrar alertas
           const showAlert = (title, message) => {
             Alert.alert(title, message);
           };
-    
           // Função para buscar o ID da empresa logada
           const getEmpresaId = useCallback(async () => {
             try {
@@ -77,14 +76,9 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
     }, [receivedServices]);
 
     useEffect(() => {
-        const date = new Date();
-        const formattedDate = date.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-        });
-        setCurrentDate(formattedDate);
-    }, []);
+      const formattedDate = moment().tz('America/Sao_Paulo').format('DD/MM/YYYY');
+      setCurrentDate(formattedDate);
+    }, []);    
 
     const toggleDropdown = () => {
         setDropdownVisible(!isDropdownVisible);
@@ -113,10 +107,9 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
     };
   
     const handleDayPress = (day) => {
-      const [year, month, dayOfMonth] = day.dateString.split('-');
-      const selectedDate = new Date(year, month - 1, dayOfMonth); // Define a data sem ajuste de fuso horário
-      setPaymentDate(selectedDate); // Armazena a data de vencimento
-      setIsCalendarVisible(false); // Fecha o calendário após a seleção
+      const selectedDate = moment(day.dateString).tz('America/Sao_Paulo').toDate();
+      setPaymentDate(selectedDate);
+      setIsCalendarVisible(false);
     };
 
     const handleCloseModalMain= () => {
@@ -130,7 +123,7 @@ const handleRegisterSale = async () => {
       const empresaId = await getEmpresaId(); // Obtém o ID da empresa logada
       if (!empresaId) return;
 
-      const formattedPaymentDate = paymentDate.toISOString().split('T')[0]; // Data prevista de pagamento
+      const formattedPaymentDate = moment(paymentDate).tz('America/Sao_Paulo').format('YYYY-MM-DD');
       const totalValue = totalWithDiscount; // Valor total com desconto
       const totalCost = totalWithoutDiscount; // Valor total sem desconto
 

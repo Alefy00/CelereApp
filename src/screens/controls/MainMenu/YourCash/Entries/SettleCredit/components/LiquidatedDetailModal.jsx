@@ -6,7 +6,6 @@ import styles from './styles';
 import { COLORS } from "../../../../../../../constants";
 import ConfirmCancelModal from "./ConfirmCancelModal";
 
-
 const LiquidatedDetailModal = ({ visible, onClose, account,  servicoNomes, onSaleCanceled, navigation }) => {
     const [isFirstModalVisible, setFirstModalVisible] = useState(visible);
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);

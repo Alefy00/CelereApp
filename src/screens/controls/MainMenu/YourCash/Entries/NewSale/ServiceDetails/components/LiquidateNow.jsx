@@ -12,6 +12,7 @@ import { COLORS } from '../../../../../../../../constants';
 import axios from 'axios';
 import { API_BASE_URL } from '../../../../../../../../services/apiConfig';
 import mixpanel from '../../../../../../../../services/mixpanelClient';
+import moment from 'moment-timezone';
 
 const LiquidateNow = ({ navigation, route, clients }) => {
   const { services: receivedServices = [], products: receivedProducts = [], totalPrice: initialTotalPrice } = route.params;
@@ -99,11 +100,11 @@ const LiquidateNow = ({ navigation, route, clients }) => {
         }
       };
 
-  useEffect(() => {
-    const date = new Date();
-    const formattedDate = `Hoje, ${date.toLocaleDateString('pt-BR')}`;
-    setCurrentDate(formattedDate);
-  }, []);
+      useEffect(() => {
+        const formattedDate = `Hoje, ${moment().tz('America/Sao_Paulo').format('DD/MM/YYYY')}`;
+        setCurrentDate(formattedDate);
+      }, []);
+      
   const paymentOptions = ['2x', '3x', '4x', '5x', '6x', '7x'];
 
   useEffect(() => {
@@ -129,7 +130,7 @@ const handleRegisterSale = async () => {
     const empresaId = await getEmpresaId();
     if (!empresaId) return;
 
-    const currentDate = new Date().toISOString().split('T')[0];
+    const currentDate = moment().tz('America/Sao_Paulo').format('YYYY-MM-DD');
 
     if (!selectedPaymentMethod) {
       Alert.alert("Erro", "Selecione uma forma de pagamento.");
