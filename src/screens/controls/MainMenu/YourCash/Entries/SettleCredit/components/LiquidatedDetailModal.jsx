@@ -5,10 +5,12 @@ import Icon from "react-native-vector-icons/Ionicons";
 import styles from './styles';
 import { COLORS } from "../../../../../../../constants";
 import ConfirmCancelModal from "./ConfirmCancelModal";
+import CancelWarningModal from "../../../../../Resume/components/CancelWarningModal";
 
 const LiquidatedDetailModal = ({ visible, onClose, account,  servicoNomes, onSaleCanceled, navigation }) => {
     const [isFirstModalVisible, setFirstModalVisible] = useState(visible);
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+    const [warningModalVisible, setWarningModalVisible] = useState(false);
 
     useEffect(() => {
         if (account) {
@@ -25,6 +27,13 @@ const LiquidatedDetailModal = ({ visible, onClose, account,  servicoNomes, onSal
     const closeFirstModal = () => {
         setFirstModalVisible(false);
         onClose();
+    };
+    const navigateToExpense = () => {
+        closeFirstModal();
+        navigation.navigate('NewExpense');
+    };
+    const openWarningModal = () => {
+        setWarningModalVisible(true);
     };
 
     const renderItem = ({ item }) => {
@@ -118,12 +127,12 @@ const calculateTotalAmount = useCallback(() => {
                       </Text>
                   </View>
 
-                  {/* 
-                  <TouchableOpacity style={styles.cancelButtonModal} onPress={openConfirmModal}>
+
+                  <TouchableOpacity style={styles.cancelButtonModal} onPress={openWarningModal}>
                       <Icon name="close-circle-outline" size={24} color="black" />
-                      <Text style={styles.buttonText}>Cancelar venda</Text>
+                      <Text style={styles.buttonText}>estornar venda</Text>
                   </TouchableOpacity>
-                  */}
+
 
                   <TouchableOpacity style={styles.reciboButton}  onPress={() => {
                             // Navegar para a tela ReceiptScreen com o saleId
@@ -146,6 +155,12 @@ const calculateTotalAmount = useCallback(() => {
                 onClose={closeFirstModal}
                 saleId={account.id} // Passar o ID da venda
                 onSaleCanceled={onSaleCanceled} // Atualizar a lista de vendas no componente pai
+                />
+
+                <CancelWarningModal
+                visible={warningModalVisible}
+                onClose={closeFirstModal}
+                onNavigateToExpense={navigateToExpense}
                 />
       </Modal>
   );
