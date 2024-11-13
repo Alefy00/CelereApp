@@ -16,6 +16,7 @@ import { API_BASE_URL } from '../../../services/apiConfig';
 import mixpanel from '../../../services/mixpanelClient';
 import moment from 'moment-timezone';
 
+
 const MainMenu = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [saldoCaixa, setSaldoCaixa] = useState(null);

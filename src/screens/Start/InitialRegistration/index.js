@@ -245,6 +245,7 @@ const InitialRegistration = ({ navigation }) => {
           <CheckBox
             value={isPrivacyChecked}
             onValueChange={setIsPrivacyChecked}
+            tintColors={{ true: '#000', false: '#000' }}
           />
           <Text style={styles.privacyText}>
             Eu concordo com a{' '}
