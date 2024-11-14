@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     },
     infoContainer: {
       flex: 1,
-      justifyContent:  'space-around',
+      justifyContent:  'space-between',
       marginLeft: 10,
       flexDirection: 'row',
     },

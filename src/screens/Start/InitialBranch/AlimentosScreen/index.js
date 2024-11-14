@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, FlatList, Alert } from 'react-native';
 import axios from 'axios';
-import styles from './styles'; // Certifique-se de ajustar o arquivo de estilos
+import styles from './styles';
 import BarTop3 from '../../../../components/BarTop3';
 import { COLORS } from '../../../../constants';
 import RestauranteIcon from '../../../../assets/images/svg/InitialBranch/RestauranteIcon.svg';
@@ -10,34 +10,54 @@ import DeliveryIcon from '../../../../assets/images/svg/InitialBranch/DeliveryIc
 import FoodTruckIcon from '../../../../assets/images/svg/InitialBranch/FoodTruckIcon.svg';
 import HomeIcon from '../../../../assets/images/svg/InitialBranch/HomeIcon.svg';
 import { API_BASE_URL } from '../../../../services/apiConfig';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// Função para exibir alertas
+const showAlert = (title, message) => {
+  Alert.alert(title, message);
+};
 
 const AlimentosScreen = ({ route, navigation }) => {
-  const { subcategories, userData } = route.params;
+  const { subcategories } = route.params;
   const [loading, setLoading] = useState(false);
 
-  // Mapeamento de ícones dinâmicos com base no nome da subcategoria
   const iconMapping = {
     'Restaurante': <RestauranteIcon width={50} height={50} />,
     'Delivery': <DeliveryIcon width={50} height={50} />,
     'Comida de rua': <FoodTruckIcon width={50} height={50} />,
     'Em casa': <HomeIcon width={50} height={50} />,
   };
+// Função para buscar o ID da empresa logada
+const getEmpresaId = useCallback(async () => {
+  try {
+    const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+    if (storedEmpresaId) {
+      return Number(storedEmpresaId); // Converte para número se estiver como string
+    } else {
+      showAlert('Erro', 'ID da empresa não encontrado.');
+      return null;
+    }
+  } catch (error) {
+    console.error('Erro ao buscar o ID da empresa:', error);
+    return null;
+  }
+}, []);
 
-  // Função para associar o ramo de atividade ao clicar em uma subcategoria
   const handleSubcategorySelect = async (subcategoryId) => {
-    if (!userData || !userData.id) {
-      Alert.alert('Erro', 'Dados do usuário não carregados. Tente novamente.');
+    const empresaId = await getEmpresaId(); // Obtendo o ID da empresa logada
+    if (!empresaId) {
+      Alert.alert('Erro', 'ID da empresa não encontrado. Tente novamente.');
       return;
     }
 
     try {
       setLoading(true);
-      
+
       // Enviando a requisição para associar o ramo de atividade
       const response = await axios.post(
         `${API_BASE_URL}/cad/associar_ramo_atividade/`,
         {
-          empresa_id: userData.id,
+          empresa_id: empresaId,
           ramo_atividade_id: subcategoryId,
         },
         {
@@ -47,12 +67,13 @@ const AlimentosScreen = ({ route, navigation }) => {
         }
       );
 
-      if (response.status >= 200 && response.status < 300 && response.data.status && response.data.status.toLowerCase() === 'success') {
-        // Navegar para a MainTab em caso de sucesso
+      const responseData = response.data;
+      if (response.status === 201 && responseData.status === 'success' && responseData.data) {
+        Alert.alert('Sucesso', responseData.message || 'Ramo de atividade associado com sucesso!');
         navigation.navigate('MainTab');
       } else {
-        console.log('Resposta inesperada:', response.data);
-        Alert.alert("Erro", response.data.message || 'Erro ao salvar o ramo de atividade. Tente novamente.');
+        console.log('Resposta inesperada:', responseData);
+        Alert.alert("Erro", responseData.message || 'Erro ao salvar o ramo de atividade. Tente novamente.');
       }
     } catch (error) {
       console.error('Erro ao conectar à API:', error);
@@ -67,19 +88,16 @@ const AlimentosScreen = ({ route, navigation }) => {
     }
   };
 
-  const renderSubcategoryItem = ({ item }) => {
-    return (
-      <TouchableOpacity
-        key={item.id}
-        style={styles.option}
-        onPress={() => handleSubcategorySelect(item.id)} // Chamando a função ao clicar
-      >
-        {/* Mapeando dinamicamente os ícones com base no nome da subcategoria */}
-        {iconMapping[item.nome] || <RestauranteIcon width={50} height={50} />} 
-        <Text style={styles.optionText}>{item.nome}</Text>
-      </TouchableOpacity>
-    );
-  };
+  const renderSubcategoryItem = ({ item }) => (
+    <TouchableOpacity
+      key={item.id}
+      style={styles.option}
+      onPress={() => handleSubcategorySelect(item.id)}
+    >
+      {iconMapping[item.nome] || <RestauranteIcon width={50} height={50} />}
+      <Text style={styles.optionText}>{item.nome}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
@@ -98,7 +116,7 @@ const AlimentosScreen = ({ route, navigation }) => {
         <ActivityIndicator size="large" color={COLORS.primary} />
       ) : (
         <FlatList
-          data={subcategories} // As subcategorias virão dinamicamente da API
+          data={subcategories}
           renderItem={renderSubcategoryItem}
           keyExtractor={(item) => `${item.id}`}
           numColumns={2}

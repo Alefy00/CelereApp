@@ -1,12 +1,10 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useCallback, useState } from 'react';
-import { StatusBar, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Container, LoadingIcon, Text, Copyright } from './styles';
 import LogoApp from '../../../assets/images/logo.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import { API_BASE_URL } from '../../../services/apiConfig';
 
 const Preload = props => {
   const navigation = useNavigation();

@@ -5,7 +5,6 @@ import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProgressBar from '../components/ProgressBar';
-import BarTop3 from '../../../components/BarTop3'; // Importando o BarTop3
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../constants';
 import styles from './styles';

@@ -1,12 +1,10 @@
 /* eslint-disable prettier/prettier */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Text, View, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
 import ProgressBar from '../components/ProgressBar';
-import BarTop3 from '../../../components/BarTop3'; // Importando o BarTop3
-import { COLORS } from '../../../constants'; // Importando as cores definidas
 import VarejoIcon from '../../../assets/images/svg/initial/Varejo.svg'; // Importando os ícones
 import AlimentosIcon from '../../../assets/images/svg/initial/food.svg';
 import ServicosIcon from '../../../assets/images/svg/initial/service.svg';
@@ -20,55 +18,60 @@ const subcategories = {
   alimentos: 'A',
 };
 
-// Função para obter os dados do usuário
-const useUserData = (navigation) => {
-  const [userData, setUserData] = useState(null);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const storedUserData = await AsyncStorage.getItem('userPhone');
-        if (storedUserData) {
-          setUserData(JSON.parse(storedUserData));
-        } else {
-          Alert.alert('Erro', 'Dados do usuário não encontrados.');
-        }
-      } catch (error) {
-        console.error('Erro ao carregar dados do usuário:', error);
-        Alert.alert('Erro ao carregar dados do usuário.');
-      }
-    };
-
-    fetchUserData();
-  }, [navigation]);
-
-  return userData;
-};
-
 const InitialBranch = ({ navigation }) => {
-  const userData = useUserData(navigation);
   const [loading, setLoading] = useState(false);
+
+            // Função para mostrar alertas
+            const showAlert = (title, message) => {
+              Alert.alert(title, message);
+            };
+      
+          // Função para buscar o ID da empresa logada
+          const getEmpresaId = useCallback(async () => {
+            try {
+              const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+              if (storedEmpresaId) {
+                return Number(storedEmpresaId); // Converte para número se estiver como string
+              } else {
+                showAlert('Erro', 'ID da empresa não encontrado.');
+                return null;
+              }
+            } catch (error) {
+              console.error('Erro ao buscar o ID da empresa:', error);
+              return null;
+            }
+          }, []);
 
   // Função para carregar subcategorias e navegar para a tela correta
   const openSubcategoryScreen = async (category) => {
     const tipo = subcategories[category];
-  
+    
     try {
       setLoading(true);
+  
+      // Obtendo o ID da empresa logada
+      const empresaId = await getEmpresaId();
+      console.log("ID empresa", empresaId);
+      if (!empresaId) {
+        Alert.alert('Erro', 'ID da empresa não encontrado. Tente novamente.');
+        return;
+      }
+  
       const response = await axios.get(`${API_BASE_URL}/cad/ramosatividades/?page_size=100&max_page_size=100&tipo=${tipo}`);
       const subcategoriesData = response.data.data;
   
       // Navegar dinamicamente para a tela correspondente com base na categoria
-      const screenName = `${category.charAt(0).toUpperCase() + category.slice(1)}Screen`; // Gera dinamicamente o nome da tela (ex: VarejoScreen, AlimentosScreen)
-      
-      navigation.navigate(screenName, { subcategories: subcategoriesData, userData });
+      const screenName = `${category.charAt(0).toUpperCase() + category.slice(1)}Screen`;
+  
+      // Passando `empresaId` em vez de `userData`
+      navigation.navigate(screenName, { subcategories: subcategoriesData, empresaId });
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível carregar os ramos de atividades. Tente novamente.');
     } finally {
       setLoading(false);
     }
   };
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.barTopContainer}>
