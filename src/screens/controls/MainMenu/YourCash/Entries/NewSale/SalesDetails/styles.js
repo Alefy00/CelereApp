@@ -1,38 +1,39 @@
 /* eslint-disable prettier/prettier */
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
 import { COLORS } from "../../../../../../../constants";
+
+const { width, height } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background, // Define a cor de fundo de toda a tela
+    backgroundColor: COLORS.background,
   },
   content: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: width * 0.05,
+    paddingBottom: height * 0.025,
   },
   toggleContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 5,
-    marginHorizontal: 20,
+    marginBottom: height * 0.01,
+    marginHorizontal: width * 0.05,
     borderWidth: 1,
     borderRadius: 5,
-    marginTop: 20,
+    marginTop: height * 0.025,
   },
   saleDetailsContainer: {
-    marginVertical: 10,
-    
+    marginVertical: height * 0.012,
   },
   saleDetailsTitle: {
-    fontSize: 20,
+    fontSize: width * 0.05,
     fontWeight: 'bold',
     color: COLORS.black,
   },
   saleDate: {
-    fontSize: 14,
+    fontSize: width * 0.035,
     color: COLORS.black,
-    marginTop: 5,
+    marginTop: height * 0.012,
   },
   saleDateValue: {
     color: COLORS.black,
@@ -40,14 +41,13 @@ const styles = StyleSheet.create({
   },
   toggleButton: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: height * 0.015,
     borderColor: COLORS.black,
     alignItems: 'center',
-    
   },
   activeButton: {
     backgroundColor: COLORS.primary,
-    borderRadius:5,
+    borderRadius: 5,
   },
   inactiveButtonText: {
     color: COLORS.black,
@@ -60,130 +60,127 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 10,
+    marginBottom: height * 0.025,
+    paddingBottom: height * 0.012,
   },
   clientPicker: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: height * 0.015,
+    paddingHorizontal: width * 0.03,
     borderRadius: 8,
     borderBottomWidth: 1,
     borderColor: COLORS.black,
   },
   clientText: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: COLORS.black,
   },
   addClientButton: {
     backgroundColor: COLORS.primary,
-    padding: 10,
+    padding: width * 0.025,
     borderRadius: 5,
-    marginLeft: 10,
+    marginLeft: width * 0.025,
   },
   dropdownContainer: {
     backgroundColor: COLORS.white,
     borderRadius: 5,
-    maxHeight: 150, // Limita a altura do dropdown
-    marginTop: -25,
+    maxHeight: height * 0.2,
+    marginTop: -height * 0.03,
     elevation: 2,
-    width: '100%', // Certifica-se que o dropdown tenha a largura completa
+    width: '100%',
   },
   dropdownContainerPag: {
     backgroundColor: COLORS.white,
     borderRadius: 5,
-    maxHeight: 150, // Limita a altura do dropdown
+    maxHeight: height * 0.2,
     elevation: 2,
-    width: '100%', // Certifica-se que o dropdown tenha a largura completa
+    width: '100%',
   },
   dropdownItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    paddingVertical: height * 0.015,
+    paddingHorizontal: width * 0.025,
   },
   dropdownItemText: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: COLORS.black,
   },
   cartContainer: {
-    marginBottom:8,
-
+    marginBottom: height * 0.01,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: width * 0.045,
     fontWeight: 'bold',
     color: COLORS.black,
-    marginBottom: 10,
+    marginBottom: height * 0.015,
   },
   productDetail: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 10,
+    padding: width * 0.025,
     borderRadius: 5,
-    marginBottom: 10,
+    marginBottom: height * 0.015,
   },
   productImage: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
+    width: width * 0.13,
+    height: width * 0.13,
+    marginRight: width * 0.025,
   },
   productInfo: {
     flex: 1,
   },
   productText: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: COLORS.black,
-    marginBottom: 5,
-    fontWeight:'bold',
+    marginBottom: height * 0.01,
+    fontWeight: 'bold',
   },
-  productPrice:{
+  productPrice: {
     color: COLORS.black,
   },
   productAmount: {
-    fontSize: 14,
+    fontSize: width * 0.035,
     color: COLORS.green,
   },
   productTotal: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: 'bold',
     color: COLORS.black,
   },
-  addMoreButton:{
+  addMoreButton: {
     flexDirection: 'row',
     backgroundColor: COLORS.primary,
-    paddingVertical: 15,
+    paddingVertical: height * 0.02,
     alignItems: "center",
     justifyContent: 'center',
     borderRadius: 5,
   },
-  addMoreButtonText:{
-    marginLeft: 10,
+  addMoreButtonText: {
+    marginLeft: width * 0.025,
     color: COLORS.black,
-    fontSize:15,
+    fontSize: width * 0.04,
   },
   discountContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: height * 0.025,
   },
   discountButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 30,
+    paddingVertical: height * 0.015,
+    paddingHorizontal: width * 0.075,
     borderRadius: 5,
-    marginRight: 10,
+    marginRight: width * 0.025,
     backgroundColor: COLORS.lightGray2,
-
   },
   activeDiscountButton: {
     backgroundColor: COLORS.primary,
-
   },
   inactiveDiscountButtonText: {
     color: COLORS.black,
-    fontWeight:'bold',
+    fontWeight: 'bold',
   },
   activeDiscountButtonText: {
     color: COLORS.black,
@@ -193,16 +190,16 @@ const styles = StyleSheet.create({
     flex: 1,
     borderBottomWidth: 1,
     borderColor: COLORS.black,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingVertical: height * 0.012,
+    paddingHorizontal: width * 0.025,
     backgroundColor: COLORS.background,
   },
   paymentButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    paddingVertical: height * 0.015,
+    paddingHorizontal: width * 0.025,
     borderRadius: 5,
-    marginRight: 10,
-    flexDirection:'row',
+    marginRight: width * 0.025,
+    flexDirection: 'row',
     backgroundColor: '#efebc4',
   },
   selectedPaymentButton: {
@@ -210,40 +207,40 @@ const styles = StyleSheet.create({
   },
   paymentButtonText: {
     color: COLORS.black,
-    fontSize: 15,
-    marginLeft: 5,
+    fontSize: width * 0.04,
+    marginLeft: width * 0.012,
   },
   totalContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
-    paddingVertical: 10,
-    marginTop: 80,
+    marginBottom: height * 0.015,
+    paddingVertical: height * 0.015,
+    marginTop: height * 0.1,
   },
   totalLabel: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: 'bold',
     color: COLORS.black,
   },
   totalValue: {
-    fontSize: 20,
+    fontSize: width * 0.05,
     fontWeight: 'bold',
     color: COLORS.green,
   },
   confirmButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 20,
+    paddingVertical: height * 0.025,
     borderRadius: 5,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 5,
+    marginBottom: height * 0.01,
   },
   confirmButtonText: {
     color: COLORS.black,
-    fontSize: 16,
-    marginLeft: 10,
+    fontSize: width * 0.04,
+    marginLeft: width * 0.025,
   },
   modalContainer: {
     flex: 1,
@@ -253,244 +250,235 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: COLORS.white,
-    padding: 20,
+    padding: width * 0.05,
     borderRadius: 10,
     width: '80%',
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalText: {
-    fontSize: 18,
+    fontSize: width * 0.045,
     fontWeight: 'bold',
     color: COLORS.black,
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: height * 0.015,
+    marginBottom: height * 0.025,
   },
   modalPrimaryButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+    paddingVertical: height * 0.04,
+    paddingHorizontal: width * 0.05,
     borderRadius: 5,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
-    width: '100%',
-  },
-  modalPrimaryButtonText: {
-    color: COLORS.black,
-    fontSize: 16,
-    marginLeft: 10,
-  },
-  modalSecondaryButton: {
-    borderColor: COLORS.black,
-    borderWidth: 1,
-    paddingVertical: 30,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: height * 0.015,
     width: '100%',
   },
   modalPrimaryButton2: {
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+    paddingVertical: height * 0.04,
+    paddingHorizontal: width * 0.05,
     borderRadius: 5,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: height * 0.015,
     width: '100%',
-    borderWidth: 1,
+    borderWidth:1,
+  },
+  modalPrimaryButtonText: {
+    color: COLORS.black,
+    fontSize: width * 0.04,
+    marginLeft: width * 0.025,
+  },
+
+  modalSecondaryButton: {
     borderColor: COLORS.black,
+    borderWidth: 1,
+    paddingVertical: height * 0.04,
+    paddingHorizontal: width * 0.05,
+    borderRadius: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: height * 0.015,
+    width: '100%',
   },
   modalSecondaryButtonText: {
     color: COLORS.black,
-    fontSize: 16,
-    marginLeft: 10,
+    fontSize: width * 0.04,
+    marginLeft: width * 0.025,
   },
   modalBackButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 30,
+    paddingVertical: height * 0.04,
   },
   modalBackButtonText: {
     color: COLORS.black,
-    fontSize: 16,
-    marginLeft: 10,
+    fontSize: width * 0.04,
+    marginLeft: width * 0.025,
   },
-    // ...existing styles
-    //estilo celerepay
-    paymentSelectionContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginVertical: 15,
-    },
-    paymentOptionButton: {
-      flex: 1,
-      paddingVertical: 10,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: 10,
-      backgroundColor: '#efebc4',
-      marginRight: 5,
-    },
-    selectedPaymentOptionButton: {
-      backgroundColor: COLORS.green,  // Cor verde para o botão selecionado
-    },
-    paymentOptionText: {
-      fontSize: 16,
-      color: COLORS.black,
-    },
-    selectedPaymentOptionText: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: COLORS.black,  // Texto branco para o botão selecionado
-    },
-    paymentTypeContainer: {
-      borderBottomWidth: 1,
-      marginTop: -10,
-    },
-    picker: {
-      height: 50,
-      width: '100%',
-      borderWidth: 1,
-      borderColor: '#000',
-      borderRadius: 5,
-    },
-    valueSummaryContainer: {
-      marginVertical: 20,
-    },
-    valueItem: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginVertical: 5,
-    },
-    valueLabel: {
-      fontSize: 16,
-      color: '#000',
-      fontWeight: 'bold',
-    },
-    
-    valueAmount: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: COLORS.green,
-    },
-    valueAmount2: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: COLORS.black,
-    },
-    valueAmountTaxa:{
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: COLORS.red,
-    },
-    invoiceModalContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  invoiceModalContent: {
-      width: '80%',
-      backgroundColor: 'white',
-      borderRadius: 10,
-      padding: 20,
-      alignItems: 'center',
-  },
-  invoiceModalTitle: {
-      fontSize: 18,
-      marginBottom: 20,
-      fontWeight: 'bold',
-      color: COLORS.black,
-  },
-  invoiceOptionButtonRecibo: {
-      width: '100%',
-      backgroundColor: COLORS.primary,
-      padding: 25,
-      borderRadius: 5,
-      alignItems: 'center',
-      marginBottom: 10,
-  },
-  invoiceOptionTextRecibo: {
-      fontSize: 16,
-      color: COLORS.black,
-  },
-  invoiceOptionButtonNotaFiscal: {
-      width: '100%',
-      padding: 25,
-      borderRadius: 5,
-      alignItems: 'center',
-      backgroundColor: COLORS.lightGray2,
-
-  },
-  invoiceOptionTextNotaFiscal: {
-      fontSize: 16,
-      color: COLORS.black,
-  },
-  closeButton: {
-      position: 'absolute',
-      top: 10,
-      right: 10,
-  },
-  //dropdown pacelamento
-  parcelamentoSection: {
-    marginTop: 5,
-    marginBottom: 10,
-  },
-  parcelamentoContainer: {
+  paymentSelectionContainer: {
     flexDirection: 'row',
-    marginTop: 10,
+    justifyContent: 'space-between',
+    marginVertical: height * 0.02,
   },
-  parcelamentoButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+  paymentOptionButton: {
+    flex: 1,
+    paddingVertical: height * 0.015,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 10,
+    borderRadius: 10,
+    backgroundColor: '#efebc4',
+    marginRight: width * 0.012,
   },
-  activeParcelamentoButton: {
+  selectedPaymentOptionButton: {
+    backgroundColor: COLORS.green,
+  },
+  paymentOptionText: {
+    fontSize: width * 0.04,
+    color: COLORS.black,
+  },
+  selectedPaymentOptionText: {
+    fontSize: width * 0.04,
+    fontWeight: 'bold',
+    color: COLORS.black,
+  },
+  paymentTypeContainer: {
+    borderBottomWidth: 1,
+    marginTop: -height * 0.015,
+  },
+  picker: {
+    height: height * 0.06,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: COLORS.black,
+    borderRadius: 5,
+  },
+  valueSummaryContainer: {
+    marginVertical: height * 0.025,
+  },
+  valueItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: height * 0.012,
+  },
+  valueLabel: {
+    fontSize: width * 0.04,
+    color: COLORS.black,
+    fontWeight: 'bold',
+  },
+  valueAmount: {
+    fontSize: width * 0.04,
+    fontWeight: 'bold',
+    color: COLORS.green,
+  },
+  valueAmount2: {
+    fontSize: width * 0.04,
+    fontWeight: 'bold',
+    color: COLORS.black,
+  },
+  valueAmountTaxa: {
+    fontSize: width * 0.04,
+    fontWeight: 'bold',
+    color: COLORS.red,
+  },
+  invoiceModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  invoiceModalContent: {
+    width: '80%',
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    padding: width * 0.05,
+    alignItems: 'center',
+},
+invoiceModalTitle: {
+    fontSize: width * 0.045,
+    marginBottom: height * 0.025,
+    fontWeight: 'bold',
+    color: COLORS.black,
+},
+invoiceOptionButtonRecibo: {
+    width: '100%',
     backgroundColor: COLORS.primary,
-
-  },
-  parcelamentoText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: COLORS.gray,
-  },
-  activeParcelamentoText: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    padding: height * 0.03,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: height * 0.015,
+},
+invoiceOptionTextRecibo: {
+    fontSize: width * 0.04,
     color: COLORS.black,
-  },
-  parcelamentoValue: {
-    marginTop: 10,
-    fontSize: 16,
-    fontWeight: 'bold',
+},
+invoiceOptionButtonNotaFiscal: {
+    width: '100%',
+    padding: height * 0.03,
+    borderRadius: 5,
+    alignItems: 'center',
+    backgroundColor: COLORS.lightGray2,
+},
+invoiceOptionTextNotaFiscal: {
+    fontSize: width * 0.04,
     color: COLORS.black,
-    marginLeft: 10,
-  },
-    // Estilos gerais do botão desabilitado
-    paymentOptionButtonDisabled: {
-      backgroundColor: COLORS.lightGray, // Cor de fundo cinza para indicar desabilitado
-      paddingVertical: 10,
-      paddingHorizontal: 12,
-      borderRadius: 10,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    // Texto do botão desabilitado
-    paymentOptionTextDisabled: {
-      color: COLORS.darkGray, // Cor do texto para indicar desabilitado
-      fontSize: 14,
-
-    },
+},
+closeButton: {
+    position: 'absolute',
+    top: height * 0.012,
+    right: width * 0.025,
+},
+parcelamentoSection: {
+  marginTop: height * 0.012,
+  marginBottom: height * 0.015,
+},
+parcelamentoContainer: {
+  flexDirection: 'row',
+  marginTop: height * 0.012,
+},
+parcelamentoButton: {
+  paddingVertical: height * 0.015,
+  paddingHorizontal: width * 0.05,
+  borderRadius: 5,
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginRight: width * 0.025,
+},
+activeParcelamentoButton: {
+  backgroundColor: COLORS.primary,
+},
+parcelamentoText: {
+  fontSize: width * 0.04,
+  fontWeight: 'bold',
+  color: COLORS.gray,
+},
+activeParcelamentoText: {
+  fontSize: width * 0.04,
+  fontWeight: 'bold',
+  color: COLORS.black,
+},
+parcelamentoValue: {
+  marginTop: height * 0.015,
+  fontSize: width * 0.04,
+  fontWeight: 'bold',
+  color: COLORS.black,
+  marginLeft: width * 0.025,
+},
+paymentOptionButtonDisabled: {
+  backgroundColor: COLORS.lightGray,
+  paddingVertical: height * 0.015,
+  paddingHorizontal: width * 0.03,
+  borderRadius: 10,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+paymentOptionTextDisabled: {
+  color: COLORS.darkGray,
+  fontSize: width * 0.035,
+},
 });
 
 export default styles;

@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useRef, useCallback } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView, Modal, Alert, Image } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, Modal, Alert, Image, Dimensions  } from 'react-native';
 import styles from './styles';
 import BarTop2 from '../../../../../../components/BarTop2';
 import { COLORS } from '../../../../../../constants';
@@ -31,6 +31,7 @@ const AddProductScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false); // Atualizado
   const [photo, setPhoto] = useState(null);  // Estado para armazenar a foto tirada
   const productValuesRef = useRef(); // Usamos uma referência para o componente ProductValues
+  const { width } = Dimensions.get('window');
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
@@ -218,7 +219,7 @@ const uploadProductImage = async (productId, empresaId) => {
 
   const handleNewProduct = () => {
     setIsModalVisible(false);
-  }
+  };
 
   // Função para adicionar uma nova categoria
   const handleAddCategory = () => {
@@ -248,7 +249,12 @@ const uploadProductImage = async (productId, empresaId) => {
               {photo ? (
                 <Image
                     source={{ uri: photo.uri }}
-                    style={{ width: 110, height: 110, resizeMode: 'contain', borderRadius: 10, }}  // Tamanho fixo para garantir visualização
+                   style={{
+                    width: width * 0.3,
+                    height: width * 0.3,
+                    resizeMode: 'contain',
+                    borderRadius: 10,
+                  }}
                     onError={(error) => console.error('Erro ao carregar a imagem:', error.nativeEvent.error)}
                   />
               ) : (

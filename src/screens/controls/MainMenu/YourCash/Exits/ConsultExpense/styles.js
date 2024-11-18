@@ -1,6 +1,8 @@
 /* eslint-disable prettier/prettier */
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { COLORS } from '../../../../../../constants';
+
+const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -8,91 +10,90 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   headerContainer: {
-    padding: 20,
+    padding: width * 0.05,
     backgroundColor: COLORS.background,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: width * 0.055,
     fontWeight: '900',
     color: COLORS.black,
-    marginTop: -10,
+    marginTop: height * -0.01,
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: COLORS.black,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingBottom: 15,
-    marginTop: -10,
+    paddingHorizontal: width * 0.05,
+    paddingBottom: height * 0.015,
+    marginTop: height * -0.01,
   },
   searchInputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
     borderRadius: 10,
-    paddingHorizontal: 10,
-    marginRight: 10,
-    borderBottomWidth:1,
+    paddingHorizontal: width * 0.025,
+    marginRight: width * 0.025,
+    borderBottomWidth: 1,
     borderColor: COLORS.black,
   },
   searchInput: {
     flex: 1,
-    paddingVertical: 10,
-    fontSize: 16,
+    paddingVertical: height * 0.012,
+    fontSize: width * 0.04,
     color: COLORS.black,
   },
   searchIcon: {
-    padding: 5,
+    padding: width * 0.015,
   },
   filterButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingVertical: height * 0.012,
+    paddingHorizontal: width * 0.04,
     borderRadius: 5,
     flexDirection: 'row',
   },
   filterButtonText: {
     color: COLORS.black,
-    fontSize: 16,
-    marginLeft:15
-
+    fontSize: width * 0.04,
+    marginLeft: width * 0.04,
   },
   expensesListContainer: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingHorizontal: width * 0.05,
+    paddingTop: height * 0.01,
   },
   addButtonContainer: {
     position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
+    bottom: height * 0.02,
+    left: width * 0.05,
+    right: width * 0.05,
   },
   addButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 25,
+    paddingVertical: height * 0.025,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    marginHorizontal:20,
-    marginVertical:20,
+    marginHorizontal: width * 0.05,
+    marginVertical: height * 0.02,
     flexDirection: 'row',
   },
   addButtonText: {
     color: COLORS.black,
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: 'bold',
-    marginLeft:10,
+    marginLeft: width * 0.025,
   },
   expenseContainer: {
-    padding: 15,
+    padding: width * 0.04,
     backgroundColor: COLORS.white,
     borderRadius: 10,
-    marginVertical: 10,
+    marginVertical: height * 0.015,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -102,35 +103,35 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
   expenseInfo: {
     flexDirection: 'column',
   },
   expenseName: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: 'bold',
     color: COLORS.black,
   },
   expenseType: {
-    fontSize: 14,
+    fontSize: width * 0.035,
     color: COLORS.gray,
-    marginTop: 2,
-    width: 250
+    marginTop: height * 0.005,
+    width: width * 0.65,
   },
   expenseReference: {
-    fontSize: 14,
-    marginTop: 5,
+    fontSize: width * 0.035,
+    marginTop: height * 0.005,
     color: COLORS.black,
   },
   expenseDueDate: {
-    fontSize: 14,
-    marginTop: 5,
+    fontSize: width * 0.035,
+    marginTop: height * 0.005,
     color: COLORS.black,
   },
   expenseStatus: {
-    fontSize: 14,
-    marginTop: 5,
+    fontSize: width * 0.035,
+    marginTop: height * 0.005,
     color: COLORS.black,
   },
   expenseStatusPending: {
@@ -140,15 +141,13 @@ const styles = StyleSheet.create({
     color: COLORS.green,
   },
   expenseAmount: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: 'bold',
     alignSelf: 'center',
     color: COLORS.black,
-    marginTop: "-32%",
-    marginRight: '12%',
-
+    marginTop: height * -0.05,
+    marginRight: width * 0.05,
   },
-  //toggle botão
   toggleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -157,23 +156,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     backgroundColor: COLORS.white,
-    marginHorizontal: 20,
-    marginBottom: 10,
+    marginHorizontal: width * 0.05,
+    marginBottom: height * 0.015,
   },
   toggleButton: {
     flex: 1,
-    padding: 10,
+    padding: height * 0.012,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-
   },
   toggleButtonActive: {
     backgroundColor: COLORS.primary,
   },
   toggleText: {
-    marginLeft: 5,
-    fontSize: 16,
+    marginLeft: width * 0.015,
+    fontSize: width * 0.04,
     color: COLORS.black,
   },
   toggleTextActive: {

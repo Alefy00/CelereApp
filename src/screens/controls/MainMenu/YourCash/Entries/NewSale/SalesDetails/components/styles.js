@@ -1,6 +1,8 @@
 /* eslint-disable prettier/prettier */
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
 import { COLORS } from "../../../../../../../../constants";
+
+const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -8,20 +10,20 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   content: {
-    padding: 16,
+    padding: width * 0.04, // Ajuste proporcional
   },
   saleDetailsContainer: {
-    marginBottom: 20,
+    marginBottom: height * 0.02, // Ajuste proporcional
   },
   saleDetailsTitle: {
-    fontSize: 20,
+    fontSize: width * 0.05, // Ajuste para tamanhos variados de tela
     fontWeight: 'bold',
     color: COLORS.black,
   },
   saleDate: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: COLORS.black,
-    marginTop: 8,
+    marginTop: height * 0.01,
   },
   saleDateValue: {
     fontWeight: 'bold',
@@ -33,22 +35,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.primary,
     borderRadius: 5,
-    marginBottom: 20,
+    marginBottom: height * 0.02,
   },
   toggleButton: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
+    paddingVertical: height * 0.012, // Ajuste proporcional
   },
-  activeButton: {
+  activeButton:{
     backgroundColor: COLORS.primary,
   },
-  inactiveButtonText: {
+  activeButtonText:{
     color: COLORS.black,
-    fontWeight: 'bold',
+    fontWeight:'bold',
   },
-  activeButtonText: {
+  inactiveButtonText:{
     color: COLORS.black,
     fontWeight: 'bold',
   },
@@ -56,152 +58,142 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 5,
-    paddingBottom: 10,
+    marginBottom: height * 0.005,
+    paddingBottom: height * 0.01,
   },
   clientPicker: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: height * 0.012,
+    paddingHorizontal: width * 0.03,
     borderRadius: 8,
     borderBottomWidth: 1,
     borderColor: COLORS.black,
   },
   clientText: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: COLORS.black,
   },
   addClientButton: {
     backgroundColor: COLORS.primary,
-    padding: 10,
+    padding: height * 0.012,
     borderRadius: 5,
-    marginLeft: 10,
+    marginLeft: width * 0.02,
   },
   dropdownContainer: {
-    maxHeight: 150, // Limita a altura do dropdown
-    marginTop: -25,
-    width: '100%', // Certifica-se que o dropdown tenha a largura completa
+    maxHeight: height * 0.2, // Limita a altura do dropdown
+    marginTop: -height * 0.03,
+    width: '100%', 
   },
   dropdownItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    paddingVertical: height * 0.012,
+    paddingHorizontal: width * 0.03,
   },
   dropdownItemText: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: COLORS.black,
   },
   dateContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: height * 0.012,
   },
   datePicker: {
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: COLORS.black,
-    paddingBottom: 8,
+    paddingBottom: height * 0.01,
     flex: 1,
   },
   dateText: {
     flex: 1,
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: COLORS.black,
   },
   cartContainer: {
-    marginBottom: 10,
+    marginBottom: height * 0.012,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: width * 0.045,
     fontWeight: 'bold',
     color: COLORS.black,
-    marginBottom: 10,
+    marginBottom: height * 0.012,
   },
   productDetail: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
-    padding: 10,
+    marginBottom: height * 0.012,
+    padding: width * 0.03,
     borderRadius: 5,
   },
   productImage: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
+    width: width * 0.12,
+    height: width * 0.12,
+    marginRight: width * 0.03,
   },
   productInfo: {
     flex: 1,
   },
   productText: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: 'bold',
     color: COLORS.black,
   },
-  productPrice:{
+  productPrice: {
     color: COLORS.black,
   },
   productAmount: {
-    fontSize: 14,
+    fontSize: width * 0.035,
     color: COLORS.green,
-    marginTop: 5,
+    marginTop: height * 0.005,
   },
   productTotal: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: 'bold',
     color: COLORS.black,
   },
   discountContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: height * 0.02,
   },
   discountButton: {
-    padding: 10,
+    padding: width * 0.03,
     borderRadius: 5,
-    marginRight: 10,
-    paddingHorizontal: 20,
+    marginRight: width * 0.02,
+    paddingHorizontal: width * 0.05,
     backgroundColor: COLORS.lightGray2,
   },
   activeDiscountButton: {
     backgroundColor: COLORS.primary,
   },
-  activeDiscountButtonText: {
-    color: COLORS.black,
-    fontWeight: 'bold',
-  },
-  inactiveDiscountButtonText: {
-    color: COLORS.black,
-  },
-
-  //more button
-
-  addMoreButton:{
+  addMoreButton: {
     flexDirection: 'row',
     backgroundColor: COLORS.primary,
-    paddingVertical: 15,
+    paddingVertical: height * 0.018,
     alignItems: "center",
     justifyContent: 'center',
     borderRadius: 5,
   },
-  addMoreButtonText:{
-    marginLeft: 10,
+  addMoreButtonText: {
+    marginLeft: width * 0.03,
     color: COLORS.black,
-    fontSize:15,
+    fontSize: width * 0.04,
   },
   discountInput: {
     flex: 1,
-    fontSize: 16,
-    padding: 10,
+    fontSize: width * 0.04,
+    padding: width * 0.03,
     borderRadius: 5,
     borderBottomWidth: 1,
     borderColor: "#000",
   },
   paymentToggleContainer: {
     flexDirection: 'row',
-    marginBottom: 20,
+    marginBottom: height * 0.02,
     borderWidth: 1,
     borderColor: COLORS.black,
     borderRadius: 5,
@@ -211,49 +203,48 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    
+    paddingVertical: height * 0.012,
   },
   selectedPaymentButton: {
     backgroundColor: COLORS.primary,
   },
   paymentButtonText: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: 'bold',
     color: COLORS.black,
-    marginLeft: 10,
+    marginLeft: width * 0.02,
   },
   totalContainer: {
-    marginBottom: 20,
+    marginBottom: height * 0.02,
     alignItems: 'center',
     flexDirection: 'row',
-    justifyContent:'space-between',
-    marginTop: 80,
+    justifyContent: 'space-between',
+    marginTop: height * 0.08,
   },
   totalLabel: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: COLORS.black,
-    marginBottom: 5,
-    fontWeight:'bold',
+    marginBottom: height * 0.005,
+    fontWeight: 'bold',
   },
   totalValue: {
-    fontSize: 24,
+    fontSize: width * 0.06,
     fontWeight: 'bold',
     color: COLORS.green,
   },
   confirmButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 15,
+    paddingVertical: height * 0.018,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 5,
     flexDirection: 'row',
   },
   confirmButtonText: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: 'bold',
     color: COLORS.black,
-    marginLeft: 10,
+    marginLeft: width * 0.02,
   },
   modalContainer: {
     flex: 1,
@@ -265,123 +256,119 @@ const styles = StyleSheet.create({
     width: '80%',
     backgroundColor: COLORS.white,
     borderRadius: 10,
-    padding: 20,
+    padding: width * 0.05,
     alignItems: 'center',
   },
   modalText: {
-    fontSize: 18,
+    fontSize: width * 0.045,
     fontWeight: 'bold',
     color: COLORS.black,
-    marginTop: 20,
-    marginBottom: 20,
+    marginTop: height * 0.02,
+    marginBottom: height * 0.02,
   },
-
   modalPrimaryButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+    paddingVertical: height * 0.015,
+    paddingHorizontal: width * 0.05,
     borderRadius: 5,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: height * 0.01,
     width: '100%',
   },
   modalPrimaryButtonText: {
     color: COLORS.black,
-    fontSize: 16,
-    marginLeft: 10,
+    fontSize: width * 0.04,
+    marginLeft: width * 0.02,
   },
   modalSecondaryButton: {
     borderColor: COLORS.black,
     borderWidth: 1,
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+    paddingVertical: height * 0.015,
+    paddingHorizontal: width * 0.05,
     borderRadius: 5,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: height * 0.01,
     width: '100%',
   },
   modalPrimaryButton2: {
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+    paddingVertical: height * 0.015,
+    paddingHorizontal: width * 0.05,
     borderRadius: 5,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: height * 0.01,
     width: '100%',
     borderWidth: 1,
     borderColor: COLORS.black,
   },
   modalSecondaryButtonText: {
     color: COLORS.black,
-    fontSize: 16,
-    marginLeft: 10,
+    fontSize: width * 0.04,
+    marginLeft: width * 0.02,
   },
   modalBackButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 30,
+    paddingVertical: height * 0.015,
   },
   modalBackButtonText: {
     color: COLORS.black,
-    fontSize: 16,
-    marginLeft: 10,
+    fontSize: width * 0.04,
+    marginLeft: width * 0.02,
   },
   invoiceModalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-},
-invoiceModalContent: {
+  },
+  invoiceModalContent: {
     width: '80%',
     backgroundColor: 'white',
     borderRadius: 10,
-    padding: 20,
+    padding: width * 0.05,
     alignItems: 'center',
-},
-invoiceModalTitle: {
-    fontSize: 18,
-    marginBottom: 20,
+  },
+  invoiceModalTitle: {
+    fontSize: width * 0.045,
+    marginBottom: height * 0.02,
     fontWeight: 'bold',
     color: COLORS.black,
-},
-invoiceOptionButtonRecibo: {
+  },
+  invoiceOptionButtonRecibo: {
     width: '100%',
     backgroundColor: COLORS.primary,
-    padding: 25,
+    padding: height * 0.015,
     borderRadius: 5,
     alignItems: 'center',
-    marginBottom: 10,
-},
-invoiceOptionTextRecibo: {
-    fontSize: 16,
+    marginBottom: height * 0.01,
+  },
+  invoiceOptionTextRecibo: {
+    fontSize: width * 0.04,
     color: COLORS.black,
-},
-invoiceOptionButtonNotaFiscal: {
+  },
+  invoiceOptionButtonNotaFiscal: {
     width: '100%',
-    padding: 25,
+    padding: height * 0.015,
     borderRadius: 5,
     alignItems: 'center',
     backgroundColor: COLORS.lightGray2,
-
-},
-invoiceOptionTextNotaFiscal: {
-    fontSize: 16,
+  },
+  invoiceOptionTextNotaFiscal: {
+    fontSize: width * 0.04,
     color: COLORS.black,
-},
-closeButton: {
+  },
+  closeButton: {
     position: 'absolute',
-    top: 10,
-    right: 10,
-},
-
-  
+    top: height * 0.01,
+    right: width * 0.02,
+  },  
 });
 
 export default styles;

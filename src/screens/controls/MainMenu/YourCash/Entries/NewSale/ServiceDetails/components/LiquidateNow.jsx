@@ -474,6 +474,7 @@ const formatCurrency = (value) => {
       </TouchableOpacity>
 
       <Text style={styles.sectionTitle}>Forma de Pagamento</Text>
+      <View style={styles.ContainerFormaPagamento}>
       <FlatList
         horizontal
         data={paymentMethods}
@@ -489,6 +490,7 @@ const formatCurrency = (value) => {
         keyExtractor={item => item.id.toString()}
         showsHorizontalScrollIndicator={false}
       />
+      </View>
             {/* Se o método selecionado for cartão de crédito, exibir a opção de parcelamento */}
             {selectedPaymentMethod && paymentMethods.find(method => method.id === selectedPaymentMethod)?.nome?.toLowerCase() === 'cartao de credito' && (
               <View style={styles.parcelamentoSection}>
@@ -524,14 +526,14 @@ const formatCurrency = (value) => {
           style={[styles.paymentOptionButtonDisabled]}
           disabled={true}
         >
-          <Text style={styles.paymentOptionTextDisabled}>CélerePay (Indisponível)</Text>
+          <Text style={styles.paymentOptionTextDisabled}>CélerePay (Em Breve)</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.paymentOptionButtonDisabled]}
           disabled={true}
         >
-          <Text style={styles.paymentOptionTextDisabled}>Maquininha (Indisponível)</Text>
+          <Text style={styles.paymentOptionTextDisabled}>Maquininha (Em Breve)</Text>
         </TouchableOpacity>
       </View>
 

@@ -1,8 +1,10 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, forwardRef, useImperativeHandle } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions  } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../../../../constants';
+
+const { width } = Dimensions.get('window');
 
 // Usamos forwardRef para permitir o uso de ref pelo componente pai
 const ProductValues = forwardRef(({ onCustoChange, onPrecoVendaChange }, ref) => {
@@ -126,38 +128,38 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
     borderRadius: 8,
-    padding: 16,
+    padding: width * 0.04,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-    marginTop: 20,
-    marginHorizontal: 20,
+    marginTop: width * 0.05,
+    marginHorizontal: width * 0.05,
   },
   title: {
-    fontSize: 17,
+    fontSize: width * 0.045,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: width * 0.025,
     color: COLORS.black,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: width * 0.05,
   },
   input: {
     flex: 1,
-    height: 40,
+    height: width * 0.1,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.black,
-    fontSize: 16,
-    paddingHorizontal: 10,
+    fontSize: width * 0.04,
+    paddingHorizontal: width * 0.03,
     color: COLORS.black,
   },
   marginLabel: {
-    marginHorizontal: 10,
-    fontSize: 16,
+    marginHorizontal: width * 0.03,
+    fontSize: width * 0.04,
     color: COLORS.black,
   },
   marginControl: {
@@ -166,16 +168,16 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   marginInput: {
-    width: 50,
-    height: 40,
+    width: width * 0.05,
+    height: width * 0.1,
     textAlign: 'center',
     borderRadius: 4,
-    marginHorizontal: 5,
+    marginHorizontal: width * 0.02,
   },
   marginButton: {
-    backgroundColor: '#FFD700',
+    backgroundColor: COLORS.primary,
     borderRadius: 4,
-    padding: 5,
+    padding: width * 0.015,
   },
 });
 

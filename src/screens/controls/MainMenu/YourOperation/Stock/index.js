@@ -45,9 +45,11 @@ const StockInfo = ({ navigation }) => {
 
   const fetchProductImage = async (empresaId, produtoId) => {
     try {
+      console.log(`Fetching image for empresaId: ${empresaId}, produtoId: ${produtoId}`);
       const response = await axios.get(`${IMAGE_API}?empresa=${empresaId}&produto=${produtoId}`);
       if (response.data && response.data.status === 'success') {
-        return response.data.data.imagem;
+        const imagePath = response.data.data.imagem;
+        return imagePath.startsWith('/media') ? `${API_BASE_URL}${imagePath}` : imagePath;
       } else {
         console.error('Erro ao buscar imagem do produto:', response.data.message);
         return null;
