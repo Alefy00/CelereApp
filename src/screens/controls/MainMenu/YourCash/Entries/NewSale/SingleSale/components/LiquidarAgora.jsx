@@ -189,6 +189,9 @@ const registerSale = async () => {
       return;
     }
 
+    // Determina o desconto como 0 se não informado
+    const descontoCalculado = discountValue ? parseFloat(discountValue) : 0;
+
     // Montar os dados da venda
     const vendaData = {
       empresa: empresaId,
@@ -197,7 +200,7 @@ const registerSale = async () => {
       dt_previsao_pagamento: currentDate,
       valor_total_custo_venda: parseFloat(totalLiquido).toFixed(2),
       valor_total_venda: parseFloat(totalLiquido).toFixed(2),
-      percentual_desconto: discountType === '%' ? parseFloat(discountValue) : 0, // Inclui o desconto global
+      percentual_desconto: discountType === '%' ? descontoCalculado : 0,
       tipo_pagamento_venda: selectedPaymentMethod,
     };
 
@@ -229,6 +232,7 @@ const registerSale = async () => {
   }
 };
 
+
 const registerSaleItems = async (vendaId) => {
   try {
     const empresaId = await getEmpresaId();
@@ -238,12 +242,16 @@ const registerSaleItems = async (vendaId) => {
       return;
     }
 
+    // Calcular o total bruto dos itens
     const totalBruto = cartItems.reduce((sum, item) => sum + (item.priceVenda * item.quantity), 0);
 
     const productItems = cartItems.map((product) => {
-      // Calcular desconto proporcional
+      // Garantir que o desconto seja tratado corretamente
+      const descontoGlobal = parseFloat(discountValue) || 0;
+
+      // Calcular desconto proporcional (apenas se for em valor absoluto)
       const itemDiscountValue = discountType === 'R$'
-        ? (parseFloat(discountValue) || 0) * ((product.priceVenda * product.quantity) / totalBruto)
+        ? descontoGlobal * ((product.priceVenda * product.quantity) / totalBruto)
         : 0;
 
       return {
@@ -253,13 +261,14 @@ const registerSaleItems = async (vendaId) => {
         quantidade: parseInt(product.quantity),
         preco_unitario_compra: parseFloat(product.priceCusto).toFixed(2),
         preco_unitario_venda: parseFloat(product.priceVenda).toFixed(2),
-        percentual_desconto: discountType === '%' ? parseFloat(discountValue) : 0,
-        valor_desconto: itemDiscountValue.toFixed(2),
+        percentual_desconto: discountType === '%' ? descontoGlobal : 0, // Tratar como 0 se não houver desconto percentual
+        valor_desconto: parseFloat(itemDiscountValue).toFixed(2), // Garantir formato numérico válido
       };
     });
 
     console.log('Itens de venda a serem enviados:', productItems);
 
+    // Enviar os itens de forma assíncrona
     const productPromises = productItems.map(item =>
       axios.post(`${API_BASE_URL}/cad/itens_venda/`, item)
     );
