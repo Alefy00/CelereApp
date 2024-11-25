@@ -300,7 +300,7 @@ const uploadProductImage = async (productId, empresaId) => {
 
             {/* Controle de Mínimo em Estoque */}
             <View style={styles.controlRow}>
-              <Text style={styles.controlLabel}>Mínimo em estoque:</Text>
+              <Text style={styles.controlLabel}>Mínimo estoque:</Text>
               <View style={styles.controlButtons}>
                 <TouchableOpacity onPress={() => setMinStock(minStock > 0 ? minStock - 1 : 0)} style={styles.controlButton}>
                   <Icon name="remove-outline" size={20} color={COLORS.black} />
@@ -328,7 +328,7 @@ const uploadProductImage = async (productId, empresaId) => {
             placeholderTextColor={COLORS.lightGray}
             value={productName}
             onChangeText={setProductName}
-            maxLength={18}
+            maxLength={30}
           />
           <TextInput
             style={styles.serviceDescriptionInput}

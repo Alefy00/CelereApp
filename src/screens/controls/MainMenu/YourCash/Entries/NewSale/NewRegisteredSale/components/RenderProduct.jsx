@@ -16,7 +16,7 @@ const RenderProduct = memo(({ item, handleQuantityChange, quantities }) => {
   const imageSource = item.image_url // Utiliza o campo `image_url` que foi adicionado aos dados
     ? { uri: item.image_url } // Exibe a imagem do produto/serviço se houver
     : placeholderImage; // Placeholder caso não tenha imagem
-
+    
   const handleIncrement = () => {
     if (!isService && (quantities[item.id] || 0) >= item.qtd_estoque) {
       return; // Limite de estoque atingido
@@ -69,6 +69,5 @@ const RenderProduct = memo(({ item, handleQuantityChange, quantities }) => {
     </View>
   );
 });
-
 
 export default RenderProduct;

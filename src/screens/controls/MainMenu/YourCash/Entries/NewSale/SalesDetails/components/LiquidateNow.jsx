@@ -123,13 +123,19 @@ const handleRegisterSale = async () => {
       Alert.alert('Erro', 'Selecione um método de pagamento.');
       return;
     }
-
+    // Calcular o desconto
+    let discount = 0;
+    if (discountType === '%') {
+      discount = totalPrice * (parseFloat(discountValue) / 100);
+    } else if (discountType === 'R$') {
+      discount = parseFloat(discountValue) || 0;
+    }
     // Registra a venda primeiro
     const vendaData = {
       empresa: empresaId,
       cliente_id: selectedClient ? selectedClient.id : null, // Cliente selecionado
       dt_pagamento: currentDate, // Data de pagamento (data atual)
-      percentual_desconto: parseFloat(discountValue) || 0, // Percentual de desconto
+      percentual_desconto: discountType === '%' ? parseFloat(discountValue) : 0,
       tipo_pagamento_venda: selectedPaymentMethod, // ID da forma de pagamento selecionada
       valor_total_venda: totalValue // Valor bruto a receber
     };
@@ -150,8 +156,8 @@ const handleRegisterSale = async () => {
       venda_id: vendaId, // ID da venda registrada
       produto_id: product.id,
       quantidade: product.amount,
-      percentual_desconto: parseFloat(discountValue) || 0,
-      valor_desconto: discountType === 'R$' ? parseFloat(discountValue) : 0
+      percentual_desconto: discountType === '%' ? parseFloat(discountValue) : 0,
+      valor_desconto: discountType === 'R$' ? discount / products.length : 0,
     }));
 
     // Log dos itens da venda
@@ -463,7 +469,7 @@ const formatCurrency = (value) => {
           <View style={styles.invoiceModalContent}>
             <Text style={styles.invoiceModalTitle}>Escolha uma opção:</Text>
             <TouchableOpacity 
-                style={styles.invoiceOptionButtonRecibo} 
+                style={styles.invoiceOptionButtonRecibo}
                 onPress={() => {
                   handleCloseInvoiceModal(); // Fecha o modal de Invoice
                   navigation.navigate('ReceiptScreen', { saleId, fromLiquidateNow: true }); // Passa o saleId e a flag fromLiquidateNow

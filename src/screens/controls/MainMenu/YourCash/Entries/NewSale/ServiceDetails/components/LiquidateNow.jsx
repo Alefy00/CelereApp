@@ -137,19 +137,32 @@ const handleRegisterSale = async () => {
       return;
     }
 
+    // Calcular o desconto
+    let discountAmount = 0;
+
+    if (discountType === '%' && !isNaN(discount) && discount !== '') {
+      discountAmount = (parseFloat(discount) / 100);
+    } else if (discountType === 'R$' && !isNaN(discount) && discount !== '') {
+      discountAmount = parseFloat(discount || 0);
+    }
+
     // Preparar os itens de serviço
     const serviceItems = services.map(service => {
       const servicePrice = service.preco_venda && parseFloat(service.preco_venda) !== 0
         ? parseFloat(service.preco_venda).toFixed(2)
         : parseFloat(servicePrices[service.id] || 0).toFixed(2);
 
+      const discountValue = discountType === '%' 
+        ? servicePrice * discountAmount 
+        : discountAmount / services.length; // Divide proporcionalmente
+
       return {
         empresa_id: empresaId,
         venda_id: null, // Será atualizado após criar a venda
         servico_id: service.id,
         quantidade: service.amount || 1,
-        percentual_desconto: parseFloat(discount) || 0,
-        valor_desconto: parseFloat(discount) || 0,
+        percentual_desconto: discountType === '%' ? parseFloat(discount) : 0,
+        valor_desconto: discountType === 'R$' ? discountValue : 0,
         preco_unitario_venda: servicePrice,
       };
     });
@@ -160,29 +173,38 @@ const handleRegisterSale = async () => {
     }, 0);
 
     // Preparar os itens de produto
-    const productItems = products.map(product => ({
-      empresa_id: empresaId,
-      venda_id: null, // Será atualizado após criar a venda
-      produto_id: product.id,
-      quantidade: product.amount || 1,
-      percentual_desconto: parseFloat(discount) || 0,
-      valor_desconto: parseFloat(discount) || 0,
-      valor_unitario: parseFloat(product.preco_venda).toFixed(2),
-    }));
+    const productItems = products.map(product => {
+      const productPrice = parseFloat(product.preco_venda).toFixed(2);
+
+      const discountValue = discountType === '%' 
+        ? productPrice * discountAmount 
+        : discountAmount / products.length; // Divide proporcionalmente
+
+      return {
+        empresa_id: empresaId,
+        venda_id: null, // Será atualizado após criar a venda
+        produto_id: product.id,
+        quantidade: product.amount || 1,
+        percentual_desconto: discountType === '%' ? parseFloat(discount) : 0,
+        valor_desconto: discountType === 'R$' ? discountValue : 0,
+        valor_unitario: productPrice,
+      };
+    });
 
     // Calcular o total dos produtos
     const totalProductPrice = productItems.reduce((sum, item) => {
       return sum + (parseFloat(item.valor_unitario) * (item.quantidade || 1));
     }, 0);
 
-    // Calcular o valor total da venda
-    let totalValue = totalProductPrice + totalServicePrice + parseFloat(additionalCosts || 0);
+    // Calcular o valor total da venda sem desconto aplicado
+    const totalValueWithoutDiscount = totalProductPrice + totalServicePrice + parseFloat(additionalCosts || 0);
 
-    // Aplicar descontos
+    // Calcular o valor total com desconto
+    let totalValue = totalValueWithoutDiscount;
     if (discountType === '%' && !isNaN(discount) && discount !== '') {
-      totalValue -= (totalValue * (parseFloat(discount) / 100));
+      totalValue -= (totalValue * discountAmount);
     } else if (discountType === 'R$' && !isNaN(discount) && discount !== '') {
-      totalValue -= parseFloat(discount || 0);
+      totalValue -= discountAmount;
     }
 
     totalValue = parseFloat(totalValue.toFixed(2));
@@ -192,7 +214,7 @@ const handleRegisterSale = async () => {
       empresa: empresaId,
       cliente_id: selectedClient ? selectedClient.id : null,
       dt_pagamento: currentDate,
-      percentual_desconto: parseFloat(discount) || 0,
+      percentual_desconto: discountType === '%' ? parseFloat(discount) : 0,
       tipo_pagamento_venda: selectedPaymentMethod,
       valor_total_venda: totalValue,
       gastos_envolvidos: parseFloat(additionalCosts || 0).toFixed(2),
@@ -218,12 +240,12 @@ const handleRegisterSale = async () => {
     // Aguardar todas as requisições
     await Promise.all([...servicePromises, ...productPromises]);
 
-      // Evento Mixpanel - Captura a finalização da venda
-  mixpanel.track('Venda Finalizada', {
-    valorTotal: liquidValue,
-    metodoPagamento: selectedPaymentMethod,
-    numeroParcelas: installments,
-  });
+    // Evento Mixpanel - Captura a finalização da venda
+    mixpanel.track('Venda Finalizada', {
+      valorTotal: totalValue,
+      metodoPagamento: selectedPaymentMethod,
+      numeroParcelas: installments,
+    });
 
     setIsModalVisible(true);
   } catch (error) {
@@ -231,6 +253,7 @@ const handleRegisterSale = async () => {
     Alert.alert('Erro', 'Ocorreu um erro ao registrar a venda e os itens.');
   }
 };
+
 
   const toggleDropdown = () => {
       setDropdownVisible(!isDropdownVisible);

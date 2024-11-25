@@ -120,83 +120,90 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
 // Função para registrar venda e itens (produtos e serviços)
 const handleRegisterSale = async () => {
   try {
-      const empresaId = await getEmpresaId(); // Obtém o ID da empresa logada
-      if (!empresaId) return;
+    const empresaId = await getEmpresaId(); // Obtém o ID da empresa logada
+    if (!empresaId) return;
 
-      const formattedPaymentDate = moment(paymentDate).tz('America/Sao_Paulo').format('YYYY-MM-DD');
-      const totalValue = totalWithDiscount; // Valor total com desconto
-      const totalCost = totalWithoutDiscount; // Valor total sem desconto
+    const formattedPaymentDate = moment(paymentDate).tz('America/Sao_Paulo').format('YYYY-MM-DD');
 
-      if (!selectedClient || !selectedClient.id) {
-          Alert.alert("Erro", "Selecione um cliente para registrar a venda.");
-          return;
-      }
+    if (!selectedClient || !selectedClient.id) {
+      Alert.alert("Erro", "Selecione um cliente para registrar a venda.");
+      return;
+    }
 
-      // Define o tipo de pagamento como null
-      const paymentMethodId = null; // Ajustando para null conforme solicitado
+    // Calcular o desconto
+    let discountValue = 0;
+    if (discountType === '%') {
+      discountValue = parseFloat(discount) ? (totalWithoutDiscount * (parseFloat(discount) / 100)) : 0;
+    } else if (discountType === 'R$') {
+      discountValue = parseFloat(discount) || 0;
+    }
 
-      // Dados da venda
-      const vendaData = {
-          empresa: empresaId,
-          cliente_id: selectedClient.id, // Cliente selecionado
-          dt_pagamento: null, // Pagamento não imediato
-          dt_prevista_pagamento: formattedPaymentDate, // Data prevista de pagamento
-          valor_total_custo_venda: totalCost, // Valor total sem desconto
-          valor_total_venda: totalValue, // Valor total com desconto
-          percentual_desconto: parseFloat(discount) || 0, // Percentual de desconto (0 se não houver)
-          tipo_pagamento_venda: paymentMethodId, // Null para tipo de pagamento
-          gastos_envolvidos: parseFloat(additionalCosts || 0), // Gastos adicionais (se houver)
+    // Calcular os valores finais
+    const totalValue = totalWithoutDiscount - discountValue; // Valor total com desconto aplicado
+
+    // Preparar os dados da venda
+    const vendaData = {
+      empresa: empresaId,
+      cliente_id: selectedClient.id, // Cliente selecionado
+      dt_pagamento: null, // Pagamento não imediato
+      dt_prevista_pagamento: formattedPaymentDate, // Data prevista de pagamento
+      valor_total_custo_venda: parseFloat(totalWithoutDiscount).toFixed(2), // Valor total sem desconto
+      valor_total_venda: parseFloat(totalValue).toFixed(2), // Valor total com desconto aplicado
+      percentual_desconto: discountType === '%' ? parseFloat(discount) : 0, // Percentual de desconto
+      tipo_pagamento_venda: null, // Tipo de pagamento como null
+      gastos_envolvidos: parseFloat(additionalCosts || 0).toFixed(2), // Gastos adicionais (se houver)
+    };
+
+    console.log('Dados de venda enviados:', vendaData);
+
+    // Envia a venda para a API
+    const vendaResponse = await axios.post(API_VENDAS, vendaData);
+    const vendaId = vendaResponse.data.data.id;
+    console.log('Venda registrada com sucesso, ID da venda:', vendaId);
+
+    // Preparar os itens de serviço
+    const serviceItems = services.map(service => {
+      const servicePrice = service.preco_venda && parseFloat(service.preco_venda) !== 0
+        ? parseFloat(service.preco_venda).toFixed(2)
+        : parseFloat(servicePrices[service.id] || 0).toFixed(2);
+
+      return {
+        empresa_id: empresaId,
+        venda_id: vendaId, // ID da venda registrada
+        servico_id: service.id, // ID do serviço
+        quantidade: service.amount || 1, // Quantidade do serviço
+        preco_unitario_venda: servicePrice, // Define o preço correto
+        percentual_desconto: discountType === '%' ? parseFloat(discount) : 0, // Percentual de desconto
+        valor_desconto: discountType === 'R$' ? (discountValue / services.length) : 0, // Divide proporcionalmente
       };
+    });
 
-      console.log('Dados de venda enviados:', vendaData);
+    // Preparar os itens de produto
+    const productItems = products.map(product => ({
+      empresa_id: empresaId,
+      venda_id: vendaId, // ID da venda registrada
+      produto_id: product.id, // ID do produto
+      quantidade: product.amount || 1, // Quantidade do produto
+      percentual_desconto: discountType === '%' ? parseFloat(discount) : 0, // Percentual de desconto
+      valor_desconto: discountType === 'R$' ? (discountValue / products.length) : 0, // Divide proporcionalmente
+    }));
 
-      // Envia a venda para a API
-      const vendaResponse = await axios.post(API_VENDAS, vendaData);
-      const vendaId = vendaResponse.data.data.id;
-      console.log('Venda registrada com sucesso, ID da venda:', vendaId);
+    // Cria as promessas de registro para serviços e produtos
+    const servicePromises = serviceItems.map(item =>
+      axios.post(API_ITENS_VENDA, item)
+        .then(response => console.log('Item de serviço registrado:', response.data))
+        .catch(error => console.error('Erro ao registrar item de serviço:', error.response ? error.response.data : error))
+    );
 
-      // Agora registra os serviços da venda
-      const serviceItems = services.map(service => {
-          // Verifica se o serviço tem o preço zerado e usa o valor do input
-          const servicePrice = service.preco_venda && parseFloat(service.preco_venda) !== 0
-          ? parseFloat(service.preco_venda).toFixed(2)
-          : parseFloat(servicePrices[service.id] || 0).toFixed(2);
+    const productPromises = productItems.map(item =>
+      axios.post(API_ITENS_VENDA, item)
+        .then(response => console.log('Item de produto registrado:', response.data))
+        .catch(error => console.error('Erro ao registrar item de produto:', error.response ? error.response.data : error))
+    );
 
-          return {
-              empresa_id: empresaId,
-              venda_id: vendaId, // ID da venda registrada
-              servico_id: service.id, // ID do serviço
-              quantidade: service.amount || 1, // Quantidade do serviço
-              preco_unitario_venda: servicePrice, // Define o preço correto
-              percentual_desconto: parseFloat(discount) || 0, // Percentual de desconto sempre como número válido
-              valor_desconto: discountType === 'R$' ? parseFloat(discount) || 0 : 0, // Valor de desconto sempre como número válido
-          };
-      });
+    // Executa todas as promessas de registro de serviços e produtos
+    await Promise.all([...servicePromises, ...productPromises]);
 
-      // Registra os produtos da venda, se houver
-      const productItems = products.map(product => ({
-          empresa_id: empresaId,
-          venda_id: vendaId, // ID da venda registrada
-          produto_id: product.id, // ID do produto
-          quantidade: product.amount || 1, // Quantidade do produto
-          percentual_desconto: parseFloat(discount) || 0, // Percentual de desconto sempre como número válido
-          valor_desconto: discountType === 'R$' ? parseFloat(discount) || 0 : 0, // Valor de desconto sempre como número válido
-      }));
-
-      // Cria as promessas de registro para serviços e produtos
-      const servicePromises = serviceItems.map(item =>
-          axios.post(API_ITENS_VENDA, item)
-              .then(response => console.log('Item de serviço registrado:', response.data))
-              .catch(error => console.error('Erro ao registrar item de serviço:', error.response ? error.response.data : error))
-      );
-      const productPromises = productItems.map(item =>
-          axios.post(API_ITENS_VENDA, item)
-              .then(response => console.log('Item de produto registrado:', response.data))
-              .catch(error => console.error('Erro ao registrar item de produto:', error.response ? error.response.data : error))
-      );
-
-      // Executa todas as promessas de registro de serviços e produtos
-      await Promise.all([...servicePromises, ...productPromises]);
     // Rastrear a conclusão da venda no Mixpanel
     mixpanel.track('Venda Concluída', {
       vendaId,
@@ -205,14 +212,13 @@ const handleRegisterSale = async () => {
       formaPagamento: selectedPayment,
     });
 
-      resetCart(); // Limpa o carrinho após registrar a venda
+    resetCart(); // Limpa o carrinho após registrar a venda
 
-      // Navega para a tela de nova venda ou resumo
-      setIsModalVisible(true);
-
+    // Navega para a tela de nova venda ou resumo
+    setIsModalVisible(true);
   } catch (error) {
-      console.error('Erro ao registrar venda:', error.response ? error.response.data : error);
-      Alert.alert('Erro', 'Ocorreu um erro ao registrar a venda e os itens.');
+    console.error('Erro ao registrar venda:', error.response ? error.response.data : error);
+    Alert.alert('Erro', 'Ocorreu um erro ao registrar a venda e os itens.');
   }
 };
 

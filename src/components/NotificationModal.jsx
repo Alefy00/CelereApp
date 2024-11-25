@@ -9,112 +9,139 @@ import { API_BASE_URL } from '../services/apiConfig';
 
 const NotificationModal = ({ visible, featureName, notify, setNotify, onClose }) => {
     const [phoneNumber, setPhoneNumber] = useState('');
-  
+    const [isNotifiable, setIsNotifiable] = useState(true); // Novo estado para controlar exibição
+
     const GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfGZco1hzzoN53BKyz71eThn4rEc983XjSypf9n5omVOkLM4A/formResponse';
     const PHONE_FIELD_ID = 'entry.1318202489';
     const CELEREPAY_FIELD_ID = 'entry.1435310616';
     const CASH_FLOW_FIELD_ID = 'entry.1716468157';
     const NFE_FIELD_ID = 'entry.93110646';
-  
+
     const fetchPhoneNumber = useCallback(async () => {
-      try {
-        const storedEmpresaId = await AsyncStorage.getItem('empresaId');
-        if (storedEmpresaId) {
-          const response = await fetch(`${API_BASE_URL}/cad/empresas/${storedEmpresaId}`);
-          const data = await response.json();
-          
-          if (data.ddi && data.ddd && data.celular) {
-            const formattedPhoneNumber = `+${data.ddi}${data.ddd}${data.celular}`;
-            setPhoneNumber(formattedPhoneNumber);
-            console.log('Número de telefone recuperado:', formattedPhoneNumber);
-          } else {
-            Alert.alert('Erro', 'Número de telefone não encontrado.');
-          }
-        } else {
-          Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
+        try {
+            const storedEmpresaId = await AsyncStorage.getItem('empresaId');
+            if (storedEmpresaId) {
+                const response = await fetch(`${API_BASE_URL}/cad/empresas/${storedEmpresaId}`);
+                const data = await response.json();
+                if (data.ddi && data.ddd && data.celular) {
+                    const formattedPhoneNumber = `+${data.ddi}${data.ddd}${data.celular}`;
+                    setPhoneNumber(formattedPhoneNumber);
+                    console.log('Número de telefone recuperado:', formattedPhoneNumber);
+                } else {
+                    Alert.alert('Erro', 'Número de telefone não encontrado.');
+                }
+            } else {
+                Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
+            }
+        } catch (error) {
+            console.error('Erro ao obter o número de telefone:', error);
         }
-      } catch (error) {
-        console.error('Erro ao obter o número de telefone:', error);
-      }
     }, []);
-  
+
+    const checkNotifiableStatus = useCallback(async () => {
+        try {
+            const notifiedFeatures = await AsyncStorage.getItem('notifiedFeatures');
+            const notifiedList = notifiedFeatures ? JSON.parse(notifiedFeatures) : [];
+            setIsNotifiable(!notifiedList.includes(featureName)); // Desabilita modal se já notificado
+        } catch (error) {
+            console.error('Erro ao verificar notificações salvas:', error);
+        }
+    }, [featureName]);
+
+    useEffect(() => {
+        if (visible) {
+            fetchPhoneNumber();
+            checkNotifiableStatus();
+        }
+    }, [visible, fetchPhoneNumber, checkNotifiableStatus]);
+
     useEffect(() => {
       if (visible) {
-        fetchPhoneNumber();
+          setNotify(false); // Redefine o checkbox para desmarcado
+          fetchPhoneNumber();
+          checkNotifiableStatus();
       }
-    }, [visible, fetchPhoneNumber]);
+  }, [visible, fetchPhoneNumber, checkNotifiableStatus, setNotify]);
   
+
     const sendNotificationRequest = async () => {
-      // Converte o FormData manualmente para URL encoded
-      const formBody = [];
-      formBody.push(`${encodeURIComponent(PHONE_FIELD_ID)}=${encodeURIComponent(phoneNumber)}`);
-  
-      if (featureName === 'CélerePay') {
-        formBody.push(`${encodeURIComponent(CELEREPAY_FIELD_ID)}=${encodeURIComponent('Sim')}`);
-      } else if (featureName === 'Fluxo de Caixa') {
-        formBody.push(`${encodeURIComponent(CASH_FLOW_FIELD_ID)}=${encodeURIComponent('Sim')}`);
-      } else if (featureName === 'NF-e') {
-        formBody.push(`${encodeURIComponent(NFE_FIELD_ID)}=${encodeURIComponent('Sim')}`);
-      }
-  
-      const formBodyString = formBody.join('&');
-  
-      // Logs para depuração
-      console.log('Enviando dados para o Google Forms:');
-      console.log('URL:', GOOGLE_FORM_ACTION_URL);
-      console.log('Dados do formBodyString:', formBodyString);
-  
-      try {
-        const response = await fetch(GOOGLE_FORM_ACTION_URL, {
-          method: 'POST',
-          body: formBodyString,
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        });
-  
-        if (response.ok) {
-          alert('Solicitação enviada com sucesso!');
-        } else {
-          console.error('Erro ao enviar: ', response.statusText);
-          alert('Erro ao enviar solicitação. Tente novamente.');
+        const formBody = [];
+        formBody.push(`${encodeURIComponent(PHONE_FIELD_ID)}=${encodeURIComponent(phoneNumber)}`);
+
+        if (featureName === 'CélerePay') {
+            formBody.push(`${encodeURIComponent(CELEREPAY_FIELD_ID)}=${encodeURIComponent('Sim')}`);
+        } else if (featureName === 'Fluxo de Caixa') {
+            formBody.push(`${encodeURIComponent(CASH_FLOW_FIELD_ID)}=${encodeURIComponent('Sim')}`);
+        } else if (featureName === 'NF-e') {
+            formBody.push(`${encodeURIComponent(NFE_FIELD_ID)}=${encodeURIComponent('Sim')}`);
         }
-      } catch (error) {
-        console.error('Erro ao enviar solicitação:', error);
-        alert('Erro ao enviar solicitação. Tente novamente.');
-      }
+
+        const formBodyString = formBody.join('&');
+
+        try {
+            const response = await fetch(GOOGLE_FORM_ACTION_URL, {
+                method: 'POST',
+                body: formBodyString,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            });
+
+            if (response.ok) {
+                alert('Solicitação enviada com sucesso!');
+                // Salvar a funcionalidade no AsyncStorage
+                const notifiedFeatures = await AsyncStorage.getItem('notifiedFeatures');
+                const notifiedList = notifiedFeatures ? JSON.parse(notifiedFeatures) : [];
+                notifiedList.push(featureName);
+                await AsyncStorage.setItem('notifiedFeatures', JSON.stringify(notifiedList));
+            } else {
+                console.error('Erro ao enviar: ', response.statusText);
+                alert('Erro ao enviar solicitação. Tente novamente.');
+            }
+        } catch (error) {
+            console.error('Erro ao enviar solicitação:', error);
+            alert('Erro ao enviar solicitação. Tente novamente.');
+        }
+    };
+
+    const handleSubmitNotification = () => {
+        sendNotificationRequest();
+        onClose();
     };
   
-  const handleSubmitNotification = () => {
-    sendNotificationRequest();
-    onClose();
-  };
+    if (!isNotifiable) {
+      onClose();
+      return null;
+  }
+    return (
+        <Modal transparent={true} visible={visible} animationType="slide">
+            <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                        <Ionicons name="close" size={24} color="#000" />
+                    </TouchableOpacity>
 
-  return (
-    <Modal transparent={true} visible={visible} animationType="slide">
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          {/* Botão de fechar no canto superior direito */}
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color="#000" />
-          </TouchableOpacity>
+                    <Text style={styles.modalTitle}>{featureName} estará disponível em breve!</Text>
+                    <Text style={styles.modalText}>Gostaria de ser notificado?</Text>
 
-          <Text style={styles.modalTitle}>{featureName} estará disponível em breve!</Text>
-          <Text style={styles.modalText}>Gostaria de ser notificado?</Text>
+                    <View style={styles.checkboxContainer}>
+                        <CheckBox value={notify} onValueChange={setNotify} tintColors={{ true: '#000', false: '#000' }} />
+                        <Text style={styles.checkboxLabel}>Sim, me notifique</Text>
+                    </View>
 
-          <View style={styles.checkboxContainer}>
-            <CheckBox value={notify} onValueChange={setNotify} tintColors={{ true: '#000', false: '#000' }} />
-            <Text style={styles.checkboxLabel}>Sim, me notifique</Text>
-          </View>
-
-          <TouchableOpacity onPress={handleSubmitNotification} style={styles.sendButton}>
-            <Text style={styles.sendButtonText}>Enviar Notificação</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
+                    <TouchableOpacity
+                        onPress={handleSubmitNotification}
+                        style={[styles.sendButton, !notify && styles.sendButtonDisabled]}
+                        disabled={!notify} // Desabilita o botão se o checkbox não estiver marcado
+                    >
+                        <Text style={styles.sendButtonText}>Enviar Notificação</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+    );
 };
+
 
 const styles = StyleSheet.create({
   modalContainer: {

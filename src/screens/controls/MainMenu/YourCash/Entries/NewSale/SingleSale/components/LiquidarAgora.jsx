@@ -174,121 +174,104 @@ useEffect(() => {
   calculateTotals();
 }, [cartItems, discountValue, discountType, calculateTotals]);
 
-  // Função para registrar a venda
-  const registerSale = async () => {
-    try {
-      const empresaId = await getEmpresaId();
-      const currentDate = moment().tz('America/Sao_Paulo').format('YYYY-MM-DD');
+const registerSale = async () => {
+  try {
+    const empresaId = await getEmpresaId();
+    const currentDate = moment().tz('America/Sao_Paulo').format('YYYY-MM-DD');
 
-      if (!selectedPaymentMethod) {
-        showAlert("Erro", "Selecione uma forma de pagamento.");
-        return;
-      }
+    if (!selectedPaymentMethod) {
+      showAlert("Erro", "Selecione uma forma de pagamento.");
+      return;
+    }
 
-      if (totalLiquido <= 0) {
-        showAlert('Erro', 'O valor total da venda não pode ser zero ou negativo.');
-        return;
-      }
+    if (totalLiquido <= 0) {
+      showAlert('Erro', 'O valor total da venda não pode ser zero ou negativo.');
+      return;
+    }
 
-      const vendaData = {
-        empresa: empresaId,
-        cliente_id: selectedClient ? selectedClient.id : null,
-        dt_pagamento: currentDate,
-        dt_previsao_pagamento: currentDate,
-        valor_total_custo_venda: parseFloat(totalLiquido).toFixed(2),
-        valor_total_venda: parseFloat(totalLiquido).toFixed(2),
-        percentual_desconto: parseFloat(discountValue) || 0,
-        tipo_pagamento_venda: selectedPaymentMethod,
-      };
+    // Montar os dados da venda
+    const vendaData = {
+      empresa: empresaId,
+      cliente_id: selectedClient ? selectedClient.id : null,
+      dt_pagamento: currentDate,
+      dt_previsao_pagamento: currentDate,
+      valor_total_custo_venda: parseFloat(totalLiquido).toFixed(2),
+      valor_total_venda: parseFloat(totalLiquido).toFixed(2),
+      percentual_desconto: discountType === '%' ? parseFloat(discountValue) : 0, // Inclui o desconto global
+      tipo_pagamento_venda: selectedPaymentMethod,
+    };
 
-      console.log('Dados da venda a serem enviados:', vendaData);
+    console.log('Dados da venda a serem enviados:', vendaData);
 
-      const response = await axios.post(`${API_BASE_URL}/cad/vendas/`, vendaData);
-      if (response.data && response.data.status === 'success') {
-        const vendaId = response.data.data.id;
-        console.log('Venda registrada, ID:', vendaId);
+    const response = await axios.post(`${API_BASE_URL}/cad/vendas/`, vendaData);
+    if (response.data && response.data.status === 'success') {
+      const vendaId = response.data.data.id;
+      console.log('Venda registrada, ID:', vendaId);
 
-        // Agora, registrar os itens da venda
-        await registerSaleItems(vendaId);
-        setSaleId(vendaId);
-        setIsModalVisible(true);
-      // Evento Mixpanel - Captura a conclusão da venda
+      // Registrar os itens da venda
+      await registerSaleItems(vendaId);
+      setSaleId(vendaId);
+      setIsModalVisible(true);
+
       mixpanel.track('Venda Concluída', {
         vendaId: vendaId,
         valorTotal: totalLiquido,
         metodoPagamento: selectedPaymentMethod,
       });
-      } else {
-        showAlert('Erro', 'Falha ao registrar a venda. Verifique os dados e tente novamente.');
-        console.error('Erro ao registrar venda:', response.data);
-      }
-      resetFields();
-    } catch (error) {
-      console.error('Erro ao registrar venda:', error.response ? error.response.data : error.message);
-      showAlert('Erro', 'Ocorreu um erro ao registrar a venda. Verifique sua conexão e tente novamente.');
+    } else {
+      showAlert('Erro', 'Falha ao registrar a venda. Verifique os dados e tente novamente.');
+      console.error('Erro ao registrar venda:', response.data);
     }
-  };
+    resetFields();
+  } catch (error) {
+    console.error('Erro ao registrar venda:', error.response ? error.response.data : error.message);
+    showAlert('Erro', 'Ocorreu um erro ao registrar a venda. Verifique sua conexão e tente novamente.');
+  }
+};
 
-  const registerSaleItems = async (vendaId) => {
-    try {
-      const empresaId = await getEmpresaId();
-  
-      if (!cartItems || cartItems.length === 0) {
-        showAlert('Erro', 'Nenhum item encontrado no carrinho.');
-        return;
-      }
-  
-      const productItems = cartItems.map((product, index) => {
-        if (!product.name || !product.quantity || !product.priceVenda || !product.priceCusto) {
-          console.error(`Erro no item ${index + 1}: Dados incompletos ou inválidos`, product);
-          showAlert('Erro', `Dados incompletos no item ${index + 1}`);
-          return null;
-        }
-  
-        // Log do produto que está sendo mapeado para envio
-        console.log('Produto mapeado para envio:', product);
-  
-        return {
-          empresa_id: empresaId,
-          venda_id: vendaId,
-          nome: product.name,
-          quantidade: parseInt(product.quantity),
-          preco_unitario_compra: parseFloat(product.priceCusto).toFixed(2),
-          preco_unitario_venda: parseFloat(product.priceVenda).toFixed(2),
-          valor_desconto: discountType === 'R$' ? parseFloat(discountValue) || 0 : 0,
-          percentual_desconto: discountType === '%' ? parseFloat(discountValue) || 0 : 0,
-        };
-      }).filter(item => item !== null);
-  
-      if (productItems.length === 0) {
-        showAlert('Erro', 'Nenhum item válido para registrar.');
-        return;
-      }
-  
-      // Log dos itens de venda que serão enviados
-      console.log('Itens de venda a serem enviados:', productItems);
-  
-      const productPromises = productItems.map(item => 
-        axios.post(`${API_BASE_URL}/cad/itens_venda/`, item)
-      );
-  
-      const responses = await Promise.all(productPromises);
-  
-      // Log das respostas da API
-      responses.forEach(response => {
-        console.log('Resposta da API para item de venda:', response.data);
-      });
+const registerSaleItems = async (vendaId) => {
+  try {
+    const empresaId = await getEmpresaId();
 
-    } catch (error) {
-      // Log detalhado do erro
-      if (error.response) {
-        console.error('Erro ao registrar itens da venda:', error.response.data);
-      } else {
-        console.error('Erro ao registrar itens da venda:', error.message);
-      }
-      showAlert('Erro', 'Ocorreu um erro ao registrar os itens da venda.');
+    if (!cartItems || cartItems.length === 0) {
+      showAlert('Erro', 'Nenhum item encontrado no carrinho.');
+      return;
     }
-  };
+
+    const totalBruto = cartItems.reduce((sum, item) => sum + (item.priceVenda * item.quantity), 0);
+
+    const productItems = cartItems.map((product) => {
+      // Calcular desconto proporcional
+      const itemDiscountValue = discountType === 'R$'
+        ? (parseFloat(discountValue) || 0) * ((product.priceVenda * product.quantity) / totalBruto)
+        : 0;
+
+      return {
+        empresa_id: empresaId,
+        venda_id: vendaId,
+        nome: product.name,
+        quantidade: parseInt(product.quantity),
+        preco_unitario_compra: parseFloat(product.priceCusto).toFixed(2),
+        preco_unitario_venda: parseFloat(product.priceVenda).toFixed(2),
+        percentual_desconto: discountType === '%' ? parseFloat(discountValue) : 0,
+        valor_desconto: itemDiscountValue.toFixed(2),
+      };
+    });
+
+    console.log('Itens de venda a serem enviados:', productItems);
+
+    const productPromises = productItems.map(item =>
+      axios.post(`${API_BASE_URL}/cad/itens_venda/`, item)
+    );
+
+    await Promise.all(productPromises);
+
+  } catch (error) {
+    console.error('Erro ao registrar itens da venda:', error.response ? error.response.data : error.message);
+    showAlert('Erro', 'Ocorreu um erro ao registrar os itens da venda.');
+  }
+};
+
 
 // Funções auxiliares de UI
 const toggleDropdown = () => {
@@ -435,7 +418,7 @@ return (
           style={styles.input}
           value={item.name}
           onChangeText={(text) => updateCartItem(index, 'name', text)}
-          maxLength={18}
+          maxLength={30}
         />
         <TextInput
           placeholder="Preço de custo (R$)"
@@ -614,6 +597,7 @@ return (
           </TouchableOpacity>
           <TouchableOpacity style={styles.invoiceOptionButtonNotaFiscal} onPress={() => console.log("Emitir Nota Fiscal")} disabled={true}>
             <Text style={styles.invoiceOptionTextNotaFiscal}>Nota Fiscal</Text>
+            <Text style={styles.invoiceOptionTextNotaFiscal}>(Em Breve)</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.closeButton} onPress={handleCloseInvoiceModal}>
             <Icon name="close" size={25} color={COLORS.black} />

@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: width * 0.05,
+    marginBottom: width * 0.04
   },
   input: {
     flex: 1,
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     color: COLORS.black,
   },
   marginLabel: {
-    marginHorizontal: width * 0.03,
+    marginHorizontal: width * 0.02,
     fontSize: width * 0.04,
     color: COLORS.black,
   },
@@ -168,16 +168,16 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   marginInput: {
-    width: width * 0.05,
+    width: width * 0.13,
     height: width * 0.1,
     textAlign: 'center',
     borderRadius: 4,
-    marginHorizontal: width * 0.02,
+    marginHorizontal: width * 0.01,
   },
   marginButton: {
     backgroundColor: COLORS.primary,
     borderRadius: 4,
-    padding: width * 0.015,
+    padding: width * 0.01,
   },
 });
 

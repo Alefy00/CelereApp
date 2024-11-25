@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   },
   modalPrimaryButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: height * 0.015,
+    paddingVertical: height * 0.03,
     paddingHorizontal: width * 0.05,
     borderRadius: 5,
     flexDirection: 'row',
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: height * 0.015,
+    paddingVertical: height * 0.03,
   },
   modalBackButtonText: {
     color: COLORS.black,

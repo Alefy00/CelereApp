@@ -42,54 +42,57 @@ const StockInfo = ({ navigation }) => {
       return null;
     }
   };
-
   const fetchProductImage = async (empresaId, produtoId) => {
     try {
-      console.log(`Fetching image for empresaId: ${empresaId}, produtoId: ${produtoId}`);
       const response = await axios.get(`${IMAGE_API}?empresa=${empresaId}&produto=${produtoId}`);
-      if (response.data && response.data.status === 'success') {
-        const imagePath = response.data.data.imagem;
-        return imagePath.startsWith('/media') ? `${API_BASE_URL}${imagePath}` : imagePath;
-      } else {
-        console.error('Erro ao buscar imagem do produto:', response.data.message);
-        return null;
+      if (response.data?.status === 'success') {
+        let imagePath = response.data.data.imagem;
+  
+        // Corrigir duplicações no caminho retornado pelo backend
+        imagePath = imagePath.replace(/\/upload\/media\/imagem\/upload\/media\//g, '/media/');
+  
+        return `${API_BASE_URL}${imagePath}`;
       }
     } catch (error) {
-      console.error('Erro ao buscar imagem do produto:', error.message);
-      return null;
+      console.error(`Erro ao buscar imagem para o produto ${produtoId}:`, error.message);
     }
+    return null; // Retorna null em caso de erro
   };
+  
+  
 
   // Memoize fetchProductsWithImages using useCallback
   const fetchProductsWithImages = useCallback(async () => {
     try {
       const empresaId = await getEmpresaId();
-      if (empresaId) {
-        const response = await axios.get(`${PRODUCTS_API}?empresa=${empresaId}`);
-        if (response.data && response.data.status === 200) {
-          const productsData = response.data.data;
-
-          const productsWithImages = await Promise.all(productsData.map(async (product) => {
+      if (!empresaId) return;
+  
+      const response = await axios.get(`${PRODUCTS_API}?empresa=${empresaId}`);
+      if (response.data?.status === 200) {
+        const productsData = response.data.data;
+  
+        const productsWithImages = await Promise.all(
+          productsData.map(async (product) => {
             const imagePath = await fetchProductImage(empresaId, product.id);
             return {
               ...product,
-              image_url: imagePath ? `${API_BASE_URL}${imagePath}` : null,
+              image_url: imagePath ? { uri: imagePath } : require('../../../../../assets/images/png/placeholder.png'),
             };
-          }));
-
-          setProducts(productsWithImages);
-          setFilteredProducts(productsWithImages);
-
-          const totalCustoCalc = productsWithImages.reduce((sum, product) => sum + parseFloat(product.custo), 0);
-          const totalVendaCalc = productsWithImages.reduce((sum, product) => sum + (parseFloat(product.preco_venda) * product.qtd_estoque), 0);
-          const totalItemsCalc = productsWithImages.reduce((sum, product) => sum + product.qtd_estoque, 0);
-
-          setTotalCusto(totalCustoCalc.toFixed(2));
-          setTotalVenda(totalVendaCalc.toFixed(2));
-          setTotalItems(totalItemsCalc);
-        } else {
-          Alert.alert('Erro', 'Falha ao recuperar produtos.');
-        }
+          })
+        );
+  
+        setProducts(productsWithImages);
+        setFilteredProducts(productsWithImages);
+  
+        const totalCustoCalc = productsWithImages.reduce((sum, product) => sum + parseFloat(product.custo), 0);
+        const totalVendaCalc = productsWithImages.reduce((sum, product) => sum + parseFloat(product.preco_venda) * product.qtd_estoque, 0);
+        const totalItemsCalc = productsWithImages.reduce((sum, product) => sum + product.qtd_estoque, 0);
+  
+        setTotalCusto(totalCustoCalc.toFixed(2));
+        setTotalVenda(totalVendaCalc.toFixed(2));
+        setTotalItems(totalItemsCalc);
+      } else {
+        Alert.alert('Erro', 'Falha ao recuperar produtos.');
       }
     } catch (error) {
       console.error('Erro ao buscar produtos:', error.message);
@@ -98,6 +101,7 @@ const StockInfo = ({ navigation }) => {
       setLoading(false);
     }
   }, []);
+  
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -177,14 +181,19 @@ const StockInfo = ({ navigation }) => {
     </TouchableOpacity>
   );
 
-  const renderProductItem = ({ item }) => (
-    <TouchableOpacity onPress={() => handleProductSelect(item)}>
-      <View style={styles.productItem}>
-        <Image
-          source={item.image_url ? { uri: item.image_url } : require('../../../../../assets/images/png/placeholder.png')}
-          style={styles.productImage}
-          onError={() => console.log('Erro ao carregar a imagem do produto', item.nome)}
-        />
+        const renderProductItem = ({ item }) => (
+          <TouchableOpacity onPress={() => handleProductSelect(item)}>
+            <View style={styles.productItem}>
+            <Image
+        source={item.image_url} // Configurado no fetchProductsWithImages
+        style={styles.productImage}
+        onError={(error) => {
+          console.error(`Erro ao carregar imagem do produto ${item.nome}:`, error.nativeEvent.error);
+          item.image_url = require('../../../../../assets/images/png/placeholder.png'); // Fallback para placeholder
+          setFilteredProducts([...filteredProducts]); // Atualiza a lista para refletir o fallback
+        }}
+      />
+
         <View style={styles.productInfo}>
           <View style={{ flexDirection: 'column' }}>
             <Text style={styles.productTitle}>{item.nome}</Text>
