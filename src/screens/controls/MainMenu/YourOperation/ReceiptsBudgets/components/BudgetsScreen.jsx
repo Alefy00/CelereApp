@@ -11,6 +11,7 @@ import styles from '../../../YourCash/Entries/SettleCredit/components/stylesRece
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BarTop2 from '../../../../../../components/BarTop2';
 import { API_BASE_URL } from '../../../../../../services/apiConfig';
+import { useFocusEffect } from '@react-navigation/native';
 
 const BudgetsScreen = ({ navigation, route }) => {
     const { saleId } = route.params;  // ID do orçamento passado para a tela
@@ -92,41 +93,78 @@ const BudgetsScreen = ({ navigation, route }) => {
         fetchReceipt();
     }, [fetchReceipt]);
 
+    useFocusEffect(
+        useCallback(() => {
+          // Quando entra na tela, não há necessidade de ações
+      
+          // Quando sai da tela
+          return async () => {
+            if (pdfPath) {
+              const fileExists = await RNFetchBlob.fs.exists(pdfPath);
+              if (fileExists) {
+                try {
+                  await RNFetchBlob.fs.unlink(pdfPath);
+                  console.log('Arquivo PDF temporário excluído ao sair da tela');
+                } catch (err) {
+                  console.error('Erro ao excluir o arquivo PDF temporário:', err);
+                }
+              }
+            }
+          };
+        }, [pdfPath])
+      );
+      
     const handleShare = async () => {
         if (!pdfPath) {
-            showAlert('Erro', 'O orçamento ainda não está pronto para compartilhar.');
-            return;
+          showAlert('Erro', 'O orçamento ainda não está pronto para compartilhar.');
+          return;
         }
-    
+      
         try {
-            // Verifica se o arquivo PDF realmente existe no caminho especificado
-            const fileExists = await RNFetchBlob.fs.exists(pdfPath);
-            if (!fileExists) {
-                showAlert('Erro', 'O arquivo PDF não foi encontrado.');
-                return;
-            }
-    
-            const shareOptions = {
-                title: 'Compartilhar Orçamento',
-                url: `file://${pdfPath}`,
-                failOnCancel: false,  // Para evitar erros ao cancelar o compartilhamento
-                type: 'application/pdf',
-            };
-    
-            await Share.open(shareOptions);
+          const fileExists = await RNFetchBlob.fs.exists(pdfPath);
+          if (!fileExists) {
+            showAlert('Erro', 'O arquivo PDF não foi encontrado.');
+            return;
+          }
+      
+          const shareOptions = {
+            title: 'Compartilhar Orçamento',
+            url: `file://${pdfPath}`,
+            failOnCancel: false, // Ignora cancelamento como erro
+            type: 'application/pdf',
+          };
+      
+          await Share.open(shareOptions);
+          console.log('PDF compartilhado com sucesso.');
         } catch (error) {
-            // Trata o erro caso o compartilhamento falhe, mas ignora o erro quando o usuário cancela
-            if (error.message !== 'User did not share') {
-                console.error('Erro ao compartilhar o PDF:', error);
-                showAlert('Erro', 'Não foi possível compartilhar o PDF. Verifique se o aplicativo de destino permite o compartilhamento de arquivos PDF.');
-            }
+          if (error.message !== 'User did not share') {
+            console.error('Erro ao compartilhar o PDF:', error);
+            showAlert(
+              'Erro',
+              'Não foi possível compartilhar o PDF. Verifique se o aplicativo de destino permite o compartilhamento de arquivos PDF.'
+            );
+          }
         }
-    };
-    
+      };
+      
+      
 
     // Função para voltar para a tela anterior
-    const handleBack = () => {
-        navigation.navigate('NewBudgets', { clearCart: true });  // Limpa o carrinho ao voltar
+    const handleBack = async () => {
+      // Excluímos o arquivo temporário ao voltar, caso ele ainda exista
+      if (pdfPath) {
+        const fileExists = await RNFetchBlob.fs.exists(pdfPath);
+        if (fileExists) {
+          await RNFetchBlob.fs.unlink(pdfPath);
+          console.log('Arquivo PDF temporário excluído ao voltar');
+        }
+      }
+      // Verifica se a navegação veio de 'Budget' ou usa o comportamento padrão
+      if (route.params?.from === 'Budget') {
+        navigation.navigate('Budget'); // Voltar para a tela Budget
+      } else {
+        navigation.navigate('NewBudgets', { clearCart: true }); // Limpa o carrinho e volta para NewBudgets
+      }
     };
 
     return (
@@ -154,9 +192,6 @@ const BudgetsScreen = ({ navigation, route }) => {
                     }}
                     onLoadComplete={() => {
                         console.log('PDF carregado com sucesso');
-                        RNFetchBlob.fs.unlink(pdfPath)
-                            .then(() => console.log('Arquivo PDF temporário excluído'))
-                            .catch((err) => console.error('Erro ao excluir o arquivo temporário:', err));
                     }}
                 />
             ) : null}

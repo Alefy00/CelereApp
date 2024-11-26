@@ -39,7 +39,6 @@ const Budget = ({ navigation }) => {
       if (isNaN(empresaId)) {
         throw new Error('ID da empresa inválido.');
       }
-      console.log('Empresa ID:', empresaId); // Log para verificar o ID da empresa
       return empresaId;
     } catch (error) {
       console.error('Erro ao buscar o ID da empresa:', error);
@@ -248,6 +247,17 @@ const Budget = ({ navigation }) => {
                  <Text style={styles.modalText}>{selectedBudget.clientName}</Text>
                  <Text style={styles.modalText}>R$ {parseFloat(selectedBudget.valor_total_venda).toFixed(2)}</Text>
                 </View>
+                <TouchableOpacity
+                  style={styles.receiptButton} // Adicione um estilo apropriado
+                  onPress={() => {
+                    setModalVisible(false); // Fecha o modal
+                    navigation.navigate('BudgetsScreen', { saleId: selectedBudget.id, from: 'Budget' }); // Envia o ID do orçamento
+                  }}
+                >
+                  <Icon name="document-text-outline" size={20} color={COLORS.black} />
+                  <Text style={styles.receiptButtonText}>Gerar Recibo</Text>
+                </TouchableOpacity>
+
                 <TouchableOpacity style={styles.deleteButton} onPress={() => deleteBudget(selectedBudget.id)}>
                 <Icon name="trash-outline" size={20} color={COLORS.black} />
                   <Text style={styles.deleteButtonText}>Excluir</Text>

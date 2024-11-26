@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
     fontSize: width * 0.055,
     fontWeight: 'bold',
     color: COLORS.black,
-    marginTop: height * 0.04,
+    marginTop: height * 0.05,
     paddingHorizontal: width * 0.04,
   },
   subtitle: {

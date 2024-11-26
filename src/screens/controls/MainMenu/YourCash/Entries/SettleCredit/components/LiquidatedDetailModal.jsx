@@ -130,7 +130,7 @@ const calculateTotalAmount = useCallback(() => {
 
                   <TouchableOpacity style={styles.cancelButtonModal} onPress={openWarningModal}>
                       <Icon name="close-circle-outline" size={24} color="black" />
-                      <Text style={styles.buttonText}>estornar venda</Text>
+                      <Text style={styles.buttonText}>Estornar venda</Text>
                   </TouchableOpacity>
 
 

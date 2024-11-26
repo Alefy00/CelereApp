@@ -98,20 +98,31 @@ const arrayBufferToBase64 = (buffer) => {
             }
         }
     };
-    const handleBack = () => {
-        if (fromLiquidateNow) {
-          // Se veio de LiquidateNow, limpa o carrinho e navega para NewRegisteredSale
-          navigation.navigate('NewRegisteredSale', { clearCart: true });
-        } else if (fromLiquidateAgora) {
-          // Se veio de LiquidateAgora, navega para SingleSale
-          navigation.navigate('SingleSale');
-        } else if(fromLiquidateNowService){
-            navigation.navigate('NewRegisteredSale', { clearCart: true });
-        }else {
-          // Volta para a tela anterior normalmente
-          navigation.goBack();
+    const handleBack = async () => {
+        if (pdfPath) {
+            const fileExists = await RNFetchBlob.fs.exists(pdfPath);
+            if (fileExists) {
+                try {
+                    await RNFetchBlob.fs.unlink(pdfPath);
+                    console.log('Arquivo PDF temporário excluído ao voltar');
+                } catch (err) {
+                    console.error('Erro ao excluir o arquivo PDF temporário:', err);
+                }
+            }
         }
-      };
+    
+        // Comportamento baseado no parâmetro de navegação
+        if (fromLiquidateNow) {
+            navigation.navigate('NewRegisteredSale', { clearCart: true });
+        } else if (fromLiquidateAgora) {
+            navigation.navigate('SingleSale');
+        } else if (fromLiquidateNowService) {
+            navigation.navigate('NewRegisteredSale', { clearCart: true });
+        } else {
+            navigation.goBack();
+        }
+    };
+    
 
     return (
         <View style={styles.container}>
@@ -138,9 +149,6 @@ const arrayBufferToBase64 = (buffer) => {
                     }}
                     onLoadComplete={() => {
                         console.log('PDF carregado com sucesso');
-                        RNFetchBlob.fs.unlink(pdfPath)
-                            .then(() => console.log('Arquivo PDF temporário excluído'))
-                            .catch((err) => console.error('Erro ao excluir o arquivo temporário:', err));
                     }}
                 />
             ) : null}

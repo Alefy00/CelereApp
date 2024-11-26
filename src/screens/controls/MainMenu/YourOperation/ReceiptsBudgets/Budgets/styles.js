@@ -133,6 +133,21 @@ const styles = StyleSheet.create({
         color: COLORS.black,
         
       },
+      receiptButton: {
+        width: '100%',
+        backgroundColor: COLORS.primary, // Amarelo para o botão de excluir
+        paddingVertical: 25,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginBottom: 10,
+        flexDirection: 'row',
+        justifyContent: 'center',
+      },
+      receiptButtonText: {
+        color: COLORS.black,
+        marginLeft: 5,
+        fontSize: 16,
+      },
       deleteButton: {
         width: '100%',
         backgroundColor: COLORS.primary, // Amarelo para o botão de excluir
