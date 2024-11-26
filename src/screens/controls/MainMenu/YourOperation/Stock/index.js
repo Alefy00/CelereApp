@@ -42,16 +42,13 @@ const StockInfo = ({ navigation }) => {
       return null;
     }
   };
+  
   const fetchProductImage = async (empresaId, produtoId) => {
     try {
       const response = await axios.get(`${IMAGE_API}?empresa=${empresaId}&produto=${produtoId}`);
       if (response.data?.status === 'success') {
-        let imagePath = response.data.data.imagem;
-  
-        // Corrigir duplicações no caminho retornado pelo backend
-        imagePath = imagePath.replace(/\/upload\/media\/imagem\/upload\/media\//g, '/media/');
-  
-        return `${API_BASE_URL}${imagePath}`;
+        const imagePath = response.data.data.imagem; // URL completa retornada pelo backend
+        return imagePath; // Retorna a URL diretamente
       }
     } catch (error) {
       console.error(`Erro ao buscar imagem para o produto ${produtoId}:`, error.message);
@@ -59,8 +56,6 @@ const StockInfo = ({ navigation }) => {
     return null; // Retorna null em caso de erro
   };
   
-  
-
   // Memoize fetchProductsWithImages using useCallback
   const fetchProductsWithImages = useCallback(async () => {
     try {
@@ -76,7 +71,9 @@ const StockInfo = ({ navigation }) => {
             const imagePath = await fetchProductImage(empresaId, product.id);
             return {
               ...product,
-              image_url: imagePath ? { uri: imagePath } : require('../../../../../assets/images/png/placeholder.png'),
+              image_url: imagePath
+                ? { uri: imagePath } // Usa a URL retornada diretamente
+                : require('../../../../../assets/images/png/placeholder.png'), // Placeholder para imagens ausentes
             };
           })
         );
@@ -85,7 +82,10 @@ const StockInfo = ({ navigation }) => {
         setFilteredProducts(productsWithImages);
   
         const totalCustoCalc = productsWithImages.reduce((sum, product) => sum + parseFloat(product.custo), 0);
-        const totalVendaCalc = productsWithImages.reduce((sum, product) => sum + parseFloat(product.preco_venda) * product.qtd_estoque, 0);
+        const totalVendaCalc = productsWithImages.reduce(
+          (sum, product) => sum + parseFloat(product.preco_venda) * product.qtd_estoque,
+          0
+        );
         const totalItemsCalc = productsWithImages.reduce((sum, product) => sum + product.qtd_estoque, 0);
   
         setTotalCusto(totalCustoCalc.toFixed(2));
@@ -101,6 +101,7 @@ const StockInfo = ({ navigation }) => {
       setLoading(false);
     }
   }, []);
+  
   
 
   const fetchCategories = useCallback(async () => {

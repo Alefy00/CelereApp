@@ -38,58 +38,52 @@ const RegisteredServices = ({ navigation }) => {
     }
   };
 
-  const fetchServiceImage = async (empresaId, serviceId) => {
-    try {
-      const response = await axios.get(
-        `${API_BASE_URL}/mnt/imagensservico/getImagemServ/?empresa=${empresaId}&servico=${serviceId}`
-      );
-      if (response.data && response.data.status === 'success') {
-        return `${API_BASE_URL}${response.data.data.imagem}`;  // URL completa da imagem
-      } else {
-        return null;  // Retorna null se não houver imagem
-      }
-    } catch (error) {
-      console.error('Erro ao buscar imagem do serviço:', error);
-      return null;  // Retorna null em caso de erro
-    }
-  };
-  
   const fetchServices = useCallback(async () => {
     try {
-      setLoading(true);  // Inicia o loading
-      const empresaId = await getEmpresaId();
+      setLoading(true); // Inicia o loading
+      const empresaId = await getEmpresaId(); // Recupera o ID da empresa logada
       if (empresaId) {
-        let query = `?page=1&page_size=100`;
+        // Adiciona o filtro para serviços da empresa
+        const query = `?empresa=${empresaId}&page=1&page_size=100`;
   
-        // Filtro por nome de serviço
-        if (nome) {
-          query += `&search=${nome}`;
-        }
-  
+        // Faz a requisição para buscar os serviços
         const response = await axios.get(`${REGISTERED_SERVICES_API}${query}`);
-  
+        
         if (response.data && response.data.results && response.data.results.data) {
-          const filteredServices = response.data.results.data.filter(service => service.empresa.id === empresaId);
+          // Filtra apenas os serviços da empresa logada
+          const filteredServices = response.data.results.data.filter(
+            (service) => service.empresa.id === empresaId
+          );
   
-          // Agora, para cada serviço, busca a imagem correspondente
-          const servicesWithImages = await Promise.all(filteredServices.map(async (service) => {
-            const imageUrl = await fetchServiceImage(empresaId, service.id);
-            return { ...service, image_url: imageUrl };  // Adiciona o campo image_url com a imagem recuperada
-          }));
+          // Adiciona as imagens aos serviços filtrados
+          const servicesWithImages = await Promise.all(
+            filteredServices.map(async (service) => {
+              try {
+                const imageResponse = await axios.get(
+                  `${API_BASE_URL}/mnt/imagensservico/getImagemServico/?empresa=${empresaId}&servico=${service.id}`
+                );
+                const imageUrl = 
+                  imageResponse.data?.data?.imagem ?? null; // Adiciona imagem se existir
+                return { ...service, image_url: imageUrl }; // Retorna serviço com imagem
+              } catch (error) {
+                console.warn(`Erro ao carregar imagem para o serviço ${service.id}`, error);
+                return { ...service, image_url: null }; // Fallback para imagem nula
+              }
+            })
+          );
   
-          setServices(servicesWithImages);  // Popula a lista de serviços com as imagens
+          setServices(servicesWithImages); // Atualiza a lista de serviços
         } else {
-          Alert.alert('Erro', 'Falha ao recuperar os serviços.');
+          Alert.alert('Erro', 'Não foi possível recuperar os serviços.');
         }
       }
     } catch (error) {
       console.error('Erro ao buscar serviços:', error);
       Alert.alert('Erro', 'Ocorreu um erro ao buscar os serviços.');
     } finally {
-      setLoading(false);  // Finaliza o loading
+      setLoading(false); // Finaliza o loading
     }
-  }, [nome]);
-  
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -159,10 +153,11 @@ const RegisteredServices = ({ navigation }) => {
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
               <View style={styles.serviceCard}>
-                <Image
-                  source={item.image_url ? { uri: item.image_url } : require('../../../../../../assets/images/png/placeholder.png')} // Imagem padrão se não houver
-                  style={styles.serviceImage}
-                />
+              <Image
+                source={item.image_url ? { uri: item.image_url } : require('../../../../../../assets/images/png/placeholder.png')}
+                style={styles.serviceImage}
+              />
+
                 <View style={styles.serviceInfo}>
                   <Text style={styles.serviceName}>{item.nome}</Text>
                   {/* Mudança para exibir unidade_medida */}

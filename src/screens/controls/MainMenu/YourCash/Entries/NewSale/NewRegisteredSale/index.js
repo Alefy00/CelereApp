@@ -49,85 +49,80 @@ const NewRegisteredSale = ({ navigation, route }) => {
     }
   }, []);
   
-  const fetchProductImage = async (empresaId, productId) => {
+  const fetchImage = async (empresaId, itemId, type) => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/mnt/imagensproduto/getImagemProd/?empresa=${empresaId}&produto=${productId}`
-      );
+      const url = type === 'product'
+        ? `${API_BASE_URL}/mnt/imagensproduto/getImagemProd/?empresa=${empresaId}&produto=${itemId}`
+        : `${API_BASE_URL}/mnt/imagensservico/getImagemServico/?empresa=${empresaId}&servico=${itemId}`;
+        
+      const response = await axios.get(url);
+      
       if (response.data && response.data.status === 'success') {
-        return `${API_BASE_URL}${response.data.data.imagem}`;  // URL completa da imagem
+        return response.data.data.imagem; // URL da imagem
       } else {
-        return null;  // Retorna null se não houver imagem
+        return null; // Retorna null se não houver imagem
       }
     } catch (error) {
-      return null;  // Retorna null em caso de erro
+      return null; // Fallback para erro
     }
   };
 
-  const fetchServiceImage = async (empresaId, serviceId) => {
-    try {
-      const response = await axios.get(
-        `${API_BASE_URL}/mnt/imagensservico/getImagemServ/?empresa=${empresaId}&servico=${serviceId}`
-      );
-      if (response.data && response.data.status === 'success') {
-        return `${API_BASE_URL}${response.data.data.imagem}`;  // URL completa da imagem
-      } else {
-        return null;  // Retorna null se não houver imagem
-      }
-    } catch (error) {
-      return null;  // Retorna null em caso de erro
-    }
-  };
-
-  // Função de busca de produtos e serviços
   const fetchProductsAndServices = useCallback(async () => {
     setLoading(true);
     try {
       const empresaId = await getEmpresaId();
       if (empresaId) {
-        const productResponse = await axios.get(`${PRODUCTS_API}?page_size=100&empresa=${empresaId}`);
-        const fetchedProducts = productResponse.data.data;
-
-        const serviceResponse = await axios.get(`${SERVICES_API}?page_size=100&empresa_id=${empresaId}`);
-        const fetchedServices = serviceResponse.data.results.data;
-
-        const filteredServices = fetchedServices.filter(service => service.empresa.id === empresaId);
-
-        const productsWithImages = await Promise.all(fetchedProducts.map(async (product) => {
-          const imageUrl = await fetchProductImage(empresaId, product.id);
-          return { ...product, image_url: imageUrl };
-        }));
-
-        const servicesWithImages = await Promise.all(filteredServices.map(async (service) => {
-          const imageUrl = await fetchServiceImage(empresaId, service.id);
-          return {
-            ...service,
-            categoria: 'Serviços',
-            qtd_estoque: null,
-            image_url: imageUrl,
-          };
-        }));
-
-        setProducts([...productsWithImages, ...servicesWithImages]);
-        setFilteredProducts([...productsWithImages, ...servicesWithImages]);
-
-        // Evento Mixpanel para rastrear a busca de produtos e serviços
+        // Requisição para produtos
+        const productResponse = await axios.get(`${PRODUCTS_API}?empresa=${empresaId}&page_size=100`);
+        const fetchedProducts = productResponse.data?.data || [];
+  
+        // Requisição para serviços
+        const serviceResponse = await axios.get(`${SERVICES_API}?empresa_id=${empresaId}&page_size=100`);
+        const fetchedServices = serviceResponse.data?.results?.data || [];
+  
+        // Filtro para garantir que apenas itens da empresa logada sejam considerados
+        const filteredServices = fetchedServices.filter((service) => service.empresa.id === empresaId);
+  
+        // Adiciona imagens aos produtos e serviços
+        const productsWithImages = await Promise.all(
+          fetchedProducts.map(async (product) => {
+            const imageUrl = await fetchImage(empresaId, product.id, 'product');
+            return { ...product, image_url: imageUrl };
+          })
+        );
+  
+        const servicesWithImages = await Promise.all(
+          filteredServices.map(async (service) => {
+            const imageUrl = await fetchImage(empresaId, service.id, 'service');
+            return {
+              ...service,
+              categoria: 'Serviços',
+              qtd_estoque: null,
+              image_url: imageUrl,
+            };
+          })
+        );
+  
+        // Combina produtos e serviços na lista principal
+        const allItems = [...productsWithImages, ...servicesWithImages];
+        setProducts(allItems);
+        setFilteredProducts(allItems);
+  
+        // Evento Mixpanel para rastrear carregamento
         mixpanel.track('Produtos e Serviços Carregados', {
           totalProdutos: productsWithImages.length,
           totalServicos: servicesWithImages.length,
-          empresaId: empresaId,
+          empresaId,
         });
       }
     } catch (error) {
       showAlert("Erro", "Erro ao conectar à API.");
-      // Evento Mixpanel para erro
       mixpanel.track('Erro ao carregar Produtos/Serviços', { erro: error.message });
     } finally {
       setLoading(false);
     }
   }, [getEmpresaId]);
-
-
+  
   // Recarregar produtos e serviços ao voltar para a tela
   useFocusEffect(
     useCallback(() => {
