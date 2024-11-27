@@ -145,6 +145,12 @@ const styles = StyleSheet.create({
     fontSize: width * 0.035,
     color: COLORS.green,
   },
+  containerRemove:{
+    paddingHorizontal: width * 0.001,
+  },
+  removerIcon:{
+    marginLeft: width * 0.15,
+  },
   productTotal: {
     fontSize: width * 0.04,
     fontWeight: 'bold',

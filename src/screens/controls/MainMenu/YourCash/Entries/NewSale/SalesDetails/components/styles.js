@@ -145,6 +145,12 @@ const styles = StyleSheet.create({
   productPrice: {
     color: COLORS.black,
   },
+  containerRemove:{
+    paddingHorizontal: width * 0.001,
+  },
+  removerIcon:{
+    marginLeft: width * 0.15,
+  },
   productAmount: {
     fontSize: width * 0.035,
     color: COLORS.green,

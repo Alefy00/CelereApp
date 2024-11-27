@@ -16,8 +16,6 @@ import moment from 'moment-timezone';
 
 const LiquidateNow = ({ navigation, route, clients }) => {
   const { services: receivedServices = [], products: receivedProducts = [], totalPrice: initialTotalPrice } = route.params;
-
-  // Adicionando useState para controlar produtos e serviços
   const [services, setServices] = useState([]);
   const [products, setProducts] = useState([]);
   const [discountType, setDiscountType] = useState('%');
@@ -137,13 +135,15 @@ const handleRegisterSale = async () => {
       return;
     }
 
-    // Calcular o desconto
-    let discountAmount = 0;
+    // Garantir que o desconto seja um número válido
+    const discountValue = parseFloat(discount) || 0;
 
-    if (discountType === '%' && !isNaN(discount) && discount !== '') {
-      discountAmount = (parseFloat(discount) / 100);
-    } else if (discountType === 'R$' && !isNaN(discount) && discount !== '') {
-      discountAmount = parseFloat(discount || 0);
+    // Calcular o valor do desconto
+    let discountAmount = 0;
+    if (discountType === '%') {
+      discountAmount = discountValue / 100; // Percentual
+    } else if (discountType === 'R$') {
+      discountAmount = discountValue; // Valor fixo
     }
 
     // Preparar os itens de serviço
@@ -152,8 +152,8 @@ const handleRegisterSale = async () => {
         ? parseFloat(service.preco_venda).toFixed(2)
         : parseFloat(servicePrices[service.id] || 0).toFixed(2);
 
-      const discountValue = discountType === '%' 
-        ? servicePrice * discountAmount 
+      const serviceDiscount = discountType === '%'
+        ? servicePrice * discountAmount
         : discountAmount / services.length; // Divide proporcionalmente
 
       return {
@@ -161,8 +161,8 @@ const handleRegisterSale = async () => {
         venda_id: null, // Será atualizado após criar a venda
         servico_id: service.id,
         quantidade: service.amount || 1,
-        percentual_desconto: discountType === '%' ? parseFloat(discount) : 0,
-        valor_desconto: discountType === 'R$' ? discountValue : 0,
+        percentual_desconto: discountType === '%' ? discountValue : 0,
+        valor_desconto: discountType === 'R$' ? serviceDiscount : 0,
         preco_unitario_venda: servicePrice,
       };
     });
@@ -176,8 +176,8 @@ const handleRegisterSale = async () => {
     const productItems = products.map(product => {
       const productPrice = parseFloat(product.preco_venda).toFixed(2);
 
-      const discountValue = discountType === '%' 
-        ? productPrice * discountAmount 
+      const productDiscount = discountType === '%'
+        ? productPrice * discountAmount
         : discountAmount / products.length; // Divide proporcionalmente
 
       return {
@@ -185,8 +185,8 @@ const handleRegisterSale = async () => {
         venda_id: null, // Será atualizado após criar a venda
         produto_id: product.id,
         quantidade: product.amount || 1,
-        percentual_desconto: discountType === '%' ? parseFloat(discount) : 0,
-        valor_desconto: discountType === 'R$' ? discountValue : 0,
+        percentual_desconto: discountType === '%' ? discountValue : 0,
+        valor_desconto: discountType === 'R$' ? productDiscount : 0,
         valor_unitario: productPrice,
       };
     });
@@ -201,9 +201,9 @@ const handleRegisterSale = async () => {
 
     // Calcular o valor total com desconto
     let totalValue = totalValueWithoutDiscount;
-    if (discountType === '%' && !isNaN(discount) && discount !== '') {
-      totalValue -= (totalValue * discountAmount);
-    } else if (discountType === 'R$' && !isNaN(discount) && discount !== '') {
+    if (discountType === '%') {
+      totalValue -= totalValue * discountAmount;
+    } else if (discountType === 'R$') {
       totalValue -= discountAmount;
     }
 
@@ -214,7 +214,7 @@ const handleRegisterSale = async () => {
       empresa: empresaId,
       cliente_id: selectedClient ? selectedClient.id : null,
       dt_pagamento: currentDate,
-      percentual_desconto: discountType === '%' ? parseFloat(discount) : 0,
+      percentual_desconto: discountType === '%' ? discountValue : 0,
       tipo_pagamento_venda: selectedPaymentMethod,
       valor_total_venda: totalValue,
       gastos_envolvidos: parseFloat(additionalCosts || 0).toFixed(2),
@@ -240,7 +240,6 @@ const handleRegisterSale = async () => {
     // Aguardar todas as requisições
     await Promise.all([...servicePromises, ...productPromises]);
 
-    // Evento Mixpanel - Captura a finalização da venda
     mixpanel.track('Venda Finalizada', {
       valorTotal: totalValue,
       metodoPagamento: selectedPaymentMethod,
@@ -253,7 +252,6 @@ const handleRegisterSale = async () => {
     Alert.alert('Erro', 'Ocorreu um erro ao registrar a venda e os itens.');
   }
 };
-
 
   const toggleDropdown = () => {
       setDropdownVisible(!isDropdownVisible);
@@ -356,7 +354,32 @@ const formatCurrency = (value) => {
     currency: 'BRL',
   });
 };
+useEffect(() => {
+  // Separar produtos de serviços ao carregar
+  const produtosFiltrados = [];
+  const servicosFiltrados = [];
+  receivedServices.forEach(item => {
+    if (item.categoria === 'Serviços') {
+      servicosFiltrados.push(item);
+    } else {
+      produtosFiltrados.push(item);
+    }
+  });
 
+  setProducts(produtosFiltrados);
+  setServices(servicosFiltrados);
+}, [receivedServices]);
+  // Função para remover produto
+  const removeProduct = (productId) => {
+    const updatedProducts = products.filter(product => product.id !== productId);
+    setProducts(updatedProducts);
+  };
+
+  // Função para remover serviço
+  const removeService = (serviceId) => {
+    const updatedServices = services.filter(service => service.id !== serviceId);
+    setServices(updatedServices);
+  };
     return (
       <ScrollView style={styles.containerBase}>
       <Text style={styles.title}>Detalhes da venda</Text>
@@ -413,21 +436,14 @@ const formatCurrency = (value) => {
         Quantidade: {service.amount}
       </Text>
     </View>
-
-    {/* Input de preço para serviços com valor 0 */}
-    {!service.preco_venda || parseFloat(service.preco_venda) === 0 ? (
-      <TextInput
-        style={styles.priceInput}
-        keyboardType="numeric"
-        value={servicePrices[service.id] ? formatCurrency(servicePrices[service.id]) : ''}
-        onChangeText={text => handleServicePriceChange(service.id, text)}
-        placeholder="Preço (R$)"
-      />
-    ) : (
+    <View style={styles.containerRemove}>
+      <TouchableOpacity style={styles.removeButton} onPress={() => removeService(service.id)}>
+        <Icon name="trash-outline" size={22} color={COLORS.red} />
+      </TouchableOpacity>
       <Text style={styles.cartItemTotal}>
         {formatCurrency(service.preco_venda * service.amount)}
       </Text>
-    )}
+    </View>
   </View>
 ))}
     </View>
@@ -450,22 +466,19 @@ const formatCurrency = (value) => {
                     Quantidade: {product.amount}
                   </Text>
                 </View>
+                <View style={styles.containerRemove}>
+                <TouchableOpacity style={styles.removeButton} onPress={() => removeProduct(product.id)}>
+                  <Icon name="trash-outline" size={22} color={COLORS.red} />
+                </TouchableOpacity>
                 <Text style={styles.cartItemTotalProduto}>
                   {formatCurrency(product.preco_venda * product.amount)}
                 </Text>
+                </View>
               </View>
             ))}
           </View>
         </>
       )}
-      {/* 
-      <TextInput
-        style={styles.additionalCostsInput}
-        placeholder="Adicionar gastos envolvidos se houver (R$) - Opcional"
-        keyboardType="numeric"
-        value={formatCurrency(additionalCosts)}
-        onChangeText={setAdditionalCosts}
-      />*/}
             {/* Descontos */}
             <Text style={styles.Desconto}>Descontos</Text>
       <View style={styles.discountSection}>

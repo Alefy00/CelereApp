@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         color: COLORS.black,
-        width: '55%',
+        width: '75%',
       },
       cartItemSubtitle: {
         fontSize: width * 0.035,
@@ -136,6 +136,7 @@ const styles = StyleSheet.create({
       },
       cartItemPrice:{
         color: COLORS.black,
+        marginRight: width * 0.002,
       },
       quantitySection: {
         flexDirection: 'row',
@@ -169,18 +170,29 @@ const styles = StyleSheet.create({
         width: width * 0.23,
         marginLeft: width * 0.05,
       },
+      containerRemove:{
+        marginLeft: width * 0.002,
+      },
+      removeButton:{
+        marginHorizontal: width * 0.30,
+      },
       cartItemTotal:{
-        marginLeft: width * 0.25,
+        marginHorizontal: width * 0.22,
         color: COLORS.black,
         fontWeight:'bold',
       },
       cartItemTotalProduct:{
-        marginLeft: width * 0.17,
+        marginLeft: width * 0.1,
         color: COLORS.black,
         fontWeight:'bold',
       },
       cartItemTotalProduto:{
-        marginLeft: width * 0.22,
+        marginLeft: width * 0.15,
+        color: COLORS.black,
+        fontWeight:'bold',
+      },
+      cartItemTotalProdutoValor:{
+        marginHorizontal: width * 0.18,
         color: COLORS.black,
         fontWeight:'bold',
       },

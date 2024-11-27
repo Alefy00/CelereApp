@@ -9,8 +9,9 @@ import axios from "axios";
 import CustomCalendar from "../../../../../../../../components/CustomCalendar";
 import { API_BASE_URL } from "../../../../../../../../services/apiConfig";
 import moment from 'moment-timezone';
+import mixpanel from "../../../../../../../../services/mixpanelClient";
 
-const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
+const ReceivableDetails = ({ products, totalPrice, clients, navigation, setProducts }) => {
   const [paymentMethod, setPaymentMethod] = useState('Boleto');
   const [discountType, setDiscountType] = useState('%');
   const [discountValue, setDiscountValue] = useState('');
@@ -95,6 +96,12 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation }) => {
 // Função de registrar venda e itens
 const handleRegisterSale = async () => {
   try {
+
+        // Valida se o cliente foi selecionado
+        if (!selectedClient) {
+          Alert.alert('Erro', 'Por favor, selecione um cliente antes de registrar a venda.');
+          return; // Interrompe o registro
+        }
     const empresaId = await getEmpresaId(); // Obtém o ID da empresa logada
     if (!empresaId) return;
 
@@ -163,6 +170,20 @@ const handleRegisterSale = async () => {
     calculateLiquidValue();
   }, [totalPrice, discountValue, discountType, calculateLiquidValue]);
 
+  const removeProduct = (productId) => {
+    const updatedProducts = products.filter(product => product.id !== productId);
+    setProducts(updatedProducts); // Atualiza o estado no componente pai
+    
+    // Rastrear a remoção no Mixpanel ou outro serviço de análise
+    mixpanel.track('Produto Removido de Contas a Receber', {
+      produtoId: productId,
+    });
+  };
+  useEffect(() => {
+    const newTotal = products.reduce((total, product) => total + (product.preco_venda * product.amount), 0);
+    setLiquidValue(newTotal); // Atualiza o valor líquido
+  }, [products]); // Observa mudanças em products  
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -230,7 +251,14 @@ const handleRegisterSale = async () => {
               </Text>
                 <Text style={styles.productAmount}>Quantidade: {product.amount}</Text>
               </View>
-              <Text style={styles.productTotal}>{formatCurrency(product.preco_venda * product.amount)}</Text>
+              <View style={styles.containerRemove}>
+              <TouchableOpacity style={styles.removerIcon} onPress={() => removeProduct(product.id)}>
+                  <Icon name="trash-outline" size={22} color={COLORS.red} />
+              </TouchableOpacity>
+              <Text style={styles.productTotal}>
+              {formatCurrency(product.preco_venda * product.amount)}
+              </Text>
+            </View>
             </View>
           ))}
         </View>

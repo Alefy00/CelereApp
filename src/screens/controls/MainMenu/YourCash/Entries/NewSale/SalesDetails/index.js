@@ -18,6 +18,8 @@ const SaleDetails = ({ navigation, route }) => {
   const [viewMode, setViewMode] = useState('Liquidar agora');
   const [clients, setClients] = useState([]);  // Estado para armazenar os clientes
   const [loading, setLoading] = useState(false);
+  const [cartProducts, setCartProducts] = useState(products); // Gerencia os produtos do carrinho
+  const [receivableProducts, setReceivableProducts] = useState(products); // Para contas a receber
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = async () => {
@@ -113,27 +115,27 @@ const SaleDetails = ({ navigation, route }) => {
 
         {/* Renderizando o conteúdo da aba selecionada */}
         {viewMode === 'Liquidar agora' && (
-          <LiquidateNow
-            products={products}
-            totalPrice={totalPrice}
-            clients={clients}  // Passa os clientes reais
-            navigation={navigation}
-            loading={loading}  // Passa o estado de carregamento
-            clearCart={clearCart}  // Passe clearCart aqui
-          />
-        )}
-
-        {viewMode === 'Contas a receber' && (
-          <ReceivableDetails
-            products={products}
-            totalPrice={totalPrice}
-            clients={clients}  // Passa os clientes reais
-            navigation={navigation}
-            loading={loading}  // Passa o estado de carregamento
-            clearCart={clearCart}  // Passe clearCart aqui
-          />
-        )}
-
+            <LiquidateNow
+              products={cartProducts} // Use cartProducts em vez de products
+              setProducts={setCartProducts} // Passa a função para atualizar os produtos
+              totalPrice={cartProducts.reduce((total, product) => total + (product.preco_venda * product.amount), 0)} // Recalcula o total dinamicamente
+              clients={clients}  // Passa os clientes reais
+              navigation={navigation}
+              loading={loading}  // Passa o estado de carregamento
+              clearCart={clearCart}  // Passe clearCart aqui
+            />
+          )}
+          {viewMode === 'Contas a receber' && (
+            <ReceivableDetails
+              products={receivableProducts} // Use receivableProducts para contas a receber
+              setProducts={setReceivableProducts} // Passa a função para atualizar os produtos
+              totalPrice={receivableProducts.reduce((total, product) => total + (product.preco_venda * product.amount), 0)} // Recalcula o total dinamicamente
+              clients={clients}  
+              navigation={navigation}
+              loading={loading}
+              clearCart={clearCart}
+            />
+          )}
       </ScrollView>
     </KeyboardAvoidingView>
   );

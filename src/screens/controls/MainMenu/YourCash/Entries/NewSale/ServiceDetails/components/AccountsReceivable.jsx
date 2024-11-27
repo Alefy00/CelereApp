@@ -117,111 +117,112 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
       navigation.navigate('MainTab')
     };
 
-// Função para registrar venda e itens (produtos e serviços)
-const handleRegisterSale = async () => {
-  try {
-    const empresaId = await getEmpresaId(); // Obtém o ID da empresa logada
-    if (!empresaId) return;
-
-    const formattedPaymentDate = moment(paymentDate).tz('America/Sao_Paulo').format('YYYY-MM-DD');
-
-    if (!selectedClient || !selectedClient.id) {
-      Alert.alert("Erro", "Selecione um cliente para registrar a venda.");
-      return;
-    }
-
-    // Calcular o desconto
-    let discountValue = 0;
-    if (discountType === '%') {
-      discountValue = parseFloat(discount) ? (totalWithoutDiscount * (parseFloat(discount) / 100)) : 0;
-    } else if (discountType === 'R$') {
-      discountValue = parseFloat(discount) || 0;
-    }
-
-    // Calcular os valores finais
-    const totalValue = totalWithoutDiscount - discountValue; // Valor total com desconto aplicado
-
-    // Preparar os dados da venda
-    const vendaData = {
-      empresa: empresaId,
-      cliente_id: selectedClient.id, // Cliente selecionado
-      dt_pagamento: null, // Pagamento não imediato
-      dt_prevista_pagamento: formattedPaymentDate, // Data prevista de pagamento
-      valor_total_custo_venda: parseFloat(totalWithoutDiscount).toFixed(2), // Valor total sem desconto
-      valor_total_venda: parseFloat(totalValue).toFixed(2), // Valor total com desconto aplicado
-      percentual_desconto: discountType === '%' ? parseFloat(discount) : 0, // Percentual de desconto
-      tipo_pagamento_venda: null, // Tipo de pagamento como null
-      gastos_envolvidos: parseFloat(additionalCosts || 0).toFixed(2), // Gastos adicionais (se houver)
+    const handleRegisterSale = async () => {
+      try {
+        const empresaId = await getEmpresaId(); // Obtém o ID da empresa logada
+        if (!empresaId) return;
+    
+        const formattedPaymentDate = moment(paymentDate).tz('America/Sao_Paulo').format('YYYY-MM-DD');
+    
+        if (!selectedClient || !selectedClient.id) {
+          Alert.alert("Erro", "Selecione um cliente para registrar a venda.");
+          return;
+        }
+    
+        // Garantir que o desconto seja tratado corretamente
+        const parsedDiscount = parseFloat(discount) || 0; // Garante que seja 0 se não informado ou inválido
+        let discountValue = 0;
+    
+        if (discountType === '%') {
+          discountValue = parsedDiscount > 0 ? (totalWithoutDiscount * (parsedDiscount / 100)) : 0;
+        } else if (discountType === 'R$') {
+          discountValue = parsedDiscount > 0 ? parsedDiscount : 0;
+        }
+    
+        // Calcular os valores finais
+        const totalValue = totalWithoutDiscount - discountValue; // Valor total com desconto aplicado
+    
+        // Preparar os dados da venda
+        const vendaData = {
+          empresa: empresaId,
+          cliente_id: selectedClient.id, // Cliente selecionado
+          dt_pagamento: null, // Pagamento não imediato
+          dt_prevista_pagamento: formattedPaymentDate, // Data prevista de pagamento
+          valor_total_custo_venda: parseFloat(totalWithoutDiscount).toFixed(2), // Valor total sem desconto
+          valor_total_venda: parseFloat(totalValue).toFixed(2), // Valor total com desconto aplicado
+          percentual_desconto: discountType === '%' ? parsedDiscount : 0, // Percentual de desconto
+          tipo_pagamento_venda: null, // Tipo de pagamento como null
+          gastos_envolvidos: parseFloat(additionalCosts || 0).toFixed(2), // Gastos adicionais (se houver)
+        };
+    
+        console.log('Dados de venda enviados:', vendaData);
+    
+        // Envia a venda para a API
+        const vendaResponse = await axios.post(API_VENDAS, vendaData);
+        const vendaId = vendaResponse.data.data.id;
+        console.log('Venda registrada com sucesso, ID da venda:', vendaId);
+    
+        // Preparar os itens de serviço
+        const serviceItems = services.map(service => {
+          const servicePrice = service.preco_venda && parseFloat(service.preco_venda) !== 0
+            ? parseFloat(service.preco_venda).toFixed(2)
+            : parseFloat(servicePrices[service.id] || 0).toFixed(2);
+    
+          return {
+            empresa_id: empresaId,
+            venda_id: vendaId, // ID da venda registrada
+            servico_id: service.id, // ID do serviço
+            quantidade: service.amount || 1, // Quantidade do serviço
+            preco_unitario_venda: servicePrice, // Define o preço correto
+            percentual_desconto: discountType === '%' ? parsedDiscount : 0, // Percentual de desconto
+            valor_desconto: discountType === 'R$' ? (discountValue / services.length) : 0, // Divide proporcionalmente
+          };
+        });
+    
+        // Preparar os itens de produto
+        const productItems = products.map(product => ({
+          empresa_id: empresaId,
+          venda_id: vendaId, // ID da venda registrada
+          produto_id: product.id, // ID do produto
+          quantidade: product.amount || 1, // Quantidade do produto
+          percentual_desconto: discountType === '%' ? parsedDiscount : 0, // Percentual de desconto
+          valor_desconto: discountType === 'R$' ? (discountValue / products.length) : 0, // Divide proporcionalmente
+        }));
+    
+        // Cria as promessas de registro para serviços e produtos
+        const servicePromises = serviceItems.map(item =>
+          axios.post(API_ITENS_VENDA, item)
+            .then(response => console.log('Item de serviço registrado:', response.data))
+            .catch(error => console.error('Erro ao registrar item de serviço:', error.response ? error.response.data : error))
+        );
+    
+        const productPromises = productItems.map(item =>
+          axios.post(API_ITENS_VENDA, item)
+            .then(response => console.log('Item de produto registrado:', response.data))
+            .catch(error => console.error('Erro ao registrar item de produto:', error.response ? error.response.data : error))
+        );
+    
+        // Executa todas as promessas de registro de serviços e produtos
+        await Promise.all([...servicePromises, ...productPromises]);
+    
+        // Rastrear a conclusão da venda no Mixpanel
+        mixpanel.track('Venda Concluída', {
+          vendaId,
+          totalPreco: totalValue,
+          descontoAplicado: parsedDiscount,
+          formaPagamento: selectedPayment,
+        });
+    
+        resetCart(); // Limpa o carrinho após registrar a venda
+    
+        // Navega para a tela de nova venda ou resumo
+        setIsModalVisible(true);
+      } catch (error) {
+        console.error('Erro ao registrar venda:', error.response ? error.response.data : error);
+        Alert.alert('Erro', 'Ocorreu um erro ao registrar a venda e os itens.');
+      }
     };
-
-    console.log('Dados de venda enviados:', vendaData);
-
-    // Envia a venda para a API
-    const vendaResponse = await axios.post(API_VENDAS, vendaData);
-    const vendaId = vendaResponse.data.data.id;
-    console.log('Venda registrada com sucesso, ID da venda:', vendaId);
-
-    // Preparar os itens de serviço
-    const serviceItems = services.map(service => {
-      const servicePrice = service.preco_venda && parseFloat(service.preco_venda) !== 0
-        ? parseFloat(service.preco_venda).toFixed(2)
-        : parseFloat(servicePrices[service.id] || 0).toFixed(2);
-
-      return {
-        empresa_id: empresaId,
-        venda_id: vendaId, // ID da venda registrada
-        servico_id: service.id, // ID do serviço
-        quantidade: service.amount || 1, // Quantidade do serviço
-        preco_unitario_venda: servicePrice, // Define o preço correto
-        percentual_desconto: discountType === '%' ? parseFloat(discount) : 0, // Percentual de desconto
-        valor_desconto: discountType === 'R$' ? (discountValue / services.length) : 0, // Divide proporcionalmente
-      };
-    });
-
-    // Preparar os itens de produto
-    const productItems = products.map(product => ({
-      empresa_id: empresaId,
-      venda_id: vendaId, // ID da venda registrada
-      produto_id: product.id, // ID do produto
-      quantidade: product.amount || 1, // Quantidade do produto
-      percentual_desconto: discountType === '%' ? parseFloat(discount) : 0, // Percentual de desconto
-      valor_desconto: discountType === 'R$' ? (discountValue / products.length) : 0, // Divide proporcionalmente
-    }));
-
-    // Cria as promessas de registro para serviços e produtos
-    const servicePromises = serviceItems.map(item =>
-      axios.post(API_ITENS_VENDA, item)
-        .then(response => console.log('Item de serviço registrado:', response.data))
-        .catch(error => console.error('Erro ao registrar item de serviço:', error.response ? error.response.data : error))
-    );
-
-    const productPromises = productItems.map(item =>
-      axios.post(API_ITENS_VENDA, item)
-        .then(response => console.log('Item de produto registrado:', response.data))
-        .catch(error => console.error('Erro ao registrar item de produto:', error.response ? error.response.data : error))
-    );
-
-    // Executa todas as promessas de registro de serviços e produtos
-    await Promise.all([...servicePromises, ...productPromises]);
-
-    // Rastrear a conclusão da venda no Mixpanel
-    mixpanel.track('Venda Concluída', {
-      vendaId,
-      totalPreco: totalValue,
-      descontoAplicado: discount,
-      formaPagamento: selectedPayment,
-    });
-
-    resetCart(); // Limpa o carrinho após registrar a venda
-
-    // Navega para a tela de nova venda ou resumo
-    setIsModalVisible(true);
-  } catch (error) {
-    console.error('Erro ao registrar venda:', error.response ? error.response.data : error);
-    Alert.alert('Erro', 'Ocorreu um erro ao registrar a venda e os itens.');
-  }
-};
-
+    
     // Adiciona uma função que reseta o carrinho
 const resetCart = () => {
   setProducts([]);
@@ -274,18 +275,6 @@ useEffect(() => {
   calculateTotalWithDiscount();
 }, [products, services, discount, discountType, additionalCosts, servicePrices, calculateTotalWithoutDiscount, calculateTotalWithDiscount]);
 
-// Função para atualizar o valor do serviço manualmente inserido pelo usuário
-const handleServicePriceChange = (serviceId, value) => {
-  // Aqui formatamos o valor para moeda brasileira e garantimos que ele está armazenado corretamente
-  const numericValue = value.replace(/[^\d]/g, ''); // Remove caracteres não numéricos
-  const formattedValue = (parseFloat(numericValue) / 100).toFixed(2); // Formata como centavos
-
-  setServicePrices(prevPrices => ({
-    ...prevPrices,
-    [serviceId]: formattedValue,
-  }));
-};
-
     // Função para formatar valor para moeda Real Brasileiro
 const formatCurrency = (value) => {
   if (!value) return '';
@@ -294,7 +283,16 @@ const formatCurrency = (value) => {
     currency: 'BRL',
   });
 };
+const removeProduct = (productId) => {
+  const updatedProducts = products.filter(product => product.id !== productId);
+  setProducts(updatedProducts);
+};
 
+// Função para remover serviço
+const removeService = (serviceId) => {
+  const updatedServices = services.filter(service => service.id !== serviceId);
+  setServices(updatedServices);
+};
     return (
         <ScrollView style={styles.containerBase}>
             <Text style={styles.title}>Detalhes da venda</Text>
@@ -345,44 +343,40 @@ const formatCurrency = (value) => {
             )}
 
         {/* Exibe os serviços separadamente */}
-{services.length > 0 && (
+     {/* Exibe os serviços separadamente */}
+     {services.length > 0 && (
   <>
     <Text style={styles.sectionTitle}>Serviços</Text>
     <View style={styles.cartSection}>
-      {services.map((service, index) => (
-        <View key={index} style={styles.cartItem}>
-          <Image source={{ uri: service.imagem }} style={styles.productImage} />
-          <View style={styles.containerServiço}>
-            <Text style={styles.cartItemTitle}>{service.nome}</Text>
-            <Text style={styles.cartItemSubtitle}>
-              Unid. de medida: {service.unidade_medida || 'Por manutenção'}
-            </Text>
-            <Text style={styles.cartItemPrice}>
-              Preço unitário: {service.preco_venda ? formatCurrency(service.preco_venda) : 'Defina o preço'}
-            </Text>
-            <Text style={styles.cartItemSubtitleMedida}>
-              Quantidade: {service.amount}
-            </Text>
-          </View>
-            {/* Input de preço para serviços com valor 0 */}
-            {!service.preco_venda || parseFloat(service.preco_venda) === 0 ? (
-              <TextInput
-                style={styles.priceInput}
-                keyboardType="numeric"
-                value={servicePrices[service.id] ? formatCurrency(servicePrices[service.id]) : ''} // Exibe o valor 
-                onChangeText={text => handleServicePriceChange(service.id, text)} // Atualiza o valor do serviço
-                placeholder="Preço (R$)"
-              />
-            ) : (
-              <Text style={styles.cartItemTotal}>
-                {formatCurrency(service.preco_venda * service.amount)}
-              </Text>
-            )}
-        </View>
-      ))}
+    {services.map((service, index) => (
+  <View key={index} style={styles.cartItem}>
+    <Image source={{ uri: service.imagem }} style={styles.productImage} />
+    <View style={styles.containerServiço}>
+      <Text style={styles.cartItemTitle}>{service.nome}</Text>
+      <Text style={styles.cartItemSubtitle}>
+        Unid. de medida: {service.unidade_medida || 'Por manutenção'}
+      </Text>
+      <Text style={styles.cartItemPrice}>
+        Preço unitário: {service.preco_venda ? formatCurrency(service.preco_venda) : 'Defina o preço'}
+      </Text>
+      <Text style={styles.cartItemSubtitleMedida}>
+        Quantidade: {service.amount}
+      </Text>
+    </View>
+    <View style={styles.containerRemove}>
+      <TouchableOpacity style={styles.removeButton} onPress={() => removeService(service.id)}>
+        <Icon name="trash-outline" size={22} color={COLORS.red} />
+      </TouchableOpacity>
+      <Text style={styles.cartItemTotal}>
+        {formatCurrency(service.preco_venda * service.amount)}
+      </Text>
+    </View>
+  </View>
+))}
     </View>
   </>
 )}
+
 {products.length > 0 && (
         <>
           <Text style={styles.sectionTitle}>Produtos</Text>
@@ -393,28 +387,25 @@ const formatCurrency = (value) => {
                 <View style={styles.containerServiço}>
                   <Text style={styles.cartItemTitle}>{product.nome}</Text>
                   <Text style={styles.cartItemPrice}>
-                    Preço unitário: R$ {product.preco_venda ? formatCurrency(product.preco_venda) : 'Defina o preço'}
+                    Preço unitário: {product.preco_venda ? formatCurrency(product.preco_venda) : 'Defina o preço'}
                   </Text>
                   <Text style={styles.cartItemSubtitleMedida}>
                     Quantidade: {product.amount}
                   </Text>
                 </View>
-                <Text style={styles.cartItemTotalProduct}>
-                {formatCurrency(product.preco_venda * product.amount)}
+                <View style={styles.containerRemove}>
+                <TouchableOpacity style={styles.removeButton} onPress={() => removeProduct(product.id)}>
+                  <Icon name="trash-outline" size={22} color={COLORS.red} />
+                </TouchableOpacity>
+                <Text style={styles.cartItemTotalProdutoValor}>
+                  {formatCurrency(product.preco_venda * product.amount)}
                 </Text>
+                </View>
               </View>
             ))}
           </View>
         </>
       )}
-      {/* 
-         <TextInput
-        style={styles.additionalCostsInput}
-        placeholder="Adicionar gastos envolvidos se houver (R$) - Opcional"
-        keyboardType="numeric"
-        value={formatCurrency(additionalCosts)}
-        onChangeText={setAdditionalCosts}
-        />*/}
         {/* Total e valor líquido a receber */}
         <View style={styles.totalContainer2}>
           <Text style={styles.totalLabel}>Valor total <Icon name="alert-circle" size={20} color={COLORS.lightGray} /></Text>

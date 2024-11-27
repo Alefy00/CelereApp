@@ -14,7 +14,7 @@ import { API_BASE_URL } from "../../../../../../../../services/apiConfig";
 import mixpanel from "../../../../../../../../services/mixpanelClient";
 import moment from 'moment-timezone';
 
-const LiquidateNow = ({ products, totalPrice, clients, navigation, route }) => {
+const LiquidateNow = ({ products, totalPrice, clients, navigation, route, setProducts }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [discountType, setDiscountType] = useState('%');
   const [discountValue, setDiscountValue] = useState('');
@@ -109,82 +109,80 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route }) => {
     setIsPaymentDropdownVisible(false);
   };
 
-// Função de registrar venda e itens
-const handleRegisterSale = async () => {
-  try {
-    const empresaId = await getEmpresaId(); // Obtém o ID da empresa logada
-    if (!empresaId) return;
-
-    const currentDate = moment().tz('America/Sao_Paulo').format('YYYY-MM-DD');
-    const totalValue = liquidValue; // Valor bruto a receber após desconto
-
-    if (!selectedPaymentMethod) {
-      console.error('Nenhum método de pagamento selecionado!');
-      Alert.alert('Erro', 'Selecione um método de pagamento.');
-      return;
+  const handleRegisterSale = async () => {
+    try {
+      const empresaId = await getEmpresaId(); // Obtém o ID da empresa logada
+      if (!empresaId) return;
+  
+      const currentDate = moment().tz('America/Sao_Paulo').format('YYYY-MM-DD');
+      const totalValue = liquidValue; // Valor bruto a receber após desconto
+  
+      if (!selectedPaymentMethod) {
+        console.error('Nenhum método de pagamento selecionado!');
+        Alert.alert('Erro', 'Selecione um método de pagamento.');
+        return;
+      }
+  
+      // Calcular o desconto
+      let discount = 0;
+      if (discountType === '%') {
+        discount = totalPrice * ((parseFloat(discountValue) || 0) / 100); // Garante 0 se discountValue for vazio
+      } else if (discountType === 'R$') {
+        discount = parseFloat(discountValue) || 0; // Garante 0 se discountValue for vazio
+      }
+  
+      // Registra a venda primeiro
+      const vendaData = {
+        empresa: empresaId,
+        cliente_id: selectedClient ? selectedClient.id : null, // Cliente selecionado
+        dt_pagamento: currentDate, // Data de pagamento (data atual)
+        percentual_desconto: discountType === '%' ? parseFloat(discountValue) || 0 : 0, // Garante 0 para percentual
+        tipo_pagamento_venda: selectedPaymentMethod, // ID da forma de pagamento selecionada
+        valor_total_venda: totalValue, // Valor bruto a receber
+      };
+  
+      // Log do payload para conferência
+      console.log('Payload da requisição:', vendaData);
+  
+      const vendaResponse = await axios.post(`${API_BASE_URL}/cad/vendas/`, vendaData);
+  
+      const vendaId = vendaResponse.data.data.id;
+  
+      // Agora registra os itens da venda
+      const saleItems = products.map(product => ({
+        empresa_id: empresaId,
+        venda_id: vendaId, // ID da venda registrada
+        produto_id: product.id,
+        quantidade: product.amount,
+        percentual_desconto: discountType === '%' ? parseFloat(discountValue) || 0 : 0, // Garante 0 para percentual
+        valor_desconto: discountType === 'R$' ? discount / products.length : 0,
+      }));
+  
+      // Log dos itens da venda
+      console.log('Itens da venda:', saleItems);
+  
+      const responsePromises = saleItems.map(item =>
+        axios.post(`${API_BASE_URL}/cad/itens_venda/`, item)
+      );
+  
+      await Promise.all(responsePromises);
+  
+      setSaleId(vendaId);
+      setIsModalVisible(true);
+  
+      // Rastrear a venda concluída no Mixpanel
+      mixpanel.track('Venda Concluída', {
+        vendaId: vendaId,
+        totalPreco: totalValue,
+        desconto: discountValue || 0, // Garante 0 para rastreamento
+        parcelas: installments,
+        metodoPagamento: selectedPaymentMethod,
+      });
+    } catch (error) {
+      console.error('Erro ao registrar venda:', error.response ? error.response.data : error.message);
+      Alert.alert('Erro', 'Ocorreu um erro ao registrar a venda.');
     }
-    // Calcular o desconto
-    let discount = 0;
-    if (discountType === '%') {
-      discount = totalPrice * (parseFloat(discountValue) / 100);
-    } else if (discountType === 'R$') {
-      discount = parseFloat(discountValue) || 0;
-    }
-    // Registra a venda primeiro
-    const vendaData = {
-      empresa: empresaId,
-      cliente_id: selectedClient ? selectedClient.id : null, // Cliente selecionado
-      dt_pagamento: currentDate, // Data de pagamento (data atual)
-      percentual_desconto: discountType === '%' ? parseFloat(discountValue) : 0,
-      tipo_pagamento_venda: selectedPaymentMethod, // ID da forma de pagamento selecionada
-      valor_total_venda: totalValue // Valor bruto a receber
-    };
-
-    // Log do payload da requisição
-    console.log('Payload da requisição:', vendaData);
-
-    const vendaResponse = await axios.post(`${API_BASE_URL}/cad/vendas/`, vendaData);
-
-    // Log da resposta da requisição
-    console.log('Resposta da requisição:', vendaResponse.data);
-
-    const vendaId = vendaResponse.data.data.id;
-
-    // Agora registra os itens da venda
-    const saleItems = products.map(product => ({
-      empresa_id: empresaId,
-      venda_id: vendaId, // ID da venda registrada
-      produto_id: product.id,
-      quantidade: product.amount,
-      percentual_desconto: discountType === '%' ? parseFloat(discountValue) : 0,
-      valor_desconto: discountType === 'R$' ? discount / products.length : 0,
-    }));
-
-    // Log dos itens da venda
-    console.log('Itens da venda:', saleItems);
-
-    const responsePromises = saleItems.map(item =>
-      axios.post(`${API_BASE_URL}/cad/itens_venda/`, item)
-    );
-
-    await Promise.all(responsePromises);
-
-    setSaleId(vendaId);
-    setIsModalVisible(true);
-    // Rastrear a venda concluída no Mixpanel
-    mixpanel.track('Venda Concluída', {
-      vendaId: vendaId,
-      totalPreco: totalValue,
-      desconto: discountValue,
-      parcelas: installments,
-      metodoPagamento: selectedPaymentMethod,
-    });
-  } catch (error) {
-    // Log do erro, se a requisição falhar
-    console.error('Erro ao registrar venda:', error.response ? error.response.data : error.message);
-    Alert.alert('Erro', 'Ocorreu um erro ao registrar a venda.');
-  }
-};
+  };
 
   const toggleDropdown = () => {
     setDropdownVisible(!isDropdownVisible);
@@ -257,6 +255,22 @@ const formatCurrency = (value) => {
     currency: 'BRL',
   });
 };
+const removeProduct = (productId) => {
+  const updatedProducts = products.filter(product => product.id !== productId);
+  setProducts(updatedProducts); // Atualiza o estado no componente pai
+
+  // Opcional: Rastrear no Mixpanel a remoção de produto
+  mixpanel.track('Produto Removido do Carrinho', {
+    produtoId: productId,
+  });
+};
+
+useEffect(() => {
+  // Recalcula o total sempre que a lista de produtos mudar
+  const newTotal = products.reduce((total, product) => total + (product.preco_venda * product.amount), 0);
+  setLiquidValue(newTotal);
+}, [products]); // Observa mudanças em products
+
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -307,9 +321,14 @@ const formatCurrency = (value) => {
                 Quantidade: {product.amount}
               </Text>
             </View>
-            <Text style={styles.productTotal}>
-            {formatCurrency(product.preco_venda * product.amount)}
-            </Text>
+            <View style={styles.containerRemove}>
+              <TouchableOpacity style={styles.removerIcon} onPress={() => removeProduct(product.id)}>
+                  <Icon name="trash-outline" size={22} color={COLORS.red} />
+              </TouchableOpacity>
+              <Text style={styles.productTotal}>
+              {formatCurrency(product.preco_venda * product.amount)}
+              </Text>
+            </View>
           </View>
         ))}
       </View>

@@ -82,8 +82,8 @@ const UpdateStockModal = ({ isVisible, onClose, product }) => {
 
           {/* Imagem do Produto */}
           <View style={styles.productImageContainer}>
-            <Image
-              source={product.image_url ? { uri: product.image_url } : require('../../../../../../assets/images/png/placeholder.png')}
+          <Image
+              source={product.image_url || require('../../../../../../assets/images/png/placeholder.png')}
               style={styles.productImage}
             />
           </View>

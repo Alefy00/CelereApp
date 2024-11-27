@@ -51,7 +51,6 @@ const StockInfo = ({ navigation }) => {
         return imagePath; // Retorna a URL diretamente
       }
     } catch (error) {
-      console.error(`Erro ao buscar imagem para o produto ${produtoId}:`, error.message);
     }
     return null; // Retorna null em caso de erro
   };
@@ -72,8 +71,8 @@ const StockInfo = ({ navigation }) => {
             return {
               ...product,
               image_url: imagePath
-                ? { uri: imagePath } // Usa a URL retornada diretamente
-                : require('../../../../../assets/images/png/placeholder.png'), // Placeholder para imagens ausentes
+                ? { uri: imagePath }
+                : require('../../../../../assets/images/png/placeholder.png'),
             };
           })
         );
@@ -81,16 +80,26 @@ const StockInfo = ({ navigation }) => {
         setProducts(productsWithImages);
         setFilteredProducts(productsWithImages);
   
-        const totalCustoCalc = productsWithImages.reduce((sum, product) => sum + parseFloat(product.custo), 0);
-        const totalVendaCalc = productsWithImages.reduce(
-          (sum, product) => sum + parseFloat(product.preco_venda) * product.qtd_estoque,
+        // Validação e cálculo dos totais
+        const totalCustoCalc = productsWithImages.reduce(
+          (sum, product) => sum + (parseFloat(product.custo) || 0),
           0
         );
-        const totalItemsCalc = productsWithImages.reduce((sum, product) => sum + product.qtd_estoque, 0);
+  
+        const totalVendaCalc = productsWithImages.reduce(
+          (sum, product) => sum + (parseFloat(product.preco_venda) || 0) * (product.qtd_estoque || 0),
+          0
+        );
+  
+        const totalItemsCalc = productsWithImages.reduce(
+          (sum, product) => sum + (product.qtd_estoque || 0),
+          0
+        );
   
         setTotalCusto(totalCustoCalc.toFixed(2));
         setTotalVenda(totalVendaCalc.toFixed(2));
         setTotalItems(totalItemsCalc);
+  
       } else {
         Alert.alert('Erro', 'Falha ao recuperar produtos.');
       }
@@ -101,8 +110,6 @@ const StockInfo = ({ navigation }) => {
       setLoading(false);
     }
   }, []);
-  
-  
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -162,10 +169,8 @@ const StockInfo = ({ navigation }) => {
 
   // Função para selecionar o produto e abrir o modal
   const handleProductSelect = (product) => {
-    console.log('Produto selecionado:', product);  // Verifica se o produto está sendo selecionado corretamente
     setSelectedProduct(product);  // Define o produto selecionado
     setIsModalVisible(true);  // Abre o modal
-    console.log('Modal visível?', isModalVisible);  // Verifica o estado do modal
   };
 
   const renderFilterItem = ({ item }) => (
