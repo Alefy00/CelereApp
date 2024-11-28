@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, FlatList, Dimensions, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, FlatList, Alert } from 'react-native';
 import styles from './styles';
 import BarTop2 from '../../../../../components/BarTop2';
 import { COLORS } from '../../../../../constants';
@@ -80,25 +80,25 @@ const StockInfo = ({ navigation }) => {
         setProducts(productsWithImages);
         setFilteredProducts(productsWithImages);
   
-        // Validação e cálculo dos totais
         const totalCustoCalc = productsWithImages.reduce(
-          (sum, product) => sum + (parseFloat(product.custo) || 0),
+          (sum, product) => sum + (parseFloat(product.custo) || 0) * (product.qtd_estoque || 0),
           0
         );
-  
+        
         const totalVendaCalc = productsWithImages.reduce(
           (sum, product) => sum + (parseFloat(product.preco_venda) || 0) * (product.qtd_estoque || 0),
           0
         );
-  
+        
         const totalItemsCalc = productsWithImages.reduce(
           (sum, product) => sum + (product.qtd_estoque || 0),
           0
         );
-  
+        
         setTotalCusto(totalCustoCalc.toFixed(2));
         setTotalVenda(totalVendaCalc.toFixed(2));
         setTotalItems(totalItemsCalc);
+        
   
       } else {
         Alert.alert('Erro', 'Falha ao recuperar produtos.');
