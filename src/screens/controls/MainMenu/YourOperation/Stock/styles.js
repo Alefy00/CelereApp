@@ -136,6 +136,7 @@ const styles = StyleSheet.create({
     right: 10,
     bottom: 20,
     alignItems: 'center',
+    marginTop:800
   },
   fixedButton: {
     width: 45,
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
   },
   fixedButton2: {
     flexDirection: 'row',
-    width: 180,
+    width: 50,
     height: 45,
     backgroundColor: '#FFD700',
     borderRadius: 30,

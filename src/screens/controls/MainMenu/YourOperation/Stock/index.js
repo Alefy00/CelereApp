@@ -47,13 +47,25 @@ const StockInfo = ({ navigation }) => {
     try {
       const response = await axios.get(`${IMAGE_API}?empresa=${empresaId}&produto=${produtoId}`);
       if (response.data?.status === 'success') {
-        const imagePath = response.data.data.imagem; // URL completa retornada pelo backend
-        return imagePath; // Retorna a URL diretamente
+        const imagePath = response.data.data.imagem;
+  
+        // Garante que qualquer URL com HTTP seja convertida para HTTPS
+        const secureImagePath = imagePath.startsWith("http://")
+          ? imagePath.replace("http://", "https://")
+          : imagePath;
+  
+        // Log para verificar a URL ajustada
+        console.log('URL da Imagem Ajustada:', secureImagePath);
+  
+        return secureImagePath; // Retorna a URL segura
       }
     } catch (error) {
+      console.error(`Erro ao buscar imagem para produto ${produtoId}:`, error.message);
     }
     return null; // Retorna null em caso de erro
   };
+  
+  
   
   // Memoize fetchProductsWithImages using useCallback
   const fetchProductsWithImages = useCallback(async () => {
@@ -84,22 +96,21 @@ const StockInfo = ({ navigation }) => {
           (sum, product) => sum + (parseFloat(product.custo) || 0) * (product.qtd_estoque || 0),
           0
         );
-        
+
         const totalVendaCalc = productsWithImages.reduce(
           (sum, product) => sum + (parseFloat(product.preco_venda) || 0) * (product.qtd_estoque || 0),
           0
         );
-        
+
         const totalItemsCalc = productsWithImages.reduce(
           (sum, product) => sum + (product.qtd_estoque || 0),
           0
         );
-        
+
         setTotalCusto(totalCustoCalc.toFixed(2));
         setTotalVenda(totalVendaCalc.toFixed(2));
         setTotalItems(totalItemsCalc);
-        
-  
+
       } else {
         Alert.alert('Erro', 'Falha ao recuperar produtos.');
       }
@@ -287,7 +298,6 @@ const StockInfo = ({ navigation }) => {
       <View style={styles.fixedButtonsContainer}>
         <TouchableOpacity style={styles.fixedButton2} onPress={handleAddProduct}>
           <Icon name="add-outline" size={30} color="#000" />
-          <Text style={styles.textAdd}>Adicionar produto</Text>
         </TouchableOpacity>
       </View>
 

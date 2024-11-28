@@ -58,14 +58,27 @@ const NewRegisteredSale = ({ navigation, route }) => {
       const response = await axios.get(url);
       
       if (response.data && response.data.status === 'success') {
-        return response.data.data.imagem; // URL da imagem
+        const imagePath = response.data.data.imagem;
+  
+        // Garante que a URL seja ajustada para HTTPS
+        const secureImagePath = imagePath.startsWith("http://")
+          ? imagePath.replace("http://", "https://")
+          : imagePath;
+  
+        // Log para verificar a URL ajustada
+        console.log('URL da Imagem Ajustada:', secureImagePath);
+  
+        return secureImagePath; // Retorna a URL segura
       } else {
+        console.warn(`Imagem não encontrada para ${type} com ID ${itemId}`);
         return null; // Retorna null se não houver imagem
       }
     } catch (error) {
+      console.error(`Erro ao buscar imagem para ${type} com ID ${itemId}:`, error.message);
       return null; // Fallback para erro
     }
   };
+  
 
   const fetchProductsAndServices = useCallback(async () => {
     setLoading(true);

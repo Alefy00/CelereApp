@@ -42,6 +42,7 @@ const RegisteredServices = ({ navigation }) => {
     try {
       setLoading(true); // Inicia o loading
       const empresaId = await getEmpresaId(); // Recupera o ID da empresa logada
+  
       if (empresaId) {
         // Adiciona o filtro para serviços da empresa
         const query = `?empresa=${empresaId}&page=1&page_size=100`;
@@ -62,9 +63,19 @@ const RegisteredServices = ({ navigation }) => {
                 const imageResponse = await axios.get(
                   `${API_BASE_URL}/mnt/imagensservico/getImagemServico/?empresa=${empresaId}&servico=${service.id}`
                 );
-                const imageUrl = 
-                  imageResponse.data?.data?.imagem ?? null; // Adiciona imagem se existir
-                return { ...service, image_url: imageUrl }; // Retorna serviço com imagem
+                let imageUrl = imageResponse.data?.data?.imagem ?? null;
+  
+                // Garante que a URL seja HTTPS
+                if (imageUrl) {
+                  imageUrl = imageUrl.startsWith("http://")
+                    ? imageUrl.replace("http://", "https://")
+                    : imageUrl;
+  
+                  // Log da URL ajustada
+                  console.log(`Serviço ID ${service.id} - URL da Imagem Ajustada:`, imageUrl);
+                }
+  
+                return { ...service, image_url: imageUrl }; // Retorna serviço com imagem ajustada
               } catch (error) {
                 console.warn(`Erro ao carregar imagem para o serviço ${service.id}`, error);
                 return { ...service, image_url: null }; // Fallback para imagem nula
@@ -84,6 +95,7 @@ const RegisteredServices = ({ navigation }) => {
       setLoading(false); // Finaliza o loading
     }
   }, []);
+
 
   useFocusEffect(
     useCallback(() => {
