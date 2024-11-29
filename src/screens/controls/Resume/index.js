@@ -15,6 +15,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { API_BASE_URL } from '../../../services/apiConfig';
 import mixpanel from '../../../services/mixpanelClient';
 import moment from 'moment-timezone';
+import BaseCarousel from './components/Carousel/BaseCarousel';
 
 
 const MainMenu = ({ navigation }) => {
@@ -188,24 +189,12 @@ const initializeDateFilter = useCallback(async () => {
         <View style={styles.container}>
           <DateCarousel onDateSelected={(startDate, endDate) => handleDateChange(startDate, endDate)} />
           <Text style={styles.label}>Resumo do dia</Text>
-          <View style={styles.ContainerCarousel}>
-            <View style={styles.pageContainer}>
-              <Text style={styles.title}>
-                Saldo Caixa <Icon name="alert-circle" size={16} color={COLORS.lightGray} />
-              </Text>
-              {loading ? (
-                <ActivityIndicator size="large" color={COLORS.primary} />
-              ) : (
-                <Text  style={[
-                  styles.amount, 
-                  { color: saldoCaixa < 0 ? COLORS.red : COLORS.green }
-                ]}>{`${formatCurrency(saldoCaixa)}`}</Text>
-              )}
-              <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-                <Text style={styles.updateButtonAttSaldo}>Ajustar caixa</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+
+          <BaseCarousel
+            empresaId={empresaId}
+            selectedDate={selectedDate}
+            onAdjustPress={() => setIsModalVisible(true)}
+          />
           <View style={styles.ContainerCircle}>
             <SalesChartCard selectedDate={selectedDate} />
           </View>

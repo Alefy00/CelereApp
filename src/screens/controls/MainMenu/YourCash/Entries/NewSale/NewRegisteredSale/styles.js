@@ -49,6 +49,7 @@ const styles = StyleSheet.create({
   },
   productsList: {
     padding: 16,
+    paddingBottom:140
   },
   productCard: {
     backgroundColor: COLORS.white,
@@ -110,21 +111,28 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   confirmationCard: {
+    position: 'absolute', // Mantém fixo na tela
+    bottom: 10, // Levemente acima do final
+    left: 120, // Margem lateral
+    right: 10, // Margem lateral
     backgroundColor: COLORS.white,
     padding: 16,
-    alignItems: 'flex-end',
-    justifyContent: 'space-around',
-    marginTop: 10,
-    marginLeft:110,
-    marginBottom: 15, // Espaço para o botão de leitura de código de barras
-    width: '70%',
-    alignSelf: 'center', // Deixando o card menor e centralizado
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5, // Sombra no Android
+    zIndex: 100, // Garantir prioridade
+    width: '65%',
+    textAlign:'right'
   },
+  
   totalPrice: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-
+  textAlign:'right'
   },
   confirmButton: {
     backgroundColor: COLORS.primary,

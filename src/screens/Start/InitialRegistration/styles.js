@@ -2,7 +2,7 @@
 import { StyleSheet } from "react-native";
 import { COLORS } from "../../../constants";
 
-export default StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.primary,
@@ -136,5 +136,15 @@ export default StyleSheet.create({
     marginTop: -20,
     flexDirection: 'row',
     alignItems:'center'
+  },
+  privacyLink:{
+    textDecorationLine:'underline',
+    textDecorationColor:'#000',
+    color: '#000'
+  },
+  privacyText:{
+    color: '#000'
   }
 });
+
+export default styles;

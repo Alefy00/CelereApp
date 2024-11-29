@@ -64,21 +64,16 @@ const NewRegisteredSale = ({ navigation, route }) => {
         const secureImagePath = imagePath.startsWith("http://")
           ? imagePath.replace("http://", "https://")
           : imagePath;
-  
-        // Log para verificar a URL ajustada
-        console.log('URL da Imagem Ajustada:', secureImagePath);
-  
+
         return secureImagePath; // Retorna a URL segura
       } else {
-        console.warn(`Imagem não encontrada para ${type} com ID ${itemId}`);
         return null; // Retorna null se não houver imagem
       }
     } catch (error) {
-      console.error(`Erro ao buscar imagem para ${type} com ID ${itemId}:`, error.message);
+  
       return null; // Fallback para erro
     }
   };
-  
 
   const fetchProductsAndServices = useCallback(async () => {
     setLoading(true);
@@ -316,24 +311,6 @@ useFocusEffect(
     navigateToNextScreen(services, nonServices, allSelectedItems, totalPrice);
   };
 
-  const renderFooter = () => {
-    const hasItemsInCart = Object.keys(quantities).length > 0; // Verifica se há itens no carrinho
-  
-    return (
-      <>
-        {hasItemsInCart && (
-          <View style={styles.confirmationCard}>
-            <Text style={styles.totalPrice}>Total: R${totalPrice.toFixed(2)}</Text>
-            <TouchableOpacity style={styles.confirmButton} onPress={handleNext}>
-              <Icon name="checkmark-circle" size={25} color={COLORS.black} />
-              <Text style={styles.confirmButtonText}>Confirmar essa venda</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </>
-    );
-  };
-
   const toggleFourthModal = () => setFourthModalVisible(!fourthModalVisible);
     // Certifique-se de que o modal é fechado corretamente
     const closeModalOnNavigate = () => {
@@ -413,7 +390,6 @@ useFocusEffect(
             keyExtractor={(item) => item.id.toString()}
             contentContainerStyle={styles.productsList}
             numColumns={2}
-            ListFooterComponent={renderFooter}
             scrollEnabled={false}
           />
           )}
@@ -440,6 +416,13 @@ useFocusEffect(
         </View>
       </TouchableWithoutFeedback>
       </ScrollView>
+      <View style={styles.confirmationCard}>
+            <Text style={styles.totalPrice}>Total: R${totalPrice.toFixed(2)}</Text>
+            <TouchableOpacity style={styles.confirmButton} onPress={handleNext}>
+              <Icon name="checkmark-circle" size={25} color={COLORS.black} />
+              <Text style={styles.confirmButtonText}>Confirmar essa venda</Text>
+            </TouchableOpacity>
+          </View>
     </KeyboardAvoidingView>
   );
 };

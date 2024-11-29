@@ -12,7 +12,7 @@ export const COLORS = {
   green: '#5ED070',
   blue: '#608BC1',
   red: '#FF6B6B',
-  orange: '#FA9600',
+  orange: '#FF9500',
   purple: '#9747ff',
   gray: '#939393',
   gray2: '#767676',
