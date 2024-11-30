@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components/native';
 import { COLORS } from '../constants';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -20,9 +20,13 @@ import FluxoCaixa1 from '../assets/images/svg/tabbar/iconCashFlow1.svg';
 import MenuIcon1 from '../assets/images/svg/tabbar/iconMenu1.svg';
 import ActionButtons from '../screens/controls/Resume/components/ActionButtons';
 import NotificationModal from './NotificationModal'; // Importando o NotificationModal
+import TourModal from '../screens/controls/Resume/components/TourModal';
+import { useScroll } from '../screens/controls/Resume/components/ScrollContext';
 
 import { useTranslation } from 'react-i18next';
 import '../translation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTour } from '../screens/controls/Resume/components/TourContext';
 
 const TabArea = styled.View`
   height: 70px;
@@ -77,18 +81,95 @@ export default ({ state, navigation }) => {
   const goTo = (screenName) => {
     navigation.navigate(screenName);
   };
-
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedFeature, setSelectedFeature] = useState('');
-  const [notify, setNotify] = useState(false);
-
   const openModal = (featureName) => {
     setSelectedFeature(featureName);
     setModalVisible(true);
   };
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState('');
+  const [notify, setNotify] = useState(false);
+  const { elementPositions, isTourVisible, currentStep, setCurrentStep, setIsTourVisible } = useTour();
+  const [isCheckingTour, setIsCheckingTour] = useState(true);
+  const { scrollToElement } = useScroll();
+  const { setElementPositions } = useTour();
+  const ActionButtonsRef = useRef(null);
+  
+  const handleLayout = (key, event) => {
+    const { x, y, width, height } = event.nativeEvent.layout;
+  
+    setElementPositions((prev) => ({
+      ...prev,
+      [key]: { x, y, width, height },
+    }));
+  };
+
+  const stepsContent = [
+    {
+      key: 'dateCarousel',
+      message: 'Aqui você pode escolher o período de visualização.',
+      position: elementPositions['dateCarousel'],
+      offsetTop: 70,
+    },
+    {
+      key: 'baseCarousel',
+      message: 'Aqui é o total de dinheiro que seu negócio tem em bancos e em espécie. A cada entrada ou saída esse valor é atualizado automaticamente.',
+      position: elementPositions['baseCarousel'],
+      offsetTop: 90,
+    },
+    {
+      key: 'SalesChartCard',
+      message: 'Sempre que você tocar neste ícone, uma explicação ira aparecer.',
+      position: elementPositions['SalesChartCard'],
+      offsetTop: -60,
+    },
+    {
+      key: 'FilteredListCard',
+      message: 'Aqui serão listadas as entrada e saídas uma a uma.',
+      position: elementPositions['FilteredListCard'],
+      offsetTop: -40,
+    },
+    {
+      key: 'ActionButtonsRef',
+      message: 'Por aqui você insere vendas e despesas, realiza consultas, cadastra produtos, e muito mais.',
+      position: elementPositions['ActionButtonsRef'],
+      offsetTop: 440, // Ajuste para que o modal fique acima do botão
+    },
+  ];
+
+  useEffect(() => {
+    const checkTourStatus = async () => {
+      const tourCompleted = await AsyncStorage.getItem('tourCompleted');
+      if (!tourCompleted) {
+        setIsTourVisible(true);
+      }
+      setIsCheckingTour(false);
+    };
+    checkTourStatus();
+  }, [setIsTourVisible]);
+
+  const handleNextStep = () => {
+    const currentKey = stepsContent[currentStep - 1]?.key;
+    if (currentKey) {
+      scrollToElement(currentKey, elementPositions); // Aciona o scroll
+    }
+    setCurrentStep((prev) => Math.min(prev + 1, stepsContent.length));
+  };
+
+  const handleCloseTour = async () => {
+    setIsTourVisible(false);
+    await AsyncStorage.setItem('tourCompleted', 'true');
+  };
+
+  if (isCheckingTour) {
+    return null; // Ou carregando...
+  }
+
+  const currentStepData = stepsContent[currentStep - 1];
+
   return (
     <>
+    
       <TabArea>
         <TabItem onPress={() => goTo('Resumo')}>
           {state.index === 0 ? (
@@ -118,7 +199,7 @@ export default ({ state, navigation }) => {
           )}
         </TabItem>
 
-        <TabItemCenter>
+        <TabItemCenter ref={ActionButtonsRef} onLayout={(event) => handleLayout('ActionButtonsRef', event)}>
           <ActionButtons navigation={navigation} />
         </TabItemCenter>
 
@@ -159,6 +240,17 @@ export default ({ state, navigation }) => {
         setNotify={setNotify}
         onClose={() => setModalVisible(false)}
       />
+      {isTourVisible && (
+        <TourModal
+        step={currentStep}
+        totalSteps={stepsContent.length}
+        message={currentStepData?.message}
+        position={currentStepData?.position || { x: 0, y: 0, width: 300, height: 100 }}
+        offsetTop={currentStepData?.offsetTop || 10} // Passa o ajuste específico
+        onNext={handleNextStep}
+        onClose={handleCloseTour}
+      />
+      )}
     </>
   );
 };

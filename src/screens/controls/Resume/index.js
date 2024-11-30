@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
-import React, { useCallback, useEffect, useState } from 'react';
-import { KeyboardAvoidingView, ScrollView, View, Text, TouchableOpacity, ActivityIndicator, Alert, BackHandler } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { KeyboardAvoidingView, ScrollView, View, Text, Alert, BackHandler, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS } from '../../../constants';
 import BarTop from '../../../components/BarTop';
@@ -16,6 +16,8 @@ import { API_BASE_URL } from '../../../services/apiConfig';
 import mixpanel from '../../../services/mixpanelClient';
 import moment from 'moment-timezone';
 import BaseCarousel from './components/Carousel/BaseCarousel';
+import { useTour } from './components/TourContext';
+import { useScroll } from './components/ScrollContext';
 
 
 const MainMenu = ({ navigation }) => {
@@ -24,7 +26,24 @@ const MainMenu = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
   const [empresaId, setEmpresaId] = useState(null);
+  const { elementPositions, setElementPositions } = useTour();
+  const dateCarouselRef = useRef(null);
+  const baseCarouselRef = useRef(null);
+  const SalesChartCardRef = useRef(null);
+  const FilteredListCardRef = useRef(null);
+  const { scrollViewRef } = useScroll();
 
+  const handleDelayedLayout = (key, ref) => {
+    setTimeout(() => {
+      ref.current?.measure((fx, fy, width, height, px, py) => {
+        setElementPositions((prev) => ({
+          ...prev,
+          [key]: { x: px, y: py, width, height },
+        }));
+      });
+    }, 500); // Atraso de 500ms
+  };
+    
     // Função para lidar com o botão de voltar do dispositivo
     useFocusEffect(
       useCallback(() => {
@@ -126,13 +145,6 @@ useEffect(() => {
     }
   }, [selectedDate, fetchSaldoCaixa]);
 
-  const formatCurrency = (value) => {
-    const numericValue = parseFloat(value);
-    if (isNaN(numericValue)) return '0,00';
-
-    const formattedValue = Math.abs(numericValue).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    return numericValue < 0 ? `-R$ ${formattedValue}` : `R$ ${formattedValue}`;
-  };
 
 // Função de inicialização para exibir o modal apenas se necessário
 const initializeDateFilter = useCallback(async () => {
@@ -180,26 +192,34 @@ const initializeDateFilter = useCallback(async () => {
 
   return (
     <KeyboardAvoidingView behavior="position" enabled>
-      <ScrollView style={{ backgroundColor: "#FDFCF0" }}>
+      <ScrollView ref={scrollViewRef} style={{ backgroundColor: "#FDFCF0" }}>
         <BarTop
           subtitulo={'Célere'}
           backColor={COLORS.primary}
           foreColor={'#000000'}
         />
-        <View style={styles.container}>
-          <DateCarousel onDateSelected={(startDate, endDate) => handleDateChange(startDate, endDate)} />
+        <View ref={dateCarouselRef} onLayout={() => handleDelayedLayout('dateCarousel', dateCarouselRef)}
+        style={styles.container}>
+          <DateCarousel  onDateSelected={(startDate, endDate) => handleDateChange(startDate, endDate)} />
           <Text style={styles.label}>Resumo do dia</Text>
 
-          <BaseCarousel
-            empresaId={empresaId}
-            selectedDate={selectedDate}
-            onAdjustPress={() => setIsModalVisible(true)}
-          />
-          <View style={styles.ContainerCircle}>
+          <View
+            ref={baseCarouselRef}
+            onLayout={() => handleDelayedLayout('baseCarousel', baseCarouselRef)}
+            style={{ flex: 1 }}
+          >
+            <BaseCarousel
+              empresaId={empresaId}
+              selectedDate={selectedDate}
+              onAdjustPress={() => setIsModalVisible(true)}
+            />
+          </View>
+
+          <View ref={SalesChartCardRef} onLayout={() => handleDelayedLayout('SalesChartCard', SalesChartCardRef)} style={styles.ContainerCircle}>
             <SalesChartCard selectedDate={selectedDate} />
           </View>
           <Text style={styles.label2}>Fluxo de caixa por lançamento</Text>
-          <View style={styles.ContainerFilter}>
+          <View ref={FilteredListCardRef} onLayout={() => handleDelayedLayout('FilteredListCard', FilteredListCardRef)} style={styles.ContainerFilter}>
           <FilteredListCard
             selectedDate={selectedDate}
             navigation={navigation} 
@@ -220,4 +240,4 @@ const initializeDateFilter = useCallback(async () => {
   );
 };
 
-export default MainMenu;
+export default React.memo(MainMenu);

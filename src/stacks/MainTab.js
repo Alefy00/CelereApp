@@ -9,6 +9,7 @@ import Vencendo from '../screens/controls/Expiring';
 import Microphone from '../screens/controls/Microphone';
 import FluxoCaixa from '../screens/controls/CashFlow';
 import Menu from '../screens/controls/MainMenu';
+import { ScrollProvider } from '../screens/controls/Resume/components/ScrollContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -37,18 +38,20 @@ export default () => {
   }, []);
 
   return (
+    <ScrollProvider>
     <Tab.Navigator
-      tabBar={props => !isKeyboardVisible && <CustomTabBar {...props} />}  // Oculta o tab bar se o teclado estiver visível
+      tabBar={props => !isKeyboardVisible && <CustomTabBar {...props} />}
       initialRouteName="Resumo"
       screenOptions={{
         headerShown: false,
       }}
     >
-      <Tab.Screen name="Resumo" component={Resumo} />
+      <Tab.Screen name="Resumo" component={Resumo}  />
       <Tab.Screen name="Vencendo" component={Vencendo} />
     
       <Tab.Screen name="FluxoCaixa" component={FluxoCaixa} />
       <Tab.Screen name="Menu" component={Menu} />
     </Tab.Navigator>
+    </ScrollProvider>
   );
 };
