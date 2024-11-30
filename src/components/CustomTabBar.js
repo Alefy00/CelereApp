@@ -1,5 +1,4 @@
 /* eslint-disable prettier/prettier */
-/* eslint-disable prettier/prettier */
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components/native';
 import { COLORS } from '../constants';

@@ -32,6 +32,7 @@ const MainMenu = ({ navigation }) => {
   const SalesChartCardRef = useRef(null);
   const FilteredListCardRef = useRef(null);
   const { scrollViewRef } = useScroll();
+  const { isTourVisible } = useTour();
 
   const handleDelayedLayout = (key, ref) => {
     setTimeout(() => {
@@ -125,6 +126,17 @@ useEffect(() => {
   const setModalDismissed = async () => {
     await AsyncStorage.setItem('openingBalanceDismissed', 'true');
   };
+
+  useEffect(() => {
+    const checkAndShowOpeningBalance = async () => {
+      const modalDismissed = await checkModalStatus();
+      if (!isTourVisible && !modalDismissed && saldoCaixa === 0) {
+        setIsModalVisible(true); // Exibe o OpeningBalanceModal somente após o TourModal ser concluído
+      }
+    };
+
+    checkAndShowOpeningBalance();
+  }, [isTourVisible, saldoCaixa]);
 
   useFocusEffect(
     useCallback(() => {
@@ -228,7 +240,7 @@ const initializeDateFilter = useCallback(async () => {
           </View>
         </View>
         <OpeningBalanceModal
-          visible={isModalVisible}
+          visible={isModalVisible && !isTourVisible}
           onClose={handleModalClose}
           onBalanceSaved={() => {
             fetchSaldoCaixa(); // Chama fetchSaldoCaixa após salvar o saldo inicial
@@ -240,4 +252,4 @@ const initializeDateFilter = useCallback(async () => {
   );
 };
 
-export default React.memo(MainMenu);
+export default MainMenu;
