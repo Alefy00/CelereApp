@@ -1,5 +1,6 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef  } from 'react';
+import { Dimensions, PixelRatio } from 'react-native';
 import styled from 'styled-components/native';
 import { COLORS } from '../constants';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -93,6 +94,9 @@ export default ({ state, navigation }) => {
   const { scrollToElement } = useScroll();
   const { setElementPositions } = useTour();
   const ActionButtonsRef = useRef(null);
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  const scaleFactor = PixelRatio.get();
+
   
   const handleLayout = (key, event) => {
     const { x, y, width, height } = event.nativeEvent.layout;
@@ -102,39 +106,40 @@ export default ({ state, navigation }) => {
       [key]: { x, y, width, height },
     }));
   };
-
+  
   const stepsContent = [
     {
       key: 'dateCarousel',
       message: 'Aqui você pode escolher o período de visualização.',
       position: elementPositions['dateCarousel'],
-      offsetTop: 70,
+      offsetTop: screenHeight * 0.25 / scaleFactor ,
     },
     {
       key: 'baseCarousel',
       message: 'Aqui é o total de dinheiro que seu negócio tem em bancos e em espécie. A cada entrada ou saída esse valor é atualizado automaticamente.',
       position: elementPositions['baseCarousel'],
-      offsetTop: 90,
+      offsetTop: screenHeight * 0.33 / scaleFactor ,
     },
     {
       key: 'SalesChartCard',
       message: 'Sempre que você tocar neste ícone, uma explicação ira aparecer.',
       position: elementPositions['SalesChartCard'],
-      offsetTop: -60,
+      offsetTop: -screenHeight * 0.23 / scaleFactor ,
     },
     {
       key: 'FilteredListCard',
       message: 'Aqui serão listadas as entrada e saídas uma a uma.',
       position: elementPositions['FilteredListCard'],
-      offsetTop: -40,
+      offsetTop: -screenHeight * 0.25 / scaleFactor ,
     },
     {
       key: 'ActionButtonsRef',
       message: 'Por aqui você insere vendas e despesas, realiza consultas, cadastra produtos, e muito mais.',
       position: elementPositions['ActionButtonsRef'],
-      offsetTop: 440, // Ajuste para que o modal fique acima do botão
+      offsetTop: screenHeight * 1.6 / scaleFactor,
     },
   ];
+
 
   useEffect(() => {
     const checkTourStatus = async () => {

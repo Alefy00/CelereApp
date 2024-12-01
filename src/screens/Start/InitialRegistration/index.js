@@ -246,6 +246,7 @@ const InitialRegistration = ({ navigation }) => {
             value={isPrivacyChecked}
             onValueChange={setIsPrivacyChecked}
             tintColors={{ true: '#000', false: '#000' }}
+            style={{textAlign: "center",justifyContent: "center", marginLeft: 20}}
           />
           <Text style={styles.privacyText}>
             Eu concordo com a{' '}

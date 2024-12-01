@@ -1,29 +1,34 @@
 /* eslint-disable prettier/prettier */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, PixelRatio } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 
 const TourModal = ({ step, totalSteps, message, onNext, onPrevious, onClose, position, offsetTop = 10, }) => {
   const hasPosition = position && !isNaN(position.x) && !isNaN(position.y);
-
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  const scaleFactor = PixelRatio.get();
+  const insets = useSafeAreaInsets();
+  
   const modalStyle = hasPosition
-  ? {
-      position: 'absolute',
-      top: position.y + offsetTop, // Ajuste dinâmico para o passo atual
-      left: Math.max(position.x + position.width / 2 - 175, 0),
-    }
-  : {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: [{ translateX: -150 }, { translateY: -75 }],
-    };
+    ? {
+        position: 'absolute',
+        top: Math.min(position.y + offsetTop, screenHeight - 150), // Evitar que ultrapasse a tela
+        left: Math.min(Math.max(position.x + position.width / 2 - 175, 10), screenWidth - 350), // Centralizado e sem ultrapassar a tela
+      }
+    : {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: [{ translateX: -150 }, { translateY: -75 }],
+      };
 
     const arrowStyle = hasPosition
     ? {
         position: 'absolute',
-        top: step === totalSteps ? 150 : -10, // Abaixo do modal no último passo
-        left: 175, // Centraliza horizontalmente
+        top: step === totalSteps ? screenHeight * 0.205 : -screenHeight * 0.013, // Dinâmico para último passo
+        left: Math.min(175, screenWidth - 50),
         transform: step === totalSteps ? [{ rotate: '180deg' }] : [], // Gira a seta para baixo no último passo
       }
     : {

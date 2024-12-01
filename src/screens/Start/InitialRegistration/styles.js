@@ -135,15 +135,20 @@ const styles = StyleSheet.create({
   privacyContainer:{
     marginTop: -20,
     flexDirection: 'row',
-    alignItems:'center'
+    alignItems:'center',
+    textAlign: "center",
   },
   privacyLink:{
     textDecorationLine:'underline',
     textDecorationColor:'#000',
-    color: '#000'
+    color: '#000',
+    fontSize: 12,
   },
   privacyText:{
-    color: '#000'
+    color: '#000',
+    width: '100%',
+    fontSize: 12,
+    
   }
 });
 

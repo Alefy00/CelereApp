@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, ScrollView, View, Text, Alert, BackHandler, StyleSheet } from 'react-native';
+import { KeyboardAvoidingView, ScrollView, View, Text, Alert, BackHandler, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS } from '../../../constants';
 import BarTop from '../../../components/BarTop';
@@ -33,6 +33,7 @@ const MainMenu = ({ navigation }) => {
   const FilteredListCardRef = useRef(null);
   const { scrollViewRef } = useScroll();
   const { isTourVisible } = useTour();
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
   const handleDelayedLayout = (key, ref) => {
     setTimeout(() => {
@@ -218,7 +219,7 @@ const initializeDateFilter = useCallback(async () => {
           <View
             ref={baseCarouselRef}
             onLayout={() => handleDelayedLayout('baseCarousel', baseCarouselRef)}
-            style={{ flex: 1 }}
+            style={{ flex: 1 ,marginBottom: screenHeight * 0.01}}
           >
             <BaseCarousel
               empresaId={empresaId}
