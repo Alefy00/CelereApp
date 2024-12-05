@@ -31,11 +31,6 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route, setPro
   const [installmentValue, setInstallmentValue] = useState(0);
   const [saleId, setSaleId] = useState(null); // Estado para armazenar o ID da venda
 
-    // Função para mostrar alertas
-    const showAlert = (title, message) => {
-      Alert.alert(title, message);
-    };
-
     // Função para buscar o ID da empresa logada
     const getEmpresaId = useCallback(async () => {
       try {
@@ -43,7 +38,7 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route, setPro
         if (storedEmpresaId) {
           return Number(storedEmpresaId); // Converte para número se estiver como string
         } else {
-          showAlert('Erro', 'ID da empresa não encontrado.');
+          Alert('Erro', 'ID da empresa não encontrado.');
           return null;
         }
       } catch (error) {
@@ -140,10 +135,7 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route, setPro
         tipo_pagamento_venda: selectedPaymentMethod, // ID da forma de pagamento selecionada
         valor_total_venda: totalValue, // Valor bruto a receber
       };
-  
-      // Log do payload para conferência
-      console.log('Payload da requisição:', vendaData);
-  
+    
       const vendaResponse = await axios.post(`${API_BASE_URL}/cad/vendas/`, vendaData);
   
       const vendaId = vendaResponse.data.data.id;
@@ -157,21 +149,17 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route, setPro
         percentual_desconto: discountType === '%' ? parseFloat(discountValue) || 0 : 0, // Garante 0 para percentual
         valor_desconto: discountType === 'R$' ? discount / products.length : 0,
       }));
-  
-      // Log dos itens da venda
-      console.log('Itens da venda:', saleItems);
-  
+    
       const responsePromises = saleItems.map(item =>
         axios.post(`${API_BASE_URL}/cad/itens_venda/`, item)
       );
   
       await Promise.all(responsePromises);
-  
       setSaleId(vendaId);
       setIsModalVisible(true);
   
       // Rastrear a venda concluída no Mixpanel
-      mixpanel.track('Venda Concluída', {
+      mixpanel.track('Venda Concluída Pagar agora', {
         vendaId: vendaId,
         totalPreco: totalValue,
         desconto: discountValue || 0, // Garante 0 para rastreamento
@@ -213,7 +201,7 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route, setPro
 
   const handleCloseModal = () => {
     setIsModalVisible(false);
-    navigation.navigate('MainTab')
+    navigation.navigate('MainTab');
   };
 
 // Função para calcular o valor líquido considerando o desconto e calcular o valor das parcelas

@@ -1,4 +1,5 @@
-// https://github.com/DieguinhoHR/react-js-masks/blob/master/src/utils/masks.js
+/* eslint-disable prettier/prettier */
+
 export const cpfMask = value => {
   let cpfFmt = value
     .replace(/\D/g, '') // substitui qualquer caractere que não seja número por nada

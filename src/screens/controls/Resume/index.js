@@ -8,7 +8,6 @@ import DateCarousel from './components/DateCarousel';
 import styles from './styles';
 import SalesChartCard from './components/SalesChartCard';
 import FilteredListCard from './components/FilteredListCard';
-import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import OpeningBalanceModal from './components/OpeningBalanceModal';
 import { useFocusEffect } from '@react-navigation/native';
@@ -34,6 +33,7 @@ const MainMenu = ({ navigation }) => {
   const { scrollViewRef } = useScroll();
   const { isTourVisible } = useTour();
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  const startTimeRef = useRef(null);
 
   const handleDelayedLayout = (key, ref) => {
     setTimeout(() => {
@@ -78,6 +78,7 @@ const MainMenu = ({ navigation }) => {
       console.error('Erro ao obter o ID da empresa do AsyncStorage:', error);
     }
   }, []);
+  
 // Atualize a função fetchSaldoCaixa para lidar com saldos negativos
 const fetchSaldoCaixa = useCallback(async () => {
   try {
@@ -177,9 +178,18 @@ const initializeDateFilter = useCallback(async () => {
     setSelectedDate({ dt_ini: startDate, dt_end: endDate });
   }, []);
 
-  useEffect(() => {
-    mixpanel.track('Tela principal Exibida');
-  }, []);
+ // Inicia o temporizador quando a tela é exibida
+ useFocusEffect(
+  useCallback(() => {
+    startTimeRef.current = Date.now();
+    return () => {
+      // Calcula o tempo de permanência quando o usuário sai da tela
+      const endTime = Date.now();
+      const durationInSeconds = (endTime - startTimeRef.current) / 1000;
+      mixpanel.track('Tempo na Tela Principal', { durationInSeconds });
+    };
+  }, [])
+);
 
   // Modifique handleModalClose para definir que o modal foi "deixado para depois" quando fechado
   const handleModalClose = useCallback(() => {

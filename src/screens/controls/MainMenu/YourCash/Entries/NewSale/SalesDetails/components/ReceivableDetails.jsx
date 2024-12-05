@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, TouchableOpacity, ScrollView, FlatList, TextInput, Image, Modal, Alert } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Image, Modal, Alert } from "react-native";
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from "./styles";
 import { COLORS } from "../../../../../../../../constants";
@@ -23,10 +23,6 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation, setProdu
   const [liquidValue, setLiquidValue] = useState(totalPrice);  // Estado para armazenar o valor líquido após desconto
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
 
-  // Função para mostrar alertas
-  const showAlert = (title, message) => {
-    Alert.alert(title, message);
-  };
 
   // Função para buscar o ID da empresa logada
   const getEmpresaId = useCallback(async () => {
@@ -35,7 +31,7 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation, setProdu
       if (storedEmpresaId) {
         return Number(storedEmpresaId); // Converte para número se estiver como string
       } else {
-        showAlert('Erro', 'ID da empresa não encontrado.');
+        Alert('Erro', 'ID da empresa não encontrado.');
         return null;
       }
     } catch (error) {
@@ -67,7 +63,6 @@ const ReceivableDetails = ({ products, totalPrice, clients, navigation, setProdu
   };
 
   const handleConfirm = () => {
-        // Navega ou limpa o carrinho após o registro
     navigation.navigate('NewRegisteredSale', { clearCart: true });
   };
 
