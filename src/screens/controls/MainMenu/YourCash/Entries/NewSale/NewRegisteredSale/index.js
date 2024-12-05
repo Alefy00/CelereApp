@@ -419,7 +419,7 @@ useFocusEffect(
       <View style={styles.confirmationCard}>
             <Text style={styles.totalPrice}>Total: R${totalPrice.toFixed(2)}</Text>
             <TouchableOpacity style={styles.confirmButton} onPress={handleNext}>
-              <Icon name="checkmark-circle" size={25} color={COLORS.black} />
+              <Icon name="checkmark-circle" size={22} color={COLORS.black} />
               <Text style={styles.confirmButtonText}>Confirmar essa venda</Text>
             </TouchableOpacity>
           </View>

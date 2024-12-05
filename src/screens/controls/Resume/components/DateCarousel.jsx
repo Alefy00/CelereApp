@@ -13,19 +13,19 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
   const flatListRef = useRef(null);
   const [initialized, setInitialized] = useState(false); 
 
-  const adjustDateToBrasiliaTimezone = (date) => {
-    return moment(date).tz('America/Sao_Paulo').toDate();
-  };
+  // Gera as datas como strings formatadas no timezone de Brasília
   const generatePastDates = () => {
     const today = moment().tz('America/Sao_Paulo');
     const datesArray = [];
     for (let i = 0; i < 30; i++) {
-      const date = today.clone().subtract(i, 'days');
-      datesArray.push(date.toDate());
+      const date = today.clone().subtract(i, 'days').format('YYYY-MM-DD');
+      datesArray.push(date);
     }
     return datesArray;
   };
 
+
+  
   const [dates, setDates] = useState(generatePastDates());
 
   useEffect(() => {
@@ -36,24 +36,23 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
       }, 100);
   
       // Define apenas a data visualmente ao montar o componente
-      setSelectedDate(new Date());
+      setSelectedDate(moment().tz('America/Sao_Paulo').format('YYYY-MM-DD'));
       setInitialized(true); // Marca como inicializado
     }
   }, [initialized]);
 
   const renderItem = ({ item }) => {
-    const isSelected = item.getDate() === selectedDate.getDate() && item.getMonth() === selectedDate.getMonth();
+    const isSelected = item === selectedDate;
     return (
       <TouchableOpacity
         style={[styles.dateContainer, isSelected && styles.selectedDateContainer]}
         onPress={() => {
           setSelectedDate(item);
-          const formattedDate = moment(item).tz('America/Sao_Paulo').format('YYYY-MM-DD');
-          onDateSelected(formattedDate, formattedDate);
+          onDateSelected(item, item); // Passa a data como string formatada
         }}
       >
         <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
-          {item.getDate().toString().padStart(2, '0')}
+        {moment(item).tz('America/Sao_Paulo').date().toString().padStart(2, '0')}
         </Text>
         <Text style={[styles.monthText, isSelected && styles.selectedDateText]}>
           {moment(item).tz('America/Sao_Paulo').format('MMM').toUpperCase()}
@@ -73,7 +72,7 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
           ref={flatListRef}
           data={dates}
           renderItem={renderItem}
-          keyExtractor={(item) => item.getTime().toString()}
+          keyExtractor={(item) => item}
           horizontal
           inverted
           showsHorizontalScrollIndicator={false}

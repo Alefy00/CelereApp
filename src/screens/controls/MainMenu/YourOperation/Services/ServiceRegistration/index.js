@@ -299,13 +299,6 @@ const handleSelectImage = async () => {
             multiline
             />
         </View>
-            {/*
-              <View style={styles.checkboxContainer}>
-                <TouchableOpacity onPress={handlePriceCheckboxChange} style={styles.checkbox}>
-                  <Icon name={isPriceDisabled ? 'checkbox' : 'square-outline'} size={24} color={COLORS.black} />
-                </TouchableOpacity>
-                <Text style={styles.checkboxLabel}>Não inserir preço neste momento</Text>
-              </View>*/}
 
 <View style={styles.section}>
   <Text style={styles.sectionTitle}>Valores do Serviço</Text>

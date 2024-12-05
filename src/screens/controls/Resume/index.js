@@ -202,6 +202,12 @@ const initializeDateFilter = useCallback(async () => {
     setSelectedDate((prevDate) => ({ ...prevDate })); // Isso força uma re-renderização do componente com a mesma data.
   }, []);
   
+  useFocusEffect(
+    useCallback(() => {
+      // Quando a tela ganha foco, dispara a lógica de atualização
+      setSelectedDate((prev) => ({ ...prev })); // Garante que a data seja repassada ao BaseCarousel
+    }, [])
+  );
 
   return (
     <KeyboardAvoidingView behavior="position" enabled>

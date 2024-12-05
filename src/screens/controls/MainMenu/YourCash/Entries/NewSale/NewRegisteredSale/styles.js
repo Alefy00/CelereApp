@@ -15,11 +15,11 @@ const styles = StyleSheet.create({
   registerButton: {
     backgroundColor: COLORS.primary,
     paddingVertical: 10,
-    paddingHorizontal: 80,
     borderRadius: 5,
     marginBottom: 10,
     flexDirection: 'row',
     width: "100%",
+    justifyContent: "center",
   },
   registerButtonText: {
     color: COLORS.black,
@@ -137,15 +137,15 @@ const styles = StyleSheet.create({
   confirmButton: {
     backgroundColor: COLORS.primary,
     paddingVertical: 10,
-    paddingHorizontal: 20,
     borderRadius: 5,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between'
+    justifyContent: "center",
+
   },
   confirmButtonText: {
     color: COLORS.black,
-    fontSize: 16,
+    fontSize: 15,
     paddingLeft:10,
   },
   barcodeButton: {
