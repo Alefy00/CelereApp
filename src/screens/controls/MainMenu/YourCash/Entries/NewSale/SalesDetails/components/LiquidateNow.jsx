@@ -88,7 +88,6 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route, setPro
   }, []);
 
   const handleConfirm = () => {
-        // Navegar ou limpar o carrinho após isso
         navigation.navigate('NewRegisteredSale', { clearCart: true });
   };
 
@@ -159,7 +158,7 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route, setPro
       setIsModalVisible(true);
   
       // Rastrear a venda concluída no Mixpanel
-      mixpanel.track('Venda Concluída Pagar agora', {
+      mixpanel.track('Venda Produto Pagar agora', {
         vendaId: vendaId,
         totalPreco: totalValue,
         desconto: discountValue || 0, // Garante 0 para rastreamento
@@ -246,11 +245,6 @@ const formatCurrency = (value) => {
 const removeProduct = (productId) => {
   const updatedProducts = products.filter(product => product.id !== productId);
   setProducts(updatedProducts); // Atualiza o estado no componente pai
-
-  // Opcional: Rastrear no Mixpanel a remoção de produto
-  mixpanel.track('Produto Removido do Carrinho', {
-    produtoId: productId,
-  });
 };
 
 useEffect(() => {
@@ -258,6 +252,25 @@ useEffect(() => {
   const newTotal = products.reduce((total, product) => total + (product.preco_venda * product.amount), 0);
   setLiquidValue(newTotal);
 }, [products]); // Observa mudanças em products
+
+useEffect(() => {
+  const startTime = Date.now();
+
+  return () => {
+    const endTime = Date.now();
+    const durationInSeconds = (endTime - startTime) / 1000;
+
+    const hours = Math.floor(durationInSeconds / 3600);
+    const minutes = Math.floor((durationInSeconds % 3600) / 60);
+    const seconds = Math.floor(durationInSeconds % 60);
+
+    const formattedDuration = `${hours}h ${minutes}m ${seconds}s`;
+
+    mixpanel.track('Tempo na Tela Venda Produtos Pagar agora', {
+      formattedDuration,
+    });
+  };
+}, []);
 
 
   return (

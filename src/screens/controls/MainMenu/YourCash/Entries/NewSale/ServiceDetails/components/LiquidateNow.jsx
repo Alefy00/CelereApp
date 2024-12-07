@@ -36,19 +36,6 @@ const LiquidateNow = ({ navigation, route, clients }) => {
   const [saleId, setSaleId] = useState(null);
   const [servicePrices, setServicePrices] = useState({});
 
-  const handleServicePriceChange = (serviceId, text) => {
-    let numericValue = text.replace(/\D/g, ''); // Remove caracteres não numéricos
-    numericValue = (numericValue / 100).toFixed(2); // Formata para centavos
-    setServicePrices(prevPrices => ({
-      ...prevPrices,
-      [serviceId]: numericValue,
-    }));
-  };
-      // Função para mostrar alertas
-      const showAlert = (title, message) => {
-        Alert.alert(title, message);
-      };
-
       // Função para buscar o ID da empresa logada
       const getEmpresaId = useCallback(async () => {
         try {
@@ -56,7 +43,7 @@ const LiquidateNow = ({ navigation, route, clients }) => {
           if (storedEmpresaId) {
             return Number(storedEmpresaId); // Converte para número se estiver como string
           } else {
-            showAlert('Erro', 'ID da empresa não encontrado.');
+            Alert('Erro', 'ID da empresa não encontrado.');
             return null;
           }
         } catch (error) {
@@ -220,8 +207,6 @@ const handleRegisterSale = async () => {
       gastos_envolvidos: parseFloat(additionalCosts || 0).toFixed(2),
     };
 
-    console.log('Payload da venda a ser enviada:', vendaData);
-
     // Registrar a venda
     const vendaResponse = await axios.post(`${API_BASE_URL}/cad/vendas/`, vendaData);
     const vendaId = vendaResponse.data.data.id;
@@ -279,10 +264,6 @@ const handleRegisterSale = async () => {
     setPaymentType(option);
     setInstallments(parseInt(option));  // Define o número de parcelas com base na escolha
     setIsPaymentDropdownVisible(false);
-      // Evento Mixpanel - Captura a escolha de parcelas
-  mixpanel.track('Pagamento Parcelado Selecionado', {
-    numeroParcelas: option,
-  });
   };
 
 // Função para calcular o total dos produtos e serviços, com aplicação do desconto
@@ -298,7 +279,6 @@ const calculateTotal = useCallback(() => {
       : servicePrices[service.id] || 0; // Usa o preço inserido no input se o preço for zero
     return sum + ((parseFloat(servicePrice) || 0) * (service.amount || 1));
   }, 0);
-  
 
   // Calcular o total geral (produtos + serviços + custos adicionais)
   let total = totalProductPrice + totalServicePrice + parseFloat(additionalCosts || 0);
@@ -335,8 +315,6 @@ useEffect(() => {
 
   const handleAddProduct = () => {
       navigation.navigate('NewRegisteredSale');
-
-      mixpanel.track('Adicionar Produtos');
   };
 
   const handleOpenInvoiceModal = () => {
@@ -449,7 +427,6 @@ useEffect(() => {
     </View>
   </>
 )}
-
 {products.length > 0 && (
         <>
           <Text style={styles.sectionTitle}>Produtos</Text>

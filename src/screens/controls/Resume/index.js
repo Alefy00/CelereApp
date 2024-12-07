@@ -178,18 +178,27 @@ const initializeDateFilter = useCallback(async () => {
     setSelectedDate({ dt_ini: startDate, dt_end: endDate });
   }, []);
 
- // Inicia o temporizador quando a tela é exibida
- useFocusEffect(
-  useCallback(() => {
-    startTimeRef.current = Date.now();
-    return () => {
-      // Calcula o tempo de permanência quando o usuário sai da tela
-      const endTime = Date.now();
-      const durationInSeconds = (endTime - startTimeRef.current) / 1000;
-      mixpanel.track('Tempo na Tela Principal', { durationInSeconds });
-    };
-  }, [])
-);
+  useFocusEffect(
+    useCallback(() => {
+      startTimeRef.current = Date.now();
+      return () => {
+        const endTime = Date.now();
+        const durationInSeconds = (endTime - startTimeRef.current) / 1000;
+
+        const hours = Math.floor(durationInSeconds / 3600);
+        const minutes = Math.floor((durationInSeconds % 3600) / 60);
+        const seconds = Math.floor(durationInSeconds % 60);
+
+        // Formate para um string legível
+        const formattedDuration = `${hours}h ${minutes}m ${seconds}s`;
+
+        // Envie para o Mixpanel
+        mixpanel.track('Tempo na Tela Principal', {
+          formattedDuration,
+        });
+      };
+    }, [])
+  );
 
   // Modifique handleModalClose para definir que o modal foi "deixado para depois" quando fechado
   const handleModalClose = useCallback(() => {

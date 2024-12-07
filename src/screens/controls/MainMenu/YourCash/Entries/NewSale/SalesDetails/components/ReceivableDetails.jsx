@@ -136,6 +136,13 @@ const handleRegisterSale = async () => {
     const responsePromises = saleItems.map(item =>
       axios.post(`${API_BASE_URL}/cad/itens_venda/`, item)
     );
+    mixpanel.track('Venda Produto Contas a Pagar ', {
+      clienteId: selectedClient.id,
+      clienteNome: selectedClient.nome,
+      valorTotal: liquidValue,
+      desconto: discountValue,
+      metodoPagamento: paymentMethod,
+    });
     await Promise.all(responsePromises);
     setIsModalVisible(true);
 
@@ -177,7 +184,26 @@ const handleRegisterSale = async () => {
   useEffect(() => {
     const newTotal = products.reduce((total, product) => total + (product.preco_venda * product.amount), 0);
     setLiquidValue(newTotal); // Atualiza o valor líquido
-  }, [products]); // Observa mudanças em products  
+  }, [products]); // Observa mudanças em products
+
+  useEffect(() => {
+    const startTime = Date.now();
+  
+    return () => {
+      const endTime = Date.now();
+      const durationInSeconds = (endTime - startTime) / 1000;
+  
+      const hours = Math.floor(durationInSeconds / 3600);
+      const minutes = Math.floor((durationInSeconds % 3600) / 60);
+      const seconds = Math.floor(durationInSeconds % 60);
+  
+      const formattedDuration = `${hours}h ${minutes}m ${seconds}s`;
+  
+      mixpanel.track('Tempo na Tela Venda Produtos Contas a Receber', {
+        formattedDuration,
+      });
+    };
+  }, []);
 
   return (
     <View style={styles.container}>
