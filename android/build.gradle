@@ -1,18 +1,19 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
     ext {
         buildToolsVersion = "34.0.0"
-        minSdkVersion = 21
+        minSdkVersion = 28
         compileSdkVersion = 34
         targetSdkVersion = 34
         ndkVersion = "25.1.8937393"
         kotlinVersion = "1.8.0"
+        zoopSdkVersion = "1.3.2" // Substitua pela versão correta do SDK Zoop.
     }
+
     repositories {
         google()
         mavenCentral()
     }
+
     dependencies {
         classpath("com.android.tools.build:gradle:8.0.2")
         classpath("com.facebook.react:react-native-gradle-plugin:0.71.3")
@@ -26,9 +27,15 @@ allprojects {
         mavenCentral()
         google()
         maven { url "$rootDir/../node_modules/react-native/android" }
+        maven {
+            url = uri("https://maven.pkg.github.com/getzoop/zoop-package-public")
+            credentials {
+                username = "Alefy00"
+                password = password = "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"
+            }
+        }
     }
-    
 }
 
-apply plugin: "com.facebook.react.rootproject"
 
+apply plugin: "com.facebook.react.rootproject"
