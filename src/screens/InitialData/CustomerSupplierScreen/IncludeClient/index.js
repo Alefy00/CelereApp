@@ -1,19 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Modal,
-  TouchableWithoutFeedback,
-  Keyboard,
-  SafeAreaView,
-  Alert,
-  PermissionsAndroid,
-  FlatList,  // Para exibir a lista de contatos
-} from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, Modal, TouchableWithoutFeedback, Keyboard, SafeAreaView,  Alert, PermissionsAndroid, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './styles';
 import BarTop3 from '../../../../components/BarTop3';
@@ -22,6 +9,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Contacts from 'react-native-contacts';  // Biblioteca para acessar contatos
 import { API_BASE_URL } from '../../../../services/apiConfig';
+import ProminentDisclosureModal from './components/ProminentDisclosureModal';
 
 const IncludeClient = ({ navigation }) => {
   const [clientName, setClientName] = useState('');
@@ -32,6 +20,7 @@ const IncludeClient = ({ navigation }) => {
   const [empresaId, setEmpresaId] = useState(null);  // Estado para armazenar o ID da empresa
   const [contactsList, setContactsList] = useState([]);  // Estado para armazenar os contatos
   const [contactPickerVisible, setContactPickerVisible] = useState(false);  // Estado para controlar o picker de contatos
+  const [disclosureVisible, setDisclosureVisible] = useState(false);
 
   // Função para buscar o ID da empresa logada no AsyncStorage
   useEffect(() => {
@@ -52,23 +41,16 @@ const IncludeClient = ({ navigation }) => {
     fetchEmpresaId();
   }, []);
 
-  const handleFocus = () => {
-    setIsFocused(true); // Ocultar botão quando qualquer input ganhar foco
-  };
+  const handleFocus = () => { setIsFocused(true); };
+  const handleBlur = () => { setIsFocused(false); };
 
-  const handleBlur = () => {
-    setIsFocused(false); // Exibir botão quando o input perder o foco
-  };
-
-  // Função para formatar o número de telefone
   const formatPhoneNumber = (phone) => {
     if (!phone.startsWith('+55')) {
-      return `+55${phone.replace(/\D/g, '')}`;  // Adiciona o DDI +55 e remove caracteres não numéricos
+      return `+55${phone.replace(/\D/g, '')}`;
     }
     return phone;
   };
 
-  // Função para solicitar permissão de acesso aos contatos
   const requestContactsPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -83,27 +65,30 @@ const IncludeClient = ({ navigation }) => {
       );
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
         console.log("Permissão de contatos concedida");
+        return true;
       } else {
         console.log("Permissão de contatos negada");
         Alert.alert("Erro", "Permissão para acessar contatos foi negada.");
+        return false;
       }
     } catch (err) {
       console.warn(err);
+      return false;
     }
   };
 
-  // Função para pegar todos os contatos do dispositivo
   const fetchContacts = async () => {
     try {
       const hasPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_CONTACTS);
       if (!hasPermission) {
-        await requestContactsPermission();  // Solicita a permissão se ainda não foi concedida
+        const permissionGranted = await requestContactsPermission();
+        if (!permissionGranted) return;
       }
 
-      Contacts.getAll()  // Obtém todos os contatos do dispositivo
+      Contacts.getAll()
         .then(contacts => {
-          setContactsList(contacts);  // Armazena os contatos na lista
-          setContactPickerVisible(true);  // Exibe o modal com os contatos
+          setContactsList(contacts);
+          setContactPickerVisible(true);
         })
         .catch((err) => {
           console.error('Erro ao obter os contatos: ', err);
@@ -115,16 +100,14 @@ const IncludeClient = ({ navigation }) => {
     }
   };
 
-  // Função para selecionar um contato e preencher os campos
   const selectContact = (contact) => {
-    const phoneNumber = contact.phoneNumbers[0]?.number || ''; // Pega o primeiro número de telefone do contato
+    const phoneNumber = contact.phoneNumbers[0]?.number || '';
     const formattedPhone = formatPhoneNumber(phoneNumber);
-    setClientName(contact.givenName);  // Preenche o nome do cliente
-    setClientPhone(formattedPhone);  // Preenche o número de telefone formatado
-    setContactPickerVisible(false);  // Fecha o modal
+    setClientName(contact.givenName);
+    setClientPhone(formattedPhone);
+    setContactPickerVisible(false);
   };
 
-  // Função para inserir cliente na API
   const handleConfirm = async () => {
     if (!clientName) {
       Alert.alert("Erro", "Por favor, insira o nome do cliente.");
@@ -136,17 +119,17 @@ const IncludeClient = ({ navigation }) => {
       return;
     }
 
-    const formattedPhone = formatPhoneNumber(clientPhone);  // Formata o número de telefone
+    const formattedPhone = formatPhoneNumber(clientPhone);
 
     try {
       const response = await axios.post(`${API_BASE_URL}/cad/cliente/`, {
         nome: clientName,
-        celular: formattedPhone || null,  // Se não houver telefone, passa null
+        celular: formattedPhone || null,
         empresa: empresaId,
       });
 
       if (response.data && response.data.status === "success") {
-        setModalVisible(true); // Exibe o modal ao confirmar
+        setModalVisible(true);
       } else {
         Alert.alert("Erro", "Erro ao incluir o cliente. Tente novamente.");
       }
@@ -157,23 +140,37 @@ const IncludeClient = ({ navigation }) => {
   };
 
   const handleIncludeNew = () => {
-    // Limpa os campos de input
     setClientName('');
     setClientPhone('');
     setAdditionalInfo('');
-    setModalVisible(false); // Fecha o modal
+    setModalVisible(false);
   };
 
   const handleReturnToMenu = () => {
-    setModalVisible(false); // Fecha o modal
-    navigation.goBack(); // Navega para a tela do menu
+    setModalVisible(false);
+    navigation.goBack();
+  };
+
+  // Ao clicar no botão para adicionar dos contatos, primeiro mostramos o disclosure.
+  const handleAddFromContacts = () => {
+    setDisclosureVisible(true);
+  };
+
+  const handleDisclosureAgree = () => {
+    // Usuário concordou com o uso dos dados
+    setDisclosureVisible(false);
+    fetchContacts();
+  };
+
+  const handleDisclosureClose = () => {
+    // Usuário não concordou
+    setDisclosureVisible(false);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.containerBase}>
-          {/* Barra fixa no topo */}
           <View style={styles.containerBartop}>
             <BarTop3
               titulo={'Voltar'}
@@ -184,17 +181,15 @@ const IncludeClient = ({ navigation }) => {
             />
           </View>
 
-          {/* Conteúdo rolável */}
           <ScrollView contentContainerStyle={styles.scrollContent}>
             <Text style={styles.title}>Incluir clientes</Text>
 
             {/* Botão de adicionar dos contatos */}
-            <TouchableOpacity style={styles.addFromContactsButton} onPress={fetchContacts}>
+            <TouchableOpacity style={styles.addFromContactsButton} onPress={handleAddFromContacts}>
               <Icon name="person" size={24} color="black" />
               <Text style={styles.buttonText}>Adicionar dos seus contatos</Text>
             </TouchableOpacity>
 
-            {/* Campo de nome do cliente */}
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Nome do Cliente</Text>
               <TextInput
@@ -208,7 +203,6 @@ const IncludeClient = ({ navigation }) => {
               />
             </View>
 
-            {/* Campo de celular opcional */}
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Celular (Opcional)</Text>
               <TextInput
@@ -223,7 +217,6 @@ const IncludeClient = ({ navigation }) => {
               />
             </View>
 
-            {/* Campo de informações adicionais (Opcional) */}
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Informações adicionais (Opcional)</Text>
               <TextInput
@@ -238,7 +231,6 @@ const IncludeClient = ({ navigation }) => {
             </View>
           </ScrollView>
 
-          {/* Botão de confirmar visível condicionalmente */}
           {!isFocused && (
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
@@ -248,7 +240,6 @@ const IncludeClient = ({ navigation }) => {
             </View>
           )}
 
-          {/* Modal de confirmação */}
           <Modal
             animationType="fade"
             transparent={true}
@@ -259,14 +250,10 @@ const IncludeClient = ({ navigation }) => {
               <View style={styles.modalContainer}>
                 <Icon name="checkmark-circle" size={80} color={COLORS.green} />
                 <Text style={styles.modalTitle}>Inclusão de cliente realizada com sucesso!</Text>
-
-                {/* Botão Incluir novo */}
                 <TouchableOpacity style={styles.modalButton} onPress={handleIncludeNew}>
                   <Icon name="add" size={24} color={COLORS.black} />
                   <Text style={styles.modalButtonText}>Incluir novo</Text>
                 </TouchableOpacity>
-
-                {/* Botão Retornar para Menu */}
                 <TouchableOpacity style={styles.modalButtonSecondary} onPress={handleReturnToMenu}>
                   <Text style={styles.modalButtonText}>Retornar</Text>
                 </TouchableOpacity>
@@ -274,7 +261,6 @@ const IncludeClient = ({ navigation }) => {
             </View>
           </Modal>
 
-          {/* Modal para seleção de contato */}
           <Modal
             animationType="slide"
             transparent={false}
@@ -298,6 +284,12 @@ const IncludeClient = ({ navigation }) => {
             </View>
           </Modal>
 
+          {/* Modal de Prominent Disclosure */}
+          <ProminentDisclosureModal
+            visible={disclosureVisible}
+            onClose={handleDisclosureClose}
+            onAgree={handleDisclosureAgree}
+          />
         </View>
       </TouchableWithoutFeedback>
     </SafeAreaView>
