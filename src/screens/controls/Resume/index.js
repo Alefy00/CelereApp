@@ -17,7 +17,7 @@ import moment from 'moment-timezone';
 import BaseCarousel from './components/Carousel/BaseCarousel';
 import { useTour } from './components/TourContext';
 import { useScroll } from './components/ScrollContext';
-
+import { initializeZoopSDK } from '../../../services/zoopService';
 
 const MainMenu = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -34,6 +34,10 @@ const MainMenu = ({ navigation }) => {
   const { isTourVisible } = useTour();
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
   const startTimeRef = useRef(null);
+
+  useEffect(() => {
+    initializeZoopSDK();
+  }, []);
 
   const handleDelayedLayout = (key, ref) => {
     setTimeout(() => {
