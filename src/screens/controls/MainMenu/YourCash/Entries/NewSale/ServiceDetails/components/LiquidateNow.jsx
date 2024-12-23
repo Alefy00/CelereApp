@@ -358,6 +358,7 @@ useEffect(() => {
     const updatedServices = services.filter(service => service.id !== serviceId);
     setServices(updatedServices);
   };
+  
     return (
       <ScrollView style={styles.containerBase}>
       <Text style={styles.title}>Detalhes da venda</Text>
@@ -457,7 +458,7 @@ useEffect(() => {
         </>
       )}
             {/* Descontos */}
-            <Text style={styles.Desconto}>Descontos</Text>
+      <Text style={styles.Desconto}>Descontos</Text>
       <View style={styles.discountSection}>
         <TouchableOpacity
           style={[styles.discountButton, discountType === '%' && styles.activeDiscountButton]}

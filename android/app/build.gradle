@@ -54,7 +54,7 @@ dependencies {
     // AndroidX e bibliotecas de terceiros
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.0'
-    implementation("com.airbnb.android:lottie:5.2.0")
+    implementation 'com.airbnb.android:lottie:6.0.0'
 
     // Hermes ou JSC
     if (hermesEnabled.toBoolean()) {

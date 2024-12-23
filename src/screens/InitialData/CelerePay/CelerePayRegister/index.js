@@ -276,4 +276,4 @@ const CelerePayRegister = ({ navigation }) => {
     );
   };
   
-  export default CelerePayRegister;
+export default CelerePayRegister;

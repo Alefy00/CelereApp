@@ -80,6 +80,7 @@ import TeamScreen from '../screens/controls/MainMenu/YourControls/Users';
 import ReceiptScreen from '../screens/controls/MainMenu/YourCash/Entries/SettleCredit/components/ReceiptScreen';
 import BudgetsScreen from '../screens/controls/MainMenu/YourOperation/ReceiptsBudgets/components/BudgetsScreen';
 import LiquidateNow from '../screens/controls/MainMenu/YourCash/Entries/NewSale/SalesDetails/components/LiquidateNow';
+import PaymentScreen from '../screens/InitialData/CelerePay/Payment/PaymentScreen';
 
 const Stack = createStackNavigator();
 
@@ -148,6 +149,7 @@ export default () => (
     <Stack.Screen name="CelerePayRegister" component={CelerePayRegister} />
     <Stack.Screen name="CelerePayBank" component={CelerePayBank} />
     <Stack.Screen name="CelerePayConfirmation" component={CelerePayConfirmation} />
+    <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
     <Stack.Screen name="Budget" component={Budget} />
     <Stack.Screen name="Receipts" component={Receipts} />
     <Stack.Screen name="NewBudgets" component={NewBudgets} />
