@@ -49,7 +49,7 @@ const CelerePayBank = ({ navigation }) => {
 
   const handleSecondModalConfirm = () => {
     setIsSecondModalVisible(false); // Fecha o segundo modal
-    navigation.navigate('Start'); // Navega para a próxima tela
+    navigation.navigate('MainTab'); // Navega para a próxima tela
   };
 
   return (

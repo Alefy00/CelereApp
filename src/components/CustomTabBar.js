@@ -106,6 +106,10 @@ export default ({ state, navigation }) => {
       [key]: { x, y, width, height },
     }));
   };
+
+  const handleCelerePay = () => {
+    navigation.navigate("MaxTransparency");
+  };
   
   const stepsContent = [
     {
@@ -189,7 +193,7 @@ export default ({ state, navigation }) => {
           )}
         </TabItem>
 
-        <TabItem onPress={() => openModal('CélerePay')}>
+        <TabItem onPress={handleCelerePay}>
           {state.index === 1 ? (
             <>
               <Ionicons name="card" size={20} color={COLORS.secondary} />

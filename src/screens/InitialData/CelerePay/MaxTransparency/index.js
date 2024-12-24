@@ -8,14 +8,9 @@ import { COLORS } from '../../../../constants';
 import CelerePayIcon from '../../../../assets/images/svg/CelerePay/CelerePayIcon.svg'; // Importe o SVG como componente
 
 const MaxTransparency = ({ navigation }) => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const handleContinue = () => {
     navigation.navigate('CelerePayRegister');
-  };
-
-  const toggleModal = () => {
-    setIsModalVisible(!isModalVisible);
   };
 
   return (

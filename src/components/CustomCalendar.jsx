@@ -1,30 +1,36 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, StyleSheet } from 'react-native';
-import { Calendar,LocaleConfig } from 'react-native-calendars';
+import { View, Modal, TouchableOpacity, StyleSheet } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import { Calendar, LocaleConfig } from 'react-native-calendars';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { COLORS } from '../constants'; // Ajuste a importação conforme seu projeto
+import { COLORS } from '../constants';
 
 // Configurando o calendário para exibir em português
 LocaleConfig.locales['pt-br'] = {
-  monthNames: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],
+  monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
   monthNamesShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-  dayNames: ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'],
+  dayNames: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'],
   dayNamesShort: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'],
-  today: 'Hoje'
+  today: 'Hoje',
 };
 LocaleConfig.defaultLocale = 'pt-br';
 
 const CustomCalendar = ({ visible, onClose, onDayPress }) => {
   const [selectedDate, setSelectedDate] = useState('');
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+
+  // Atualiza a data exibida no calendário
+  const getCurrentDate = () => `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
 
   const handleDayPress = (day) => {
-    const selectedDate = new Date(day.dateString + 'T12:00:00'); // Define a data no meio-dia local
-    const formattedDate = selectedDate.toISOString().split('T')[0]; // Formata para 'yyyy-MM-dd'
-  
-    setSelectedDate(day.dateString); // Marca a data selecionada no calendário
-    onDayPress({ dateString: formattedDate }); // Passa a data formatada para o componente pai
-    onClose(); // Fecha o modal
+    const selectedDate = new Date(day.dateString + 'T12:00:00');
+    const formattedDate = selectedDate.toISOString().split('T')[0];
+
+    setSelectedDate(day.dateString);
+    onDayPress({ dateString: formattedDate });
+    onClose();
   };
 
   return (
@@ -35,53 +41,36 @@ const CustomCalendar = ({ visible, onClose, onDayPress }) => {
             <Icon name="close" size={24} color={COLORS.black} />
           </TouchableOpacity>
 
+          <View style={styles.navigationContainer}>
+            <Picker
+              selectedValue={currentMonth}
+              style={styles.picker}
+              onValueChange={(itemValue) => setCurrentMonth(itemValue)}>
+              {Array.from({ length: 12 }, (_, i) => (
+                <Picker.Item label={LocaleConfig.locales['pt-br'].monthNames[i]} value={i + 1} key={i} />
+              ))}
+            </Picker>
+
+            <Picker
+              selectedValue={currentYear}
+              style={styles.picker}
+              onValueChange={(itemValue) => setCurrentYear(itemValue)}>
+              {Array.from({ length: 21 }, (_, i) => (
+                <Picker.Item label={`${2020 + i}`} value={2020 + i} key={i} />
+              ))}
+            </Picker>
+          </View>
+
           <Calendar
+            key={getCurrentDate()} // Força a re-renderização quando a data muda
             onDayPress={handleDayPress}
             markedDates={{
               [selectedDate]: { selected: true, marked: true, selectedColor: COLORS.primary },
             }}
-            theme={{
-              backgroundColor: COLORS.white,
-              calendarBackground: COLORS.white,
-              textSectionTitleColor: COLORS.black,
-              selectedDayBackgroundColor: COLORS.primary,
-              selectedDayTextColor: COLORS.white,
-              todayTextColor: COLORS.primary,
-              dayTextColor: COLORS.black,
-              arrowColor: COLORS.black,
-              monthTextColor: COLORS.black,
-              textDayFontFamily: 'Arial',
-              textMonthFontFamily: 'Arial',
-              textDayHeaderFontFamily: 'Arial',
-              textDayFontWeight: '300',
-              textMonthFontWeight: 'bold',
-              textDayHeaderFontWeight: '500',
-              textDayFontSize: 16,
-              textMonthFontSize: 20,
-              textDayHeaderFontSize: 14,
-              'stylesheet.calendar.header': {
-                week: {
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  paddingLeft: 10,
-                  paddingRight: 10,
-                  marginTop: 6,
-                  alignItems: 'center',
-                },
-              },
-              'stylesheet.day.basic': {
-                base: {
-                  width: 32,
-                  height: 32,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                },
-                selected: {
-                  backgroundColor: COLORS.primary,
-                  borderRadius: 16,
-                },
-              },
-            }}
+            current={getCurrentDate()} // Atualiza a exibição do calendário
+            theme={styles.calendarTheme}
+            renderHeader={() => null}
+            hideArrows={true}
           />
         </View>
       </View>
@@ -94,7 +83,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo semitransparente para o modal
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   calendarContainer: {
     width: '90%',
@@ -110,5 +99,35 @@ const styles = StyleSheet.create({
   closeButton: {
     alignSelf: 'flex-end',
   },
+  navigationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  picker: {
+    flex: 1,
+    height: 50,
+  },
+  calendarTheme: {
+    backgroundColor: COLORS.white,
+    calendarBackground: COLORS.white,
+    textSectionTitleColor: COLORS.black,
+    selectedDayBackgroundColor: COLORS.primary,
+    selectedDayTextColor: COLORS.white,
+    todayTextColor: COLORS.primary,
+    dayTextColor: COLORS.black,
+    arrowColor: COLORS.black,
+    monthTextColor: COLORS.black,
+    textDayFontFamily: 'Arial',
+    textMonthFontFamily: 'Arial',
+    textDayHeaderFontFamily: 'Arial',
+    textDayFontWeight: '300',
+    textMonthFontWeight: 'bold',
+    textDayHeaderFontWeight: '500',
+    textDayFontSize: 16,
+    textMonthFontSize: 20,
+    textDayHeaderFontSize: 14,
+  },
 });
+
 export default CustomCalendar;

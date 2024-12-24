@@ -83,6 +83,8 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     paddingHorizontal: 20,
     marginBottom: 10,
+    marginTop: 20,
+    
   },
   confirmButton: {
     flexDirection: 'row',
