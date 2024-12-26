@@ -55,10 +55,14 @@ const CustomCalendar = ({ visible, onClose, onDayPress }) => {
               selectedValue={currentYear}
               style={styles.picker}
               onValueChange={(itemValue) => setCurrentYear(itemValue)}>
-              {Array.from({ length: 21 }, (_, i) => (
-                <Picker.Item label={`${2020 + i}`} value={2020 + i} key={i} />
-              ))}
+              {Array.from({ length: 75 }, (_, i) => {
+                const year = 1950 + i;
+                return (
+                  <Picker.Item label={`${year}`} value={year} key={i} />
+                );
+              })}
             </Picker>
+
           </View>
 
           <Calendar
@@ -71,6 +75,7 @@ const CustomCalendar = ({ visible, onClose, onDayPress }) => {
             theme={styles.calendarTheme}
             renderHeader={() => null}
             hideArrows={true}
+            firstDay={1}
           />
         </View>
       </View>

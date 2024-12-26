@@ -4,7 +4,7 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../../constants';
 
-const ConfirmationModal = ({ visible, onClose, data }) => {
+const ConfirmationModal = ({ visible, onClose, data, onConfirm }) => {
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
       <View style={styles.modalOverlay}>
@@ -36,6 +36,12 @@ const ConfirmationModal = ({ visible, onClose, data }) => {
 
               <Text style={styles.modalLabel}>UF:</Text>
               <Text style={styles.modalValue}>{data.uf}</Text>
+
+              <Text style={styles.modalLabel}>Renda:</Text>
+              <Text style={styles.modalValue}>{data.monthlyIncome}</Text>
+
+              <Text style={styles.modalLabel}>País:</Text>
+              <Text style={styles.modalValue}>{data.countryCode}</Text>
             </View>
 
             <View style={styles.modalColumn}>
@@ -65,7 +71,7 @@ const ConfirmationModal = ({ visible, onClose, data }) => {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.modalButton} onPress={onClose}>
+          <TouchableOpacity style={styles.modalButton} onPress={onConfirm}>
             <Icon name="checkmark-circle" size={24} color="#000" />
             <Text style={styles.modalButtonText}>Confirmar dados</Text>
           </TouchableOpacity>

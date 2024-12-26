@@ -8,12 +8,12 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   containerBartop: {
-    height: 50,
+    height: 55,
   },
   container: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
   title: {
     fontSize: 30,
@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: COLORS.black,
     marginBottom: 10,
+    paddingHorizontal: 10,
   },
   boldText: {
     fontWeight: 'bold',
@@ -49,8 +50,8 @@ const styles = StyleSheet.create({
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
     color: COLORS.black,
+    paddingHorizontal: 10,
   },
   checkboxLabel: {
     marginLeft: 10,
@@ -161,7 +162,6 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     marginLeft: 10,
   },
-  
   
 });
 
