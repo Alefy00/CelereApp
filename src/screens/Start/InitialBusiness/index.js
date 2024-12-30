@@ -13,7 +13,7 @@ import { API_BASE_URL } from '../../../services/apiConfig';
 const BusinessInfoScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [name, setName] = useState('');
-  const [email, setEmail] = useState(''); 
+  const [email, setEmail] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [role, setRole] = useState('');
   const [cnpj, setCnpj] = useState('');

@@ -160,33 +160,6 @@ const CelerePayIndividualForm = ({
         onChangeText={formatCpf}
         keyboardType="numeric"
       />
-        <TextInput
-        style={styles.input}
-        placeholder="Nome do seu negócio"
-        value={description}
-        onChangeText={setDescription}
-      />
-      <View style={styles.rowContainer}>
-        <TextInput
-          style={[styles.input, styles.inputSmallRG]}
-          placeholder="Digite o n° do seu RG"
-          value={rg}
-          onChangeText={setRg}
-        />
-        <TextInput
-          style={[styles.input, styles.inputSmall]}
-          placeholder="Expeditor"
-          value={expeditor}
-          onChangeText={setExpeditor}
-        />
-        <TextInput
-          style={[styles.input, styles.inputSmall]}
-          placeholder="UF"
-          value={uf}
-          onChangeText={setUf}
-        />
-      </View>
-
       {/* Endereço */}
       <View style={styles.rowContainer}>
         <TextInput

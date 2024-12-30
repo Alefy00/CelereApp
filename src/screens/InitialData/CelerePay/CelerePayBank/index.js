@@ -14,6 +14,7 @@ const CelerePayBank = ({ navigation }) => {
   const [empresaId, setEmpresaId] = useState(null);
   const [sellerId, setSellerId] = useState(null); // ID do Seller
   const [loading, setLoading] = useState(false); // Estado de loading
+  const [docUser, setDocUser] = useState(''); // Guardará CPF ou CNPJ real
 
   const [isCnpjChecked, setIsCnpjChecked] = useState(false);
   const [isCpfChecked, setIsCpfChecked] = useState(false);
@@ -45,139 +46,188 @@ const CelerePayBank = ({ navigation }) => {
 
     const getSellerId = useCallback(async () => {
       try {
-          console.log('Iniciando a função getSellerId...');
-          const storedSellerId = await AsyncStorage.getItem('sellerId');
-  
-          if (storedSellerId) {
-              console.log('ID do Seller recuperado do AsyncStorage:', storedSellerId);
-              setSellerId(storedSellerId);
-              return storedSellerId;
-          }
-  
-          console.log('ID do Seller não encontrado no AsyncStorage. Buscando no banco...');
-  
-          // Buscar CPF ou CNPJ no backend
+        console.log('Iniciando a função getSellerId...');
+    
+        // 1. Recuperar sellerId do AsyncStorage
+        const storedSellerId = await AsyncStorage.getItem('sellerId');
+    
+        if (storedSellerId) {
+          console.log('ID do Seller recuperado do AsyncStorage:', storedSellerId);
+    
+          // Buscar CPF/CNPJ do backend porque ele não é salvo no AsyncStorage
           const response = await fetch(`https://api.celere.top/config/empreendedor/?empresa=${empresaId}`);
           const data = await response.json();
-          console.log('Dados retornados do banco (empreendedor):', data);
-  
-          if (data.status === 'success' && data.data.length > 0) {
-              const sellerDocument = isCpfChecked ? data.data[0].cpf : data.data[0].cnpj;
-  
-              if (!sellerDocument) {
-                  console.error('CPF ou CNPJ inválido ou ausente.');
-                  throw new Error('Documento do Seller não encontrado.');
-              }
-  
-              console.log('Documento (CPF ou CNPJ) selecionado para busca na Zoop:', sellerDocument);
-  
-              // Buscar o ID do Seller na Zoop
-              const zoopResponse = await fetch(
-                  `https://api.zoop.ws/v1/marketplaces/a218f4e829f749278a8608c478dd9ba5/sellers/search?taxpayer_id=${sellerDocument}`,
-                  {
-                      headers: {
-                          Authorization: `Basic ${Buffer.from('zpk_prod_fLDQqil50te59vqiqsSJ7AZ9:').toString('base64')}`,
-                      },
-                  }
-              );
-  
-              const zoopData = await zoopResponse.json();
-              console.log('Dados da resposta da API Zoop:', zoopData);
-  
-              if (zoopData?.items?.length > 0) {
-                  const retrievedSellerId = zoopData.items[0].id;
-                  console.log('ID do Seller recuperado da Zoop:', retrievedSellerId);
-  
-                  await AsyncStorage.setItem('sellerId', retrievedSellerId);
-                  setSellerId(retrievedSellerId);
-                  return retrievedSellerId;
-              } else {
-                  console.error('Nenhum seller encontrado na resposta da Zoop.');
-              }
+    
+          if (data.status === 'success' && data.data && data.data.length > 0) {
+            const empreendedor = data.data[0];
+    
+            // Recuperar CPF ou CNPJ baseado no campo correto
+            let sellerDocument = '';
+            if (empreendedor.possui_cnpj && empreendedor.cnpj) {
+              sellerDocument = empreendedor.cnpj;
+            } else {
+              sellerDocument = empreendedor.cpf;
+            }
+    
+            if (!sellerDocument) {
+              throw new Error('CPF ou CNPJ não encontrado no backend.');
+            }
+    
+            console.log('Documento recuperado do backend:', sellerDocument);
+    
+            // Retornar tanto o SellerID quanto o Documento
+            return {
+              sellerId: storedSellerId,
+              doc: sellerDocument,
+            };
           } else {
-              console.error('Nenhum dado válido retornado pela API do banco de dados.');
+            throw new Error('Nenhum empreendedor retornado do backend.');
           }
-  
-          throw new Error('ID do Seller não encontrado.');
+        }
+    
+        console.log('ID do Seller não encontrado no AsyncStorage. Buscando no banco...');
+    
+        // 2. Buscar dados do empreendedor no backend se sellerId não estiver salvo
+        const response = await fetch(`https://api.celere.top/config/empreendedor/?empresa=${empresaId}`);
+        const data = await response.json();
+    
+        if (data.status === 'success' && data.data && data.data.length > 0) {
+          const empreendedor = data.data[0];
+    
+          let sellerDocument = '';
+          if (empreendedor.possui_cnpj && empreendedor.cnpj) {
+            sellerDocument = empreendedor.cnpj;
+          } else {
+            sellerDocument = empreendedor.cpf;
+          }
+    
+          if (!sellerDocument) {
+            throw new Error('CPF ou CNPJ não encontrado no backend.');
+          }
+    
+          console.log('Documento (taxpayer_id) selecionado:', sellerDocument);
+    
+          // Buscar Seller na Zoop usando o documento
+          const zoopResponse = await fetch(
+            `https://api.zoop.ws/v1/marketplaces/a218f4e829f749278a8608c478dd9ba5/sellers/search?taxpayer_id=${sellerDocument}`,
+            {
+              headers: {
+                Authorization: `Basic ${Buffer.from('zpk_prod_fLDQqil50te59vqiqsSJ7AZ9:').toString('base64')}`,
+              },
+            }
+          );
+    
+          const zoopData = await zoopResponse.json();
+          console.log('Dados da resposta da API Zoop:', zoopData);
+    
+          if (zoopData?.items?.length > 0) {
+            const retrievedSellerId = zoopData.items[0].id;
+            console.log('ID do Seller recuperado da Zoop:', retrievedSellerId);
+    
+            // Armazenar no AsyncStorage
+            await AsyncStorage.setItem('sellerId', retrievedSellerId);
+    
+            return {
+              sellerId: retrievedSellerId,
+              doc: sellerDocument,
+            };
+          } else {
+            throw new Error('Nenhum seller encontrado para esse CPF/CNPJ na Zoop.');
+          }
+        } else {
+          throw new Error('Nenhum empreendedor retornado do backend.');
+        }
       } catch (error) {
-          console.error('Erro na função getSellerId:', error);
-          Alert.alert('Erro', 'Não foi possível recuperar o ID do Seller.');
+        console.error('Erro na função getSellerId:', error);
+        Alert.alert('Erro', 'Não foi possível recuperar o ID do Seller.');
+        return null;
       }
-  }, [empresaId, isCpfChecked]);
+    }, [empresaId]);
+    
   
-
     // Função para criar conta bancária
     const createBankAccount = async () => {
       setLoading(true);
       try {
-          const sellerId = await getSellerId();
-          if (!sellerId) return;
-  
-          const body = {
-              holder_name: NameHolder,
-              bank_code: bankNumber,
-              routing_number: agency,
-              account_number: accountNumber,
-              taxpayer_id: isCpfChecked ? 'CPF-DO-USER' : 'CNPJ-DO-USER', // Ajustar dinamicamente
-              type: 'checking',
-          };
-  
-          console.log('Corpo da requisição para criação da conta bancária:', body);
-  
-          // Criar Token da Conta Bancária
-          const tokenResponse = await fetch(
-              'https://api.zoop.ws/v1/marketplaces/a218f4e829f749278a8608c478dd9ba5/bank_accounts/tokens',
-              {
-                  method: 'POST',
-                  headers: {
-                      Authorization: `Basic ${Buffer.from('zpk_prod_fLDQqil50te59vqiqsSJ7AZ9:').toString('base64')}`,
-                      'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify(body),
-              }
-          );
-  
-          const tokenData = await tokenResponse.json();
-          console.log('Resposta da API para criação do token:', tokenData);
-  
-          if (!tokenResponse.ok) {
-              throw new Error(`Erro ao criar token: ${tokenData.message}`);
+        const result = await getSellerId();
+        if (!result) {
+          throw new Error('Falha ao recuperar dados do Seller.');
+        }
+        const { sellerId, doc } = result;
+    
+        if (!sellerId) {
+          throw new Error('SellerId não encontrado.');
+        }
+        if (!doc) {
+          throw new Error('CPF/CNPJ (doc) está vazio. Não podemos criar o token.');
+        }
+    
+        console.log('Documento (taxpayer_id) que iremos usar:', doc);
+    
+        const body = {
+          holder_name: NameHolder,
+          bank_code: bankNumber,
+          routing_number: agency,
+          account_number: accountNumber,
+          taxpayer_id: doc,
+          type: 'checking',
+        };
+    
+        console.log('Corpo da requisição para criação do token da conta bancária:', body);
+    
+        // Criar Token da Conta Bancária
+        const tokenResponse = await fetch(
+          'https://api.zoop.ws/v1/marketplaces/a218f4e829f749278a8608c478dd9ba5/bank_accounts/tokens',
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Basic ${Buffer.from('zpk_prod_fLDQqil50te59vqiqsSJ7AZ9:').toString('base64')}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
           }
-  
-          // Associar Conta Bancária ao Seller
-          const associateResponse = await fetch(
-              'https://api.zoop.ws/v1/marketplaces/a218f4e829f749278a8608c478dd9ba5/bank_accounts',
-              {
-                  method: 'POST',
-                  headers: {
-                      Authorization: `Basic ${Buffer.from('zpk_prod_fLDQqil50te59vqiqsSJ7AZ9:').toString('base64')}`,
-                      'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                      customer: sellerId,
-                      token: tokenData.id,
-                  }),
-              }
-          );
-  
-          const associateData = await associateResponse.json();
-          console.log('Resposta da API para associação da conta bancária:', associateData);
-  
-          if (!associateResponse.ok) {
-              throw new Error(`Erro ao associar conta: ${associateData.message}`);
+        );
+    
+        const tokenData = await tokenResponse.json();
+        console.log('Resposta da API para criação do token:', tokenData);
+    
+        if (!tokenResponse.ok) {
+          throw new Error(`Erro ao criar token: ${tokenData?.message || 'Sem mensagem de erro.'}`);
+        }
+    
+        // Associar Conta Bancária ao Seller
+        const associateResponse = await fetch(
+          'https://api.zoop.ws/v1/marketplaces/a218f4e829f749278a8608c478dd9ba5/bank_accounts',
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Basic ${Buffer.from('zpk_prod_fLDQqil50te59vqiqsSJ7AZ9:').toString('base64')}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              customer: sellerId,
+              token: tokenData.id,
+            }),
           }
-  
-          Alert.alert('Sucesso', 'Conta bancária associada com sucesso!');
-          navigation.navigate('MainTab');
+        );
+    
+        const associateData = await associateResponse.json();
+        console.log('Resposta da API para associação da conta bancária:', associateData);
+    
+        if (!associateResponse.ok) {
+          throw new Error(`Erro ao associar conta: ${associateData?.message || 'Sem mensagem de erro.'}`);
+        }
+    
+        Alert.alert('Sucesso', 'Conta bancária associada com sucesso!');
+        navigation.navigate('MainTab');
       } catch (error) {
-          console.error('Erro ao criar conta bancária:', error);
-          Alert.alert('Erro', 'Não foi possível criar a conta bancária.');
+        console.error('Erro ao criar conta bancária:', error);
+        Alert.alert('Erro', error.message);
       } finally {
-          setLoading(false);
+        setLoading(false);
       }
-  };
-  
-
+    };
+    
       // Função para carregar planos da Zoop
       const fetchPlans = useCallback(async () => {
         setLoadingPlans(true);
@@ -288,7 +338,7 @@ const associatePlanToSeller = async () => {
 
   const handleFirstModalConfirm = () => {
     setIsFirstModalVisible(false); // Fecha o primeiro modal
-    setIsSecondModalVisible(true); // Abre o segundo modal
+    createBankAccount();
   };
   const handleFirstModalConfirm2 = () => {
     setIsFirstModalVisible(false); // Fecha o primeiro modal
@@ -349,7 +399,7 @@ const associatePlanToSeller = async () => {
             {/* Inputs para dados bancários */}
             <TextInput
               style={styles.input}
-              placeholder="Número do banco"
+              placeholder="Código do banco"
               value={bankNumber}
               onChangeText={setBankNumber}
               keyboardType="numeric"

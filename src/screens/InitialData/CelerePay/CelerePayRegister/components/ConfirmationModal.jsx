@@ -28,18 +28,6 @@ const ConfirmationModal = ({ visible, onClose, data, onConfirm }) => {
               <Text style={styles.modalLabel}>CNPJ:</Text>
               <Text style={styles.modalValue}>{data.hasCnpj ? data.cnpj : 'Não tenho CNPJ'}</Text>
 
-              <Text style={styles.modalLabel}>RG:</Text>
-              <Text style={styles.modalValue}>{data.rg}</Text>
-
-              <Text style={styles.modalLabel}>Expeditor:</Text>
-              <Text style={styles.modalValue}>{data.expeditor}</Text>
-
-              <Text style={styles.modalLabel}>UF:</Text>
-              <Text style={styles.modalValue}>{data.uf}</Text>
-
-              <Text style={styles.modalLabel}>Renda:</Text>
-              <Text style={styles.modalValue}>{data.monthlyIncome}</Text>
-
               <Text style={styles.modalLabel}>País:</Text>
               <Text style={styles.modalValue}>{data.countryCode}</Text>
             </View>

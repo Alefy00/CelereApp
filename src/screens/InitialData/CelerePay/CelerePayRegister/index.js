@@ -23,9 +23,6 @@ const CelerePayRegister = ({ navigation }) => {
   const [cnpj, setCnpj] = useState('');
   const [cpf, setCpf] = useState('');
   const [cep, setCep] = useState('');
-  const [rg, setRg] = useState('');
-  const [expeditor, setExpeditor] = useState('');
-  const [uf, setUf] = useState('');
   const [street, setStreet] = useState('');
   const [number, setNumber] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
@@ -33,18 +30,12 @@ const CelerePayRegister = ({ navigation }) => {
   const [state, setState] = useState('');
   const [countryCode, setCountryCode] = useState('BR');
   const [hasCnpj, setHasCnpj] = useState(false);
-  const [description, setDescription] = useState('');
-
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
-
-  // MCC
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [loadingCategories, setLoadingCategories] = useState(false);
-
-  // --- Funções de uso geral ---
 
   const getEmpresaId = useCallback(async () => {
     try {
@@ -135,11 +126,6 @@ const CelerePayRegister = ({ navigation }) => {
 
   // --- Lógica de criação de Seller na Zoop ---
   const createSellerInZoop = async () => {
-    if (!entrepreneurData) {
-      Alert.alert('Erro', 'Dados do empreendedor não disponíveis.');
-      return;
-    }
-
     // Validação básica
     if (!firstName || !lastName || !cpf || !birthDate || !selectedCategory) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
@@ -167,10 +153,7 @@ const CelerePayRegister = ({ navigation }) => {
         country_code: countryCode,
       },
       mcc: selectedCategory,
-      statement_descriptor: description,
     };
-
-    console.log("Payload seller",body);
 
     setLoading(true);
     try {
@@ -193,6 +176,7 @@ const CelerePayRegister = ({ navigation }) => {
       if (response.ok) {
         Alert.alert('Sucesso', 'Vendedor criado com sucesso na Zoop!');
         const sellerId = data.id; // Supondo que o ID do seller esteja no campo 'id' da resposta
+        console.log('ID do seller:', sellerId);
         await AsyncStorage.setItem('sellerId', sellerId.toString()); // Armazena o ID do seller no AsyncStorage
         navigation.navigate('CelerePayBank');
       } else {
@@ -205,18 +189,69 @@ const CelerePayRegister = ({ navigation }) => {
     }
   };
 
-  // --- Modal de Confirmação ---
+  const saveSellerLocally = async (sellerId) => {
+    try {
+      // Construção do payload para CPF
+      const localPayload = {
+        empresa: empresaId, // ID da empresa logada
+        tipo_seller: 'CPF', // Apenas CPF
+        identificador: cpf.replace(/\D/g, ''), // Limpa formatação do CPF
+        first_name: firstName,
+        last_name: lastName,
+        birthdate: birthDate,
+        address_line1: street,
+        address_line2: number,
+        neighborhood,
+        city,
+        state,
+        postal_code: cep.replace(/\D/g, ''), // Limpa formatação do CEP
+        // Campos de CNPJ são omitidos
+        nome_empresa: null,
+        telefone_empresa: null,
+        email_empresa: null,
+        address_empresa_line1: null,
+        address_empresa_line2: null,
+        neighborhood_empresa: null,
+        city_empresa: null,
+        state_empresa: null,
+        postal_code_empresa: null,
+      };
+  
+      // Requisição ao endpoint do backend local
+      const response = await fetch('https://api.celere.top/api/celerepay/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(localPayload),
+      });
+  
+      // Processamento da resposta
+      const result = await response.json();
+      if (response.ok) {
+        console.log('Vendedor salvo no backend local:', result);
+        Alert.alert('Sucesso', 'Vendedor salvo no sistema local com sucesso!');
+      } else {
+        Alert.alert('Erro', `Erro ao salvar vendedor localmente: ${result.message || 'Erro desconhecido.'}`);
+      }
+    } catch (error) {
+      console.error('Erro ao salvar vendedor localmente:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao salvar o vendedor no sistema local.');
+    }
+  };
+ 
+
   const closeModal = () => {
     setIsModalVisible(false);
   };
   const handleConfirmData = () => {
-    // Abre modal de confirmação
     setIsModalVisible(true);
   };
   const handleConfirmModal = () => {
     // Fecha modal e de fato cria o seller
     setIsModalVisible(false);
     createSellerInZoop();
+    saveSellerLocally();
   };
 
   if (loading) {
@@ -238,10 +273,7 @@ const CelerePayRegister = ({ navigation }) => {
             foreColor={COLORS.black}
           />
         </View>
-
-        {/* Conteúdo principal com ScrollView */}
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Componente de formulário de PF */}
           <CelerePayIndividualForm
             firstName={firstName}
             setFirstName={setFirstName}
@@ -255,12 +287,6 @@ const CelerePayRegister = ({ navigation }) => {
             setCnpj={setCnpj}
             hasCnpj={hasCnpj}
             setHasCnpj={setHasCnpj}
-            rg={rg}
-            setRg={setRg}
-            expeditor={expeditor}
-            setExpeditor={setExpeditor}
-            uf={uf}
-            setUf={setUf}
             cep={cep}
             setCep={setCep}
             street={street}
@@ -282,8 +308,6 @@ const CelerePayRegister = ({ navigation }) => {
             isCalendarVisible={isCalendarVisible}
             setIsCalendarVisible={setIsCalendarVisible}
             isKeyboardVisible={isKeyboardVisible}
-            setDescription={setDescription}
-            description={description}
             // Função para quando clicar em "Confirmar"
             handleConfirmData={handleConfirmData}
           />
@@ -298,7 +322,15 @@ const CelerePayRegister = ({ navigation }) => {
             firstName,
             lastName,
             cpf,
-            // ...demais dados caso queira mostrar no modal
+            cep,
+            number,
+            street,
+            neighborhood,
+            city,
+            state,
+            countryCode,
+            hasCnpj,
+            cnpj,
           }}
         />
       </View>
