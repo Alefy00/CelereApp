@@ -24,9 +24,9 @@ export const HeaderArea = styled.View`
 `;
 
 export const ToggleRight = styled.View`
-  flex-basis: 25px;
+  flex-basis: 48px;
   justify-content: center;
-  margin-right: 20px;
+  
 `;
 
 export const ToggleText = styled.View`
@@ -129,13 +129,13 @@ export default ({
       </ToggleText>
 
       <ToggleRight>
-        <Btn onPress={handleMenu}>
+        <Btn onPress={handleMenu} accessibilityLabel="Acessar perfil" accessibilityRole="button">
           <RobotIcon width="26" height="26" fill={foreColor} />
         </Btn>
       </ToggleRight>
 
       <ToggleRight style={{marginLeft: 10}}>
-        <Btn>
+        <Btn accessibilityLabel="Acessar calculadora" accessibilityRole="button">
           <CalculatorIcon width="26" height="26" fill={foreColor} />
         </Btn>
       </ToggleRight>

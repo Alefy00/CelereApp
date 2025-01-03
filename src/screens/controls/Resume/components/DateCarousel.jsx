@@ -24,8 +24,6 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
     return datesArray;
   };
 
-
-  
   const [dates, setDates] = useState(generatePastDates());
 
   useEffect(() => {
@@ -90,7 +88,7 @@ const DateCarousel = forwardRef(({ onDateSelected }, ref) => {
           style={[styles.filterIconContainer, filterVisible && styles.filterIconActive]} 
           onPress={toggleFilterVisibility}
         >
-          <Icon name="filter-outline" size={24} color={filterVisible ? COLORS.black : COLORS.grey} />
+          <Icon name="filter-outline" size={26} color={filterVisible ? COLORS.black : COLORS.grey} />
         </TouchableOpacity>
       </View>
 

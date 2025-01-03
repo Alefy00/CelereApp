@@ -27,7 +27,7 @@ const TourModal = ({ step, totalSteps, message, onNext, onPrevious, onClose, pos
     const arrowStyle = hasPosition
     ? {
         position: 'absolute',
-        top: step === totalSteps ? screenHeight * 0.205 : -screenHeight * 0.013, // Dinâmico para último passo
+        top: step === totalSteps ? screenHeight * 0.219 : -screenHeight * 0.013, // Dinâmico para último passo
         left: Math.min(175, screenWidth - 50),
         transform: step === totalSteps ? [{ rotate: '180deg' }] : [], // Gira a seta para baixo no último passo
       }
@@ -104,6 +104,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '100%',
     justifyContent:'center',
+    alignItems:'center',
+    height: 48,
   },
   buttonText: {
     color: '#000',

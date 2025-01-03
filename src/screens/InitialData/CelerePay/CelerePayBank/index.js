@@ -109,10 +109,10 @@ const CelerePayBank = ({ navigation }) => {
     
           // Buscar Seller na Zoop usando o documento
           const zoopResponse = await fetch(
-            `https://api.zoop.ws/v1/marketplaces/a218f4e829f749278a8608c478dd9ba5/sellers/search?taxpayer_id=${sellerDocument}`,
+            `https://api.zoop.ws/v1/marketplaces//sellers/search?taxpayer_id=${sellerDocument}`,
             {
               headers: {
-                Authorization: `Basic ${Buffer.from('zpk_prod_fLDQqil50te59vqiqsSJ7AZ9:').toString('base64')}`,
+                Authorization: `Basic ${Buffer.from('').toString('base64')}`,
               },
             }
           );
@@ -177,11 +177,11 @@ const CelerePayBank = ({ navigation }) => {
     
         // Criar Token da Conta Bancária
         const tokenResponse = await fetch(
-          'https://api.zoop.ws/v1/marketplaces/a218f4e829f749278a8608c478dd9ba5/bank_accounts/tokens',
+          'https://api.zoop.ws/v1/marketplaces//bank_accounts/tokens',
           {
             method: 'POST',
             headers: {
-              Authorization: `Basic ${Buffer.from('zpk_prod_fLDQqil50te59vqiqsSJ7AZ9:').toString('base64')}`,
+              Authorization: `Basic ${Buffer.from('').toString('base64')}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify(body),
@@ -197,11 +197,11 @@ const CelerePayBank = ({ navigation }) => {
     
         // Associar Conta Bancária ao Seller
         const associateResponse = await fetch(
-          'https://api.zoop.ws/v1/marketplaces/a218f4e829f749278a8608c478dd9ba5/bank_accounts',
+          'https://api.zoop.ws/v1/marketplaces//bank_accounts',
           {
             method: 'POST',
             headers: {
-              Authorization: `Basic ${Buffer.from('zpk_prod_fLDQqil50te59vqiqsSJ7AZ9:').toString('base64')}`,
+              Authorization: `Basic ${Buffer.from('').toString('base64')}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
@@ -233,10 +233,10 @@ const CelerePayBank = ({ navigation }) => {
         setLoadingPlans(true);
         try {
             const response = await fetch(
-                'https://api.zoop.ws/v1/marketplaces/a218f4e829f749278a8608c478dd9ba5/plans',
+                'https://api.zoop.ws/v1/marketplaces//plans',
                 {
                     headers: {
-                        Authorization: `Basic ${Buffer.from('zpk_prod_fLDQqil50te59vqiqsSJ7AZ9:').toString('base64')}`,
+                        Authorization: `Basic ${Buffer.from('').toString('base64')}`,
                     },
                 }
             );
@@ -286,11 +286,11 @@ const associatePlanToSeller = async () => {
     console.log('Corpo da requisição para associação do plano:', body);
 
     const response = await fetch(
-      'https://api.zoop.ws/v1/marketplaces/a218f4e829f749278a8608c478dd9ba5/subscriptions',
+      'https://api.zoop.ws/v1/marketplaces//subscriptions',
       {
         method: 'POST',
         headers: {
-          Authorization: `Basic ${Buffer.from('zpk_prod_fLDQqil50te59vqiqsSJ7AZ9:').toString('base64')}`,
+          Authorization: `Basic ${Buffer.from('').toString('base64')}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
@@ -444,7 +444,6 @@ const associatePlanToSeller = async () => {
                 )}
             </View>
         </ScrollView>
-        
 
         {/* Botão de confirmar (oculto quando o teclado estiver visível) */}
         {!isKeyboardVisible && (

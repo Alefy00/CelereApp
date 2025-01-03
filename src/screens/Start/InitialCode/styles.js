@@ -60,7 +60,7 @@ export default StyleSheet.create({
     textAlign: 'center',
     fontSize: 24,
     marginHorizontal: 5, // Espaçamento entre os dígitos
-    width: 40, // Ajuste da largura para cada dígito
+    width: 48, // Ajuste da largura para cada dígito
   },
   button: {
     flexDirection: 'row',

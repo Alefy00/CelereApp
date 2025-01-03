@@ -67,10 +67,10 @@ export const HeaderSubTitle = styled.Text`
 `;
 
 export const ToggleLeft = styled.TouchableOpacity`
-  flex-basis: 20px;
+  flex-basis: 25px;
   align-items: center;
   justify-content: center;
-  flex-basis: 25px;
+  flex-basis: 40px;
 `;
 
 export const ItemMailer = styled.Text`
@@ -120,8 +120,8 @@ export default ({
   };
   return (
     <HeaderArea backColor={backColor}>
-      <ToggleLeft onPress={handleBackButton}>
-        <IconArrowLeft width="24" height="24" fill={foreColor} />
+      <ToggleLeft onPress={handleBackButton} accessibilityLabel="Voltar para a tela anterior" accessibilityRole="button">
+        <IconArrowLeft width="26" height="26" fill={foreColor} />
       </ToggleLeft>
 
       <ToggleText>

@@ -86,7 +86,7 @@ const CelerePayRegister = ({ navigation }) => {
     const fetchCategories = async () => {
       setLoadingCategories(true);
       try {
-        const credentials = 'zpk_prod_fLDQqil50te59vqiqsSJ7AZ9:'; 
+        const credentials = ''; 
         const encodedCredentials = Buffer.from(credentials).toString('base64');
 
         const response = await fetch('https://api.zoop.ws/v1/merchant_category_codes', {
@@ -157,11 +157,11 @@ const CelerePayRegister = ({ navigation }) => {
 
     setLoading(true);
     try {
-      const credentials = 'zpk_prod_fLDQqil50te59vqiqsSJ7AZ9:'; 
+      const credentials = ''; 
       const encodedCredentials = Buffer.from(credentials).toString('base64');
 
       const response = await fetch(
-        'https://api.zoop.ws/v1/marketplaces/a218f4e829f749278a8608c478dd9ba5/sellers/individuals',
+        'https://api.zoop.ws/v1/marketplaces//sellers/individuals',
         {
           method: 'POST',
           headers: {
