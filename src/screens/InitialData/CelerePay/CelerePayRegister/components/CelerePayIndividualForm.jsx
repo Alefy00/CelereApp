@@ -22,12 +22,6 @@ const CelerePayIndividualForm = ({
   setCnpj,
   hasCnpj,
   setHasCnpj,
-  rg,
-  setRg,
-  expeditor,
-  setExpeditor,
-  uf,
-  setUf,
   cep,
   setCep,
   street,
@@ -50,8 +44,6 @@ const CelerePayIndividualForm = ({
   setIsCalendarVisible,
   isKeyboardVisible,
   handleConfirmData,
-  description,
-  setDescription,
 }) => {
 
   // Formatações de texto (podem ficar aqui ou no pai, se preferir)
@@ -80,14 +72,6 @@ const CelerePayIndividualForm = ({
         Você recebe o valor das suas transações <Text style={styles.boldText}>no dia útil seguinte.</Text>
       </Text>
 
-      {/* Campo de CNPJ */}
-      <TextInput
-        style={styles.input}
-        placeholder="Digite seu CNPJ"
-        value={cnpj}
-        onChangeText={formatCnpj}
-        keyboardType="numeric"
-      />
       <View style={styles.checkboxContainer}>
         <CheckBox
           value={hasCnpj}
@@ -127,7 +111,7 @@ const CelerePayIndividualForm = ({
         />
         <TextInput
           style={[styles.input, styles.inputSmallBairro]}
-          placeholder="Último Nome"
+          placeholder="Sobrenome completo"
           value={lastName}
           onChangeText={setLastName}
         />

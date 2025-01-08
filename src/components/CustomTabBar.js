@@ -193,7 +193,7 @@ export default ({ state, navigation }) => {
           )}
         </TabItem>
 
-        <TabItem onPress={() => openModal('CélerePay')}>
+        <TabItem onPress={handleCelerePay}>
           {state.index === 1 ? (
             <>
               <Ionicons name="card" size={20} color='#A0A0A0' />

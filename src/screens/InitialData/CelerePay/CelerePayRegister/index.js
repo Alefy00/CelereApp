@@ -10,6 +10,7 @@ import { Buffer } from 'buffer';
 global.Buffer = Buffer;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CelerePayIndividualForm from './components/CelerePayIndividualForm';
+import { API_BASE_URL } from '../../../../services/apiConfig';
 
 const CelerePayRegister = ({ navigation }) => {
   const [empresaId, setEmpresaId] = useState(null);
@@ -54,7 +55,7 @@ const CelerePayRegister = ({ navigation }) => {
     if (!empresaId) return;
     setLoading(true);
     try {
-      const response = await fetch(`https://api.celere.top/config/empreendedor/?empresa=${empresaId}`);
+      const response = await fetch(`${API_BASE_URL}/config/empreendedor/?empresa=${empresaId}`);
       const data = await response.json();
 
       if (data.status === 'success' && data.data.length > 0) {
@@ -81,33 +82,37 @@ const CelerePayRegister = ({ navigation }) => {
     }
   }, [empresaId, fetchEntrepreneurData]);
 
-  // Carregar categorias (MCC)
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setLoadingCategories(true);
-      try {
-        const credentials = ''; 
-        const encodedCredentials = Buffer.from(credentials).toString('base64');
+// Carregar categorias (MCC)
+useEffect(() => {
+  const fetchCategories = async () => {
+    setLoadingCategories(true);
+    try {
+      const credentials = 'zpk_prod_fLDQqil50te59vqiqsSJ7AZ9';
+      const encodedCredentials = Buffer.from(`${credentials}:`).toString('base64');
 
-        const response = await fetch('https://api.zoop.ws/v1/merchant_category_codes', {
-          headers: {
-            Authorization: `Basic ${encodedCredentials}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`Erro HTTP: ${response.status}`);
+      const response = await fetch('https://api.zoop.ws/v1/merchant_category_codes', {
+        method: 'GET',
+        headers: {
+          Authorization: `Basic ${encodedCredentials}`,
+          'Content-Type': 'application/json'
         }
-        const data = await response.json();
-        setCategories(data.items || []);
-      } catch (error) {
-        console.error('Erro no fetch:', error);
-      } finally {
-        setLoadingCategories(false);
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
       }
-    };
-    fetchCategories();
-  }, []);
+
+      const data = await response.json();
+      setCategories(data.items || []);
+    } catch (error) {
+      console.error('Erro no fetch:', error);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
+  fetchCategories();
+}, []);
 
   // Listener de teclado
   useEffect(() => {
@@ -157,11 +162,11 @@ const CelerePayRegister = ({ navigation }) => {
 
     setLoading(true);
     try {
-      const credentials = ''; 
-      const encodedCredentials = Buffer.from(credentials).toString('base64');
+      const credentials = 'zpk_prod_fLDQqil50te59vqiqsSJ7AZ9'; 
+      const encodedCredentials = Buffer.from(`${credentials}:`).toString('base64');
 
       const response = await fetch(
-        'https://api.zoop.ws/v1/marketplaces//sellers/individuals',
+        'https://api.zoop.ws/v1/marketplaces/a218f4e829f749278a8608c478dd9ba5/sellers/individuals',
         {
           method: 'POST',
           headers: {
@@ -218,7 +223,7 @@ const CelerePayRegister = ({ navigation }) => {
       };
   
       // Requisição ao endpoint do backend local
-      const response = await fetch('https://api.celere.top/api/celerepay/', {
+      const response = await fetch(`${API_BASE_URL}/api/celerepay/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -331,6 +336,7 @@ const CelerePayRegister = ({ navigation }) => {
             countryCode,
             hasCnpj,
             cnpj,
+            birthDate,
           }}
         />
       </View>

@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '../../../../../constants';
 
 const ConfirmationModal = ({ visible, onClose, data, onConfirm }) => {
+
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
       <View style={styles.modalOverlay}>
@@ -30,6 +31,12 @@ const ConfirmationModal = ({ visible, onClose, data, onConfirm }) => {
 
               <Text style={styles.modalLabel}>País:</Text>
               <Text style={styles.modalValue}>{data.countryCode}</Text>
+              
+              <Text style={styles.modalLabel}>Estado:</Text>
+              <Text style={styles.modalValue}>{data.state}</Text>
+
+              <Text style={styles.modalLabel}>Data de nascimento:</Text>
+              <Text style={styles.modalValue}>{data.birthDate}</Text>
             </View>
 
             <View style={styles.modalColumn}>
@@ -45,17 +52,12 @@ const ConfirmationModal = ({ visible, onClose, data, onConfirm }) => {
               <Text style={styles.modalLabel}>Número:</Text>
               <Text style={styles.modalValue}>{data.number}</Text>
 
-              <Text style={styles.modalLabel}>Complemento:</Text>
-              <Text style={styles.modalValue}>{data.complement}</Text>
-
               <Text style={styles.modalLabel}>Bairro:</Text>
               <Text style={styles.modalValue}>{data.neighborhood}</Text>
 
               <Text style={styles.modalLabel}>Cidade:</Text>
               <Text style={styles.modalValue}>{data.city}</Text>
 
-              <Text style={styles.modalLabel}>Estado:</Text>
-              <Text style={styles.modalValue}>{data.state}</Text>
             </View>
           </View>
 
