@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     marginBottom: 10,
     paddingHorizontal: 10,
+    textAlign: 'center',
   },
   boldText: {
     fontWeight: 'bold',
@@ -161,6 +162,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.black,
     marginLeft: 10,
+  },
+  //Bussiness Form
+  inputBussines: {
+    height: 40,
+    borderColor: COLORS.black,
+    borderBottomWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
   },
   
 });

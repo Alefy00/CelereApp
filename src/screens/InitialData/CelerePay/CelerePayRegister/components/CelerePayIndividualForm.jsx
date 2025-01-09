@@ -2,7 +2,6 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import CheckBox from '@react-native-community/checkbox';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CustomCalendar from '../../../../../components/CustomCalendar';
 import styles from '../styles';
@@ -18,10 +17,6 @@ const CelerePayIndividualForm = ({
   setBirthDate,
   cpf,
   setCpf,
-  cnpj,
-  setCnpj,
-  hasCnpj,
-  setHasCnpj,
   cep,
   setCep,
   street,
@@ -46,12 +41,6 @@ const CelerePayIndividualForm = ({
   handleConfirmData,
 }) => {
 
-  // Formatações de texto (podem ficar aqui ou no pai, se preferir)
-  const formatCnpj = (text) => {
-    const cleaned = text.replace(/\D/g, '').slice(0, 14);
-    const formatted = cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
-    setCnpj(formatted);
-  };
 
   const formatCpf = (text) => {
     const cleaned = text.replace(/\D/g, '').slice(0, 11);
@@ -67,19 +56,7 @@ const CelerePayIndividualForm = ({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Célere Pay</Text>
-      <Text style={styles.subTitle}>
-        Você recebe o valor das suas transações <Text style={styles.boldText}>no dia útil seguinte.</Text>
-      </Text>
 
-      <View style={styles.checkboxContainer}>
-        <CheckBox
-          value={hasCnpj}
-          onValueChange={(val) => setHasCnpj(val)}
-          tintColors={{ true: COLORS.black, false: COLORS.grey }}
-        />
-        <Text style={styles.checkboxLabel}>Tenho CNPJ</Text>
-      </View>
 
       {/* Picker de Categorias */}
       <View style={styles.pickerContainer}>

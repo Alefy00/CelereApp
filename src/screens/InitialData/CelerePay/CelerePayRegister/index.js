@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  View, Alert, TouchableWithoutFeedback, Keyboard, ScrollView, ActivityIndicator} from 'react-native';
+  View, Alert, TouchableWithoutFeedback, Keyboard, ScrollView, ActivityIndicator,
+  Text} from 'react-native';
 import BarTop3 from '../../../../components/BarTop3';
 import styles from './styles';
 import { COLORS } from '../../../../constants';
@@ -10,7 +11,9 @@ import { Buffer } from 'buffer';
 global.Buffer = Buffer;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CelerePayIndividualForm from './components/CelerePayIndividualForm';
+import CelerePayBusinessForm from './components/CelerePayBusinessForm';
 import { API_BASE_URL } from '../../../../services/apiConfig';
+import CheckBox from '@react-native-community/checkbox';
 
 const CelerePayRegister = ({ navigation }) => {
   const [empresaId, setEmpresaId] = useState(null);
@@ -38,6 +41,9 @@ const CelerePayRegister = ({ navigation }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [loadingCategories, setLoadingCategories] = useState(false);
 
+    // Alternar entre CPF e CNPJ
+    const toggleHasCnpj = () => setHasCnpj((prev) => !prev);
+  
   const getEmpresaId = useCallback(async () => {
     try {
       const storedEmpresaId = await AsyncStorage.getItem('empresaId');
@@ -194,70 +200,110 @@ useEffect(() => {
     }
   };
 
-  const saveSellerLocally = async (sellerId) => {
+  const saveSellerLocally = async (sellerId, sellerType, formData) => {
     try {
-      // Construção do payload para CPF
-      const localPayload = {
-        empresa: empresaId, // ID da empresa logada
-        tipo_seller: 'CPF', // Apenas CPF
-        identificador: cpf.replace(/\D/g, ''), // Limpa formatação do CPF
-        first_name: firstName,
-        last_name: lastName,
-        birthdate: birthDate,
-        address_line1: street,
-        address_line2: number,
-        neighborhood,
-        city,
-        state,
-        postal_code: cep.replace(/\D/g, ''), // Limpa formatação do CEP
-        // Campos de CNPJ são omitidos
-        nome_empresa: null,
-        telefone_empresa: null,
-        email_empresa: null,
-        address_empresa_line1: null,
-        address_empresa_line2: null,
-        neighborhood_empresa: null,
-        city_empresa: null,
-        state_empresa: null,
-        postal_code_empresa: null,
-      };
-  
-      // Requisição ao endpoint do backend local
-      const response = await fetch(`${API_BASE_URL}/api/celerepay/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(localPayload),
-      });
-  
-      // Processamento da resposta
-      const result = await response.json();
-      if (response.ok) {
-        console.log('Vendedor salvo no backend local:', result);
-        Alert.alert('Sucesso', 'Vendedor salvo no sistema local com sucesso!');
-      } else {
-        Alert.alert('Erro', `Erro ao salvar vendedor localmente: ${result.message || 'Erro desconhecido.'}`);
-      }
+        // Construção do payload condicional para CPF e CNPJ
+        const localPayload = {
+            empresa: empresaId,
+            tipo_seller: sellerType,
+            identificador: sellerType === 'CPF' 
+                ? formData.cpf.replace(/\D/g, '') 
+                : formData.ein.replace(/\D/g, ''),
+            first_name: sellerType === 'CPF' ? formData.firstName : formData.owner.first_name,
+            last_name: sellerType === 'CPF' ? formData.lastName : formData.owner.last_name,
+            birthdate: sellerType === 'CPF' ? formData.birthDate : null,
+            email: sellerType === 'CPF' ? formData.email : formData.business_email,
+            telefone: sellerType === 'CPF' ? `${entrepreneurData.ddd}${entrepreneurData.celular}` : formData.business_phone,
+            address_line1: sellerType === 'CPF' ? formData.street : formData.business_address.line1,
+            address_line2: sellerType === 'CPF' ? formData.number : formData.business_address.line2,
+            neighborhood: sellerType === 'CPF' ? formData.neighborhood : formData.business_address.neighborhood,
+            city: sellerType === 'CPF' ? formData.city : formData.business_address.city,
+            state: sellerType === 'CPF' ? formData.state : formData.business_address.state,
+            postal_code: sellerType === 'CPF' ? formData.cep.replace(/\D/g, '') : formData.business_address.postal_code.replace(/\D/g, ''),
+
+            // Campos adicionais para CNPJ
+            nome_empresa: sellerType === 'CNPJ' ? formData.business_name : null,
+            telefone_empresa: sellerType === 'CNPJ' ? formData.business_phone : null,
+            email_empresa: sellerType === 'CNPJ' ? formData.business_email : null,
+            address_empresa_line1: sellerType === 'CNPJ' ? formData.business_address.line1 : null,
+            address_empresa_line2: sellerType === 'CNPJ' ? formData.business_address.line2 : null,
+            neighborhood_empresa: sellerType === 'CNPJ' ? formData.business_address.neighborhood : null,
+            city_empresa: sellerType === 'CNPJ' ? formData.business_address.city : null,
+            state_empresa: sellerType === 'CNPJ' ? formData.business_address.state : null,
+            postal_code_empresa: sellerType === 'CNPJ' ? formData.business_address.postal_code.replace(/\D/g, '') : null
+        };
+
+        // Requisição ao endpoint do backend local
+        const response = await fetch(`${API_BASE_URL}/api/celerepay/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(localPayload),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            console.log('Vendedor salvo no backend local:', result);
+            Alert.alert('Sucesso', 'Vendedor salvo no sistema local com sucesso!');
+        } else {
+            Alert.alert('Erro', `Erro ao salvar vendedor localmente: ${result.message || 'Erro desconhecido.'}`);
+        }
     } catch (error) {
-      console.error('Erro ao salvar vendedor localmente:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao salvar o vendedor no sistema local.');
+        console.error('Erro ao salvar vendedor localmente:', error);
+        Alert.alert('Erro', 'Ocorreu um erro ao salvar o vendedor no sistema local.');
     }
-  };
+};
  
+  const createBusinessSellerInZoop = async (formData) => {
+    setLoading(true);
+    try {
+        const credentials = 'zpk_prod_fLDQqil50te59vqiqsSJ7AZ9';
+        const encodedCredentials = Buffer.from(`${credentials}:`).toString('base64');
+
+        const response = await fetch('https://api.zoop.ws/v1/marketplaces/a218f4e829f749278a8608c478dd9ba5/sellers/businesses', {
+            method: 'POST',
+            headers: {
+                Authorization: `Basic ${encodedCredentials}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            Alert.alert('Sucesso', 'Empresa cadastrada com sucesso!');
+            console.log('ID do vendedor:', data.id);
+            await AsyncStorage.setItem('sellerId', data.id);
+            navigation.navigate('CelerePayBank');
+        } else {
+            Alert.alert('Erro ao cadastrar', data.message || 'Erro desconhecido.');
+        }
+    } catch (error) {
+        console.error('Erro ao se comunicar com a Zoop:', error);
+        Alert.alert('Erro', 'Não foi possível completar a integração.');
+    } finally {
+        setLoading(false);
+    }
+};
 
   const closeModal = () => {
     setIsModalVisible(false);
   };
-  const handleConfirmData = () => {
-    setIsModalVisible(true);
-  };
-  const handleConfirmModal = () => {
-    // Fecha modal e de fato cria o seller
+  const handleConfirmModal = async (formData) => {
     setIsModalVisible(false);
-    createSellerInZoop();
-    saveSellerLocally();
-  };
+    const sellerType = hasCnpj ? 'CNPJ' : 'CPF';
+
+    if (hasCnpj) {
+        await createBusinessSellerInZoop(formData);
+        await saveSellerLocally(formData.ein, sellerType, formData); 
+    } else {
+        await createSellerInZoop();
+        await saveSellerLocally(formData.cpf, sellerType, formData); 
+    }
+};
+
 
   if (loading) {
     return (
@@ -278,44 +324,57 @@ useEffect(() => {
             foreColor={COLORS.black}
           />
         </View>
+            <Text style={styles.title}>Célere Pay</Text>
+              <Text style={styles.subTitle}>
+                Você recebe o valor das suas transações <Text style={styles.boldText}>no dia útil seguinte.</Text>
+              </Text>
+                  {/* Checkbox para alternância entre CPF e CNPJ */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', margin: 5 }}>
+            <CheckBox
+            value={hasCnpj} 
+            onValueChange={toggleHasCnpj} 
+            tintColors={{ true: '#000', false: '#000' }}/>
+            <Text style={{ marginLeft: 10 }}>Tenho CNPJ</Text>
+          </View>
         <ScrollView contentContainerStyle={styles.scrollContent}>
+        {hasCnpj ? (
+          <CelerePayBusinessForm onSubmit={handleConfirmModal} />
+        ) : (
           <CelerePayIndividualForm
-            firstName={firstName}
-            setFirstName={setFirstName}
-            lastName={lastName}
-            setLastName={setLastName}
-            birthDate={birthDate}
-            setBirthDate={setBirthDate}
-            cpf={cpf}
-            setCpf={setCpf}
-            cnpj={cnpj}
-            setCnpj={setCnpj}
-            hasCnpj={hasCnpj}
-            setHasCnpj={setHasCnpj}
-            cep={cep}
-            setCep={setCep}
-            street={street}
-            setStreet={setStreet}
-            number={number}
-            setNumber={setNumber}
-            neighborhood={neighborhood}
-            setNeighborhood={setNeighborhood}
-            city={city}
-            setCity={setCity}
-            state={state}
-            setState={setState}
-            countryCode={countryCode}
-            setCountryCode={setCountryCode}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            categories={categories}
-            loadingCategories={loadingCategories}
-            isCalendarVisible={isCalendarVisible}
-            setIsCalendarVisible={setIsCalendarVisible}
-            isKeyboardVisible={isKeyboardVisible}
-            // Função para quando clicar em "Confirmar"
-            handleConfirmData={handleConfirmData}
-          />
+          firstName={firstName}
+          setFirstName={setFirstName}
+          lastName={lastName}
+          setLastName={setLastName}
+          birthDate={birthDate}
+          setBirthDate={setBirthDate}
+          cpf={cpf}
+          setCpf={setCpf}
+          cep={cep}
+          setCep={setCep}
+          street={street}
+          setStreet={setStreet}
+          number={number}
+          setNumber={setNumber}
+          neighborhood={neighborhood}
+          setNeighborhood={setNeighborhood}
+          city={city}
+          setCity={setCity}
+          state={state}
+          setState={setState}
+          countryCode={countryCode}
+          setCountryCode={setCountryCode}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          categories={categories}
+          loadingCategories={loadingCategories}
+          isCalendarVisible={isCalendarVisible}
+          setIsCalendarVisible={setIsCalendarVisible}
+          isKeyboardVisible={isKeyboardVisible}
+          // Função para quando clicar em "Confirmar"
+          handleConfirmData={handleConfirmModal}
+        />
+        )}
+
         </ScrollView>
 
         {/* Modal de confirmação */}
