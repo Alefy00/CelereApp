@@ -9,6 +9,7 @@ import OverdueReceivablesTab from './OverdueReceivablesTab';
 import ExpensesDueToday from './ExpensesDueToday';
 import AccountsReceivableToday from './AccountsReceivableToday';
 import LatePayments from './LatePayments';
+import SalesChartCard from '../SalesChartCard';
 
 const { width } = Dimensions.get('window');
 
@@ -19,6 +20,7 @@ const BaseCarousel = ({ empresaId, selectedDate, onAdjustPress }) => {
   // Dados das abas
   const items = [
     { id: 'saldo', component: <BalanceTab empresaId={empresaId} selectedDate={selectedDate} onAdjustPress={onAdjustPress} /> },
+    { id: 'SalesChartCard', component: <SalesChartCard empresaId={empresaId} selectedDate={selectedDate} itemName="SalesChartCard" /> }, 
     { id: 'despesas-proximo-dia', component: <ExpensesNextDayTab empresaId={empresaId} selectedDate={selectedDate} itemName="Despesas à Vencer Próximo dia Útil" /> },
     { id: 'contas-atraso', component: <OverdueReceivablesTab empresaId={empresaId} selectedDate={selectedDate} itemName="Contas a Receber em Atraso" /> },
     { id: 'despesas-hoje', component: <ExpensesDueToday empresaId={empresaId} selectedDate={selectedDate} itemName="Despesas a Vencer Hoje" /> },

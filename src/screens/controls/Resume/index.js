@@ -258,9 +258,9 @@ const initializeDateFilter = useCallback(async () => {
           </View>
 
           <View ref={SalesChartCardRef} onLayout={() => handleDelayedLayout('SalesChartCard', SalesChartCardRef)} style={styles.ContainerCircle}>
-            <SalesChartCard selectedDate={selectedDate} />
+            {/*Ponto de referencia para o tour pop-up */}
           </View>
-          <Text style={styles.label2}>Fluxo de caixa por lançamento</Text>
+          <Text style={styles.label2}>Fluxo de caixa</Text>
           <View ref={FilteredListCardRef} onLayout={() => handleDelayedLayout('FilteredListCard', FilteredListCardRef)} style={styles.ContainerFilter}>
           <FilteredListCard
             selectedDate={selectedDate}

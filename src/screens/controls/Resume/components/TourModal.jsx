@@ -8,8 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const TourModal = ({ step, totalSteps, message, onNext, onPrevious, onClose, position, offsetTop = 10, }) => {
   const hasPosition = position && !isNaN(position.x) && !isNaN(position.y);
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-  const scaleFactor = PixelRatio.get();
-  const insets = useSafeAreaInsets();
+
   
   const modalStyle = hasPosition
     ? {
@@ -28,7 +27,9 @@ const TourModal = ({ step, totalSteps, message, onNext, onPrevious, onClose, pos
     ? {
         position: 'absolute',
         top: step === totalSteps ? screenHeight * 0.219 : -screenHeight * 0.013, // Dinâmico para último passo
-        left: Math.min(175, screenWidth - 50),
+        left: step === 3
+        ? Math.min(position.x + position.width - 188, screenWidth - 50) // Ajuste exclusivo para o terceiro passo
+        : Math.min(175, screenWidth - 50),
         transform: step === totalSteps ? [{ rotate: '180deg' }] : [], // Gira a seta para baixo no último passo
       }
     : {

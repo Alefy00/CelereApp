@@ -128,13 +128,13 @@ export default ({ state, navigation }) => {
       key: 'SalesChartCard',
       message: 'Sempre que você tocar neste ícone, uma explicação ira aparecer.',
       position: elementPositions['SalesChartCard'],
-      offsetTop: -screenHeight * 0.23 / scaleFactor ,
+      offsetTop: -screenHeight * 0.47 / scaleFactor ,
     },
     {
       key: 'FilteredListCard',
       message: 'Aqui serão listadas as entrada e saídas uma a uma.',
       position: elementPositions['FilteredListCard'],
-      offsetTop: -screenHeight * 0.25 / scaleFactor ,
+      offsetTop: screenHeight * 0.08 / scaleFactor ,
     },
     {
       key: 'ActionButtonsRef',

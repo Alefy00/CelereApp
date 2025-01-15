@@ -11,7 +11,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";  // Para a
 import { useFocusEffect } from '@react-navigation/native';  // Para recarregar a lista quando a tela ganha foco
 import { API_BASE_URL } from "../../../../../../../services/apiConfig";
 
-const API_URL = 'https://api.celere.top/cad/cliente/';  // URL da API
 
 const SaleDetails = ({ navigation, route }) => {
   const { products, totalPrice, clearCart } = route.params;

@@ -14,6 +14,7 @@ import { API_BASE_URL } from "../../../../../../../../services/apiConfig";
 import mixpanel from "../../../../../../../../services/mixpanelClient";
 import moment from 'moment-timezone';
 
+
 const LiquidateNow = ({ products, totalPrice, clients, navigation, route, setProducts }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [discountType, setDiscountType] = useState('%');
@@ -188,6 +189,10 @@ const LiquidateNow = ({ products, totalPrice, clients, navigation, route, setPro
 
   const navigateToAddClient = () => {
     navigation.navigate("IncludeClient");
+  };
+
+  const ZoopMock = () => {
+    navigation.navigate("TestScreen");
   };
 
   const handleOpenInvoiceModal = () => {
@@ -387,7 +392,7 @@ useEffect(() => {
       <View style={styles.paymentSelectionContainer}>
         <TouchableOpacity
           style={[styles.paymentOptionButtonDisabled]}
-          disabled={true}
+          onPress={ZoopMock}
         >
           <Text style={styles.paymentOptionTextDisabled}>CélerePay (Em Breve)</Text>
         </TouchableOpacity>

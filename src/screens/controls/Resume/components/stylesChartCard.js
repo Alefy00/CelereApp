@@ -5,6 +5,9 @@ import { COLORS } from "../../../../constants";
 const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
+  container:{
+    marginHorizontal: width * 0.045,
+  },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
@@ -20,6 +23,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: height * -0.01,
+    
   },
   infoContainer: {
     flex: 1,

@@ -12,6 +12,7 @@ import com.zoop.sdk.plugin.taponphone.api.PaymentType
 import com.zoop.sdk.plugin.taponphone.api.TapOnPhone
 import com.zoop.sdk.plugin.taponphone.api.TapOnPhoneTheme
 import com.zoop.sdk.plugin.taponphone.api.PinPadType
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -19,9 +20,16 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.UUID
 
+enum class PaymentStatus {
+    PROCESSING,
+    SUCCESS,
+    FAIL
+}
+
 class ZoopModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     private val tapOnPhone = TapOnPhone(reactContext)
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var paymentStatus: PaymentStatus = PaymentStatus.FAIL
 
     override fun getName(): String {
         return "ZoopModule"
@@ -38,7 +46,7 @@ class ZoopModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
     ) {
         try {
             val theme = TapOnPhoneTheme(
-                logo = reactApplicationContext.resources.getDrawable(R.drawable.splash_screen, null),
+                logo = ContextCompat.getDrawable(reactApplicationContext, R.drawable.splash_screen),
                 backgroundColor = Color.parseColor("#FADC00"),
                 amountTextColor = Color.parseColor("#000000"),
                 paymentTypeTextColor = Color.parseColor("#000000"),
@@ -77,6 +85,12 @@ class ZoopModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
 
     @ReactMethod
     fun pay(amount: Double, paymentType: String, installments: Int?, promise: Promise) {
+        if (paymentStatus == PaymentStatus.PROCESSING) {
+            promise.reject("PAYMENT_ERROR", "Um pagamento já está em andamento.")
+            return
+        }
+        paymentStatus = PaymentStatus.PROCESSING
+
         coroutineScope.launch {
             try {
                 val paymentRequest = PaymentRequest(
@@ -87,36 +101,22 @@ class ZoopModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
                         "debit" -> PaymentType.DEBIT
                         else -> PaymentType.CREDIT
                     },
-                    installments = if (installments != null && installments >= 2) installments else null,
-                    metadata = """
-                        {
-                            "client": "CelerePay",
-                            "info": "Payment from Zoop"
-                        }
-                    """.trimIndent()
+                    installments = if (installments != null && installments >= 2) installments else null
                 )
 
                 tapOnPhone.pay(
                     payRequest = paymentRequest,
                     onApproved = { response ->
-                        promise.resolve(
-                            "Pagamento aprovado! Id da transação: ${response.transactionId}, Bandeira: ${response.cardBrand}"
-                        )
+                        paymentStatus = PaymentStatus.SUCCESS
+                        promise.resolve("Pagamento aprovado! Id da transação: ${response.transactionId}, Bandeira: ${response.cardBrand}")
                     },
                     onError = { error ->
-                        promise.reject(
-                            "PAYMENT_ERROR",
-                            """
-                                Erro ao realizar pagamento:
-                                Id da Transação: ${error.transactionId ?: "N/A"}
-                                Mensagem: ${error.message}
-                                Código: ${error.code}
-                                Descrição: ${error.description}
-                            """.trimIndent()
-                        )
+                        paymentStatus = PaymentStatus.FAIL
+                        promise.reject("PAYMENT_ERROR", "Erro: ${error.message}")
                     }
                 )
             } catch (e: Exception) {
+                paymentStatus = PaymentStatus.FAIL
                 promise.reject("PAYMENT_ERROR", e.message)
             }
         }

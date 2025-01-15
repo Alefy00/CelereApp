@@ -25,12 +25,14 @@ allprojects {
         mavenLocal()
         mavenCentral()
         google()
-        maven { url "$rootDir/../node_modules/react-native/android" }
+        maven {
+            url "$rootDir/../node_modules/react-native/android"
+        }
         maven {
             url = uri("https://maven.pkg.github.com/getzoop/zoop-package-public")
             credentials {
-                username = "Alefy00"
-                password = "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"
+                username = project.findProperty("GITHUB_USER") ?: System.getenv("GITHUB_USER")
+                password = project.findProperty("GITHUB_PAT") ?: System.getenv("GITHUB_PAT")
             }
         }
     }

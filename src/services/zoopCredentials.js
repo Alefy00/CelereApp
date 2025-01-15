@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import axios from 'axios';
 import { API_BASE_URL } from './apiConfig';
+
 // Função para obter o token JWT
 const getZoopToken = async () => {
   try {
@@ -19,8 +20,8 @@ const getZoopToken = async () => {
   }
 };
 
-// Função para obter as credenciais Zoop
-export const getZoopCredentials = async () => {
+// Função para obter as credenciais Zoop (exceto seller)
+export const getZoopCredentials = async (sellerManual) => {
   try {
     const token = await getZoopToken();
     const response = await axios.get(`${API_BASE_URL}/api/zoop_credentials/`, {
@@ -30,8 +31,18 @@ export const getZoopCredentials = async () => {
     });
 
     if (response.data.success) {
-      return response.data.data; // Retorna { clientId, clientSecret, marketplace, seller, accessKey }
+      const { clientId, clientSecret, marketplace, accessKey } = response.data.data;
+      
+      // Retorna as credenciais, inserindo o seller manualmente
+      return {
+        clientId,
+        clientSecret,
+        marketplace,
+        seller: sellerManual, // Seller manualmente inserido
+        accessKey
+      };
     }
+
     throw new Error('Erro ao obter as credenciais Zoop');
   } catch (error) {
     console.error('Erro ao recuperar as credenciais Zoop:', error);
