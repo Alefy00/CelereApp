@@ -30,6 +30,8 @@ export const getZoopCredentials = async (sellerManual) => {
       },
     });
 
+    console.log(response)
+
     if (response.data.success) {
       const { clientId, clientSecret, marketplace, accessKey } = response.data.data;
       

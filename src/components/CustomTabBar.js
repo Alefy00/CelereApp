@@ -52,9 +52,9 @@ const TabItemCenter = styled.TouchableOpacity`
   margin-top: -20px;
 `;
 export const ItemTitle = styled.Text`
-  font-size: 12px;
+  font-size: 11px;
   color: #fffef1;
-  height: 32px;
+  height: 30px;
   font-family: Rubik;
   text-align: center;
 `;
@@ -98,9 +98,9 @@ export default ({ state, navigation }) => {
   const scaleFactor = PixelRatio.get();
 
   
+  // Função para capturar a posição dos elementos corretamente usando `measureInWindow`
   const handleLayout = (key, event) => {
     const { x, y, width, height } = event.nativeEvent.layout;
-  
     setElementPositions((prev) => ({
       ...prev,
       [key]: { x, y, width, height },
@@ -122,25 +122,25 @@ export default ({ state, navigation }) => {
       key: 'baseCarousel',
       message: 'Aqui é o total de dinheiro que seu negócio tem em bancos e em espécie. A cada entrada ou saída esse valor é atualizado automaticamente.',
       position: elementPositions['baseCarousel'],
-      offsetTop: screenHeight * 0.33 / scaleFactor ,
+      offsetTop: screenHeight * 0.34 / scaleFactor ,
     },
     {
       key: 'SalesChartCard',
       message: 'Sempre que você tocar neste ícone, uma explicação ira aparecer.',
       position: elementPositions['SalesChartCard'],
-      offsetTop: -screenHeight * 0.47 / scaleFactor ,
+      offsetTop: -screenHeight * 0.35 / scaleFactor ,
     },
     {
       key: 'FilteredListCard',
       message: 'Aqui serão listadas as entrada e saídas uma a uma.',
       position: elementPositions['FilteredListCard'],
-      offsetTop: screenHeight * 0.08 / scaleFactor ,
+      offsetTop: screenHeight * 0.3 / scaleFactor ,
     },
     {
       key: 'ActionButtonsRef',
       message: 'Por aqui você insere vendas e despesas, realiza consultas, cadastra produtos, e muito mais.',
       position: elementPositions['ActionButtonsRef'],
-      offsetTop: screenHeight * 1.6 / scaleFactor,
+      offsetTop: screenHeight * 1.91 / scaleFactor,
     },
   ];
 
@@ -182,18 +182,18 @@ export default ({ state, navigation }) => {
         <TabItem onPress={() => goTo('Resumo')}>
           {state.index === 0 ? (
             <>
-              <ResumoIcon1 width="48" height="48" />
+              <ResumoIcon1 width="44" height="44" />
               <ItemTitle style={{ marginTop: +3 }}>{t('summary')}</ItemTitle>
             </>
           ) : (
             <>
-              <ResumoIcon0 width="26" height="26" style={{ marginTop: +15, opacity: state.index !== 0 ? 0.6 : 1 }} />
-              <ItemTitle style={{ marginTop: +10 }}>{t('summary')}</ItemTitle>
+              <ResumoIcon0 width="26" height="26" style={{ marginTop: +10, opacity: state.index !== 0 ? 0.6 : 1 }} />
+              <ItemTitle style={{ marginTop: +5 }}>{t('summary')}</ItemTitle>
             </>
           )}
         </TabItem>
 
-        <TabItem onPress={handleCelerePay}>
+        <TabItem onPress={() => openModal('CélerePay')}>
           {state.index === 1 ? (
             <>
               <Ionicons name="card" size={20} color='#A0A0A0' />
@@ -202,7 +202,7 @@ export default ({ state, navigation }) => {
           ) : (
             <>
               <Ionicons name="card" size={40} color={COLORS.lightGray4} />
-              <ItemTitle style={{ marginTop: +10 }}>CélerePay</ItemTitle>
+              <ItemTitle style={{ marginTop: +5 }}>CélerePay</ItemTitle>
             </>
           )}
         </TabItem>
@@ -219,8 +219,8 @@ export default ({ state, navigation }) => {
             </>
           ) : (
             <>
-              <FluxoCaixa0 width="26" height="26" style={{ marginTop: +15, opacity: state.index !== 3 ? 0.6 : 1 }} />
-              <ItemTitle style={{ marginTop: +10 }}>{t('cash_flow')}</ItemTitle>
+              <FluxoCaixa0 width="26" height="26" style={{ marginTop: +10, opacity: state.index !== 3 ? 0.6 : 1 }} />
+              <ItemTitle style={{ marginTop: +5 }}>{t('cash_flow')}</ItemTitle>
             </>
           )}
         </TabItem>
@@ -233,8 +233,8 @@ export default ({ state, navigation }) => {
             </>
           ) : (
             <>
-              <NF width="26" height="26" style={{ marginTop: +15, opacity: state.index !== 4 ? 0.6 : 1 }} />
-              <ItemTitle style={{ marginTop: +10 }}>NF-e</ItemTitle>
+              <NF width="26" height="26" style={{ marginTop: +10, opacity: state.index !== 4 ? 0.6 : 1 }} />
+              <ItemTitle style={{ marginTop: +5}}>NF-e</ItemTitle>
             </>
           )}
         </TabItem>

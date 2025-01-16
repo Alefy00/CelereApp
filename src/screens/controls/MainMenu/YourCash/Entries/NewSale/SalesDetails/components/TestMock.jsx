@@ -5,11 +5,12 @@ import { initializeZoopSDK, realizarPagamento } from '../../../../../../../../se
 
 const TestScreen = () => {
     const [sdkInitialized, setSdkInitialized] = useState(false);
+    const [sellerId, setSellerId] = useState("77ccc8a6e43849679496dab43c5c2bc8");
 
     const handleInitialize = async () => {
         try {
-            await initializeZoopSDK(); // Correção aqui no nome da função
-            setSdkInitialized(true);
+           await initializeZoopSDK();
+           setSdkInitialized(true);
             Alert.alert("Sucesso", "SDK inicializado com sucesso!");
         } catch (error) {
             Alert.alert("Erro", `Falha ao inicializar o SDK: ${error.message}`);
@@ -22,10 +23,10 @@ const TestScreen = () => {
             return;
         }
         try {
-            await realizarPagamento();
+            await realizarPagamento(sellerId);
             Alert.alert("Pagamento Concluído", "O pagamento foi realizado com sucesso!");
         } catch (error) {
-            Alert.alert("Erro no Pagamento", error.message);
+            Alert.alert("Erro no Pagamento", `Erro: ${error.message}`);
         }
     };
 

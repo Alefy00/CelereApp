@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, ActivityIndicator, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import { COLORS } from '../../../../../constants';
@@ -10,6 +10,7 @@ import styles from '../../styles';
 const BalanceTab = ({ empresaId, selectedDate, onAdjustPress }) => {
   const [saldoCaixa, setSaldoCaixa] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const fetchSaldoCaixa = useCallback(async () => {
     try {
@@ -49,7 +50,10 @@ const BalanceTab = ({ empresaId, selectedDate, onAdjustPress }) => {
   return (
     <View style={styles.pageContainer}>
       <Text style={styles.title}>
-        Saldo Caixa <Icon name="alert-circle" size={16} color={COLORS.lightGray} />
+        Saldo Caixa 
+        <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+          <Icon name="alert-circle" size={16} color={COLORS.lightGray} />
+        </TouchableOpacity>
       </Text>
       {loading ? (
         <ActivityIndicator size="large" color={COLORS.primary} />
@@ -64,10 +68,57 @@ const BalanceTab = ({ empresaId, selectedDate, onAdjustPress }) => {
         </Text>
       )}
       <TouchableOpacity onPress={onAdjustPress}>
-        <Text style={styles.updateButtonAttSaldo}>Ajustar caixa</Text>
+        <Text style={styles.updateButtonAttSaldo}>Ajustar manualmente</Text>
       </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <View style={modalStyles.modalContainer}>
+          <View style={modalStyles.modalContent}>
+            <TouchableOpacity
+              style={modalStyles.closeButton}
+              onPress={() => setIsModalVisible(false)}
+            >
+              <Icon name="close" size={24} color={COLORS.black} />
+            </TouchableOpacity>
+            <Text style={modalStyles.modalText}>
+              Saldo em caixa é formado pelo que você tem de dinheiro em espécie, em bancos e em recebíveis de cartão.
+            </Text>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
+
+const modalStyles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    textAlign: 'justify',
+    marginTop: 20,
+  },
+});
 
 export default BalanceTab;

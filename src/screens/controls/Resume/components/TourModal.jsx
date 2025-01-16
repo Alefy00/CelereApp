@@ -23,18 +23,21 @@ const TourModal = ({ step, totalSteps, message, onNext, onPrevious, onClose, pos
         transform: [{ translateX: -150 }, { translateY: -75 }],
       };
 
-    const arrowStyle = hasPosition
-    ? {
-        position: 'absolute',
-        top: step === totalSteps ? screenHeight * 0.219 : -screenHeight * 0.013, // Dinâmico para último passo
-        left: step === 3
-        ? Math.min(position.x + position.width - 188, screenWidth - 50) // Ajuste exclusivo para o terceiro passo
-        : Math.min(175, screenWidth - 50),
-        transform: step === totalSteps ? [{ rotate: '180deg' }] : [], // Gira a seta para baixo no último passo
-      }
-    : {
-        display: 'none', // Esconde a seta se não houver posição
-      };
+      const arrowStyle = hasPosition
+      ? {
+          position: 'absolute',
+          top: step === totalSteps ? screenHeight * 0.2 : -screenHeight * 0.012, // Dinâmico para último passo
+          left: step === 3
+              ? Math.min(position.x + position.width - 168, screenWidth - 50) // Ajuste exclusivo para o terceiro passo
+              : step === totalSteps 
+                  ? Math.min(position.x + position.width / 25, screenWidth - 50) // Novo ajuste exclusivo para o último passo
+                  : Math.min(175, screenWidth - 50),
+          transform: step === totalSteps ? [{ rotate: '180deg' }] : [], // Gira a seta para baixo no último passo
+        }
+      : {
+          display: 'none', // Esconde a seta se não houver posição
+        };
+  
   
 
   return (

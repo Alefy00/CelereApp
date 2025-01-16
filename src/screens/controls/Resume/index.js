@@ -234,7 +234,7 @@ const initializeDateFilter = useCallback(async () => {
 
   return (
     <KeyboardAvoidingView behavior="position" enabled>
-      <ScrollView ref={scrollViewRef} style={{ backgroundColor: "#FDFCF0" }}>
+      <ScrollView ref={scrollViewRef} style={{ flexGrow:1,backgroundColor: COLORS.background, }}>
         <BarTop
           subtitulo={'Célere'}
           backColor={COLORS.primary}
@@ -260,7 +260,7 @@ const initializeDateFilter = useCallback(async () => {
           <View ref={SalesChartCardRef} onLayout={() => handleDelayedLayout('SalesChartCard', SalesChartCardRef)} style={styles.ContainerCircle}>
             {/*Ponto de referencia para o tour pop-up */}
           </View>
-          <Text style={styles.label2}>Fluxo de caixa</Text>
+          <Text style={styles.label2}>Fluxo de caixa do dia</Text>
           <View ref={FilteredListCardRef} onLayout={() => handleDelayedLayout('FilteredListCard', FilteredListCardRef)} style={styles.ContainerFilter}>
           <FilteredListCard
             selectedDate={selectedDate}

@@ -25,14 +25,15 @@ const initializeZoopSDK = async () => {  // Nome corrigido aqui
   }
 };
 
-// Realizar pagamento após a inicialização
-const realizarPagamento = async () => {
+// Realizar pagamento após a inicialização com o sellerId do usuário
+const realizarPagamento = async (sellerId) => {
   try {
     const amount = 1.00; 
     const paymentType = "credit"; 
     const installments = 1; 
 
-    const response = await ZoopModule.pay(amount, paymentType, installments);
+    // Agora passando explicitamente o sellerId na chamada
+    const response = await ZoopModule.pay(amount, paymentType, installments, sellerId);
     alert(`Pagamento realizado com sucesso! Detalhes: ${response}`);
     console.log("Pagamento aprovado:", response);
   } catch (error) {
@@ -40,6 +41,7 @@ const realizarPagamento = async () => {
     alert(`Erro no pagamento: ${error.message}`);
   }
 };
+
 
 // Exportando as funções para uso no app
 export { initializeZoopSDK, realizarPagamento }; // Nome corrigido aqui

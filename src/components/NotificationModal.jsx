@@ -160,8 +160,9 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: 10,
+    top: 5,
     right: 10,
+    marginBottom:15,
   },
   modalTitle: {
     fontSize: 18,

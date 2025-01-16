@@ -4,8 +4,8 @@ import { COLORS } from "../../../../constants";
 
 const styles = StyleSheet.create({
     scrollContainer: {
-      flexGrow: 1,
-      paddingBottom: 70, // Espaço suficiente para o tab bar
+      backgroundColor: COLORS.background,
+      paddingBottom:140,
     },
     card: {
       backgroundColor: '#FFFFFF',
