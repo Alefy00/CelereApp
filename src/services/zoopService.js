@@ -4,8 +4,8 @@ import { getZoopCredentials } from './zoopCredentials';
 
 const { ZoopModule } = NativeModules;
 
-// Inicializar o SDK corretamente com nome ajustado
-const initializeZoopSDK = async () => {  // Nome corrigido aqui
+// Inicializar o SDK
+const initializeZoopSDK = async () => { 
   try {
     const sellerIdManual = "f36b5fadbd414b188227f64553f1c521"; // Seller ID manual para o teste
     const credentials = await getZoopCredentials(sellerIdManual);
@@ -28,9 +28,9 @@ const initializeZoopSDK = async () => {  // Nome corrigido aqui
 // Realizar pagamento após a inicialização com o sellerId do usuário
 const realizarPagamento = async (sellerId) => {
   try {
-    const amount = 1.00; 
-    const paymentType = "credit"; 
-    const installments = 1; 
+    const amount = 1.00;
+    const paymentType = "credit";
+    const installments = 2;
 
     // Agora passando explicitamente o sellerId na chamada
     const response = await ZoopModule.pay(amount, paymentType, installments, sellerId);

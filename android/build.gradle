@@ -5,7 +5,7 @@ buildscript {
         compileSdkVersion = 34
         targetSdkVersion = 34
         ndkVersion = "25.1.8937393"
-        kotlinVersion = "1.8.0"
+        kotlinVersion = "1.9.0"
     }
 
     repositories {
@@ -20,6 +20,15 @@ buildscript {
     }
 }
 
+// Carregar local.properties
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(new FileInputStream(localPropertiesFile))
+} else {
+    println "local.properties não encontrado!"
+}
+
 allprojects {
     repositories {
         mavenLocal()
@@ -31,12 +40,15 @@ allprojects {
         maven {
             url = uri("https://maven.pkg.github.com/getzoop/zoop-package-public")
             credentials {
-                username = project.findProperty("GITHUB_USER") ?: System.getenv("GITHUB_USER")
-                password = project.findProperty("GITHUB_PAT") ?: System.getenv("GITHUB_PAT")
+                username = localProperties.getProperty("GITHUB_USER") ?: System.getenv("GITHUB_USER")
+                password = localProperties.getProperty("GITHUB_PAT") ?: System.getenv("GITHUB_PAT")
             }
         }
     }
 }
 
+// Log para validar se as credenciais foram carregadas corretamente
+println "GITHUB_USER (local.properties): ${localProperties.getProperty("GITHUB_USER")}"
+println "GITHUB_PAT (local.properties): ${localProperties.getProperty("GITHUB_PAT")}"
 
 apply plugin: "com.facebook.react.rootproject"

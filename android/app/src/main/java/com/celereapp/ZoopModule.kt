@@ -12,7 +12,13 @@ import com.zoop.sdk.plugin.taponphone.api.PaymentType
 import com.zoop.sdk.plugin.taponphone.api.TapOnPhone
 import com.zoop.sdk.plugin.taponphone.api.TapOnPhoneTheme
 import com.zoop.sdk.plugin.taponphone.api.PinPadType
+import com.zoop.sdk.plugin.taponphone.api.PaymentApprovedResponse
+import com.zoop.sdk.plugin.taponphone.api.PaymentErrorResponse
+import com.zoop.sdk.plugin.taponphone.api.TapOnPhoneError
+
 import androidx.core.content.ContextCompat
+import android.content.Context
+import android.nfc.NfcManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -41,6 +47,16 @@ class ZoopModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
             .show()
     }
 }
+private fun isNfcEnabled(): Boolean {
+    val nfcManager = reactApplicationContext.getSystemService(Context.NFC_SERVICE) as NfcManager
+    val adapter = nfcManager.defaultAdapter
+    val nfcEnabled = adapter != null && adapter.isEnabled
+
+    // Exibe o status do NFC usando sendAlert
+    sendAlert("Status do NFC", "NFC Ativado: $nfcEnabled")
+
+    return nfcEnabled
+}
 
     // Armazenando as credenciais para reutilização
     private lateinit var savedCredentials: InitializationRequest.Credentials
@@ -58,20 +74,13 @@ class ZoopModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
         accessKey: String,
         promise: Promise
     ) {
+if (!isNfcEnabled()) {
+    sendAlert("Erro", "O NFC não está habilitado no dispositivo. Por favor, ative o NFC para continuar.")
+    promise.reject("NFC_ERROR", "O NFC não está habilitado no dispositivo.")
+    return
+}
+
         try {
-                   // Exibir credenciais como alerta
-        val initMessage = """
-            Inicializando SDK com:
-            clientId: $clientId
-            clientSecret: $clientSecret
-            seller: $seller
-            marketplace: $marketplace
-            accessKey: $accessKey
-        """.trimIndent()
-
-        sendAlert("Inicialização do SDK", initMessage)
-
-
 
             val theme = TapOnPhoneTheme(
                 logo = ContextCompat.getDrawable(reactApplicationContext, R.drawable.splash_screen),
@@ -100,13 +109,18 @@ class ZoopModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
             tapOnPhone.initialize(
                 request = request,
                 onSuccess = {
-                     sendAlert("Sucesso", "SDK inicializado com sucesso!")
                     promise.resolve("SDK initialized successfully")
                 },
-                onError = { error ->
-                    sendAlert("Erro na Inicialização", "Código: ${error.code}\nMensagem: ${error.message}")
-                    promise.reject("SDK_INITIALIZATION_ERROR", "Erro: ${error.message}, Código: ${error.code}")
-                }
+                onError = { error: TapOnPhoneError ->
+                        sendAlert(
+                            "Erro na Inicialização",
+                            """
+                            Código: ${error.code}
+                            Mensagem: ${error.message}
+                            """.trimIndent()
+                        )
+                        promise.reject("SDK_INITIALIZATION_ERROR", "Erro: ${error.message}, Código: ${error.code}")
+                    }
             )
         } catch (e: Exception) {
             sendAlert("Erro", "Exceção na inicialização: ${e.message}")
@@ -114,10 +128,10 @@ class ZoopModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
         }
     }
 
-    @ReactMethod
-    fun pay(amount: Double, paymentType: String, installments: Int?, sellerId: String, promise: Promise) {
+@ReactMethod
+fun pay(amount: Double, paymentType: String, installments: Int?, sellerId: String, promise: Promise) {
 
-        sendAlert(
+    sendAlert(
         "Pagamento Iniciado",
         """
         Iniciando pagamento com:
@@ -127,51 +141,82 @@ class ZoopModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
         SellerId: $sellerId
         """.trimIndent()
     )
-        if (paymentStatus == PaymentStatus.PROCESSING) {
-            
-            promise.reject("PAYMENT_ERROR", "Um pagamento já está em andamento.")
-            return
-        }
 
-        paymentStatus = PaymentStatus.PROCESSING
+    if (paymentStatus == PaymentStatus.PROCESSING) {
+        promise.reject("PAYMENT_ERROR", "Um pagamento já está em andamento.")
+        return
+    }
 
-        coroutineScope.launch {
-            try {
-                // Atualizando apenas o sellerId nas credenciais salvas
-                val updatedCredentials = savedCredentials.copy(seller = sellerId)
-                tapOnPhone.setCredential(updatedCredentials)
+    paymentStatus = PaymentStatus.PROCESSING
 
-                val paymentRequest = PaymentRequest(
-                    referenceId = UUID.randomUUID().toString(),
-                    amount = (amount * 100).toLong(),
-                    paymentType = when (paymentType) {
-                        "credit" -> PaymentType.CREDIT
-                        "debit" -> PaymentType.DEBIT
-                        else -> PaymentType.CREDIT
-                    },
-                    installments = if (installments != null && installments >= 2) installments else null
-                )
+    coroutineScope.launch {
+        try {
+            // Atualizando apenas o sellerId nas credenciais salvas
+            val updatedCredentials = savedCredentials.copy(seller = sellerId)
+            tapOnPhone.setCredential(updatedCredentials)
 
-                tapOnPhone.pay(
-                    payRequest = paymentRequest,
-                    onApproved = { response ->
-                        paymentStatus = PaymentStatus.SUCCESS
-                        sendAlert("Pagamento Aprovado", "Transação: ${response.transactionId}")
-                        promise.resolve("Pagamento aprovado! Id da transação: ${response.transactionId}, Bandeira: ${response.cardBrand}")
-                    },
-                    onError = { error ->
-                        paymentStatus = PaymentStatus.FAIL
-                        sendAlert("Erro no Pagamento", "Código: ${error.code}\nMensagem: ${error.message}")
-                        promise.reject("PAYMENT_ERROR", "Erro: ${error.message}")
-                    }
-                )
-            } catch (e: Exception) {
-                paymentStatus = PaymentStatus.FAIL
-                sendAlert("Erro", "Exceção no pagamento: ${e.message}")
-                promise.reject("PAYMENT_ERROR", e.message)
-            }
+            val paymentRequest = PaymentRequest(
+                amount = (amount * 100).toLong(),
+                paymentType = when (paymentType) {
+                    "credit" -> PaymentType.CREDIT
+                    "debit" -> PaymentType.DEBIT
+                    else -> PaymentType.CREDIT
+                },
+                installments = installments,
+                referenceId = UUID.randomUUID().toString(),
+                metadata = """
+                {
+                    "clientId": "1234",
+                    "name": "Célere"        
+                }
+            """,
+            )
+
+            tapOnPhone.pay(
+                payRequest = paymentRequest,
+                onApproved = { response: PaymentApprovedResponse ->
+                    paymentStatus = PaymentStatus.SUCCESS
+                    sendAlert(
+                        "Pagamento Aprovado",
+                        """
+                        Transação Aprovada:
+                        ID: ${response.transactionId}
+                        Bandeira: ${response.cardBrand}
+                        """.trimIndent()
+                    )
+                    promise.resolve(
+                        "Pagamento aprovado! Id da transação: ${response.transactionId}, Bandeira: ${response.cardBrand}"
+                    )
+                },
+                onError = { error: PaymentErrorResponse ->
+                    paymentStatus = PaymentStatus.FAIL
+                    sendAlert(
+                        "Erro no Pagamento",
+                        """
+                        Código: ${error.code}
+                        Mensagem: ${error.message}
+                        Descrição: ${error.description}
+                        Transação: ${error.transactionId ?: "N/A"}
+                        """.trimIndent()
+                    )
+                    promise.reject(
+                        "PAYMENT_ERROR",
+                        """
+                        Erro: ${error.message}
+                        Código: ${error.code}
+                        Descrição: ${error.description}
+                        """.trimIndent()
+                    )
+                }
+            )
+        } catch (e: Exception) {
+            paymentStatus = PaymentStatus.FAIL
+            sendAlert("Erro", "Exceção no pagamento: ${e.message}")
+            promise.reject("PAYMENT_ERROR", e.message)
         }
     }
+}
+
 
     override fun onCatalystInstanceDestroy() {
         super.onCatalystInstanceDestroy()

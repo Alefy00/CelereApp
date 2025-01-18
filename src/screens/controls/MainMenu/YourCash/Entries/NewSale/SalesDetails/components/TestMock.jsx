@@ -5,7 +5,7 @@ import { initializeZoopSDK, realizarPagamento } from '../../../../../../../../se
 
 const TestScreen = () => {
     const [sdkInitialized, setSdkInitialized] = useState(false);
-    const [sellerId, setSellerId] = useState("77ccc8a6e43849679496dab43c5c2bc8");
+    const [sellerId, setSellerId] = useState("f36b5fadbd414b188227f64553f1c521");
 
     const handleInitialize = async () => {
         try {
