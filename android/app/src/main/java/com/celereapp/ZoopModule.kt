@@ -52,9 +52,6 @@ private fun isNfcEnabled(): Boolean {
     val adapter = nfcManager.defaultAdapter
     val nfcEnabled = adapter != null && adapter.isEnabled
 
-    // Exibe o status do NFC usando sendAlert
-    sendAlert("Status do NFC", "NFC Ativado: $nfcEnabled")
-
     return nfcEnabled
 }
 
@@ -129,8 +126,13 @@ if (!isNfcEnabled()) {
     }
 
 @ReactMethod
-fun pay(amount: Double, paymentType: String, installments: Int?, sellerId: String, promise: Promise) {
-
+fun pay(
+    amount: Double,
+    paymentType: String,
+    installments: Int?,
+    userSellerId: String,  // Este é o sellerId do usuário
+    promise: Promise
+) {
     sendAlert(
         "Pagamento Iniciado",
         """
@@ -138,7 +140,7 @@ fun pay(amount: Double, paymentType: String, installments: Int?, sellerId: Strin
         Amount: $amount
         PaymentType: $paymentType
         Installments: $installments
-        SellerId: $sellerId
+        SellerId (usuário): $userSellerId
         """.trimIndent()
     )
 
@@ -151,25 +153,20 @@ fun pay(amount: Double, paymentType: String, installments: Int?, sellerId: Strin
 
     coroutineScope.launch {
         try {
-            // Atualizando apenas o sellerId nas credenciais salvas
-            val updatedCredentials = savedCredentials.copy(seller = sellerId)
-            tapOnPhone.setCredential(updatedCredentials)
-
             val paymentRequest = PaymentRequest(
                 amount = (amount * 100).toLong(),
                 paymentType = when (paymentType) {
                     "credit" -> PaymentType.CREDIT
-                    "debit" -> PaymentType.DEBIT
-                    else -> PaymentType.CREDIT
+                    "debit"  -> PaymentType.DEBIT
+                    else     -> PaymentType.CREDIT // fallback
                 },
                 installments = installments,
                 referenceId = UUID.randomUUID().toString(),
                 metadata = """
-                {
-                    "clientId": "1234",
-                    "name": "Célere"        
-                }
-            """,
+                    {
+                        "sellerId": "$userSellerId"
+                    }
+                """.trimIndent()
             )
 
             tapOnPhone.pay(
@@ -179,13 +176,13 @@ fun pay(amount: Double, paymentType: String, installments: Int?, sellerId: Strin
                     sendAlert(
                         "Pagamento Aprovado",
                         """
-                        Transação Aprovada:
-                        ID: ${response.transactionId}
-                        Bandeira: ${response.cardBrand}
+                            Transação Aprovada:
+                            ID: ${response.transactionId}
+                            Bandeira: ${response.cardBrand}
                         """.trimIndent()
                     )
                     promise.resolve(
-                        "Pagamento aprovado! Id da transação: ${response.transactionId}, Bandeira: ${response.cardBrand}"
+                        "Pagamento aprovado! Transação: ${response.transactionId}, Bandeira: ${response.cardBrand}"
                     )
                 },
                 onError = { error: PaymentErrorResponse ->
@@ -193,18 +190,18 @@ fun pay(amount: Double, paymentType: String, installments: Int?, sellerId: Strin
                     sendAlert(
                         "Erro no Pagamento",
                         """
-                        Código: ${error.code}
-                        Mensagem: ${error.message}
-                        Descrição: ${error.description}
-                        Transação: ${error.transactionId ?: "N/A"}
+                            Código: ${error.code}
+                            Mensagem: ${error.message}
+                            Descrição: ${error.description}
+                            ID Transação: ${error.transactionId ?: "N/A"}
                         """.trimIndent()
                     )
                     promise.reject(
                         "PAYMENT_ERROR",
                         """
-                        Erro: ${error.message}
-                        Código: ${error.code}
-                        Descrição: ${error.description}
+                            Erro: ${error.message}
+                            Código: ${error.code}
+                            Descrição: ${error.description}
                         """.trimIndent()
                     )
                 }

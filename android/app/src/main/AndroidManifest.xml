@@ -3,7 +3,7 @@
 
     <!-- NFC e Hardware -->
     <uses-permission android:name="android.permission.NFC" />
-    <uses-feature android:name="android.hardware.nfc" android:required="true"/>
+    <uses-feature android:name="android.hardware.nfc" android:required="false"/>
 
     <!-- Permissões Essenciais -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>

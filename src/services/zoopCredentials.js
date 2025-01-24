@@ -20,28 +20,27 @@ const getZoopToken = async () => {
   }
 };
 
-// Função para obter as credenciais Zoop (exceto seller)
-export const getZoopCredentials = async (sellerManual) => {
+export const getZoopCredentials = async () => {
   try {
-    const token = await getZoopToken();
+    const token = await getZoopToken(); // Recupera o token de autenticação
     const response = await axios.get(`${API_BASE_URL}/api/zoop_credentials/`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
-    console.log(response)
+    console.log(response.data);
 
     if (response.data.success) {
-      const { clientId, clientSecret, marketplace, accessKey } = response.data.data;
-      
-      // Retorna as credenciais, inserindo o seller manualmente
+      const { clientId, clientSecret, marketplace, seller, accessKey } = response.data.data;
+
+      // Retorna todas as credenciais incluindo o sellerId
       return {
         clientId,
         clientSecret,
         marketplace,
-        seller: sellerManual, // Seller manualmente inserido
-        accessKey
+        seller, 
+        accessKey,
       };
     }
 
