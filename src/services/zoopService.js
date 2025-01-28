@@ -7,7 +7,7 @@ const { ZoopModule } = NativeModules;
 // Inicializar o SDK com credenciais fixas para teste
 const initializeZoopSDK = async () => {
   try {
-    const credentials = await getZoopCredentials(); // Agora inclui o seller
+    const credentials = await getZoopCredentials();
     await ZoopModule.initializeSDK(
       credentials.clientId,
       credentials.clientSecret,
@@ -33,4 +33,4 @@ const realizarPagamento = async (sellerId, amount, paymentType, installments) =>
 };
 
 // Exportando as funções para uso no app
-export { initializeZoopSDK, realizarPagamento }; // Nome corrigido aqui
+export { initializeZoopSDK, realizarPagamento };

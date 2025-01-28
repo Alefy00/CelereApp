@@ -1,13 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from 'react';
-import {
-    Button,
-    View,
-    Alert,
-    TextInput,
-    ActivityIndicator,
-    StyleSheet,
-} from 'react-native';
+import { Button, View, Alert, TextInput, ActivityIndicator,StyleSheet} from 'react-native';
 import {
     initializeZoopSDK,
     realizarPagamento,

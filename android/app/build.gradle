@@ -16,8 +16,8 @@ android {
         applicationId "com.celereapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 30
-        versionName "2.2.8"
+        versionCode 31
+        versionName "2.2.9"
     }
 
     signingConfigs {

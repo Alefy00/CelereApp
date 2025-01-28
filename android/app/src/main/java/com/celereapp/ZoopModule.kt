@@ -172,6 +172,9 @@ fun pay(
 
         tapOnPhone.setCredential(updatedCredentials) // Altera as credenciais dinamicamente
 
+        sendAlert("ZoopSDK", "Credenciais originais: ${savedCredentials.seller}")
+        sendAlert("ZoopSDK", "Novas credenciais: ${updatedCredentials.seller}")
+
         coroutineScope.launch {
             try {
                 // Cria a requisição de pagamento
