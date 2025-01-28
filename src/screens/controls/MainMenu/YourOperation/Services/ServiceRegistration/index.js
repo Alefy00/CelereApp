@@ -9,6 +9,7 @@ import { COLORS } from '../../../../../../constants';
 import styles from './styles';
 import axios from 'axios';
 import { API_BASE_URL } from '../../../../../../services/apiConfig';
+import mixpanel from '../../../../../../services/mixpanelClient';
 
 const UNIT_MEASURE_API_ENDPOINT = `${API_BASE_URL}/api/und_medida_servico/?page=1&page_size=100`;
 const REGISTER_SERVICE_API_ENDPOINT = `${API_BASE_URL}/cad/servicos/`;
@@ -38,7 +39,6 @@ const AddService = ({ navigation }) => {
         return Number(storedEmpresaId);
       } else {
         Alert.alert('Erro', 'ID da empresa não carregado. Tente novamente.');
-        console.log('ID da empresa não encontrado no AsyncStorage.');
       }
     } catch (error) {
       console.error('Erro ao obter o ID da empresa do AsyncStorage:', error);
@@ -121,6 +121,7 @@ const AddService = ({ navigation }) => {
         }
         setModalVisible(true);  // Exibe o modal de sucesso
         clearForm();  // Limpa o formulário
+        mixpanel.track('Cadastro de novo Serviço', { serviceName: name, unitMeasure });
       } else {
         Alert.alert('Erro', result.message || 'Ocorreu um erro ao registrar o serviço.');
       }
@@ -153,7 +154,6 @@ const uploadServiceImage = async (serviceId, empresaId) => {
     });
 
     if (response.data.status === 'success') {
-      console.log('Imagem do produto registrada com sucesso:', response.data);
     } else {
       Alert.alert('Erro', 'Falha ao enviar a imagem.');
     }
@@ -167,7 +167,6 @@ const uploadServiceImage = async (serviceId, empresaId) => {
 const handleSelectImage = async () => {
   launchImageLibrary({ mediaType: 'photo', includeBase64: false }, (response) => {
     if (response.didCancel) {
-      console.log('Usuário cancelou a seleção da imagem');
     } else if (response.errorCode) {
       console.error('Erro ao selecionar imagem:', response.errorMessage);
     } else if (response.assets && response.assets.length > 0) {
@@ -177,6 +176,7 @@ const handleSelectImage = async () => {
         type: selectedPhoto.type || 'image/jpeg',  // Define o tipo como 'image/jpeg' por padrão, caso não esteja presente
         name: selectedPhoto.fileName || `photo_${Date.now()}.jpg`,  // Define um nome padrão se 'fileName' estiver ausente
       });
+      mixpanel.track('Seleção de Imagem', { imageName: selectedPhoto.fileName });
     }
   });
 };
@@ -189,7 +189,7 @@ const handleSelectImage = async () => {
     setDescription('');
     setIsPriceDisabled(false);
     setPhoto(null);  // Limpa a imagem
-    setCost('')
+    setCost('');
   };
 
   const toggleUnitMeasureDropdown = () => {
@@ -207,19 +207,6 @@ const handleSelectImage = async () => {
   };
   const handleNewService = () => {
     setModalVisible(false); // Fecha o modal
-  };
-
-  const handlePriceCheckboxChange = () => {
-    setIsPriceDisabled(!isPriceDisabled);
-    if (!isPriceDisabled) {
-      setPrice('0.00'); // Define o preço como 0 ao marcar o checkbox
-      setUnitMeasure('und'); // Define o código da unidade como "und" automaticamente
-      setUnitsOfMeasure([{ id: 1, cod: 'und', nome: 'Unidade' }]); // Define a unidade "und" com o código correto
-    } else {
-      setPrice(''); // Limpa o preço quando o checkbox é desmarcado
-      setUnitMeasure(''); // Limpa a unidade de medida quando o checkbox é desmarcado
-      fetchUnitsOfMeasure(empresaId); // Recarrega as unidades de medida da API ao desmarcar o checkbox
-    }
   };
 
   const formatPriceToBRL = (value) => {
@@ -240,11 +227,13 @@ const handleSelectImage = async () => {
   const handlePriceChange = (text) => {
     const formattedValue = formatPriceToBRL(text);
     setPrice(formattedValue);
+    mixpanel.track('Atualização de Preço serviço', { price: formattedValue });
   };
 
   const handleCostChange = (text) => {
     const formattedValue = formatPriceToBRL(text);
     setCost(formattedValue);
+    mixpanel.track('Atualização de Custo serviço', { cost: formattedValue });
   };
 
   return (

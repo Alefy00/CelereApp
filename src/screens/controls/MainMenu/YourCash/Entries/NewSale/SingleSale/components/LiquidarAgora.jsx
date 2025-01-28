@@ -216,7 +216,7 @@ const registerSale = async () => {
       setSaleId(vendaId);
       setIsModalVisible(true);
 
-      mixpanel.track('Venda Concluída', {
+      mixpanel.track('Venda avulsa - Pagar agora', {
         vendaId: vendaId,
         valorTotal: totalLiquido,
         metodoPagamento: selectedPaymentMethod,

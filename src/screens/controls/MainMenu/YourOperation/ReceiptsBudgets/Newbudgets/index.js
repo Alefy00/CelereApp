@@ -10,6 +10,7 @@ import styles from "./styles";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_BASE_URL } from "../../../../../../services/apiConfig.js";
+import mixpanel from "../../../../../../services/mixpanelClient.js";
 
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
@@ -185,6 +186,7 @@ const NewBudgets = ({ navigation, route }) => {
 
     if (search) {
       filtered = filtered.filter(product => product.nome.toLowerCase().includes(search.toLowerCase()));
+      mixpanel.track('Buscar - Novo Orçamento', { query: search });
     }
 
     setFilteredProducts(filtered); // Atualiza a lista de produtos filtrados
@@ -206,12 +208,14 @@ const NewBudgets = ({ navigation, route }) => {
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
     applyFilters(); // Aplicar filtros quando uma nova categoria for selecionada
+    mixpanel.track('Mudar categoria - Novo Orçamento', { category });
   };
 
   const handleGeneralFilterChange = (filter) => {
     setGeneralFilter(filter);
     setSelectedCategory('all'); // Redefinir o filtro de categoria ao mudar o filtro geral
     applyFilters();
+    mixpanel.track('Mudar filtro geral - Novo Orçamento', { filter });
   };
 
    // Função para limpar o carrinho
@@ -232,6 +236,7 @@ const NewBudgets = ({ navigation, route }) => {
     setQuantities(prevQuantities => {
       const newQuantities = { ...prevQuantities, [id]: (prevQuantities[id] || 0) + delta };
       if (newQuantities[id] === 0) delete newQuantities[id]; // Remove a quantidade se for zero
+      mixpanel.track('Atualizar quantidade produtos', { productId: id, quantity: newQuantities[id] });
       return newQuantities;
     });
   };
@@ -256,7 +261,7 @@ const NewBudgets = ({ navigation, route }) => {
     const allSelectedItems = [...selectedItems];
   
     const totalPrice = allSelectedItems.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
-  
+    mixpanel.track('Confirmar orçamento', { totalPrice, items: selectedItems.length });
     navigation.navigate('DetailsBudgets', {
       products: allSelectedItems, // Envia tanto produtos quanto serviços juntos
       totalPrice
@@ -283,6 +288,7 @@ const NewBudgets = ({ navigation, route }) => {
     // Certifique-se de que o modal é fechado corretamente
     const closeModalOnNavigate = () => {
       setFourthModalVisible(false); // Fecha o modal ao navegar
+      mixpanel.track('Cadastrar novo produto ou serviço');
       navigation.navigate('AddProductScreen');
     };
     const closeModalOnNavigateService = () => {

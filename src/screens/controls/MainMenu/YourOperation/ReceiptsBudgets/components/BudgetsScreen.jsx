@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import BarTop2 from '../../../../../../components/BarTop2';
 import { API_BASE_URL } from '../../../../../../services/apiConfig';
 import { useFocusEffect } from '@react-navigation/native';
+import mixpanel from '../../../../../../services/mixpanelClient';
 
 const BudgetsScreen = ({ navigation, route }) => {
     const { saleId } = route.params;  // ID do orçamento passado para a tela
@@ -135,7 +136,7 @@ const BudgetsScreen = ({ navigation, route }) => {
           };
       
           await Share.open(shareOptions);
-          console.log('PDF compartilhado com sucesso.');
+          mixpanel.track('Compartilhar recibo de Orçamento', { saleId }); 
         } catch (error) {
           if (error.message !== 'User did not share') {
             console.error('Erro ao compartilhar o PDF:', error);
@@ -146,8 +147,6 @@ const BudgetsScreen = ({ navigation, route }) => {
           }
         }
       };
-      
-      
 
     // Função para voltar para a tela anterior
     const handleBack = async () => {
@@ -159,6 +158,7 @@ const BudgetsScreen = ({ navigation, route }) => {
           console.log('Arquivo PDF temporário excluído ao voltar');
         }
       }
+      mixpanel.track('Botão de voltar dinamicamente', { from: route.params?.from });
       // Verifica se a navegação veio de 'Budget' ou usa o comportamento padrão
       if (route.params?.from === 'Budget') {
         navigation.navigate('Budget'); // Voltar para a tela Budget

@@ -12,6 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { API_BASE_URL } from '../../../../../../services/apiConfig';
+import mixpanel from '../../../../../../services/mixpanelClient';
 
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
@@ -53,13 +54,10 @@ const AddProductScreen = ({ navigation }) => {
 const handleSelectImage = async () => {
   launchImageLibrary({ mediaType: 'photo', includeBase64: false }, (response) => {
     if (response.didCancel) {
-      console.log('Usuário cancelou a seleção da imagem');
     } else if (response.errorCode) {
       console.error('Erro ao selecionar imagem:', response.errorMessage);
     } else if (response.assets && response.assets.length > 0) {
       const selectedPhoto = response.assets[0];
-      console.log('Imagem capturada:', selectedPhoto);  // Log da imagem capturada
-
       setPhoto({
         uri: selectedPhoto.uri,
         type: selectedPhoto.type || 'image/jpeg',  // Define o tipo como 'image/jpeg' por padrão, caso não esteja presente
@@ -153,6 +151,7 @@ const handleSelectImage = async () => {
         }
         setIsModalVisible(true);
         clearFields();
+        mixpanel.track('Cadastro de novo Produto', { productName, category: selectedCategory });
       } else {
         Alert.alert('Erro', 'Falha ao cadastrar o produto.');
       }
@@ -224,6 +223,7 @@ const uploadProductImage = async (productId, empresaId) => {
   // Função para adicionar uma nova categoria
   const handleAddCategory = () => {
     navigation.navigate('IncludeCategoryProducts');  // Navega para a tela de categorias
+    mixpanel.track('Adicionar Categoria pra produto'); 
   };
 
   return (

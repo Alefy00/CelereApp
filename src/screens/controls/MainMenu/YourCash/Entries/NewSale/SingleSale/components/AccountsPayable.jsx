@@ -189,7 +189,7 @@ const registerSale = async () => {
 
       setIsModalVisible(true);
       // Evento Mixpanel - Captura a conclusão da venda
-      mixpanel.track('Venda Concluída', {
+      mixpanel.track('Venda avulsa contas a pagar', {
         vendaId: vendaId,
         valorTotal: totalLiquido,
         cliente: selectedClient.nome,

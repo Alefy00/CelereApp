@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import UpdateStockModal from './components/UpdateStockModal';
 import { API_BASE_URL } from '../../../../../services/apiConfig';
+import mixpanel from '../../../../../services/mixpanelClient';
 
 const PRODUCTS_API = `${API_BASE_URL}/cad/produtos/`;
 const CATEGORIES_API = `${API_BASE_URL}/mnt/categoriasprodutos/`;
@@ -53,9 +54,6 @@ const StockInfo = ({ navigation }) => {
         const secureImagePath = imagePath.startsWith("http://")
           ? imagePath.replace("http://", "https://")
           : imagePath;
-  
-        // Log para verificar a URL ajustada
-        console.log('URL da Imagem Ajustada:', secureImagePath);
   
         return secureImagePath; // Retorna a URL segura
       }
@@ -111,6 +109,13 @@ const StockInfo = ({ navigation }) => {
         setTotalVenda(totalVendaCalc.toFixed(2));
         setTotalItems(totalItemsCalc);
 
+        mixpanel.track('Resumo de Estoque Visualizado', {
+          totalCusto: totalCustoCalc,
+          totalVenda: totalVendaCalc,
+          totalItems: totalItemsCalc,
+          categories: productsWithImages.length,
+        });
+
       } else {
         Alert.alert('Erro', 'Falha ao recuperar produtos.');
       }
@@ -161,10 +166,12 @@ const StockInfo = ({ navigation }) => {
 
     if (activeFilter !== 'all') {
       filtered = filtered.filter(product => product.categoria.id.toString() === activeFilter);
+      mixpanel.track('Filtro por Categoria - Estoque', { categoryId: activeFilter });
     }
 
     if (searchTerm) {
       filtered = filtered.filter(product => product.nome.toLowerCase().includes(searchTerm.toLowerCase()));
+      mixpanel.track('Busca de Produto - Estoque', { query: searchTerm });
     }
 
     setFilteredProducts(filtered);
@@ -182,6 +189,7 @@ const StockInfo = ({ navigation }) => {
   const handleProductSelect = (product) => {
     setSelectedProduct(product);  // Define o produto selecionado
     setIsModalVisible(true);  // Abre o modal
+    mixpanel.track('Seleção de Produto - Estoque', { productId: product.id, productName: product.nome }); 
   };
 
   const renderFilterItem = ({ item }) => (
@@ -223,6 +231,7 @@ const StockInfo = ({ navigation }) => {
 
   const handleAddProduct = () => {
     navigation.navigate("AddProductScreen");
+    mixpanel.track('Adição de Novo Produto');
   };
 
   return (

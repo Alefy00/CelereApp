@@ -9,11 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 import { API_BASE_URL } from '../../../../../../services/apiConfig';
-
-const API_URL = 'https://api.celere.top/cad/cliente/'; 
-const API_ORCAMENTO_URL = 'https://api.celere.top/cad/orcamento/';
-const API_ITENS_VENDA_ORCAMENTO_URL = 'https://api.celere.top/cad/itens_venda_orcamento/';
-
+import mixpanel from '../../../../../../services/mixpanelClient';
 
 const DetailsBudgets = ({ navigation, route }) => {
   const [date, setDate] = useState('');
@@ -59,26 +55,16 @@ const DetailsBudgets = ({ navigation, route }) => {
       return;
     }
 
-    // Criar o orçamento
-    console.log('Iniciando criação do orçamento com os dados: ', {
-      empresa_id: empresaId,
-      cliente_id: selectedClient ? selectedClient.id : null,
-      informacoes_adicionais: additionalInfo,
-    });
     const orcamentoId = await createOrcamento(empresaId);
     if (!orcamentoId) return;
 
-    // Registrar itens de venda (produtos) no orçamento
-    console.log('Iniciando registro de itens de venda: ', products);
     await registerItemsVendaOrcamento(empresaId, orcamentoId, products);
-
-    // Registrar serviços no orçamento
-    console.log('Iniciando registro de serviços: ', services);
     await registerServicesOrcamento(empresaId, orcamentoId, services);
 
     // Exibir modal de confirmação
     setOrcamentoId(orcamentoId);
     setIsModalVisible(true);
+    mixpanel.track('Criar novo Orçamento', { client: selectedClient.nome, total: discountedTotal });
   };
 
   // Função para registrar o orçamento
@@ -123,13 +109,10 @@ const registerItemsVendaOrcamento = async (empresaId, orcamentoId, items) => {
         valor_desconto: valorDesconto,
         valor_total_venda: valorTotalVenda,
       };
-      console.log('Dados enviados para registrar item de venda: ', data);
-
       return axios.post(`${API_BASE_URL}/cad/itens_venda_orcamento/`, data);
     });
 
     await Promise.allSettled(requests);
-    console.log('Itens de venda registrados com sucesso.');
   } catch (error) {
     console.error('Erro ao registrar os itens:', error.response ? error.response.data : error.message);
     Alert.alert('Erro', 'Falha ao registrar os itens do orçamento.');
@@ -155,13 +138,10 @@ const registerServicesOrcamento = async (empresaId, orcamentoId, services) => {
         valor_desconto: valorDesconto,
         valor_total_venda: valorTotalVenda,
       };
-      console.log('Dados enviados para registrar serviço: ', data);
-
       return axios.post(`${API_BASE_URL}/cad/itens_venda_orcamento/`, data);
     });
 
     await Promise.allSettled(requests);
-    console.log('Serviços registrados com sucesso.');
   } catch (error) {
     console.error('Erro ao registrar os serviços:', error.response ? error.response.data : error.message);
     Alert.alert('Erro', 'Falha ao registrar os serviços do orçamento.');
@@ -173,12 +153,14 @@ const registerServicesOrcamento = async (empresaId, orcamentoId, services) => {
   const shareOrcamento = () => {
     setIsModalVisible(false);
     navigation.navigate('BudgetsScreen', { saleId: orcamentoId });
+    mixpanel.track('Compartilhar Orçamento', { orcamentoId });
   };
 
   // Função para voltar para a tela anterior
   const handleBack = () => {
     setIsModalVisible(false);
     navigation.navigate('Budget');
+    mixpanel.track('Voltar a tela de Orçamentos');
   };
 
   // Função para alternar a visibilidade do dropdown
@@ -190,6 +172,7 @@ const registerServicesOrcamento = async (empresaId, orcamentoId, services) => {
   const selectClient = (client) => {
     setSelectedClient(client);
     setIsDropdownVisible(false);
+    mixpanel.track('Selecionar cliente', { clientName: client.nome });
   };
 
   // Função para pegar a data atual
@@ -215,6 +198,7 @@ const registerServicesOrcamento = async (empresaId, orcamentoId, services) => {
 
     const newTotal = total - discountValue;
     setDiscountedTotal(newTotal > 0 ? newTotal : 0);
+    mixpanel.track('Aplicar desconto', { type: discountType, value: discountValue });
   }, [discount, discountType, total]);
 
   // Buscar lista de clientes da API

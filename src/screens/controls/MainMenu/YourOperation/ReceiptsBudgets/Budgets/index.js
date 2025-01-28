@@ -10,6 +10,7 @@ import styles from './styles';
 import FilterModal from '../../../YourCash/Entries/SettleCredit/components/FilterModal';
 import { useFocusEffect } from '@react-navigation/native';
 import { API_BASE_URL } from '../../../../../../services/apiConfig';
+import mixpanel from '../../../../../../services/mixpanelClient';
 
 const Budget = ({ navigation }) => {
   const [budgets, setBudgets] = useState([]);
@@ -152,10 +153,12 @@ const Budget = ({ navigation }) => {
     const handleSelectBudget = (budget) => {
       setSelectedBudget(budget);
       setModalVisible(true);
+      mixpanel.track('Ver detalhes do orçamento', { budgetId: budget.id });
     };
   // Função para aplicar filtros
   const applyFilters = () => {
     setModalVisibleFilter(false); // Fecha o modal após aplicar o filtro
+    mixpanel.track('Orçamentos aplicar filtro', { filters });
 
     const filteredBudgets = budgets.filter((budget) => {
       const matchesSearchText = budget.clientName.toLowerCase().includes(filters.searchText.toLowerCase());
@@ -192,6 +195,7 @@ const Budget = ({ navigation }) => {
 
   const handleNewBudgets = () => {
     navigation.navigate('NewBudgets');
+    mixpanel.track('Criar novo orçamento');
   };
 
   return (

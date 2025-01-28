@@ -10,6 +10,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { API_BASE_URL } from '../../../../../../services/apiConfig';
+import mixpanel from '../../../../../../services/mixpanelClient';
 
 const REGISTERED_SERVICES_API = `${API_BASE_URL}/cad/servicos/`;
 
@@ -70,9 +71,6 @@ const RegisteredServices = ({ navigation }) => {
                   imageUrl = imageUrl.startsWith("http://")
                     ? imageUrl.replace("http://", "https://")
                     : imageUrl;
-  
-                  // Log da URL ajustada
-                  console.log(`Serviço ID ${service.id} - URL da Imagem Ajustada:`, imageUrl);
                 }
   
                 return { ...service, image_url: imageUrl }; // Retorna serviço com imagem ajustada
@@ -114,6 +112,7 @@ const RegisteredServices = ({ navigation }) => {
 
   const handleConfirm = (date) => {
     setSelectedDate(date);
+    mixpanel.track('Selecionar Data no Filtro Serviço', { selectedDate: date.toISOString() });
     hideDatePicker();
   };
 
