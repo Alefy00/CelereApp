@@ -23,19 +23,12 @@ const initializeZoopSDK = async () => {
 };
 
 
-const realizarPagamento = async (sellerId) => {
+const realizarPagamento = async (sellerId, amount, paymentType, installments) => {
   try {
-    const amount = 1.00; // Valor em reais
-    const paymentType = "credit"; // Tipo de pagamento
-    const installments = 2; // Número de parcelas
-
     const response = await ZoopModule.pay(amount, paymentType, installments, sellerId);
-    alert(`Pagamento realizado com sucesso! Detalhes: ${response}`);
-    console.log("Pagamento aprovado:", response);
-
+    return response; // Retorna a resposta do pagamento
   } catch (error) {
-    console.error("Erro ao realizar o pagamento:", error);
-    alert(`Erro no pagamento: ${error.message}`);
+    throw error; // Lança o erro para tratamento
   }
 };
 

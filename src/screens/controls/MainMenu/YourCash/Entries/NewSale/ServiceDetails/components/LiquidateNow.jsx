@@ -111,6 +111,18 @@ const LiquidateNow = ({ navigation, route, clients }) => {
 
 // Função para registrar venda e itens (produtos e serviços)
 const handleRegisterSale = async () => {
+
+  mixpanel.track("Venda Concluida(serviço - pagar agora)", {
+    screen: "LiquidateNow",
+    client_id: selectedClient?.id,
+    client_name: selectedClient?.nome,
+    total_value: liquidValue,
+    payment_method_id: selectedPaymentMethod,
+    payment_method_name: paymentMethods.find((method) => method.id === selectedPaymentMethod)?.nome || "Unknown",
+    installments: installments,
+    discount_type: discountType,
+    discount_value: discount,
+  });
   try {
     const empresaId = await getEmpresaId();
     if (!empresaId) return;
@@ -224,12 +236,6 @@ const handleRegisterSale = async () => {
 
     // Aguardar todas as requisições
     await Promise.all([...servicePromises, ...productPromises]);
-
-    mixpanel.track('Venda Finalizada', {
-      valorTotal: totalValue,
-      metodoPagamento: selectedPaymentMethod,
-      numeroParcelas: installments,
-    });
 
     setIsModalVisible(true);
   } catch (error) {

@@ -118,7 +118,21 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
     };
 
     const handleRegisterSale = async () => {
+      
+      mixpanel.track("Venda registrada (Serviço - contas a receber)", {
+        screen: "AccountsReceivable",
+        client_id: selectedClient?.id,
+        client_name: selectedClient?.nome,
+        total_without_discount: totalWithoutDiscount,
+        total_with_discount: totalWithDiscount,
+        discount_type: discountType,
+        discount_value: discount,
+        payment_date: paymentDate.toLocaleDateString("pt-BR"),
+        payment_type: selectedPayment,
+      });
+
       try {
+
         const empresaId = await getEmpresaId(); // Obtém o ID da empresa logada
         if (!empresaId) return;
     
@@ -154,13 +168,10 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
           tipo_pagamento_venda: null, // Tipo de pagamento como null
           gastos_envolvidos: parseFloat(additionalCosts || 0).toFixed(2), // Gastos adicionais (se houver)
         };
-    
-        console.log('Dados de venda enviados:', vendaData);
-    
+        
         // Envia a venda para a API
         const vendaResponse = await axios.post(API_VENDAS, vendaData);
         const vendaId = vendaResponse.data.data.id;
-        console.log('Venda registrada com sucesso, ID da venda:', vendaId);
     
         // Preparar os itens de serviço
         const serviceItems = services.map(service => {
@@ -204,14 +215,6 @@ const AccountsReceivable = ({ route, navigation, clients, totalPrice  }) => {
     
         // Executa todas as promessas de registro de serviços e produtos
         await Promise.all([...servicePromises, ...productPromises]);
-    
-        // Rastrear a conclusão da venda no Mixpanel
-        mixpanel.track('Venda Concluída', {
-          vendaId,
-          totalPreco: totalValue,
-          descontoAplicado: parsedDiscount,
-          formaPagamento: selectedPayment,
-        });
     
         resetCart(); // Limpa o carrinho após registrar a venda
     

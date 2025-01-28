@@ -26,6 +26,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.UUID
 
+// Enum para representar o estado do pagamento
 enum class PaymentStatus {
     PROCESSING,
     SUCCESS,
@@ -33,10 +34,11 @@ enum class PaymentStatus {
 }
 
 class ZoopModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
-    private val tapOnPhone = TapOnPhone(reactContext)
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private var paymentStatus: PaymentStatus = PaymentStatus.FAIL
+    private val tapOnPhone = TapOnPhone(reactContext) // Instância principal do SDK Tap to Phone
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)  // Gerenciador de corrotinas
+    private var paymentStatus: PaymentStatus = PaymentStatus.FAIL // Estado inicial do pagamento
 
+    // Exibe uma mensagem de alerta
     private fun sendAlert(title: String, message: String) {
     val reactInstanceManager = reactApplicationContext.currentActivity
     reactInstanceManager?.runOnUiThread {
@@ -47,6 +49,7 @@ class ZoopModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
             .show()
     }
 }
+ // Verifica se o NFC está habilitado no dispositivo
 private fun isNfcEnabled(): Boolean {
     val nfcManager = reactApplicationContext.getSystemService(Context.NFC_SERVICE) as NfcManager
     val adapter = nfcManager.defaultAdapter
@@ -62,6 +65,7 @@ private fun isNfcEnabled(): Boolean {
         return "ZoopModule"
     }
 
+    // Inicializa o SDK Tap to Phone
     @ReactMethod
     fun initializeSDK(
         clientId: String,
@@ -71,6 +75,8 @@ private fun isNfcEnabled(): Boolean {
         accessKey: String,
         promise: Promise
     ) {
+
+// Verifica se o NFC está habilitado
 if (!isNfcEnabled()) {
     sendAlert("Erro", "O NFC não está habilitado no dispositivo. Por favor, ative o NFC para continuar.")
     promise.reject("NFC_ERROR", "O NFC não está habilitado no dispositivo.")
@@ -78,7 +84,7 @@ if (!isNfcEnabled()) {
 }
 
         try {
-
+            // Configuração do tema do SDK
             val theme = TapOnPhoneTheme(
                 logo = ContextCompat.getDrawable(reactApplicationContext, R.drawable.splash_screen),
                 backgroundColor = Color.parseColor("#FADC00"),
@@ -89,7 +95,7 @@ if (!isNfcEnabled()) {
                 brandBackgroundColor = "#1434CB",
                 pinPadType = PinPadType.SHUFFLED
             )
-
+            // Salva as credenciais iniciais
             savedCredentials = InitializationRequest.Credentials(
                 clientId = clientId,
                 clientSecret = clientSecret,
@@ -97,12 +103,12 @@ if (!isNfcEnabled()) {
                 seller = seller,
                 accessKey = accessKey
             )
-
+            // Cria a requisição de inicialização
             val request = InitializationRequest(
                 theme = theme,
                 credentials = savedCredentials
             )
-
+            // Inicializa o SDK
             tapOnPhone.initialize(
                 request = request,
                 onSuccess = {
@@ -125,25 +131,28 @@ if (!isNfcEnabled()) {
         }
     }
 
+ // Realiza um pagamento com o SDK
 @ReactMethod
 fun pay(
     amount: Double,
     paymentType: String,
     installments: Int?,
-    userSellerId: String,  // Este é o sellerId do usuário
+    userSellerId: String,  
     promise: Promise
 ) {
+    val amountInCents = (amount * 100).toLong() // Converte reais para centavos
+
     sendAlert(
         "Pagamento Iniciado",
         """
         Iniciando pagamento com:
-        Amount: $amount
+        Amount (em centavos): $amountInCents
         PaymentType: $paymentType
         Installments: $installments
         SellerId (usuário): $userSellerId
         """.trimIndent()
     )
-
+    // Verifica se já há um pagamento em andamento
     if (paymentStatus == PaymentStatus.PROCESSING) {
         promise.reject("PAYMENT_ERROR", "Um pagamento já está em andamento.")
         return
@@ -151,70 +160,83 @@ fun pay(
 
     paymentStatus = PaymentStatus.PROCESSING
 
-    coroutineScope.launch {
-        try {
-            val paymentRequest = PaymentRequest(
-                amount = (amount * 100).toLong(),
-                paymentType = when (paymentType) {
-                    "credit" -> PaymentType.CREDIT
-                    "debit"  -> PaymentType.DEBIT
-                    else     -> PaymentType.CREDIT // fallback
-                },
-                installments = installments,
-                referenceId = UUID.randomUUID().toString(),
-                metadata = """
-                    {
-                        "sellerId": "$userSellerId"
-                    }
-                """.trimIndent()
-            )
+    try {
+        // Atualiza dinamicamente as credenciais com o sellerId do usuário
+        val updatedCredentials = InitializationRequest.Credentials(
+            clientId = savedCredentials.clientId,
+            clientSecret = savedCredentials.clientSecret,
+            marketplace = savedCredentials.marketplace,
+            seller = userSellerId, // Atualiza o sellerId
+            accessKey = savedCredentials.accessKey
+        )
 
-            tapOnPhone.pay(
-                payRequest = paymentRequest,
-                onApproved = { response: PaymentApprovedResponse ->
-                    paymentStatus = PaymentStatus.SUCCESS
-                    sendAlert(
-                        "Pagamento Aprovado",
-                        """
-                            Transação Aprovada:
-                            ID: ${response.transactionId}
-                            Bandeira: ${response.cardBrand}
-                        """.trimIndent()
-                    )
-                    promise.resolve(
-                        "Pagamento aprovado! Transação: ${response.transactionId}, Bandeira: ${response.cardBrand}"
-                    )
-                },
-                onError = { error: PaymentErrorResponse ->
-                    paymentStatus = PaymentStatus.FAIL
-                    sendAlert(
-                        "Erro no Pagamento",
-                        """
-                            Código: ${error.code}
-                            Mensagem: ${error.message}
-                            Descrição: ${error.description}
-                            ID Transação: ${error.transactionId ?: "N/A"}
-                        """.trimIndent()
-                    )
-                    promise.reject(
-                        "PAYMENT_ERROR",
-                        """
-                            Erro: ${error.message}
-                            Código: ${error.code}
-                            Descrição: ${error.description}
-                        """.trimIndent()
-                    )
-                }
-            )
-        } catch (e: Exception) {
-            paymentStatus = PaymentStatus.FAIL
-            sendAlert("Erro", "Exceção no pagamento: ${e.message}")
-            promise.reject("PAYMENT_ERROR", e.message)
+        tapOnPhone.setCredential(updatedCredentials) // Altera as credenciais dinamicamente
+
+        coroutineScope.launch {
+            try {
+                // Cria a requisição de pagamento
+                val paymentRequest = PaymentRequest(
+                    referenceId = UUID.randomUUID().toString(),
+                    amount = amountInCents,
+                    paymentType = when (paymentType) {
+                        "credit" -> PaymentType.CREDIT
+                        "debit" -> PaymentType.DEBIT
+                        else -> PaymentType.CREDIT // Fallback
+                    },
+                    installments = installments ?: 1
+                )
+
+                // Realiza o pagamento
+                tapOnPhone.pay(
+                    payRequest = paymentRequest,
+                    onApproved = { response ->
+                        paymentStatus = PaymentStatus.SUCCESS
+                        sendAlert(
+                            "Pagamento Aprovado",
+                            """
+                                Transação Aprovada:
+                                ID: ${response.transactionId}
+                                Bandeira: ${response.cardBrand}
+                            """.trimIndent()
+                        )
+                        promise.resolve(
+                            "Pagamento aprovado! Transação: ${response.transactionId}, Bandeira: ${response.cardBrand}"
+                        )
+                    },
+                    onError = { error ->
+                        paymentStatus = PaymentStatus.FAIL
+                        sendAlert(
+                            "Erro no Pagamento",
+                            """
+                                Código: ${error.code}
+                                Mensagem: ${error.message}
+                                Descrição: ${error.description}
+                                ID Transação: ${error.transactionId ?: "N/A"}
+                            """.trimIndent()
+                        )
+                        promise.reject(
+                            "PAYMENT_ERROR",
+                            """
+                                Erro: ${error.message}
+                                Código: ${error.code}
+                                Descrição: ${error.description}
+                            """.trimIndent()
+                        )
+                    }
+                )
+            } catch (e: Exception) {
+                paymentStatus = PaymentStatus.FAIL
+                sendAlert("Erro", "Exceção no pagamento: ${e.message}")
+                promise.reject("PAYMENT_ERROR", e.message)
+            }
         }
+    } catch (e: Exception) {
+        paymentStatus = PaymentStatus.FAIL
+        sendAlert("Erro", "Falha ao atualizar credenciais: ${e.message}")
+        promise.reject("SET_CREDENTIAL_ERROR", e.message)
     }
 }
-
-
+// Cancela todas as corrotinas ao destruir o módulo
     override fun onCatalystInstanceDestroy() {
         super.onCatalystInstanceDestroy()
         coroutineScope.coroutineContext.cancel()

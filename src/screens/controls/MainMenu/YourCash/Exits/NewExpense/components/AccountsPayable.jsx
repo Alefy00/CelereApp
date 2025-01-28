@@ -27,6 +27,7 @@ import SupplierDropdown from './SupplierDropdown';
 import CustomCalendar from '../../../../../../../components/CustomCalendar';
 import { API_BASE_URL } from '../../../../../../../services/apiConfig';
 import { useFocusEffect } from '@react-navigation/native';
+import mixpanel from '../../../../../../../services/mixpanelClient';
 
 const categoryIcons = {
   1: IconFornecedor, // Fornecedores de matéria-prima, produtos ou suprimentos
@@ -199,6 +200,18 @@ const fetchSuppliers = useCallback(async () => {
   };
   
   const handleSave = () => {
+    mixpanel.track("Despesa Salva(Contas a pagar)", {
+      screen: "AccountsPayable",
+      category_id: categoria,
+      category_name: categories.find((cat) => cat.value === categoria)?.label || "Unknown",
+      value: valorNumerico,
+      partner_id: parceiro,
+      partner_name: getSupplierNameById(parceiro),
+      due_date: dueDate.format("YYYY-MM-DD"),
+      recurrence: isRecurring ? selectedFrequencyName : "single",
+      repeat_count: repeatCount,
+    });
+
     if (!dueDate) {
       Alert.alert('Erro', 'Por favor, selecione uma data de vencimento.');
       return;

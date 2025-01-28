@@ -90,16 +90,16 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    color: COLORS.black,
+    color: COLORS.gray,
   },
   description: {
     fontSize: 36,
-    color: COLORS.orange,
+    color: COLORS.gray,
     fontWeight: '900',
   },
   descriptionValor: {
     fontSize: 18,
-    color: COLORS.orange,
+    color: COLORS.gray,
   },
 });
 

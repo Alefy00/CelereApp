@@ -16,8 +16,8 @@ android {
         applicationId "com.celereapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 23
-        versionName "2.2.1"
+        versionCode 30
+        versionName "2.2.8"
     }
 
     signingConfigs {
@@ -41,7 +41,7 @@ android {
         }
         release {
             signingConfig signingConfigs.release
-            minifyEnabled false // Desative temporariamente
+            minifyEnabled false // Desativar temporariamente
             shrinkResources false // Evita remoção de recursos
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }

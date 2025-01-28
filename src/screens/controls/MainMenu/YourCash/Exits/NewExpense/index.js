@@ -26,6 +26,7 @@ import styles from './styles';
 import { useFocusEffect } from '@react-navigation/native';
 import CustomCalendar from '../../../../../../components/CustomCalendar';
 import { API_BASE_URL } from '../../../../../../services/apiConfig';
+import mixpanel from '../../../../../../services/mixpanelClient';
 
 const categoryIcons = {
   1: IconFornecedor, // Fornecedores de matéria-prima, produtos ou suprimentos
@@ -162,9 +163,13 @@ useEffect(() => {
 }, [fetchSuppliers]);
 
 const handleSelectSupplier = (supplier) => {
-  console.log('Fornecedor selecionado:', supplier);  // Verifica o valor selecionado
   setSelectedSupplier(supplier);  // Define o fornecedor selecionado
   setParceiro(supplier.value);    // Define o ID do parceiro corretamente
+
+  mixpanel.track("Supplier Selected", {
+    supplier_id: supplier.value,
+    supplier_name: supplier.label,
+  });
 };
 
 // Dentro do componente NewExpense
@@ -211,10 +216,17 @@ useFocusEffect(
     return supplier ? supplier.label : 'Parceiro não encontrado';
   };
   const handleSave = () => {
-    console.log('Categoria:', categoria);
-    console.log('Valor:', valor);
-    console.log('Parceiro:', parceiro);
-
+    mixpanel.track("Despesa salva(pagar agora)", {
+      category_id: categoria,
+      category_name: categories.find((cat) => cat.value === categoria)?.label || "Unknown",
+      value: valorNumerico,
+      partner_id: parceiro,
+      partner_name: getSupplierNameById(parceiro),
+      date: moment(date).format("YYYY-MM-DD"),
+      recurrence: isRecurring ? selectedFrequencyName : "single",
+      repeat_count: repeatCount,
+    });
+    
     if (!categoria) {
       Alert.alert('Erro', 'Por favor, selecione uma categoria.');
       return;
@@ -270,7 +282,6 @@ useFocusEffect(
       delete expenseData.eh_recorrencia_indeterminada;
     }
 
-    console.log('Dados enviados para a API:', expenseData);
     try {
       const response = await axios.post(`${API_BASE_URL}/cad/despesa/`, expenseData, {
         headers: {
