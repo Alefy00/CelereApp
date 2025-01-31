@@ -275,6 +275,7 @@ const styles = StyleSheet.create({
   cartItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginVertical:5,
   },
   containerServiço:{
     justifyContent:'space-between',
@@ -289,7 +290,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: COLORS.black,
-    width: '50%',
+    width: '100%',
   },
   cartItemSubtitle: {
     fontSize: 14,

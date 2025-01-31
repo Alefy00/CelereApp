@@ -268,22 +268,6 @@ const NewBudgets = ({ navigation, route }) => {
     });
   };
   
-
-  const renderFooter = () => (
-    
-    <>
-      {totalPrice > 0 && (
-        <View style={styles.confirmationCard}>
-          <Text style={styles.totalPrice}>Total: R${formatCurrency(totalPrice)}</Text>
-          <TouchableOpacity style={styles.confirmButton} onPress={handleNext}>
-            <Icon name="checkmark-circle" size={25} color={COLORS.black} />
-            <Text style={styles.confirmButtonText}>Confirmar Orçamento</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </>
-  );
-
   const toggleFourthModal = () => setFourthModalVisible(!fourthModalVisible);
     // Certifique-se de que o modal é fechado corretamente
     const closeModalOnNavigate = () => {
@@ -296,69 +280,63 @@ const NewBudgets = ({ navigation, route }) => {
       navigation.navigate('AddService');
     };
 
-    const formatCurrency = (value) => {
-      if (!value) return '';
-      return parseFloat(value).toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      });
-    };
-  return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1 }}>
-          <View style={{height: 55}} >
-            <BarTop2 titulo="Voltar" backColor={COLORS.primary} foreColor={COLORS.black}/>
-          </View>
-          <View style={styles.header}>
-            <TouchableOpacity style={styles.registerButton} onPress={toggleFourthModal}>
-              <Icon name="add" size={20} color={COLORS.black} />
-              <Text style={styles.registerButtonText}>Cadastrar produto ou serviço</Text>
-            </TouchableOpacity>
-            <Text style={styles.title}>Novo Orçamento</Text>
-            <View style={styles.searchContainer}>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Pesquise por um produto..."
-                value={search}
-                onChangeText={setSearch}
-              />
-              <Icon name="search" size={20} color={COLORS.grey} />
+    return (
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ flex: 1 }}>
+            <View style={{height: 55}} >
+              <BarTop2 titulo="Voltar" backColor={COLORS.primary} foreColor={COLORS.black}/>
             </View>
-
-            {/* Filtros Gerais */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
-              {['Todos', 'Produtos', 'Serviços'].map(filter => (
-                <TouchableOpacity
-                  key={filter}
-                  style={[styles.categoryButton, generalFilter === filter && styles.categoryButtonActive]}
-                  onPress={() => handleGeneralFilterChange(filter)}
-                >
-                  <Text style={[styles.categoryText, generalFilter === filter && styles.categoryTextActive]}>{filter}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
-            {/* Filtros de Categorias (apenas quando Produtos é selecionado) */}
-            {generalFilter === 'Produtos' && (
-              <ScrollView horizontal showsHorizontalScrollIndicator={true} style={styles.categoriesContainer}>
-                {categories.map(category => (
+            <View style={styles.header}>
+              <TouchableOpacity style={styles.registerButton} onPress={toggleFourthModal}>
+                <Icon name="add" size={20} color={COLORS.black} />
+                <Text style={styles.registerButtonText}>Cadastrar produto ou serviço</Text>
+              </TouchableOpacity>
+              <Text style={styles.title}>Nova Venda</Text>
+              <View style={styles.searchContainer}>
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Pesquise por um produto..."
+                  value={search}
+                  onChangeText={setSearch}
+                />
+                <Icon name="search" size={20} color={COLORS.grey} />
+              </View>
+  
+              {/* Filtros Gerais */}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesContainer}>
+                {['Todos', 'Produtos', 'Serviços'].map(filter => (
                   <TouchableOpacity
-                    key={category.id}
-                    style={[styles.categoryButton, selectedCategory === category.id && styles.categoryButtonActive]}
-                    onPress={() => handleCategoryChange(category.id)}
+                    key={filter}
+                    style={[styles.categoryButton, generalFilter === filter && styles.categoryButtonActive]}
+                    onPress={() => handleGeneralFilterChange(filter)}
                   >
-                    <Text style={[styles.categoryText, selectedCategory === category.id && styles.categoryTextActive]}>{category.label}</Text>
+                    <Text style={[styles.categoryText, generalFilter === filter && styles.categoryTextActive]}>{filter}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
-            )}
-          </View>
-
-          {loading ? (
-            <ActivityIndicator size="large" color="#000" />
-          ) : (
-            <FlatList
+  
+              {/* Filtros de Categorias (apenas quando Produtos é selecionado) */}
+              {generalFilter === 'Produtos' && (
+                <ScrollView horizontal showsHorizontalScrollIndicator={true} style={styles.categoriesContainer}>
+                  {categories.map(category => (
+                    <TouchableOpacity
+                      key={category.id}
+                      style={[styles.categoryButton, selectedCategory === category.id && styles.categoryButtonActive]}
+                      onPress={() => handleCategoryChange(category.id)}
+                    >
+                      <Text style={[styles.categoryText, selectedCategory === category.id && styles.categoryTextActive]}>{category.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              )}
+            </View>
+  
+            {loading ? (
+              <ActivityIndicator size="large" color="#000" />
+            ) : (
+              <FlatList
               data={filteredProducts}
               renderItem={({ item }) => (
                 <RenderProduct
@@ -367,37 +345,45 @@ const NewBudgets = ({ navigation, route }) => {
                   quantities={quantities}
                 />
               )}
-              keyExtractor={item => item.id.toString()}
+              keyExtractor={(item) => item.id.toString()}
               contentContainerStyle={styles.productsList}
               numColumns={2}
-              ListFooterComponent={renderFooter}
+              scrollEnabled={false}
             />
-
-          )}
-
-          {/* Modal para cadastrar produto ou serviço */}
-          <Modal visible={fourthModalVisible} animationType="slide" transparent onRequestClose={toggleFourthModal}>
-            <View style={styles.fourthModalOverlay}>
-              <View style={styles.fourthModalContent}>
-                <View style={styles.fourthModalHeader}>
-                  <Text style={styles.fourthModalTitle}>Selecione uma opção:</Text>
-                  <TouchableOpacity onPress={toggleFourthModal}>
-                    <Icon name="close" size={25} color={COLORS.black} />
+            )}
+  
+            {/* Modal para cadastrar produto ou serviço */}
+            <Modal visible={fourthModalVisible} animationType="slide" transparent onRequestClose={toggleFourthModal}>
+              <View style={styles.fourthModalOverlay}>
+                <View style={styles.fourthModalContent}>
+                  <View style={styles.fourthModalHeader}>
+                    <Text style={styles.fourthModalTitle}>Selecione uma opção:</Text>
+                    <TouchableOpacity onPress={toggleFourthModal}>
+                      <Icon name="close" size={25} color={COLORS.black} />
+                    </TouchableOpacity>
+                  </View>
+                  <TouchableOpacity style={styles.fourthModalButton2} onPress={closeModalOnNavigate}>
+                    <Text style={styles.fourthModalText}>Produtos</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.fourthModalButton} onPress={closeModalOnNavigateService}>
+                    <Text style={styles.fourthModalText}>Serviços</Text>
                   </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.fourthModalButton2} onPress={closeModalOnNavigate}>
-                  <Text style={styles.fourthModalText}>Produtos</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.fourthModalButton} onPress={closeModalOnNavigateService}>
-                  <Text style={styles.fourthModalText}>Serviços</Text>
-                </TouchableOpacity>
               </View>
+            </Modal>
+          </View>
+        </TouchableWithoutFeedback>
+        </ScrollView>
+        <View style={styles.confirmationCard}>
+              <Text style={styles.totalPrice}>Total: R${totalPrice.toFixed(2)}</Text>
+              <TouchableOpacity style={styles.confirmButton} onPress={handleNext}>
+                <Icon name="checkmark-circle" size={22} color={COLORS.black} />
+                <Text style={styles.confirmButtonText}>Confirmar essa venda</Text>
+              </TouchableOpacity>
             </View>
-          </Modal>
-        </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
-  );
+      </KeyboardAvoidingView>
+    );
+    
 };
 
 export default NewBudgets;
